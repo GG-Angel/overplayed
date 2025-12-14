@@ -6,7 +6,7 @@ from app.dependencies import parse_time, require
 time_default = "1970-01-01T00:00:00Z"
 
 
-def fetch_playlists(client: spotipy.Spotify) -> list[dict]:
+def _fetch_playlists(client: spotipy.Spotify) -> list[dict]:
     logger.info("Fetching all playlists for the current user.")
     all_playlists = []
     offset = 0
@@ -38,7 +38,7 @@ def _is_playlist_editable(playlist: dict, user_id: str) -> bool:
 def fetch_editable_playlists(client: spotipy.Spotify) -> list[dict]:
     logger.info("Fetching editable playlists for the current user.")
     user_id = require(client.me(), "Failed to fetch current user")["id"]
-    playlists = fetch_playlists(client)
+    playlists = _fetch_playlists(client)
     editable_playlists = list(
         filter(lambda p: _is_playlist_editable(p, user_id), playlists)
     )
@@ -46,7 +46,7 @@ def fetch_editable_playlists(client: spotipy.Spotify) -> list[dict]:
     return editable_playlists
 
 
-def fetch_playlist_items(client: spotipy.Spotify, playlist_id: str) -> list[dict]:
+def _fetch_playlist_items(client: spotipy.Spotify, playlist_id: str) -> list[dict]:
     logger.info(f"Fetching items for playlist with ID: {playlist_id}.")
     all_items = []
     offset = 0
@@ -69,25 +69,23 @@ def fetch_playlist_items(client: spotipy.Spotify, playlist_id: str) -> list[dict
     return all_items
 
 
-def fetch_filtered_playlist_items(
+def fetch_unique_playlist_items(
     client: spotipy.Spotify, playlist_id: str
 ) -> list[dict]:
-    logger.info(f"Fetching filtered items for playlist with ID: {playlist_id}.")
-    filtered_items = {}
-    items = fetch_playlist_items(client, playlist_id)
+    logger.info(f"Fetching unique items for playlist with ID: {playlist_id}.")
+    unique_items = {}
+    items = _fetch_playlist_items(client, playlist_id)
     logger.debug(f"Processing {len(items)} items to filter duplicates.")
     for item in items:
         track_id = require(item.get("track", {}).get("id"), "Failed to get track id")
-        if track_id not in filtered_items:
-            filtered_items[track_id] = item
+        if track_id not in unique_items:
+            unique_items[track_id] = item
             continue
 
         curr_added_at = parse_time(item.get("added_at", time_default))
-        prev_added_at = parse_time(
-            filtered_items[track_id].get("added_at", time_default)
-        )
+        prev_added_at = parse_time(unique_items[track_id].get("added_at", time_default))
         if curr_added_at > prev_added_at:
-            filtered_items[track_id] = item
+            unique_items[track_id] = item
 
-    logger.info(f"Filtered items count: {len(filtered_items)}.")
-    return list(filtered_items.values())
+    logger.info(f"Unique items count: {len(unique_items)}.")
+    return list(unique_items.values())
