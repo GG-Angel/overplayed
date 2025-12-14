@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from starlette.middleware.sessions import SessionMiddleware
 
-from app.api import auth
+from app.routes import auth
 from app.core.config import config
 from app.core.logger import setup_logging
 
