@@ -36,3 +36,9 @@ def _is_token_expired(token_info: dict) -> bool:
 def _refresh_token(request: Request, token_info: dict) -> dict:
     sp_oauth = create_spotify_oauth(request)
     return sp_oauth.refresh_access_token(token_info["refresh_token"])
+
+
+def require(value, message: str):
+    if value is None:
+        raise ValueError(message)
+    return value
