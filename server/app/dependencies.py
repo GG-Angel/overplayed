@@ -1,6 +1,8 @@
 import time
 import spotipy
 from fastapi import Request
+from datetime import datetime
+
 from spotipy.oauth2 import SpotifyOAuth
 from app.core.config import config
 
@@ -42,3 +44,7 @@ def require(value, message: str):
     if value is None:
         raise ValueError(message)
     return value
+
+
+def parse_time(time_str: str) -> datetime:
+    return datetime.strptime(time_str, "%Y-%m-%dT%H:%M:%SZ")
