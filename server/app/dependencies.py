@@ -14,7 +14,7 @@ def get_spotify_client(request: Request) -> spotipy.Spotify:
     return spotipy.Spotify(auth=token_info["access_token"])
 
 
-def create_spotify_oauth(request: Request) -> SpotifyOAuth:
+def get_spotify_oauth(request: Request) -> SpotifyOAuth:
     return SpotifyOAuth(
         client_id=config.sp_client_id,
         client_secret=config.sp_client_secret,
@@ -36,7 +36,7 @@ def _is_token_expired(token_info: dict) -> bool:
 
 
 def _refresh_token(request: Request, token_info: dict) -> dict:
-    sp_oauth = create_spotify_oauth(request)
+    sp_oauth = get_spotify_oauth(request)
     return sp_oauth.refresh_access_token(token_info["refresh_token"])
 
 
