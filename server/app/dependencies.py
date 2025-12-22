@@ -23,9 +23,14 @@ def get_spotify_oauth(request: Request) -> SpotifyOAuth:
     )
 
 
+def is_logged_in(request: Request) -> bool:
+    token_info = request.session.get("token_info")
+    return token_info is not None and not _is_token_expired(token_info)
+
+
 def _get_token_info(request: Request):
-    token_info = request.session.get("token_info", None)
-    if not token_info:
+    token_info = request.session.get("token_info")
+    if token_info is None:
         raise Exception("User not logged in")
     return token_info
 

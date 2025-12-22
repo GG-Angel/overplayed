@@ -11,5 +11,7 @@ class Config(BaseSettings):
 
     session_secret_key: str = ""
 
+    callback_url: str = "http://localhost:5173/"
+
 
 config = Config()

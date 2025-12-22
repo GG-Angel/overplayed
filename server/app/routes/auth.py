@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse
 
-from app.dependencies import get_spotify_oauth
+from app.dependencies import get_spotify_oauth, is_logged_in
+from app.core.config import config
 
 router = APIRouter()
 
@@ -20,4 +21,9 @@ def callback(request: Request):
     code = request.query_params.get("code")
     token_info = sp_oauth.get_access_token(code)
     request.session["token_info"] = token_info
-    return RedirectResponse(url="/")
+    return RedirectResponse(url=config.callback_url)
+
+
+@router.get("/status")
+def status(request: Request):
+    return is_logged_in(request)
