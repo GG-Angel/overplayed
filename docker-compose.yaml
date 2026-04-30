@@ -1,4 +1,17 @@
 services:
+    redis:
+        image: redis:alpine
+        container_name: overplayed-redis
+        restart: unless-stopped
+        ports:
+            - 6379:6379
+        volumes:
+            - redis_data:/data
+        healthcheck:
+            test: [ "CMD", "redis-cli", "ping" ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
     server:
         build:
             context: server
@@ -12,3 +25,11 @@ services:
             - SPOTIFY__CLIENT_SECRET
         env_file:
             - .env
+        healthcheck:
+            test: [ "CMD", "curl", "-f", "http://localhost:8080/" ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
+volumes:
+    redis_data:
