@@ -1,6 +1,7 @@
+from settings import STATE_KEY
 from state import State
-from server import STATE_KEY
 from fastapi import APIRouter, Request, Depends
+from fastapi.responses import JSONResponse
 
 router = APIRouter()
 
@@ -10,10 +11,10 @@ def get_app_state(request: Request) -> State:
 
 
 @router.get("/login")
-def handle_login(state: State = Depends(get_app_state)):
-    return {"url": state.oauth.get_authorize_url()}
+def handle_login(state: State = Depends(get_app_state)) -> JSONResponse:
+    return JSONResponse({"url": state.oauth.get_authorize_url()})
 
 
 @router.get("/callback")
-def handle_callback():
-    return {"message": "callback!"}
+def handle_callback() -> JSONResponse:
+    return JSONResponse({"message": "callback!"})
