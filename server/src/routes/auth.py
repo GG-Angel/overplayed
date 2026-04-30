@@ -1,3 +1,4 @@
+from spotipy import Spotify
 from utils import get_app_state
 from models import TokenInfo
 from typing import Optional
@@ -25,8 +26,11 @@ def handle_callback(
         return JSONResponse({"message": "Authorization failed."}, status_code=401)
 
     token_info = TokenInfo(**state.oauth.get_access_token(code, check_cache=False))
+    spotify: Spotify = Spotify(auth=token_info.access_token)
 
-    return JSONResponse({"message": "callback!"})
+    user = spotify.me()
+
+    return JSONResponse({"message": "callback!", "user": user})
 
 
 @router.delete("/")
