@@ -1,4 +1,7 @@
-from spotipy import Spotify
+from secrets import token_urlsafe
+from loguru import logger
+from redis import RedisError
+from spotipy import SpotifyOauthError
 from utils import get_app_state
 from models import TokenInfo
 from typing import Optional
@@ -16,21 +19,46 @@ def handle_login(state: State = Depends(get_app_state)) -> JSONResponse:
 
 
 @router.get("/callback")
-def handle_callback(
+async def handle_callback(
     code: Optional[str] = None,
     error: Optional[str] = None,
     state: State = Depends(get_app_state),
 ) -> JSONResponse:
     """Handle OAuth callback from Spotify"""
+    fail_response = JSONResponse({"message": "Authorization failed."}, status_code=401)
     if error or not code:
-        return JSONResponse({"message": "Authorization failed."}, status_code=401)
+        return fail_response
 
-    token_info = TokenInfo(**state.oauth.get_access_token(code, check_cache=False))
-    spotify: Spotify = Spotify(auth=token_info.access_token)
+    # exchange code for access token
+    try:
+        token_info = TokenInfo(**state.oauth.get_access_token(code, check_cache=False))
+    except SpotifyOauthError:
+        return fail_response
 
-    user = spotify.me()
+    # generate session for this user
+    try:
+        session_id = token_urlsafe(32)
+        redis = state.redis()
+        await redis.set(
+            f"sessions:{session_id}",
+            token_info.model_dump_json(),
+            ex=state.settings.redis.ttl_tokens,
+        )
+    except RedisError as e:
+        logger.exception(f"Failed to cache token: {e}")
+        return fail_response
 
-    return JSONResponse({"message": "callback!", "user": user})
+    # set session id cookie for future spotify requests
+    response = JSONResponse({"message": "Authorization successful."}, status_code=200)
+    response.set_cookie(
+        key="session_id",
+        value=session_id,
+        httponly=True,
+        secure=state.settings.is_production,
+        samesite="lax",
+        max_age=state.settings.redis.ttl_tokens,
+    )
+    return response
 
 
 @router.delete("/")

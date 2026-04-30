@@ -17,13 +17,21 @@ class RedisSettings(BaseModel):
     password: Optional[str] = None
     max_connections: int = 10
 
+    ttl_tokens: int = 60 * 60 * 24 * 30  # 30 days
+
 
 class Settings(BaseSettings):
     spotify: SpotifySettings = Field(default_factory=SpotifySettings)
     redis: RedisSettings = Field(default_factory=RedisSettings)
+
+    env: str = "development"
 
     model_config = SettingsConfigDict(
         env_nested_delimiter="__",
         case_sensitive=False,
         extra="ignore",
     )
+
+    @property
+    def is_production(self) -> bool:
+        return self.env.lower() == "production"
