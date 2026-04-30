@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse
 router = APIRouter()
 
 
-@router.get("/login")
+@router.get("/")
 def handle_login(state: State = Depends(get_app_state)) -> JSONResponse:
     """Redirect user to the Spotify OAuth page"""
     return JSONResponse({"url": state.oauth.get_authorize_url()})
@@ -22,8 +22,13 @@ def handle_callback(
 ) -> JSONResponse:
     """Handle OAuth callback from Spotify"""
     if error or not code:
-        return JSONResponse({"message": "Failed to authorize user."}, status_code=401)
+        return JSONResponse({"message": "Authorization failed."}, status_code=401)
 
-    token_info = TokenInfo(**state.oauth.get_access_token(code))
+    token_info = TokenInfo(**state.oauth.get_access_token(code, check_cache=False))
 
     return JSONResponse({"message": "callback!"})
+
+
+@router.delete("/")
+def handle_logout() -> JSONResponse:
+    return JSONResponse({"message": "Logged out successfully."})

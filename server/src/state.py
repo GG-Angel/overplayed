@@ -1,6 +1,7 @@
 from spotipy import SpotifyOAuth
 from settings import Settings
 from cache.pool import create_pool, close_pool
+from cache.dummy import DummyCacheHandler
 from redis.asyncio import ConnectionPool, Redis
 
 
@@ -13,6 +14,7 @@ class State:
             client_secret=self.settings.spotify.client_secret,
             scope=self.settings.spotify.scope,
             redirect_uri=self.settings.spotify.callback_url,
+            cache_handler=DummyCacheHandler(),
         )
 
     def redis(self) -> Redis:
