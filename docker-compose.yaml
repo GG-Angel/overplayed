@@ -1,0 +1,12 @@
+services:
+    server:
+        build:
+            context: server
+            dockerfile: Dockerfile
+        container_name: overplayed-server
+        restart: unless-stopped
+        ports:
+            - 8080:8080
+        environment:
+            - SPOTIFY_CLIENT_ID
+            - SPOTIFY_CLIENT_SECRET
