@@ -1,3 +1,4 @@
+from typing import Optional
 from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -8,11 +9,13 @@ class SpotifySettings(BaseModel):
     client_id: str
     client_secret: str
     scope: str = "playlist-read-private playlist-modify-private playlist-modify-public"
-    callback_url: str = "http://server:8080/auth/callback"
+    callback_url: str = "http://127.0.0.1:8080/auth/callback"
 
 
 class RedisSettings(BaseModel):
     url: str = "redis://redis:6379"
+    password: Optional[str] = None
+    max_connections: int = 10
 
 
 class Settings(BaseSettings):

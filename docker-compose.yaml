@@ -3,12 +3,13 @@ services:
         image: redis:alpine
         container_name: overplayed-redis
         restart: unless-stopped
-        ports:
-            - 6379:6379
+        command: redis-server --requirepass ${REDIS__PASSWORD}
         volumes:
             - redis_data:/data
+        networks:
+            - backend # isolate communication to server only
         healthcheck:
-            test: [ "CMD", "redis-cli", "ping" ]
+            test: [ "CMD", "redis-cli", "-a", "${REDIS__PASSWORD}", "ping" ]
             interval: 10s
             timeout: 5s
             retries: 5
@@ -23,13 +24,23 @@ services:
         environment:
             - SPOTIFY__CLIENT_ID
             - SPOTIFY__CLIENT_SECRET
+            - REDIS__PASSWORD
         env_file:
             - .env
+        networks:
+            - backend
+        depends_on:
+            redis:
+                condition: service_healthy
         healthcheck:
             test: [ "CMD", "curl", "-f", "http://localhost:8080/" ]
             interval: 10s
             timeout: 5s
             retries: 5
+
+networks:
+    backend:
+        internal: true
 
 volumes:
     redis_data:
