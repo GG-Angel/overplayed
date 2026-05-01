@@ -1,8 +1,8 @@
-from contextlib import asynccontextmanager
 import uvicorn
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from settings import STATE_KEY
-from routes import auth, root, user
+from routes import auth, root, user, playlists
 from state import State
 
 
@@ -19,6 +19,7 @@ async def start(state: State):
     app.include_router(root.router)
     app.include_router(auth.router, prefix="/auth", tags=["spotify", "auth"])
     app.include_router(user.router, prefix="/user", tags=["spotify", "user"])
+    app.include_router(playlists.router, prefix="/playlists", tags=["spotify", "playlists"])  # fmt: skip
 
     config = uvicorn.Config(app, host="0.0.0.0", port=8080)
     server = uvicorn.Server(config)

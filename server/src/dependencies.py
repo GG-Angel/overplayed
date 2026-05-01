@@ -4,7 +4,8 @@ from settings import STATE_KEY, Settings
 from state import State
 from fastapi import Request, Cookie, HTTPException
 from cache.client import RedisClient
-from models import TokenInfo
+from models import TokenInfo, SessionInfo
+from spotify.client import SpotifyClient
 
 TOKEN_EXPIRY_BUFFER = 120
 
@@ -25,27 +26,27 @@ def get_oauth(request: Request) -> SpotifyOAuth:
     return get_app_state(request).oauth
 
 
-def _is_token_expired(token: TokenInfo) -> bool:
+def is_token_expired(token: TokenInfo) -> bool:
     return token.expires_at - int(time()) < TOKEN_EXPIRY_BUFFER
 
 
-async def _refresh_token(
-    request: Request, session_id: str, token: TokenInfo
-) -> TokenInfo:
-    oauth, redis = get_oauth(request), get_redis(request)
+async def refresh_token(request: Request, token: TokenInfo) -> TokenInfo:
+    oauth = get_oauth(request)
     new_token = TokenInfo(**oauth.refresh_access_token(token.refresh_token))
-    await redis.set_session(session_id, new_token)
     return new_token
 
 
-async def get_spotify(request: Request, session_id: str = Cookie()) -> Spotify:
+async def get_spotify(request: Request, session_id: str = Cookie()) -> SpotifyClient:
     redis = get_redis(request)
-    token = await redis.get_session(session_id)
+    session = await redis.get_session(session_id)
 
-    if not token:
+    if not session:
         raise HTTPException(status_code=401, detail="Login required.")
 
-    if _is_token_expired(token):
-        token = await _refresh_token(request, session_id, token)
+    if is_token_expired(session):
+        new_token = await refresh_token(request, session)
+        session = SessionInfo(user_id=session.user_id, **new_token.model_dump())
+        await redis.set_session(session_id, session)
 
-    return Spotify(auth=token.access_token)
+    spotify = Spotify(auth=session.access_token)
+    return SpotifyClient(spotify, user_id=session.user_id)

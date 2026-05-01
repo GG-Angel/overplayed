@@ -1,8 +1,8 @@
 from settings import Settings
 from redis import RedisError
-from spotipy import SpotifyOauthError, SpotifyOAuth
+from spotipy import SpotifyOauthError, SpotifyOAuth, Spotify, SpotifyException
 from dependencies import get_oauth, get_redis, get_settings
-from models import TokenInfo
+from models import TokenInfo, SessionInfo
 from typing import Optional
 from fastapi import APIRouter, Depends, Cookie
 from fastapi.responses import JSONResponse
@@ -33,8 +33,11 @@ async def handle_callback(
 
     try:
         token_info = TokenInfo(**oauth.get_access_token(code, check_cache=False))
-        session_id = await redis.create_session(token_info)
-    except (SpotifyOauthError, RedisError):
+        spotify = Spotify(auth=token_info.access_token)
+        user_id = spotify.me()["id"]
+        session_info = SessionInfo(user_id=user_id, **token_info.model_dump())
+        session_id = await redis.create_session(session_info)
+    except (SpotifyOauthError, SpotifyException, RedisError):
         return fail_response
 
     response = JSONResponse({"message": "Authorization successful."}, status_code=200)
