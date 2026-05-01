@@ -2,13 +2,13 @@ from spotipy import SpotifyOAuth
 from settings import Settings
 from cache.pool import create_pool, close_pool
 from cache.dummy import DummyCacheHandler
+from cache.client import RedisClient
 from redis.asyncio import ConnectionPool, Redis
 
 
 class State:
     def __init__(self):
         self.settings: Settings = Settings()
-        self.redis_pool: ConnectionPool = create_pool(self.settings.redis)
         self.oauth: SpotifyOAuth = SpotifyOAuth(
             client_id=self.settings.spotify.client_id,
             client_secret=self.settings.spotify.client_secret,
@@ -17,11 +17,16 @@ class State:
             cache_handler=DummyCacheHandler(),
         )
 
-    def redis(self) -> Redis:
-        return Redis(connection_pool=self.redis_pool)
+        self._redis_pool: ConnectionPool = create_pool(self.settings.redis)
+
+    def redis(self) -> RedisClient:
+        return RedisClient(
+            redis=Redis(connection_pool=self._redis_pool),
+            ttl_tokens=self.settings.redis.ttl_tokens,
+        )
 
     async def __aenter__(self):
         return self
 
     async def __aexit__(self, *_):
-        await close_pool(self.redis_pool)
+        await close_pool(self._redis_pool)

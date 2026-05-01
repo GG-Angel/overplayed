@@ -1,66 +1,71 @@
-from secrets import token_urlsafe
-from loguru import logger
+from settings import Settings
 from redis import RedisError
-from spotipy import SpotifyOauthError
-from utils import get_app_state
+from spotipy import SpotifyOauthError, SpotifyOAuth
+from dependencies import get_oauth, get_redis, get_settings
 from models import TokenInfo
 from typing import Optional
-from state import State
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Cookie
 from fastapi.responses import JSONResponse
+from cache.client import RedisClient
 
 router = APIRouter()
 
 
-@router.get("/")
-def handle_login(state: State = Depends(get_app_state)) -> JSONResponse:
-    """Redirect user to the Spotify OAuth page"""
-    return JSONResponse({"url": state.oauth.get_authorize_url()})
+@router.get("/login")
+def handle_login(oauth: SpotifyOAuth = Depends(get_oauth)) -> JSONResponse:
+    """Provides the Spotify OAuth url for this application."""
+    return JSONResponse({"url": oauth.get_authorize_url()})
 
 
 @router.get("/callback")
 async def handle_callback(
     code: Optional[str] = None,
     error: Optional[str] = None,
-    state: State = Depends(get_app_state),
+    oauth: SpotifyOAuth = Depends(get_oauth),
+    redis: RedisClient = Depends(get_redis),
+    settings: Settings = Depends(get_settings),
 ) -> JSONResponse:
-    """Handle OAuth callback from Spotify"""
+    """Exchanges the OAuth code for an access token and starts a new session."""
     fail_response = JSONResponse({"message": "Authorization failed."}, status_code=401)
+
     if error or not code:
         return fail_response
 
-    # exchange code for access token
     try:
-        token_info = TokenInfo(**state.oauth.get_access_token(code, check_cache=False))
-    except SpotifyOauthError:
+        token_info = TokenInfo(**oauth.get_access_token(code, check_cache=False))
+        session_id = await redis.create_session(token_info)
+    except (SpotifyOauthError, RedisError):
         return fail_response
 
-    # generate session for this user
-    try:
-        session_id = token_urlsafe(32)
-        redis = state.redis()
-        await redis.set(
-            f"sessions:{session_id}",
-            token_info.model_dump_json(),
-            ex=state.settings.redis.ttl_tokens,
-        )
-    except RedisError as e:
-        logger.exception(f"Failed to cache token: {e}")
-        return fail_response
-
-    # set session id cookie for future spotify requests
     response = JSONResponse({"message": "Authorization successful."}, status_code=200)
     response.set_cookie(
         key="session_id",
         value=session_id,
         httponly=True,
-        secure=state.settings.is_production,
+        secure=settings.is_production,
         samesite="lax",
-        max_age=state.settings.redis.ttl_tokens,
+        max_age=settings.redis.ttl_tokens,
     )
     return response
 
 
-@router.delete("/")
-def handle_logout() -> JSONResponse:
-    return JSONResponse({"message": "Logged out successfully."})
+@router.delete("/logout")
+async def handle_logout(
+    session_id: str = Cookie(),
+    redis: RedisClient = Depends(get_redis),
+    settings: Settings = Depends(get_settings),
+) -> JSONResponse:
+    """Revoke the session token and delete the cookie on the client."""
+    try:
+        await redis.end_session(session_id)
+    except RedisError:
+        return JSONResponse({"message": "Failed to log out."}, status_code=500)
+
+    response = JSONResponse({"message": "Logged out successfully."}, status_code=200)
+    response.delete_cookie(
+        key="session_id",
+        httponly=True,
+        secure=settings.is_production,
+        samesite="lax",
+    )
+    return response

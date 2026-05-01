@@ -11,4 +11,4 @@ def handle_healthcheck() -> JSONResponse:
 
 @router.get("/favicon.ico")
 def handle_favicon() -> Response:
-    return Response(status_code=204)
+    return Response(status_code=204)  # no content
