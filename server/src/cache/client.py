@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+from pydantic import BaseModel
 from settings import RedisSettings
 from typing import Optional
 from redis import RedisError
@@ -12,60 +14,43 @@ class RedisClient:
         self.redis = redis
         self.settings = settings
 
-    async def get_user(self, user_id: str) -> Optional[SpotifyCurrentUser]:
+    @asynccontextmanager
+    async def redis_error_handler(self, operation: str):
         try:
-            user = await self.redis.get(self.get_user_key(user_id))
-            return SpotifyCurrentUser.model_validate_json(user) if user else None
+            yield
         except RedisError as e:
-            logger.exception(f"Failed to get user: {e}")
+            logger.exception(f"Failed to {operation}: {e}")
             raise
 
+    async def store(self, key: str, model: BaseModel, ex: int) -> None:
+        async with self.redis_error_handler(f"store {key}"):
+            await self.redis.set(key, model.model_dump_json(), ex=ex)
+
+    async def get_user(self, user_id: str) -> Optional[SpotifyCurrentUser]:
+        async with self.redis_error_handler("get user"):
+            user = await self.redis.get(self.get_user_key(user_id))
+            return SpotifyCurrentUser.model_validate_json(user) if user else None
+
     async def set_user(self, user: SpotifyCurrentUser) -> None:
-        try:
-            await self.redis.set(
-                self.get_user_key(user.id),
-                user.model_dump_json(),
-                ex=self.settings.ttl_users,
-            )
-        except RedisError as e:
-            logger.exception(f"Failed to set user: {e}")
-            raise
+        await self.store(self.get_user_key(user.id), user, self.settings.ttl_users)
 
     async def create_session(self, info: SessionInfo) -> str:
         session_id = token_urlsafe(32)
-        try:
-            await self.set_session(session_id, info)
-        except RedisError as e:
-            logger.exception(f"Failed to create session: {e}")
-            raise
+        await self.set_session(session_id, info)
         return session_id
 
     async def set_session(self, session_id: str, info: SessionInfo) -> None:
-        try:
-            await self.redis.set(
-                self.get_session_key(session_id),
-                info.model_dump_json(),
-                ex=self.settings.ttl_sessions,
-            )
-        except RedisError as e:
-            logger.exception(f"Failed to set session: {e}")
-            raise
+        await self.store(self.get_session_key(session_id), info, self.settings.ttl_sessions)  # fmt: skip
 
     async def get_session(self, session_id: str) -> Optional[SessionInfo]:
-        try:
-            if token := await self.redis.get(self.get_session_key(session_id)):
-                return SessionInfo.model_validate_json(token)
+        async with self.redis_error_handler("get session"):
+            if session := await self.redis.get(self.get_session_key(session_id)):
+                return SessionInfo.model_validate_json(session)
             return None
-        except RedisError as e:
-            logger.exception(f"Failed to get session: {e}")
-            raise
 
     async def end_session(self, session_id: str) -> None:
-        try:
+        async with self.redis_error_handler("end session"):
             await self.redis.delete(self.get_session_key(session_id))
-        except RedisError as e:
-            logger.exception(f"Failed to end session: {e}")
-            raise
 
     def get_user_key(self, user_id: str) -> str:
         return self.format_key("users", user_id)

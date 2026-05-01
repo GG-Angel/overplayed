@@ -16,12 +16,11 @@ class State:
             redirect_uri=self.settings.spotify.callback_url,
             cache_handler=DummyCacheHandler(),
         )
-
-        self._redis_pool: ConnectionPool = create_pool(self.settings.redis)
+        self.redis_pool: ConnectionPool = create_pool(self.settings.redis)
 
     def redis(self) -> RedisClient:
         return RedisClient(
-            redis=Redis(connection_pool=self._redis_pool),
+            redis=Redis(connection_pool=self.redis_pool),
             settings=self.settings.redis,
         )
 
@@ -29,4 +28,4 @@ class State:
         return self
 
     async def __aexit__(self, *_):
-        await close_pool(self._redis_pool)
+        await close_pool(self.redis_pool)

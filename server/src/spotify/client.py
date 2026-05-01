@@ -18,3 +18,5 @@ class SpotifyClient:
         )
         await redis.set_user(user)
         return user
+
+    
