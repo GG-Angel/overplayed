@@ -47,7 +47,7 @@ async def handle_callback(
         httponly=True,
         secure=settings.is_production,
         samesite="lax",
-        max_age=settings.redis.ttl_tokens,
+        max_age=settings.redis.ttl_sessions,
     )
     return response
 

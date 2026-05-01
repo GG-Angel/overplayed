@@ -17,7 +17,12 @@ class RedisSettings(BaseModel):
     password: Optional[str] = None
     max_connections: int = 10
 
-    ttl_tokens: int = 60 * 60 * 24 * 30  # 30 days
+    ttl_sessions: int = 60 * 60 * 24 * 30  # sessions, 30 days
+    ttl_users: int = 60 * 60 * 2  # spotify profiles, 2 hr
+    ttl_pt: int = 60 * 30  # playlist tracks, 30 min
+    ttl_p: int = 60 * 2  # playlists, 2 min (to update snapshots frequently)
+    ttl_tp_hit: int = 60 * 10  # track previews (hit), 10 min (url expires in 15)
+    ttl_tp_miss: int = 60 * 60 * 12  # track previews (miss), 12 hours
 
 
 class Settings(BaseSettings):

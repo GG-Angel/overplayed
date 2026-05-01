@@ -13,5 +13,8 @@ class SpotifyClient:
         if user := await redis.get_user(self.user_id):
             return user
 
-        user = await asyncio.to_thread(self.spotify.current_user)
-        return SpotifyCurrentUser.model_validate(user)
+        user = SpotifyCurrentUser.model_validate(
+            await asyncio.to_thread(self.spotify.current_user)
+        )
+        await redis.set_user(user)
+        return user

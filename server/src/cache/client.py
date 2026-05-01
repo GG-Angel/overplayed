@@ -1,3 +1,4 @@
+from settings import RedisSettings
 from typing import Optional
 from redis import RedisError
 from secrets import token_urlsafe
@@ -7,9 +8,9 @@ from loguru import logger
 
 
 class RedisClient:
-    def __init__(self, redis: Redis, ttl_tokens: int):
+    def __init__(self, redis: Redis, settings: RedisSettings):
         self.redis = redis
-        self.ttl_tokens = ttl_tokens
+        self.settings = settings
 
     async def get_user(self, user_id: str) -> Optional[SpotifyCurrentUser]:
         try:
@@ -17,6 +18,17 @@ class RedisClient:
             return SpotifyCurrentUser.model_validate_json(user) if user else None
         except RedisError as e:
             logger.exception(f"Failed to get user: {e}")
+            raise
+
+    async def set_user(self, user: SpotifyCurrentUser) -> None:
+        try:
+            await self.redis.set(
+                self.get_user_key(user.id),
+                user.model_dump_json(),
+                ex=self.settings.ttl_users,
+            )
+        except RedisError as e:
+            logger.exception(f"Failed to set user: {e}")
             raise
 
     async def create_session(self, info: SessionInfo) -> str:
@@ -33,7 +45,7 @@ class RedisClient:
             await self.redis.set(
                 self.get_session_key(session_id),
                 info.model_dump_json(),
-                ex=self.ttl_tokens,
+                ex=self.settings.ttl_sessions,
             )
         except RedisError as e:
             logger.exception(f"Failed to set session: {e}")

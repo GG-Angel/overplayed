@@ -22,7 +22,7 @@ class State:
     def redis(self) -> RedisClient:
         return RedisClient(
             redis=Redis(connection_pool=self._redis_pool),
-            ttl_tokens=self.settings.redis.ttl_tokens,
+            settings=self.settings.redis,
         )
 
     async def __aenter__(self):
