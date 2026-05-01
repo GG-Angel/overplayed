@@ -30,17 +30,14 @@ class SpotifyService:
             raise PlaylistNotOwnedError()
         return playlist
 
-    async def get_playlists(self) -> List[SpotifyPlaylist]:
-        playlist_ids = await self.redis.get_playlist_ids(self.user_id)
-
-        if playlist_ids:
-            if playlists := await self.redis.get_playlists_by_ids(playlist_ids):
-                return playlists
+    async def get_user_playlists(self) -> List[SpotifyPlaylist]:
+        if playlists := await self.redis.get_user_playlists(self.user_id):
+            return playlists
 
         playlists = await self.spotify.get_user_playlists()
-        owned_playlists = [p for p in playlists if self._is_playlist_owned(p)]
-        await self.redis.set_user_playlists(self.user_id, owned_playlists)
-        return owned_playlists
+        owned = [p for p in playlists if self._is_playlist_owned(p)]
+        await self.redis.set_user_playlists(self.user_id, owned)
+        return owned
 
     def _is_playlist_owned(self, playlist: SpotifyPlaylist) -> bool:
         return playlist.owner.id == self.user_id or playlist.collaborative

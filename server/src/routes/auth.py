@@ -5,7 +5,7 @@ from spotipy import SpotifyOauthError, SpotifyOAuth, Spotify, SpotifyException
 from dependencies import get_oauth, get_redis, get_settings
 from models import TokenInfo, SessionInfo
 from typing import Optional
-from fastapi import APIRouter, Depends, Cookie
+from fastapi import APIRouter, Depends, Cookie, HTTPException
 from fastapi.responses import JSONResponse
 from cache.client import RedisClient
 
@@ -27,10 +27,9 @@ async def handle_callback(
     settings: Settings = Depends(get_settings),
 ) -> JSONResponse:
     """Exchanges the OAuth code for an access token and starts a new session."""
-    fail_response = JSONResponse({"message": "Authorization failed."}, status_code=401)
-
+    failure = HTTPException(detail="Authorization failed.", status_code=401)
     if error or not code:
-        return fail_response
+        raise failure
 
     try:
         token_info = TokenInfo(**oauth.get_access_token(code, check_cache=False))
@@ -40,7 +39,7 @@ async def handle_callback(
         session_info = SessionInfo(user_id=user["id"], **token_info.model_dump())
         session_id = await redis.create_session(session_info)
     except (SpotifyOauthError, SpotifyException, RedisError):
-        return fail_response
+        raise failure
 
     response = JSONResponse({"message": "Authorization successful."}, status_code=200)
     response.set_cookie(
@@ -64,7 +63,7 @@ async def handle_logout(
     try:
         await redis.end_session(session_id)
     except RedisError:
-        return JSONResponse({"message": "Failed to log out."}, status_code=500)
+        raise HTTPException(detail="Failed to log out.", status_code=500)
 
     response = JSONResponse({"message": "Logged out successfully."}, status_code=200)
     response.delete_cookie(
