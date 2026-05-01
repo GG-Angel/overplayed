@@ -5,5 +5,5 @@ router = APIRouter()
 
 
 @router.get("/")
-def root():
+def handle_get_playlists():
     return "TODO"

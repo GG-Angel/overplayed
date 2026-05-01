@@ -1,3 +1,4 @@
+import asyncio
 from settings import Settings
 from redis import RedisError
 from spotipy import SpotifyOauthError, SpotifyOAuth, Spotify, SpotifyException
@@ -34,8 +35,9 @@ async def handle_callback(
     try:
         token_info = TokenInfo(**oauth.get_access_token(code, check_cache=False))
         spotify = Spotify(auth=token_info.access_token)
-        user_id = spotify.me()["id"]
-        session_info = SessionInfo(user_id=user_id, **token_info.model_dump())
+        user = await asyncio.to_thread(spotify.current_user)
+
+        session_info = SessionInfo(user_id=user["id"], **token_info.model_dump())
         session_id = await redis.create_session(session_info)
     except (SpotifyOauthError, SpotifyException, RedisError):
         return fail_response

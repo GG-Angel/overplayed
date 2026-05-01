@@ -1,15 +1,13 @@
 from models import SpotifyCurrentUser
 from fastapi import APIRouter, Depends
-from dependencies import get_spotify, get_redis
-from spotify.client import SpotifyClient
-from cache.client import RedisClient
+from dependencies import get_spotify_service
+from services.spotify import SpotifyService
 
 router = APIRouter()
 
 
 @router.get("/")
-async def handle_user(
-    spotify: SpotifyClient = Depends(get_spotify),
-    redis: RedisClient = Depends(get_redis),
+async def handle_get_user(
+    spotify: SpotifyService = Depends(get_spotify_service),
 ) -> SpotifyCurrentUser:
-    return await spotify.get_user(redis)
+    return await spotify.get_user()
