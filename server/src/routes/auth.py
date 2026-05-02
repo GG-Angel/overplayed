@@ -1,6 +1,6 @@
 import asyncio
 from settings import Settings
-from redis import RedisError
+from redis.asyncio import RedisError
 from spotipy import SpotifyOauthError, SpotifyOAuth, Spotify, SpotifyException
 from dependencies import get_oauth, get_redis, get_settings
 from models import TokenInfo, SessionInfo

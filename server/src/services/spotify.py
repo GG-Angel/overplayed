@@ -1,5 +1,5 @@
 from typing import List
-from models import SpotifyPlaylist, SpotifyCurrentUser
+from models import SpotifyPlaylist, SpotifyCurrentUser, SpotifyPlaylistTrack
 from cache.client import RedisClient
 from spotify.client import SpotifyClient
 
@@ -22,22 +22,39 @@ class SpotifyService:
         return user
 
     async def get_playlist(self, playlist_id: str) -> SpotifyPlaylist:
-        playlist = await self.redis.get_playlist(playlist_id)
-        if not playlist:
-            playlist = await self.spotify.get_playlist(playlist_id)
-            await self.redis.set_playlist(playlist)
+        if cached := await self.redis.get_playlist(playlist_id):
+            return cached
+
+        playlist = await self.spotify.get_playlist(playlist_id)
         if not self._is_playlist_owned(playlist):
             raise PlaylistNotOwnedError()
+        await self.redis.set_playlist(playlist)
+
         return playlist
 
     async def get_user_playlists(self) -> List[SpotifyPlaylist]:
-        if playlists := await self.redis.get_user_playlists(self.user_id):
-            return playlists
+        if cached := await self.redis.get_user_playlists(self.user_id):
+            return cached
 
         playlists = await self.spotify.get_user_playlists()
         owned = [p for p in playlists if self._is_playlist_owned(p)]
         await self.redis.set_user_playlists(self.user_id, owned)
         return owned
+
+    async def get_playlist_tracks(self, playlist_id: str) -> List[SpotifyPlaylistTrack]:
+        playlist = await self.get_playlist(playlist_id)
+        snapshot_id = playlist.snapshot_id
+
+        if cached := await self.redis.get_playlist_tracks(
+            playlist_id=playlist_id, snapshot_id=snapshot_id
+        ):
+            return cached
+
+        tracks = await self.spotify.get_playlist_tracks(playlist_id)
+        await self.redis.set_playlist_tracks(
+            tracks, playlist_id=playlist_id, snapshot_id=snapshot_id
+        )
+        return tracks
 
     def _is_playlist_owned(self, playlist: SpotifyPlaylist) -> bool:
         return playlist.owner.id == self.user_id or playlist.collaborative

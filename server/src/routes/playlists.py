@@ -1,6 +1,6 @@
 from spotipy import SpotifyException
 from typing import List
-from models import SpotifyPlaylist
+from models import SpotifyPlaylist, SpotifyPlaylistTrack
 from dependencies import get_spotify_service
 from fastapi import APIRouter, Depends, HTTPException
 from services.spotify import SpotifyService
@@ -26,10 +26,9 @@ async def handle_get_playlist(
         raise HTTPException(status_code=404, detail="Not found.")
 
 
-# TODO
-# @router.get("/{playlist_id}/tracks")
-# async def handle_get_playlist_tracks(
-#     playlist_id: str,
-#     service: SpotifyService = Depends(get_spotify_service),
-# ) -> List[SpotifyPlaylistTrack]:
-#     return await service.get_playlist_tracks(playlist_id)
+@router.get("/{playlist_id}/tracks")
+async def handle_get_playlist_tracks(
+    playlist_id: str,
+    service: SpotifyService = Depends(get_spotify_service),
+) -> List[SpotifyPlaylistTrack]:
+    return await service.get_playlist_tracks(playlist_id)

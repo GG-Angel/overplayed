@@ -58,6 +58,7 @@ class SpotifyClient:
                     playlist_id=playlist_id,
                     fields=spotify_fields(SpotifyPlaylistTrack, is_nested=True),
                 )
+                if not t.get("is_local") and t.get("track") and t["track"].get("id")
             ]
         logger.info(f"[{self.user_id}] Fetched {len(tracks)} tracks: {playlist_id}")
         return tracks
