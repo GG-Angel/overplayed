@@ -19,9 +19,6 @@ _USER_PLAYLIST_IDS_KEY = "userPlaylistIds"
 _PLAYLISTS_KEY = "playlists"
 _PLAYLIST_TRACKS_KEY = "playlistTracks"
 
-_FIELD_SNAPSHOT_ID = "snapshot_id"
-_FIELD_TRACKS = "tracks"
-
 _SESSION_ID_MAX_ATTEMPTS = 10
 _SESSION_ID_LENGTH = 32
 
@@ -51,11 +48,12 @@ class RedisClient:
         return None
 
     async def get_playlist_tracks(
-        self, *, playlist_id: str, snapshot_id: str
+        self, *, playlist_id: str, snapshot_id: str, offset: int, limit: int
     ) -> Optional[List[SpotifyPlaylistTrack]]:
-        key = self._key(_PLAYLIST_TRACKS_KEY, playlist_id)
         async with self._error_handler(f"get playlist tracks (playlist={playlist_id})"):
-            cached_snapshot_id = await self.redis.hget(key, _FIELD_SNAPSHOT_ID)  # ty:ignore[invalid-await]
+            key = self._key(_PLAYLIST_TRACKS_KEY, playlist_id)
+            snapshot_key = self._key(key, "snapshot")
+            cached_snapshot_id = await self.redis.get(snapshot_key)
 
             if cached_snapshot_id is None:
                 logger.debug(f"Cache miss: {key}")
@@ -65,11 +63,11 @@ class RedisClient:
                 logger.debug(f"Cache miss (stale snapshot): {key}")
                 return None
 
-            if tracks_json := await self.redis.hget(key, _FIELD_TRACKS):  # ty:ignore[invalid-await]
-                tracks = json.loads(tracks_json)
-                logger.debug(f"Cache hit: {key}")
-                return [SpotifyPlaylistTrack.model_validate(t) for t in tracks]
+            tracks = await self.redis.lrange(key, start=offset, end=offset + limit - 1)  # ty:ignore[invalid-await]
+            logger.debug(f"Cache hit: {key}")
+            return [SpotifyPlaylistTrack.model_validate_json(t) for t in tracks]
 
+        logger.warning(f"Cache miss after snapshot was found: {key}")
         return None
 
     # --- Setters ---
@@ -115,13 +113,20 @@ class RedisClient:
         self, tracks: List[SpotifyPlaylistTrack], *, playlist_id: str, snapshot_id: str
     ) -> None:
         key = self._key(_PLAYLIST_TRACKS_KEY, playlist_id)
-        tracks_json = json.dumps([t.model_dump() for t in tracks])
+        snapshot_key = self._key(key, "snapshot")
+        serialized = [t.model_dump_json() for t in tracks]
+
         async with self._error_handler(f"set playlist tracks (playlist={playlist_id})"):
-            await self._hset_with_ttl(
-                key,
-                mapping={_FIELD_SNAPSHOT_ID: snapshot_id, _FIELD_TRACKS: tracks_json},
-                ttl=self.settings.ttl_tracks,
-            )
+            async with self.redis.pipeline() as pipe:
+                pipe.delete(key)  # remove stale list
+                pipe.rpush(key, *serialized)
+                pipe.expire(key, self.settings.ttl_tracks)
+
+                pipe.set(snapshot_key, snapshot_id)
+                pipe.expire(snapshot_key, self.settings.ttl_tracks)
+
+                await pipe.execute()
+
             logger.debug(
                 f"Cached: {len(tracks)} tracks (playlist={playlist_id}, ttl={self.settings.ttl_tracks}s)"
             )
@@ -176,13 +181,6 @@ class RedisClient:
         await self._set(
             self._key(resource, resource_id), instance.model_dump_json(), ttl
         )
-
-    async def _hset_with_ttl(self, key: str, mapping: dict, ttl: int) -> None:
-        """Write a hash and set its TTL atomically."""
-        async with self.redis.pipeline() as pipe:
-            pipe.hset(key, mapping=mapping)
-            pipe.expire(key, ttl)
-            await pipe.execute()
 
     async def _get(self, key: str) -> Optional[str]:
         """Get a cached item."""

@@ -3,7 +3,7 @@ from typing import List
 from models import SpotifyPlaylist, SpotifyPlaylistTrack
 from dependencies import get_spotify_service
 from fastapi import APIRouter, Depends, HTTPException
-from services.spotify import SpotifyService
+from services.spotify import SpotifyService, PlaylistNotOwnedError
 
 router = APIRouter()
 
@@ -21,7 +21,9 @@ async def handle_get_playlist(
     service: SpotifyService = Depends(get_spotify_service),
 ) -> SpotifyPlaylist:
     try:
-        return await service.get_playlist(playlist_id=playlist_id)
+        return await service.get_playlist(playlist_id)
+    except PlaylistNotOwnedError:
+        raise HTTPException(status_code=403, detail="Forbidden.")
     except SpotifyException:
         raise HTTPException(status_code=404, detail="Not found.")
 
@@ -30,5 +32,14 @@ async def handle_get_playlist(
 async def handle_get_playlist_tracks(
     playlist_id: str,
     service: SpotifyService = Depends(get_spotify_service),
+    offset: int = 0,
+    limit: int = 100,
 ) -> List[SpotifyPlaylistTrack]:
-    return await service.get_playlist_tracks(playlist_id)
+    try:
+        return await service.get_playlist_tracks(
+            playlist_id, offset=offset, limit=limit
+        )
+    except PlaylistNotOwnedError:
+        raise HTTPException(status_code=403, detail="Forbidden.")
+    except SpotifyException:
+        raise HTTPException(status_code=404, detail="Not found.")

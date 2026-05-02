@@ -21,7 +21,7 @@ class SpotifyClient:
 
     async def get_playlist(self, playlist_id: str) -> SpotifyPlaylist:
         """Gets playlist metadata."""
-        async with self.error_handler(f"Couldn't fetch playlist {playlist_id}"):
+        async with self._error_handler(f"Couldn't fetch playlist {playlist_id}"):
             playlist = await asyncio.to_thread(
                 self.spotify.playlist,
                 playlist_id=playlist_id,
@@ -34,10 +34,10 @@ class SpotifyClient:
         """Gets all playlists saved by a user."""
         logger.info(f"[{self.user_id}] Fetching playlists")
         error_msg = f"Couldn't fetch playlists for user {self.user_id}"
-        async with self.error_handler(error_msg):
+        async with self._error_handler(error_msg):
             playlists = [
                 SpotifyPlaylist(**p)
-                async for p in self.get_paginated_items(
+                async for p in self._paginate(
                     self.spotify.current_user_playlists,
                     limit=self.settings.lim_playlists,
                 )
@@ -49,10 +49,10 @@ class SpotifyClient:
         """Gets all tracks from a playlist."""
         logger.info(f"[{self.user_id}] Fetching tracks: {playlist_id}")
         error_msg = f"Couldn't fetch tracks from playlist {playlist_id}"
-        async with self.error_handler(error_msg):
+        async with self._error_handler(error_msg):
             tracks = [
                 SpotifyPlaylistTrack(**t)
-                async for t in self.get_paginated_items(
+                async for t in self._paginate(
                     self.spotify.playlist_items,
                     limit=self.settings.lim_tracks,
                     playlist_id=playlist_id,
@@ -63,7 +63,7 @@ class SpotifyClient:
         logger.info(f"[{self.user_id}] Fetched {len(tracks)} tracks: {playlist_id}")
         return tracks
 
-    async def get_paginated_items(
+    async def _paginate(
         self, spotify_method: Callable, limit: int, **kwargs
     ) -> AsyncIterator[dict]:
         offset = 0
@@ -79,7 +79,7 @@ class SpotifyClient:
             offset += limit
 
     @asynccontextmanager
-    async def error_handler(self, message: str):
+    async def _error_handler(self, message: str):
         try:
             yield
         except SpotifyException as e:

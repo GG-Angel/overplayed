@@ -41,12 +41,14 @@ class SpotifyService:
         await self.redis.set_user_playlists(self.user_id, owned)
         return owned
 
-    async def get_playlist_tracks(self, playlist_id: str) -> List[SpotifyPlaylistTrack]:
+    async def get_playlist_tracks(
+        self, playlist_id: str, *, offset: int, limit: int
+    ) -> List[SpotifyPlaylistTrack]:
         playlist = await self.get_playlist(playlist_id)
         snapshot_id = playlist.snapshot_id
 
         if cached := await self.redis.get_playlist_tracks(
-            playlist_id=playlist_id, snapshot_id=snapshot_id
+            playlist_id=playlist_id, snapshot_id=snapshot_id, offset=offset, limit=limit
         ):
             return cached
 
@@ -54,7 +56,7 @@ class SpotifyService:
         await self.redis.set_playlist_tracks(
             tracks, playlist_id=playlist_id, snapshot_id=snapshot_id
         )
-        return tracks
+        return tracks[offset : offset + limit]
 
     def _is_playlist_owned(self, playlist: SpotifyPlaylist) -> bool:
         return playlist.owner.id == self.user_id or playlist.collaborative

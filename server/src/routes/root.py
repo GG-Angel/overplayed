@@ -1,12 +1,12 @@
-from fastapi.responses import JSONResponse, Response
+from fastapi.responses import Response
 from fastapi import APIRouter
 
 router = APIRouter()
 
 
 @router.get("/")
-def handle_healthcheck() -> JSONResponse:
-    return JSONResponse({"message": ":3"})
+def handle_healthcheck() -> str:
+    return ":3"
 
 
 @router.get("/favicon.ico")
