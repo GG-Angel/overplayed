@@ -15,6 +15,10 @@ class SpotifySettings(BaseModel):
     lim_tracks: int = 100
 
 
+class DeezerSettings(BaseModel):
+    url: str = "https://api.deezer.com"
+
+
 class RedisSettings(BaseModel):
     url: str = "redis://redis:6379"
     password: Optional[str] = None
@@ -30,12 +34,14 @@ class RedisSettings(BaseModel):
 
 class Settings(BaseSettings):
     spotify: SpotifySettings = Field(default_factory=SpotifySettings)
+    deezer: DeezerSettings = Field(default_factory=DeezerSettings)
     redis: RedisSettings = Field(default_factory=RedisSettings)
 
     env: str = "development"
 
     model_config = SettingsConfigDict(
         env_nested_delimiter="__",
+        env_file=".env",
         case_sensitive=False,
         extra="ignore",
     )

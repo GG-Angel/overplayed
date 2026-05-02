@@ -4,6 +4,7 @@ from cache.pool import create_pool, close_pool
 from cache.dummy import DummyCacheHandler
 from cache.client import RedisClient
 from redis.asyncio import ConnectionPool, Redis
+from aiohttp import ClientSession
 
 
 class State:
@@ -17,6 +18,9 @@ class State:
             cache_handler=DummyCacheHandler(),
         )
         self.redis_pool: ConnectionPool = create_pool(self.settings.redis)
+        self.deezer_session: ClientSession = ClientSession(
+            base_url=self.settings.deezer.url
+        )
 
     def redis(self) -> RedisClient:
         return RedisClient(

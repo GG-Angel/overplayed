@@ -5,6 +5,7 @@ description = "Overplayed API"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "aiohttp>=3.13.5",
     "fastapi[standard]>=0.136.1",
     "loguru>=0.7.3",
     "pydantic>=2.13.3",
