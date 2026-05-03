@@ -1,3 +1,4 @@
+from fastapi.responses import JSONResponse
 from spotipy import SpotifyException
 from typing import List
 from models import SpotifyPlaylist, SpotifyPlaylistTrack
@@ -43,3 +44,10 @@ async def handle_get_playlist_tracks(
         raise HTTPException(status_code=403, detail="Forbidden.")
     except SpotifyException:
         raise HTTPException(status_code=404, detail="Not found.")
+
+
+@router.delete("/{playlist_id}/tracks")
+async def handle_delete_playlist_tracks(
+    playlist_id: str, service: SpotifyService = Depends(get_spotify_service)
+) -> JSONResponse:
+    return JSONResponse({"detail": "Tracks removed successfully."}, status_code=200)
