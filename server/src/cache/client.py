@@ -18,8 +18,7 @@ _USERS_KEY = "users"
 _PLAYLISTS_KEY = "playlists"
 _TRACKS_KEY = "tracks"
 
-_SESSION_ID_MAX_ATTEMPTS = 10
-_SESSION_ID_LENGTH = 32
+_SESSION_ID_LENGTH = 64
 
 M = TypeVar("M", bound=BaseModel)
 
@@ -28,8 +27,6 @@ class RedisClient:
     def __init__(self, redis: Redis, settings: RedisSettings):
         self.redis = redis
         self.settings = settings
-
-    # --- Getters ---
 
     async def get_session(self, session_id: str) -> Optional[SessionInfo]:
         return await self._get_model(SessionInfo, RedisClient._session_key(session_id))
@@ -79,7 +76,16 @@ class RedisClient:
 
         logger.debug(f"Cached: {len(tracks)} tracks (key={key}, ttl={ttl}s)")
 
-    # --- Private Helpers ---
+    async def create_session(self, info: SessionInfo) -> str:
+        session_id = token_urlsafe(_SESSION_ID_LENGTH)
+        await self.set_session(session_id, info)
+        logger.info(f"Created session: {session_id}")
+        return session_id
+
+    async def end_session(self, session_id: str) -> None:
+        async with self._error_handler("end session"):
+            await self.redis.delete(self._key(_SESSIONS_KEY, session_id))
+        logger.info(f"Ended session: {session_id}")
 
     async def _get_list(self, key: str) -> Optional[List[str]]:
         if self.redis.exists(key):
