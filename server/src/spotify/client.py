@@ -85,17 +85,20 @@ class SpotifyClient:
                 )
         self._log(f"Removed {len(track_uris)} tracks from playlist: {playlist_id}")
 
-    async def create_playlist(self, name: str, description: str = "") -> SpotifyPlaylist:
+    async def create_playlist(
+        self, name: str, description: str = ""
+    ) -> SpotifyPlaylist:
         """Creates a new empty playlist."""
         self._log(f"Creating playlist: '{name}'")
-        playlist = await self._run(
-            self.spotify.user_playlist_create,
-            user=self.user_id,
-            name=name,
-            description=description,
-            public=False,
-            collaborative=False,
-        )
+        async with self._error_handler(f"Couldn't create playlist: '{name}'"):
+            playlist = await self._run(
+                self.spotify.user_playlist_create,
+                user=self.user_id,
+                name=name,
+                description=description,
+                public=False,
+                collaborative=False,
+            )
         self._log(f"Created playlist: '{name}'")
         return SpotifyPlaylist(**playlist)
 
@@ -113,6 +116,13 @@ class SpotifyClient:
                 )
                 await self._run(self.spotify.playlist_add_items, playlist_id, batch)
         self._log(f"Added {len(track_uris)} tracks to playlist: {playlist_id}")
+
+    async def delete_playlist(self, playlist_id: str) -> None:
+        """Deletes a playlist."""
+        self._log(f"Deleting playlist: {playlist_id}")
+        async with self._error_handler(f"Couldn't delete playlist: {playlist_id}"):
+            await self._run(self.spotify.current_user_unfollow_playlist, playlist_id)
+        self._log(f"Deleted playlist: {playlist_id}")
 
     async def _run(self, func: Callable, *args, **kwargs):
         """Runs a blocking Spotipy call in a thread."""

@@ -63,7 +63,7 @@ async def handle_delete_playlist_tracks(
     service: SpotifyService = Depends(get_spotify_service),
 ) -> None:
     try:
-        await service.remove_playlist_tracks(playlist_id, body.track_uris)
+        await service.delete_playlist_tracks(playlist_id, body.track_uris)
     except PlaylistNotOwnedError:
         raise HTTPException(status_code=403, detail="Forbidden.")
     except SpotifyException:
@@ -89,7 +89,15 @@ async def handle_add_playlist_tracks(
 ) -> None:
     try:
         await service.add_playlist_tracks(playlist_id, body.track_uris)
-    except PlaylistNotOwnedError:
-        raise HTTPException(status_code=403, detail="Forbidden.")
+    except SpotifyException:
+        raise HTTPException(status_code=500, detail="Failed to add tracks.")
+
+
+@router.delete("/{playlist_id}", status_code=200)
+async def handle_delete_playlist(
+    playlist_id: str, service: SpotifyService = Depends(get_spotify_service)
+) -> None:
+    try:
+        await service.delete_playlist(playlist_id)
     except SpotifyException:
         raise HTTPException(status_code=500, detail="Failed to add tracks.")

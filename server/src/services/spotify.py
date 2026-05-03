@@ -76,13 +76,17 @@ class SpotifyService:
         await self.spotify.add_playlist_tracks(playlist_id, track_uris)
         await self.redis.invalidate_playlist(self.user_id, playlist_id)
 
-    async def remove_playlist_tracks(
+    async def delete_playlist_tracks(
         self, playlist_id: str, track_uris: List[str]
     ) -> None:
         playlist = await self.get_playlist(playlist_id)
         await self.spotify.remove_playlist_tracks(
             playlist_id, playlist.snapshot_id, track_uris
         )
+        await self.redis.invalidate_playlist(self.user_id, playlist_id)
+
+    async def delete_playlist(self, playlist_id: str) -> None:
+        await self.spotify.delete_playlist(playlist_id)
         await self.redis.invalidate_playlist(self.user_id, playlist_id)
 
     def _is_playlist_owned(self, playlist: SpotifyPlaylist) -> bool:

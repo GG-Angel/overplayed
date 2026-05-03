@@ -136,14 +136,11 @@ class RedisClient:
 
         async with self._error_handler(f"set playlist tracks (key={tracks_key})"):
             async with self.redis.pipeline() as pipe:
-                # store tracks
                 pipe.delete(tracks_key)
-                pipe.rpush(tracks_key, *serialized)
-                pipe.expire(tracks_key, ttl)
-
-                # store snapshot id
+                if len(serialized) > 0:
+                    pipe.rpush(tracks_key, *serialized)
+                    pipe.expire(tracks_key, ttl)
                 pipe.set(snapshot_key, snapshot_id, ex=ttl)
-
                 await pipe.execute()
 
         logger.debug(f"Cached: {len(tracks)} tracks (key={tracks_key}, ttl={ttl}s)")
@@ -162,18 +159,23 @@ class RedisClient:
 
     async def invalidate_playlist(self, user_id: str, playlist_id: str) -> None:
         playlists_key = RedisClient._playlists_key(user_id)
-        playlist_key = RedisClient._playlist_tracks_key(user_id, playlist_id)
+        tracks_key = RedisClient._playlist_tracks_key(user_id, playlist_id)
         snapshot_key = RedisClient._playlist_snapshot_key(user_id, playlist_id)
-        await self._delete(playlists_key, playlist_key, snapshot_key)
+
+        async with self._error_handler(f"invalidate playlist {playlist_id}"):
+            async with self.redis.pipeline() as pipe:
+                pipe.hdel(playlists_key, playlist_id)  # remove single entry from hash
+                pipe.delete(tracks_key, snapshot_key)  # delete these keys entirely
+                await pipe.execute()
+
         logger.debug(f"Invalidated playlist {playlist_id} for user: {user_id}")
 
     async def invalidate_playlists(self, user_id: str) -> None:
-        await self._delete(RedisClient._playlists_key(user_id))
+        """Invalidates the user's playlist list, forcing a refetch on next request."""
+        key = RedisClient._playlists_key(user_id)
+        async with self._error_handler(f"invalidate playlists for user {user_id}"):
+            await self.redis.delete(key)
         logger.debug(f"Invalidated playlists for user: {user_id}")
-
-    async def _delete(self, *keys: str) -> None:
-        async with self._error_handler(f"invalidate {keys}"):
-            await self.redis.delete(*keys)
 
     async def _get_model(self, model: Type[M], key: str) -> Optional[M]:
         data = await self._get(key)

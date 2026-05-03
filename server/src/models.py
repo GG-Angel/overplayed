@@ -51,7 +51,7 @@ class SpotifyPlaylistTracksInfo(BaseModel):
 class SpotifyPlaylist(SpotifyId):
     collaborative: bool
     description: Optional[str]
-    images: List[SpotifyImage]
+    images: Optional[List[SpotifyImage]]
     name: str
     owner: SpotifyUser
     public: bool
