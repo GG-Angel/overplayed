@@ -63,5 +63,27 @@ class SpotifyService:
 
         return tracks[offset : offset + limit]
 
+    async def create_playlist(
+        self, name: str, description: str = ""
+    ) -> SpotifyPlaylist:
+        playlist = await self.spotify.create_playlist(name, description)
+        await self.redis.invalidate_playlists(self.user_id)
+        return playlist
+
+    async def add_playlist_tracks(
+        self, playlist_id: str, track_uris: List[str]
+    ) -> None:
+        await self.spotify.add_playlist_tracks(playlist_id, track_uris)
+        await self.redis.invalidate_playlist(self.user_id, playlist_id)
+
+    async def remove_playlist_tracks(
+        self, playlist_id: str, track_uris: List[str]
+    ) -> None:
+        playlist = await self.get_playlist(playlist_id)
+        await self.spotify.remove_playlist_tracks(
+            playlist_id, playlist.snapshot_id, track_uris
+        )
+        await self.redis.invalidate_playlist(self.user_id, playlist_id)
+
     def _is_playlist_owned(self, playlist: SpotifyPlaylist) -> bool:
         return playlist.owner.id == self.user_id or playlist.collaborative

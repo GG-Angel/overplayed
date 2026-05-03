@@ -85,7 +85,7 @@ class SpotifyClient:
                 )
         self._log(f"Removed {len(track_uris)} tracks from playlist: {playlist_id}")
 
-    async def create_playlist(self, name: str, description: str) -> SpotifyPlaylist:
+    async def create_playlist(self, name: str, description: str = "") -> SpotifyPlaylist:
         """Creates a new empty playlist."""
         self._log(f"Creating playlist: '{name}'")
         playlist = await self._run(

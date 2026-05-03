@@ -160,6 +160,21 @@ class RedisClient:
             await self.redis.delete(key)
         logger.info(f"Ended session: {session_id}")
 
+    async def invalidate_playlist(self, user_id: str, playlist_id: str) -> None:
+        playlists_key = RedisClient._playlists_key(user_id)
+        playlist_key = RedisClient._playlist_tracks_key(user_id, playlist_id)
+        snapshot_key = RedisClient._playlist_snapshot_key(user_id, playlist_id)
+        await self._delete(playlists_key, playlist_key, snapshot_key)
+        logger.debug(f"Invalidated playlist {playlist_id} for user: {user_id}")
+
+    async def invalidate_playlists(self, user_id: str) -> None:
+        await self._delete(RedisClient._playlists_key(user_id))
+        logger.debug(f"Invalidated playlists for user: {user_id}")
+
+    async def _delete(self, *keys: str) -> None:
+        async with self._error_handler(f"invalidate {keys}"):
+            await self.redis.delete(*keys)
+
     async def _get_model(self, model: Type[M], key: str) -> Optional[M]:
         data = await self._get(key)
         return model.model_validate_json(data) if data else None
