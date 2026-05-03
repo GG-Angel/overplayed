@@ -95,6 +95,9 @@ class RedisClient:
         key = RedisClient._playlists_key(user_id)
         ttl = self.settings.ttl_playlists
 
+        if not await self.redis.exists(key):
+            return  # don't create a partial cache entry
+
         async with self._error_handler(f"set playlist (key={key})"):
             async with self.redis.pipeline() as pipe:
                 pipe.hset(key, mapping={playlist.id: playlist.model_dump_json()})
