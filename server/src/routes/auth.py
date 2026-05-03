@@ -41,7 +41,7 @@ async def handle_callback(
     except (SpotifyOauthError, SpotifyException, RedisError):
         raise failure
 
-    response = JSONResponse({"message": "Authorization successful."}, status_code=200)
+    response = JSONResponse({"detail": "Authorization successful."}, status_code=200)
     response.set_cookie(
         key="session_id",
         value=session_id,
@@ -65,7 +65,7 @@ async def handle_logout(
     except RedisError:
         raise HTTPException(detail="Failed to log out.", status_code=500)
 
-    response = JSONResponse({"message": "Logged out successfully."}, status_code=200)
+    response = JSONResponse({"detail": "Logged out successfully."}, status_code=200)
     response.delete_cookie(
         key="session_id",
         httponly=True,

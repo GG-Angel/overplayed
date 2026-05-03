@@ -22,39 +22,46 @@ class SpotifyService:
         return user
 
     async def get_playlist(self, playlist_id: str) -> SpotifyPlaylist:
-        if cached := await self.redis.get_playlist(playlist_id):
+        if cached := await self.redis.get_playlist(self.user_id, playlist_id):
             return cached
 
         playlist = await self.spotify.get_playlist(playlist_id)
         if not self._is_playlist_owned(playlist):
             raise PlaylistNotOwnedError()
-        await self.redis.set_playlist(playlist)
 
+        await self.redis.set_playlist(self.user_id, playlist)
         return playlist
 
     async def get_user_playlists(self) -> List[SpotifyPlaylist]:
-        if cached := await self.redis.get_user_playlists(self.user_id):
+        if cached := await self.redis.get_playlists(self.user_id):
             return cached
 
         playlists = await self.spotify.get_user_playlists()
         owned = [p for p in playlists if self._is_playlist_owned(p)]
-        await self.redis.set_user_playlists(self.user_id, owned)
+        await self.redis.set_playlists(self.user_id, owned)
         return owned
 
-    async def get_playlist_tracks(self, playlist_id: str) -> List[SpotifyPlaylistTrack]:
+    async def get_playlist_tracks(
+        self, playlist_id: str, *, offset: int, limit: int
+    ) -> List[SpotifyPlaylistTrack]:
         playlist = await self.get_playlist(playlist_id)
         snapshot_id = playlist.snapshot_id
 
         if cached := await self.redis.get_playlist_tracks(
-            playlist_id=playlist_id, snapshot_id=snapshot_id
+            self.user_id, playlist_id, snapshot_id, offset=offset, limit=limit
         ):
             return cached
 
         tracks = await self.spotify.get_playlist_tracks(playlist_id)
+        await self.redis.set_playlist(self.user_id, playlist)
         await self.redis.set_playlist_tracks(
-            tracks, playlist_id=playlist_id, snapshot_id=snapshot_id
+            self.user_id,
+            playlist_id,
+            snapshot_id,
+            tracks,
         )
-        return tracks
+
+        return tracks[offset : offset + limit]
 
     def _is_playlist_owned(self, playlist: SpotifyPlaylist) -> bool:
         return playlist.owner.id == self.user_id or playlist.collaborative

@@ -1,7 +1,8 @@
+from fastapi.responses import JSONResponse
 from loguru import logger
 import uvicorn
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, Request
 from settings import STATE_KEY
 from routes import auth, root, user, playlists
 from state import State
@@ -18,7 +19,7 @@ async def start(state: State):
     @app.exception_handler(Exception)
     async def unhandled_exception_handler(request: Request, exc: Exception):
         logger.exception(f"Unhandled exception: {exc}")
-        raise HTTPException(status_code=500, detail="Unexpected error.")
+        return JSONResponse(status_code=500, content={"detail": "Unexpected error."})
 
     app.state[STATE_KEY] = state
 
