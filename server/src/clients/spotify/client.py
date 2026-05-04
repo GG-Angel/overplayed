@@ -5,7 +5,7 @@ from typing import List, Callable, AsyncGenerator
 from loguru import logger
 from models import SpotifyCurrentUser, SpotifyPlaylist, SpotifyPlaylistTrack
 from spotipy import Spotify, SpotifyException
-from spotify.utils import spotify_fields
+from clients.spotify.utils import spotify_fields
 
 
 def spotify_error_handler(message: str):

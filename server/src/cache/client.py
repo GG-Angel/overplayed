@@ -10,6 +10,7 @@ from models import (
     SpotifyCurrentUser,
     SpotifyPlaylist,
     SpotifyPlaylistTrack,
+    SpotifyTrackPreview,
 )
 
 _SESSIONS_KEY = "sessions"
@@ -17,6 +18,7 @@ _USERS_KEY = "users"
 _PLAYLISTS_KEY = "playlists"
 _TRACKS_KEY = "tracks"
 _SNAPSHOT_KEY = "snapshot"
+_PREVIEWS_KEY = "previews"
 
 _SESSION_ID_LENGTH = 32
 
@@ -101,6 +103,12 @@ class RedisClient:
 
         logger.debug(f"HIT: {tracks_key}")
         return [SpotifyPlaylistTrack.model_validate_json(t) for t in tracks]
+
+    @redis_error_handler("get track preview")
+    async def get_track_preview(self, track_id: str) -> Optional[SpotifyTrackPreview]:
+        return await self._get_model(
+            SpotifyTrackPreview, self._track_preview_key(track_id)
+        )
 
     @redis_error_handler("set session")
     async def set_session(self, session_id: str, session: SessionInfo) -> None:
@@ -244,3 +252,8 @@ class RedisClient:
         return RedisClient._key(
             RedisClient._playlists_key(user_id), playlist_id, _SNAPSHOT_KEY
         )
+
+    @staticmethod
+    def _track_preview_key(track_id: str) -> str:
+        """previews:{track_id}"""
+        return RedisClient._key(_PREVIEWS_KEY, track_id)

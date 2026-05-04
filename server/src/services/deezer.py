@@ -1,5 +1,5 @@
 from typing import Optional
-from deezer.client import DeezerClient
+from clients.deezer.client import DeezerClient
 from cache.client import RedisClient
 
 

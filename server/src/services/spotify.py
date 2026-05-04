@@ -1,7 +1,7 @@
 from typing import List
 from models import SpotifyPlaylist, SpotifyCurrentUser, SpotifyPlaylistTrack
 from cache.client import RedisClient
-from spotify.client import SpotifyClient
+from clients.spotify.client import SpotifyClient
 
 
 class PlaylistNotOwnedError(Exception):
