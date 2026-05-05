@@ -16,12 +16,14 @@ class SpotifySettings(BaseModel):
 
 
 class DeezerSettings(BaseModel):
-    url: str = "https://api.deezer.com"
+    base_url: str = "https://api.deezer.com"
 
 
 class RedisSettings(BaseModel):
     url: str = "redis://redis:6379"
     password: Optional[str] = None
+
+    encryption_key: bytes = Field(..., min_length=32, max_length=32)
     max_connections: int = 10
 
     ttl_sessions: int = 60 * 60 * 24 * 30  # sessions, 30 days

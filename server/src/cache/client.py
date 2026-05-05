@@ -1,3 +1,6 @@
+from os import urandom
+from base64 import b64encode, b64decode
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from contextlib import asynccontextmanager
 from pydantic import BaseModel
 from redis.asyncio import Redis, RedisError
@@ -28,10 +31,16 @@ class RedisClient:
     def __init__(self, redis: Redis, settings: RedisSettings):
         self.redis = redis
         self.settings = settings
+        self.aesgcm = AESGCM(settings.encryption_key)
 
     async def get_session(self, session_id: str) -> Optional[SessionInfo]:
         async with self._handle_error("get session"):
-            return await self._get_model(SessionInfo, self._session_key(session_id))
+            encrypted = await self._get(self._session_key(session_id))
+            if not encrypted:
+                return None
+
+            decrypted = self._decrypt(encrypted)
+            return SessionInfo.model_validate_json(decrypted)
 
     async def get_user(self, user_id: str) -> Optional[SpotifyCurrentUser]:
         async with self._handle_error("get user"):
@@ -98,8 +107,10 @@ class RedisClient:
 
     async def set_session(self, session_id: str, session: SessionInfo) -> None:
         async with self._handle_error("set session"):
-            await self._set_model(
-                session, self._session_key(session_id), self.settings.ttl_sessions
+            plaintext = session.model_dump_json()
+            encrypted = self._encrypt(plaintext)
+            await self._set(
+                self._session_key(session_id), encrypted, self.settings.ttl_sessions
             )
 
     async def set_user(self, user: SpotifyCurrentUser) -> None:
@@ -212,6 +223,9 @@ class RedisClient:
         data = await self._get(key)
         return model.model_validate_json(data) if data else None
 
+    async def _set_model(self, instance: M, key: str, ttl: int) -> None:
+        await self._set(key, instance.model_dump_json(), ttl)
+
     async def _get(self, key: str) -> Optional[str]:
         if data := await self.redis.get(key):
             logger.debug(f"HIT: {key}")
@@ -219,12 +233,20 @@ class RedisClient:
         logger.debug(f"MISS: {key}")
         return None
 
-    async def _set_model(self, instance: M, key: str, ttl: int) -> None:
-        await self._set(key, instance.model_dump_json(), ttl)
-
     async def _set(self, key: str, value: str, ttl: int) -> None:
         await self.redis.set(key, value, ex=ttl)
         logger.debug(f"CACHED: {key} (ttl={ttl}s)")
+
+    def _encrypt(self, plaintext: str) -> str:
+        nonce = urandom(12)
+        ciphertext = self.aesgcm.encrypt(nonce, plaintext.encode(), None)
+        return b64encode(nonce + ciphertext).decode()
+
+    def _decrypt(self, data: str) -> str:
+        raw = b64decode(data.encode())
+        nonce, ciphertext = raw[:12], raw[12:]
+        plaintext = self.aesgcm.decrypt(nonce, ciphertext, None)
+        return plaintext.decode()
 
     @staticmethod
     def _key(*parts: str) -> str:

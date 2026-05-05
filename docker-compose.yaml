@@ -25,6 +25,7 @@ services:
             - SPOTIFY__CLIENT_ID
             - SPOTIFY__CLIENT_SECRET
             - REDIS__PASSWORD
+            - REDIS__ENCRYPTION_KEY
         env_file:
             - .env
         networks:

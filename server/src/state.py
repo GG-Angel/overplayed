@@ -19,13 +19,13 @@ class State:
         )
         self.redis_pool: ConnectionPool = create_pool(self.settings.redis)
         self.deezer_session: ClientSession = ClientSession(
-            base_url=self.settings.deezer.url
+            base_url=self.settings.deezer.base_url
         )
 
     def redis(self) -> RedisClient:
         return RedisClient(
             redis=Redis(connection_pool=self.redis_pool),
-            settings=self.settings.redis,
+            settings=self.settings.redis
         )
 
     async def __aenter__(self):
