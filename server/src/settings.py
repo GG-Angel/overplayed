@@ -11,6 +11,7 @@ class SpotifySettings(BaseModel):
     scope: str = "playlist-read-private playlist-modify-private playlist-modify-public"
     callback_url: str = "http://127.0.0.1:8080/auth/callback"
 
+    # pagination limits
     lim_playlists: int = 50
     lim_tracks: int = 100
 
@@ -40,6 +41,7 @@ class Settings(BaseSettings):
     redis: RedisSettings = Field(default_factory=RedisSettings)
 
     env: str = "development"
+    frontend_url: str = "http://127.0.0.1:5173"
 
     model_config = SettingsConfigDict(
         env_nested_delimiter="__",

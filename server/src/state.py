@@ -17,19 +17,19 @@ class State:
             redirect_uri=self.settings.spotify.callback_url,
             cache_handler=DummyCacheHandler(),
         )
-        self.redis_pool: ConnectionPool = create_pool(self.settings.redis)
         self.deezer_session: ClientSession = ClientSession(
             base_url=self.settings.deezer.base_url
         )
 
+        self._redis_pool: ConnectionPool = create_pool(self.settings.redis)
+
     def redis(self) -> RedisClient:
         return RedisClient(
-            redis=Redis(connection_pool=self.redis_pool),
-            settings=self.settings.redis
+            redis=Redis(connection_pool=self._redis_pool), settings=self.settings.redis
         )
 
     async def __aenter__(self):
         return self
 
     async def __aexit__(self, *_):
-        await close_pool(self.redis_pool)
+        await close_pool(self._redis_pool)
