@@ -6,7 +6,7 @@ from services.spotify import SpotifyService
 router = APIRouter()
 
 
-@router.get("/")
+@router.get("/me")
 async def handle_get_user(
     spotify: SpotifyService = Depends(get_spotify_service),
 ) -> SpotifyCurrentUser:

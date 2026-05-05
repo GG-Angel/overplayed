@@ -25,7 +25,7 @@ async def start(state: State):
 
     app.include_router(root.router)
     app.include_router(auth.router, prefix="/auth", tags=["spotify", "auth"])  # fmt: skip
-    app.include_router(user.router, prefix="/user", tags=["spotify", "user"])  # fmt: skip
+    app.include_router(user.router, prefix="/users", tags=["spotify", "users"])  # fmt: skip
     app.include_router(playlists.router, prefix="/playlists", tags=["spotify", "playlists"])  # fmt: skip
     app.include_router(previews.router, prefix="/previews", tags=["spotify", "previews"])  # fmt: skip
 
