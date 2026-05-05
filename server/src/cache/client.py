@@ -2,7 +2,7 @@ import functools
 from pydantic import BaseModel
 from redis.asyncio import Redis, RedisError
 from settings import RedisSettings
-from typing import Optional, List, TypeVar, Type
+from typing import Optional, List, TypeVar, Type, Literal
 from secrets import token_urlsafe
 from loguru import logger
 from models import (
@@ -10,7 +10,6 @@ from models import (
     SpotifyCurrentUser,
     SpotifyPlaylist,
     SpotifyPlaylistTrack,
-    SpotifyTrackPreview,
 )
 
 _SESSIONS_KEY = "sessions"
@@ -105,10 +104,10 @@ class RedisClient:
         return [SpotifyPlaylistTrack.model_validate_json(t) for t in tracks]
 
     @redis_error_handler("get track preview")
-    async def get_track_preview(self, track_id: str) -> Optional[SpotifyTrackPreview]:
-        return await self._get_model(
-            SpotifyTrackPreview, self._track_preview_key(track_id)
-        )
+    async def get_track_preview_url(
+        self, isrc: str
+    ) -> str | Literal["NO_PREVIEW"] | None:
+        return await self._get(self._track_preview_key(isrc))
 
     @redis_error_handler("set session")
     async def set_session(self, session_id: str, session: SessionInfo) -> None:
@@ -178,6 +177,18 @@ class RedisClient:
 
         logger.debug(f"CACHED: {len(tracks)} tracks (key={tracks_key}, ttl={ttl}s)")
 
+    @redis_error_handler("set track preview")
+    async def set_track_preview_url(
+        self, isrc: str, preview_url: Optional[str]
+    ) -> None:
+        await self._set(
+            self._track_preview_key(isrc),
+            preview_url if preview_url else "NO_PREVIEW",
+            self.settings.ttl_previews_hit
+            if preview_url
+            else self.settings.ttl_previews_miss,
+        )
+
     @redis_error_handler("create session")
     async def create_session(self, info: SessionInfo) -> str:
         session_id = token_urlsafe(_SESSION_ID_LENGTH)
@@ -209,15 +220,21 @@ class RedisClient:
         logger.debug(f"Invalidated playlists for user: {user_id}")
 
     async def _get_model(self, model: Type[M], key: str) -> Optional[M]:
-        data = await self.redis.get(key)
-        if data:
+        data = await self._get(key)
+        return model.model_validate_json(data) if data else None
+
+    async def _get(self, key: str) -> Optional[str]:
+        if data := await self.redis.get(key):
             logger.debug(f"HIT: {key}")
-            return model.model_validate_json(data)
+            return data
         logger.debug(f"MISS: {key}")
         return None
 
     async def _set_model(self, instance: M, key: str, ttl: int) -> None:
-        await self.redis.set(key, instance.model_dump_json(), ex=ttl)
+        await self._set(key, instance.model_dump_json(), ttl)
+
+    async def _set(self, key: str, value: str, ttl: int) -> None:
+        await self.redis.set(key, value, ex=ttl)
         logger.debug(f"CACHED: {key} (ttl={ttl}s)")
 
     @staticmethod
@@ -254,6 +271,6 @@ class RedisClient:
         )
 
     @staticmethod
-    def _track_preview_key(track_id: str) -> str:
-        """previews:{track_id}"""
-        return RedisClient._key(_PREVIEWS_KEY, track_id)
+    def _track_preview_key(isrc: str) -> str:
+        """previews:{isrc}"""
+        return RedisClient._key(_PREVIEWS_KEY, isrc)

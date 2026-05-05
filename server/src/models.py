@@ -91,8 +91,3 @@ class SpotifyPlaylistTrack(BaseModel):
     added_by: SpotifyId
     is_local: bool
     track: SpotifyTrack
-
-
-class SpotifyTrackPreview(BaseModel):
-    isrc: str
-    preview_url: str

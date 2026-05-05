@@ -9,4 +9,9 @@ class DeezerService:
         self.redis = redis
 
     async def get_track_preview_url(self, isrc: str) -> Optional[str]:
-        return "TODO"
+        if cached := await self.redis.get_track_preview_url(isrc):
+            return cached if cached != "NO_PREVIEW" else None
+
+        preview_url = await self.deezer.get_track_preview_url(isrc)
+        await self.redis.set_track_preview_url(isrc, preview_url)
+        return preview_url
