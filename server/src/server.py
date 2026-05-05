@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from settings import STATE_KEY
 from state import State
-from routes import auth, root, user, playlists, previews
+from routes import auth, home, users, playlists, previews
 
 
 async def start(state: State):
@@ -23,9 +23,9 @@ async def start(state: State):
 
     app.state[STATE_KEY] = state
 
-    app.include_router(root.router)
+    app.include_router(home.router)
     app.include_router(auth.router, prefix="/auth", tags=["spotify", "auth"])  # fmt: skip
-    app.include_router(user.router, prefix="/users", tags=["spotify", "users"])  # fmt: skip
+    app.include_router(users.router, prefix="/users", tags=["spotify", "users"])  # fmt: skip
     app.include_router(playlists.router, prefix="/playlists", tags=["spotify", "playlists"])  # fmt: skip
     app.include_router(previews.router, prefix="/previews", tags=["spotify", "previews"])  # fmt: skip
 
