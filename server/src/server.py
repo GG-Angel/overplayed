@@ -1,4 +1,5 @@
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 import uvicorn
 from contextlib import asynccontextmanager
@@ -15,6 +16,14 @@ async def start(state: State):
             yield  # glues enter/exit signals to fastapi
 
     app = FastAPI(lifespan=lifespan)
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[state.settings.frontend_url],
+        allow_credentials=True,
+        allow_methods=["GET", "POST", "DELETE"],
+        allow_headers=["*"],
+    )
 
     @app.exception_handler(Exception)
     async def unhandled_exception_handler(request: Request, exc: Exception):
