@@ -1,3 +1,5 @@
+/// <reference types="vite-plugin-svgr/client" />
+
 import UserProvider from "@/context/UserProvider";
 import { queryConfig } from "@/lib/react-query";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";

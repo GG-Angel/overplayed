@@ -17,7 +17,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <button className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props}>
         {isLoading && <Spinner size="sm" className="text-current" />}
         {!isLoading && icon && <span className="mr-2">{icon}</span>}
-        <span className="mx-2">{children}</span>
+        <span>{children}</span>
       </button>
     );
   }
