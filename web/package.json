@@ -12,14 +12,22 @@
   "dependencies": {
     "@fontsource-variable/geist": "^5.2.8",
     "@tailwindcss/vite": "^4.2.4",
+    "@tanstack/react-query": "^5.100.9",
+    "@tanstack/react-query-devtools": "^5.100.9",
     "axios": "^1.16.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.14.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
+    "react-router-dom": "^7.15.0",
+    "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4.2.4",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@tanstack/eslint-plugin-query": "^5.100.9",
     "@types/node": "^24.12.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",

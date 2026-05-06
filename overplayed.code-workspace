@@ -1,19 +1,23 @@
 {
   "folders": [
     {
+      "name": "root",
+      "path": "."
+    },
+    {
       "name": "server",
       "path": "server"
     },
     {
       "name": "web",
       "path": "web"
-    },
-    {
-      "name": "root",
-      "path": "."
     }
   ],
   "settings": {
-    "typescript.tsdk": "web/node_modules/typescript/lib"
+    "typescript.tsdk": "web/node_modules/typescript/lib",
+    "files.exclude": {
+      "web": true,
+      "server": true
+    }
   }
 }

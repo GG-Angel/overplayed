@@ -1,6 +1,20 @@
+import { env } from "@/config/env";
 import Axios, { type InternalAxiosRequestConfig } from "axios";
-import { env } from "../config/env";
-import { paths } from "../config/paths";
+
+export const routes = {
+  auth: {
+    login: (redirectTo?: string | null | undefined) =>
+      `/auth/login${redirectTo ? `?redirect_to=${encodeURIComponent(redirectTo)}` : ""}`,
+    logout: () => "/auth/logout",
+  },
+  profile: () => "/users/me",
+  previews: (isrc: string) => `/previews/${isrc}`,
+  playlists: {
+    all: () => "/playlists",
+    one: (playlistId: string) => `/playlists/${playlistId}`,
+    tracks: (playlistId: string) => `/playlists/${playlistId}/tracks`,
+  },
+} as const;
 
 function authRequestInterceptor(config: InternalAxiosRequestConfig) {
   if (config.headers) {
@@ -23,8 +37,8 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       const searchParams = new URLSearchParams();
-      const redirectTo = searchParams.get("redirectTo") || window.location.pathname;
-      window.location.href = paths.auth.login.getHref(redirectTo);
+      const redirectTo = searchParams.get("redirect_to") || window.location.pathname;
+      window.location.href = routes.auth.login(redirectTo);
     }
     return Promise.reject(error);
   }

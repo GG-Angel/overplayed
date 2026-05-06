@@ -69,7 +69,7 @@ async def handle_callback(
     return response
 
 
-@router.delete("/logout")
+@router.post("/logout")
 async def handle_logout(
     session_id: str = Cookie(),
     redis: RedisClient = Depends(get_redis),
