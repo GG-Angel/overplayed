@@ -17,13 +17,12 @@ router = APIRouter()
 @router.get("/login")
 def handle_login(
     redirect_to: str = "/", oauth: SpotifyOAuth = Depends(get_oauth)
-) -> JSONResponse:
+) -> RedirectResponse:
     """Provides the Spotify OAuth url for this application."""
     parsed = urlparse(redirect_to)
     if parsed.scheme or parsed.netloc or not redirect_to.startswith("/"):
         raise HTTPException(status_code=400, detail="Invalid redirect path.")
-
-    return JSONResponse({"url": oauth.get_authorize_url(state=redirect_to)})
+    return RedirectResponse(url=oauth.get_authorize_url(state=redirect_to))
 
 
 @router.get("/callback")

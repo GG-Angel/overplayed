@@ -1,17 +1,19 @@
-import { paths } from "@/config/paths";
 import { SkipForward } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Button from "./ui/button";
+import { useUserContext } from "@/context/UserContext";
+import Avatar from "./Avatar";
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const { user, login } = useUserContext();
 
   const handleLogoClick = () => {
-    navigate(paths.home.getHref());
+    navigate("/");
   };
 
   return (
-    <div className="flex justify-between items-center">
+    <div className="flex justify-between items-center py-2">
       <button
         className="inline-flex items-center gap-1.5 select-none cursor-pointer"
         onClick={handleLogoClick}
@@ -19,7 +21,14 @@ const Navbar = () => {
         <SkipForward className="text-sp-green" />
         <span className="text-lg font-semibold hidden sm:block">Overplayed</span>
       </button>
-      <Button variant="outline">Log in</Button>
+
+      {user ? (
+        <Avatar user={user} />
+      ) : (
+        <Button variant="outline" onClick={login}>
+          Log in
+        </Button>
+      )}
     </div>
   );
 };

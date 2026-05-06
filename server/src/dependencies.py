@@ -1,3 +1,4 @@
+from typing import Optional
 from time import time
 from spotipy import SpotifyOAuth, Spotify
 from settings import STATE_KEY, Settings
@@ -39,14 +40,12 @@ async def _refresh_token(oauth: SpotifyOAuth, token: TokenInfo) -> TokenInfo:
 
 
 async def get_spotify_service(
-    session_id: str = Cookie(),
+    session_id: Optional[str] = Cookie(default=None),
     oauth: SpotifyOAuth = Depends(get_oauth),
     redis: RedisClient = Depends(get_redis),
     settings: Settings = Depends(get_settings),
 ) -> SpotifyService:
-    session = await redis.get_session(session_id)
-
-    if not session:
+    if not session_id or not (session := await redis.get_session(session_id)):
         raise HTTPException(status_code=401, detail="Login required.")
 
     if _is_token_expired(session.expires_at):

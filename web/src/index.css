@@ -22,4 +22,8 @@
     @apply bg-background text-foreground font-sans antialiased;
     -webkit-tap-highlight-color: transparent;
   }
+
+  #root {
+    @apply max-w-6xl mx-auto px-4;
+  }
 }

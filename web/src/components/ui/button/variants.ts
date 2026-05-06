@@ -1,12 +1,12 @@
 import { cva } from "class-variance-authority";
 
 export const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring hover:cursor-pointer disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring hover:cursor-pointer disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
         filled: "bg-accent text-background shadow hover:bg-accent/90",
-        outline: "bg-accent/10 text-accent shadow-sm border-2 border-accent/30 hover:bg-accent/20",
+        outline: "bg-accent/15 text-accent shadow-sm hover:bg-accent/20",
       },
       size: {
         sm: "h-8 rounded-md px-3 text-xs",

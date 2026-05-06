@@ -4,15 +4,17 @@ import Axios, { type InternalAxiosRequestConfig } from "axios";
 export const routes = {
   auth: {
     login: (redirectTo?: string | null | undefined) =>
-      `/auth/login${redirectTo ? `?redirect_to=${encodeURIComponent(redirectTo)}` : ""}`,
+      `${env.API_URL}/auth/login${
+        redirectTo ? `?redirect_to=${encodeURIComponent(redirectTo)}` : ""
+      }`,
     logout: () => "/auth/logout",
   },
   profile: () => "/users/me",
   previews: (isrc: string) => `/previews/${isrc}`,
   playlists: {
     all: () => "/playlists",
-    one: (playlistId: string) => `/playlists/${playlistId}`,
-    tracks: (playlistId: string) => `/playlists/${playlistId}/tracks`,
+    one: (id: string) => `/playlists/${id}`,
+    tracks: (id: string) => `/playlists/${id}/tracks`,
   },
 } as const;
 
@@ -20,7 +22,6 @@ function authRequestInterceptor(config: InternalAxiosRequestConfig) {
   if (config.headers) {
     config.headers.Accept = "application/json";
   }
-
   config.withCredentials = true;
   return config;
 }
@@ -35,11 +36,6 @@ api.interceptors.response.use(
     return response.data;
   },
   (error) => {
-    if (error.response?.status === 401) {
-      const searchParams = new URLSearchParams();
-      const redirectTo = searchParams.get("redirect_to") || window.location.pathname;
-      window.location.href = routes.auth.login(redirectTo);
-    }
     return Promise.reject(error);
   }
 );
