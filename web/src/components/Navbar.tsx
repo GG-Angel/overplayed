@@ -1,6 +1,6 @@
 import { SkipForward } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import Button from "./ui/button";
+import Button from "./ui/Button";
 import { useUserContext } from "@/context/UserContext";
 import Avatar from "./Avatar";
 
@@ -14,10 +14,7 @@ const Navbar = () => {
 
   return (
     <div className="flex justify-between items-center py-2">
-      <button
-        className="inline-flex items-center gap-1.5 select-none cursor-pointer"
-        onClick={handleLogoClick}
-      >
+      <button className="inline-flex items-center gap-1.5 select-none" onClick={handleLogoClick}>
         <SkipForward className="text-sp-green" />
         <span className="text-lg font-semibold hidden sm:block">Overplayed</span>
       </button>

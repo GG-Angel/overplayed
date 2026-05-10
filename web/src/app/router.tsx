@@ -1,21 +1,23 @@
 import Layout from "@/components/Layout";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { Landing } from "./pages/landing";
-import { NotFound } from "./pages/not-found";
+import { LandingPage } from "./pages/landing";
+import { ErrorPage } from "./pages/error";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import PlaylistSelection from "./pages/playlists/selection";
+import PlaylistSelectionPage from "./pages/playlists/selection";
+import PlaylistSwipePage from "./pages/playlists/swipe";
 
 export const AppRouter = () => {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Layout />}>
-          <Route index element={<Landing />} />
+          <Route index element={<LandingPage />} />
           <Route path="/playlists" element={<ProtectedRoute />}>
-            <Route index element={<PlaylistSelection />} />
+            <Route index element={<PlaylistSelectionPage />} />
+            <Route path="/playlists/:id" element={<PlaylistSwipePage />} />
           </Route>
         </Route>
-        <Route path="*" element={<NotFound />} />
+        <Route path="*" element={<ErrorPage />} />
       </Routes>
     </BrowserRouter>
   );

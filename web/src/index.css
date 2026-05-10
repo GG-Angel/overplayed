@@ -26,4 +26,8 @@
   #root {
     @apply max-w-6xl mx-auto px-4;
   }
+
+  button {
+    @apply cursor-pointer;
+  }
 }

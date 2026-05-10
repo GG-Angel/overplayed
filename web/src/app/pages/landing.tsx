@@ -1,9 +1,9 @@
-import Button from "@/components/ui/button";
+import Button from "@/components/ui/Button";
 import { useUserContext } from "@/context/UserContext";
 import SpotifyIcon from "@/assets/spotify.svg?react";
 import { useNavigate } from "react-router-dom";
 
-export const Landing = () => {
+export const LandingPage = () => {
   const { user, login } = useUserContext();
   const navigate = useNavigate();
 
@@ -12,7 +12,7 @@ export const Landing = () => {
   };
 
   return (
-    <div>
+    <>
       {user ? (
         <Button variant="outline" onClick={handleViewPlaylists}>
           View your playlists
@@ -22,6 +22,6 @@ export const Landing = () => {
           Log in with Spotify
         </Button>
       )}
-    </div>
+    </>
   );
 };

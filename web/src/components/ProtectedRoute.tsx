@@ -1,9 +1,9 @@
 import { useUserContext } from "@/context/UserContext";
-import { Spinner } from "./Spinner";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { isAxiosError } from "axios";
 import { routes } from "@/lib/api-client";
 import { useEffect } from "react";
+import { LoadingPage } from "@/app/pages/loading";
 
 export const ProtectedRoute = () => {
   const { isLoading, isError, error } = useUserContext();
@@ -17,7 +17,7 @@ export const ProtectedRoute = () => {
     }
   }, [status, location.pathname]);
 
-  if (isLoading || status === 401) return <Spinner />;
+  if (isLoading || status === 401) return <LoadingPage />;
   if (isError) return <Navigate to="/" replace />;
 
   return <Outlet />;
