@@ -93,6 +93,12 @@ class SpotifyPlaylistTrack(BaseModel):
     track: SpotifyTrack
 
 
+class SpotifyPlaylistTracks(BaseModel):
+    total: int
+    has_more: bool
+    tracks: List[SpotifyPlaylistTrack]
+
+
 class TrackUrisRequest(BaseModel):
     track_uris: List[str]
 

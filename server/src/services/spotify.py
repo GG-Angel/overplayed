@@ -1,5 +1,10 @@
 from typing import List
-from models import SpotifyPlaylist, SpotifyCurrentUser, SpotifyPlaylistTrack
+from models import (
+    SpotifyPlaylist,
+    SpotifyCurrentUser,
+    SpotifyPlaylistTrack,
+    SpotifyPlaylistTracks,
+)
 from cache.client import RedisClient
 from clients.spotify.client import SpotifyClient
 
@@ -43,7 +48,7 @@ class SpotifyService:
 
     async def get_playlist_tracks(
         self, playlist_id: str, *, offset: int, limit: int
-    ) -> List[SpotifyPlaylistTrack]:
+    ) -> SpotifyPlaylistTracks:
         playlist = await self.get_playlist(playlist_id)
         snapshot_id = playlist.snapshot_id
 
@@ -61,7 +66,11 @@ class SpotifyService:
             tracks,
         )
 
-        return tracks[offset : offset + limit]
+        return SpotifyPlaylistTracks(
+            tracks=tracks[offset : offset + limit],
+            total=len(tracks),
+            has_more=offset + limit < len(tracks),
+        )
 
     async def create_playlist(
         self, name: str, description: str = ""

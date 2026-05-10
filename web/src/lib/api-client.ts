@@ -14,13 +14,7 @@ export const routes = {
   playlists: {
     all: () => "/playlists",
     one: (id: string) => `/playlists/${id}`,
-    tracks: (id: string, offset?: number, limit?: number) => {
-      const params = new URLSearchParams();
-      if (offset !== undefined) params.append("offset", offset.toString());
-      if (limit !== undefined) params.append("limit", limit.toString());
-      const queryString = params.toString();
-      return `/playlists/${id}/tracks${queryString ? `?${queryString}` : ""}`;
-    },
+    tracks: (id: string, offset: number) => `/playlists/${id}/tracks?offset=${offset}&limit=3`, // TODO: remove limit
   },
 } as const;
 

@@ -2,9 +2,9 @@ from spotipy import SpotifyException
 from typing import List, Annotated
 from models import (
     SpotifyPlaylist,
-    SpotifyPlaylistTrack,
     CreatePlaylistRequest,
     TrackUrisRequest,
+    SpotifyPlaylistTracks,
 )
 from dependencies import get_spotify_service
 from fastapi import APIRouter, Depends, HTTPException, Path
@@ -64,7 +64,7 @@ async def handle_get_playlist_tracks(
     offset: int = 0,
     limit: int = 100,
     service: SpotifyService = Depends(get_spotify_service),
-) -> List[SpotifyPlaylistTrack]:
+) -> SpotifyPlaylistTracks:
     try:
         return await service.get_playlist_tracks(
             playlist_id, offset=offset, limit=limit

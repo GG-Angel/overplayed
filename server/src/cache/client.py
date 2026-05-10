@@ -13,6 +13,7 @@ from models import (
     SpotifyCurrentUser,
     SpotifyPlaylist,
     SpotifyPlaylistTrack,
+    SpotifyPlaylistTracks,
 )
 
 _SESSIONS_KEY = "sessions"
@@ -82,7 +83,7 @@ class RedisClient:
         *,
         offset: int = 0,
         limit: int = 100,
-    ) -> Optional[List[SpotifyPlaylistTrack]]:
+    ) -> Optional[SpotifyPlaylistTracks]:
         async with self._handle_error("get playlist tracks"):
             snapshot_key = self._playlist_snapshot_key(user_id, playlist_id)
             tracks_key = self._playlist_tracks_key(user_id, playlist_id)
@@ -90,14 +91,19 @@ class RedisClient:
             async with self.redis.pipeline() as pipe:
                 pipe.get(snapshot_key)
                 pipe.lrange(tracks_key, start=offset, end=offset + limit - 1)
-                cached_snapshot_id, tracks = await pipe.execute()
+                pipe.llen(tracks_key)
+                cached_snapshot_id, page, total = await pipe.execute()
 
-            if not tracks or cached_snapshot_id != snapshot_id:
+            if not page or cached_snapshot_id != snapshot_id:
                 logger.debug(f"MISS: {tracks_key}")
                 return None
 
             logger.debug(f"HIT: {tracks_key}")
-            return [SpotifyPlaylistTrack.model_validate_json(t) for t in tracks]
+            return SpotifyPlaylistTracks(
+                tracks=[SpotifyPlaylistTrack.model_validate_json(t) for t in page],
+                total=total,
+                has_more=offset + limit < total,
+            )
 
     async def get_track_preview_url(
         self, isrc: str
