@@ -2,7 +2,6 @@ from typing import List
 from models import (
     SpotifyPlaylist,
     SpotifyCurrentUser,
-    SpotifyPlaylistTrack,
     SpotifyPlaylistTracks,
 )
 from cache.client import RedisClient
@@ -52,9 +51,11 @@ class SpotifyService:
         playlist = await self.get_playlist(playlist_id)
         snapshot_id = playlist.snapshot_id
 
-        if cached := await self.redis.get_playlist_tracks(
-            self.user_id, playlist_id, snapshot_id, offset=offset, limit=limit
-        ):
+        if (
+            cached := await self.redis.get_playlist_tracks(
+                self.user_id, playlist_id, snapshot_id, offset=offset, limit=limit
+            )
+        ) is not None:
             return cached
 
         tracks = await self.spotify.get_playlist_tracks(playlist_id)

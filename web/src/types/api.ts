@@ -75,3 +75,9 @@ export type SpotifyPlaylistTrack = {
   is_local: boolean;
   track: SpotifyTrack;
 };
+
+export type SpotifyPlaylistTracks = {
+  total: number;
+  has_more: boolean;
+  tracks: SpotifyPlaylistTrack[];
+};

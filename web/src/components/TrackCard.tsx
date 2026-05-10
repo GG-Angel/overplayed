@@ -1,5 +1,4 @@
 import type { SpotifyPlaylistTrack } from "@/types/api";
-import React from "react";
 
 type TrackCardProps = {
   track: SpotifyPlaylistTrack;
@@ -15,9 +14,11 @@ const TrackCard = ({ track }: TrackCardProps) => {
         src={coverUrl}
         alt={`${track.track.name} cover`}
       />
-      <div className="text-left truncate whitespace-nowrap">
-        <p className="font-medium">{track.track.name}</p>
-        <p className="text-muted">{artistList}</p>
+      <div className="text-left whitespace-nowrap">
+        <a href={track.track.external_urls.spotify} className="font-medium truncate">
+          {track.track.name}
+        </a>
+        <p className="text-muted truncate text-sm">{artistList}</p>
       </div>
     </div>
   );

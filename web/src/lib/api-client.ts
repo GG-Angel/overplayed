@@ -14,7 +14,7 @@ export const routes = {
   playlists: {
     all: () => "/playlists",
     one: (id: string) => `/playlists/${id}`,
-    tracks: (id: string, offset: number) => `/playlists/${id}/tracks?offset=${offset}&limit=3`, // TODO: remove limit
+    tracks: (id: string, offset: number) => `/playlists/${id}/tracks?offset=${offset}`,
   },
 } as const;
 

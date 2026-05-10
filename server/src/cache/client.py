@@ -90,11 +90,12 @@ class RedisClient:
 
             async with self.redis.pipeline() as pipe:
                 pipe.get(snapshot_key)
+                pipe.exists(tracks_key)
                 pipe.lrange(tracks_key, start=offset, end=offset + limit - 1)
                 pipe.llen(tracks_key)
-                cached_snapshot_id, page, total = await pipe.execute()
+                cached_snapshot_id, hit, page, total = await pipe.execute()
 
-            if not page or cached_snapshot_id != snapshot_id:
+            if not hit or cached_snapshot_id != snapshot_id:
                 logger.debug(f"MISS: {tracks_key}")
                 return None
 
