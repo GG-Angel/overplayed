@@ -91,3 +91,12 @@ class SpotifyPlaylistTrack(BaseModel):
     added_by: SpotifyId
     is_local: bool
     track: SpotifyTrack
+
+
+class TrackUrisRequest(BaseModel):
+    track_uris: List[str]
+
+
+class CreatePlaylistRequest(BaseModel):
+    name: str
+    description: str = ""

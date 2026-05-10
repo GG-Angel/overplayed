@@ -1,22 +1,20 @@
 from spotipy import SpotifyException
-from typing import List
-from models import SpotifyPlaylist, SpotifyPlaylistTrack
+from typing import List, Annotated
+from models import (
+    SpotifyPlaylist,
+    SpotifyPlaylistTrack,
+    CreatePlaylistRequest,
+    TrackUrisRequest,
+)
 from dependencies import get_spotify_service
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Path
 from services.spotify import SpotifyService, PlaylistNotOwnedError
-from pydantic import BaseModel
-
-
-class TrackUrisRequest(BaseModel):
-    track_uris: List[str]
-
-
-class CreatePlaylistRequest(BaseModel):
-    name: str
-    description: str = ""
 
 
 router = APIRouter()
+
+
+SpotifyID = Annotated[str, Path(pattern=r"^[0-9A-Za-z]{22}$")]
 
 
 @router.get("/", status_code=200)
@@ -39,7 +37,7 @@ async def handle_create_playlist(
 
 @router.get("/{playlist_id}", status_code=200)
 async def handle_get_playlist(
-    playlist_id: str,
+    playlist_id: SpotifyID,
     service: SpotifyService = Depends(get_spotify_service),
 ) -> SpotifyPlaylist:
     try:
@@ -52,7 +50,7 @@ async def handle_get_playlist(
 
 @router.delete("/{playlist_id}", status_code=200)
 async def handle_delete_playlist(
-    playlist_id: str, service: SpotifyService = Depends(get_spotify_service)
+    playlist_id: SpotifyID, service: SpotifyService = Depends(get_spotify_service)
 ) -> None:
     try:
         await service.delete_playlist(playlist_id)
@@ -62,7 +60,7 @@ async def handle_delete_playlist(
 
 @router.get("/{playlist_id}/tracks", status_code=200)
 async def handle_get_playlist_tracks(
-    playlist_id: str,
+    playlist_id: SpotifyID,
     offset: int = 0,
     limit: int = 100,
     service: SpotifyService = Depends(get_spotify_service),
@@ -79,7 +77,7 @@ async def handle_get_playlist_tracks(
 
 @router.post("/{playlist_id}/tracks", status_code=204)
 async def handle_add_playlist_tracks(
-    playlist_id: str,
+    playlist_id: SpotifyID,
     body: TrackUrisRequest,
     service: SpotifyService = Depends(get_spotify_service),
 ) -> None:
@@ -91,7 +89,7 @@ async def handle_add_playlist_tracks(
 
 @router.delete("/{playlist_id}/tracks", status_code=204)
 async def handle_delete_playlist_tracks(
-    playlist_id: str,
+    playlist_id: SpotifyID,
     body: TrackUrisRequest,
     service: SpotifyService = Depends(get_spotify_service),
 ) -> None:
