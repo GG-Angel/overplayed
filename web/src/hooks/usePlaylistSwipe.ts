@@ -11,11 +11,12 @@ type Swipe = {
 };
 
 const usePlaylistSwipe = (id: string | undefined) => {
-  const [index, setIndex] = useState(0);
   const [swipes, setSwipes] = useState<Swipe[]>([]);
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = usePlaylistTracks(id);
 
   const tracks = data?.pages.flatMap((p) => p.tracks) ?? [];
+
+  const index = swipes.length;
   const currentTrack = tracks.at(index);
   const isFirst = index <= 0;
 
@@ -29,13 +30,11 @@ const usePlaylistSwipe = (id: string | undefined) => {
   const swipe = (decision: Decision) => {
     if (!currentTrack) return;
     setSwipes((prev) => [...prev, { id: currentTrack.track.id, decision }]);
-    setIndex((i) => i + 1);
   };
 
   const undo = () => {
     if (index <= 0) return;
     setSwipes((prev) => prev.slice(0, -1));
-    setIndex((i) => i - 1);
   };
 
   return {

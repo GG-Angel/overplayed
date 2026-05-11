@@ -1,14 +1,11 @@
-import { api, routes } from "@/lib/api-client";
+import { get, routes } from "@/lib/api-client";
 import type { SpotifyPlaylistTracks } from "@/types/api";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
 const PAGE_SIZE = 50;
 
-const getPlaylistTracks = async (
-  id: string,
-  offset: number,
-  limit: number
-): Promise<SpotifyPlaylistTracks> => api.get(routes.playlists.tracks(id, offset, limit));
+const getPlaylistTracks = async (id: string, offset: number, limit: number) =>
+  await get<SpotifyPlaylistTracks>(routes.playlists.tracks(id, offset, limit));
 
 const usePlaylistTracks = (id: string | undefined) =>
   useInfiniteQuery({

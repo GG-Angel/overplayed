@@ -33,7 +33,7 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> &
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, children, isLoading, icon, ...props }, ref) => {
     return (
-      <button className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props}>
+      <button className={cn(buttonVariants({ variant, size }), className)} ref={ref} {...props}>
         {isLoading && <Spinner size="sm" className="text-current" />}
         {!isLoading && icon && <span className="mr-2">{icon}</span>}
         <span>{children}</span>

@@ -7,15 +7,7 @@ import usePlaylistSwipe from "@/hooks/usePlaylistSwipe";
 
 const PlaylistSwipePage = () => {
   const { playlistId } = useParams();
-  const { currentTrack, swipes, swipe, undo, isLoading, isFirst } = usePlaylistSwipe(playlistId);
-
-  const decisionCounter = swipes.reduce(
-    (acc, swipe) => {
-      acc[swipe.decision]++;
-      return acc;
-    },
-    { like: 0, dislike: 0 }
-  );
+  const { currentTrack, swipe, undo, isLoading, isFirst } = usePlaylistSwipe(playlistId);
 
   if (isLoading) return <LoadingPage />;
   if (!currentTrack) return <div>Done!</div>;
@@ -29,9 +21,6 @@ const PlaylistSwipePage = () => {
         <SwipeButton icon={Heart} onClick={() => swipe("like")} intent="like" />
         <SwipeButton icon={Check} size="sm" intent="finish" />
       </div>
-
-      <p>Likes: {decisionCounter.like}</p>
-      <p>Dislikes: {decisionCounter.dislike}</p>
     </div>
   );
 };

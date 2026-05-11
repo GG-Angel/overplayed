@@ -1,26 +1,23 @@
 import { UserContext } from "./UserContext";
 import { useQuery } from "@tanstack/react-query";
-import { api, routes } from "@/lib/api-client";
+import { get, post, routes } from "@/lib/api-client";
 import type { SpotifyCurrentUser } from "@/types/api";
 import type { ReactNode } from "react";
 
-const getUser = async (): Promise<SpotifyCurrentUser> => {
-  return await api.get(routes.profile());
-};
+const getUser = async () => await get<SpotifyCurrentUser>(routes.profile());
 
 const useUser = () =>
   useQuery({
     queryKey: ["user"],
     queryFn: getUser,
-    staleTime: Infinity,
   });
 
-const login = () => {
-  window.location.href = routes.auth.login(location.pathname);
+const login = (currentPathname: string) => {
+  window.location.href = routes.auth.login(currentPathname);
 };
 
-const logout = async (): Promise<void> => {
-  await api.post(routes.auth.logout());
+const logout = async () => {
+  await post<void>(routes.auth.logout());
 };
 
 type UserProviderProps = {

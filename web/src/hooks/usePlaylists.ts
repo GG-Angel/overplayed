@@ -1,8 +1,8 @@
-import { api, routes } from "@/lib/api-client";
+import { get, routes } from "@/lib/api-client";
 import type { SpotifyPlaylist } from "@/types/api";
 import { useQuery } from "@tanstack/react-query";
 
-const getPlaylists = (): Promise<SpotifyPlaylist[]> => api.get(routes.playlists.all());
+const getPlaylists = async () => await get<SpotifyPlaylist[]>(routes.playlists.all());
 
 export const usePlaylists = () =>
   useQuery({

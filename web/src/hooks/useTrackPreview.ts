@@ -1,9 +1,9 @@
 import type { DeezerTrackPreview } from "@/types/api";
-import { api, routes } from "@/lib/api-client";
+import { get, routes } from "@/lib/api-client";
 import { useQuery } from "@tanstack/react-query";
 
-const getTrackPreview = async (isrc: string): Promise<DeezerTrackPreview> =>
-  api.get(routes.previews(isrc));
+const getTrackPreview = async (isrc: string) =>
+  await get<DeezerTrackPreview>(routes.previews(isrc));
 
 const useTrackPreview = (isrc: string | undefined) =>
   useQuery({

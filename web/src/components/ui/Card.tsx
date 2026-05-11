@@ -17,7 +17,7 @@ type CardProps = HTMLAttributes<HTMLDivElement> & VariantProps<typeof cardVarian
 
 const Card = ({ className, size, children, ...props }: CardProps) => {
   return (
-    <div className={cn(cardVariants({ size, className }))} {...props}>
+    <div className={cn(cardVariants({ size }), className)} {...props}>
       {children}
     </div>
   );

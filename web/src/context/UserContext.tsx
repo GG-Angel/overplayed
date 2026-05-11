@@ -3,7 +3,7 @@ import { createContext, useContext } from "react";
 
 interface UserContextValues {
   user: SpotifyCurrentUser | undefined;
-  login: () => void;
+  login: (currentPathname: string) => void;
   logout: () => void;
   isLoading: boolean;
   isError: boolean;
