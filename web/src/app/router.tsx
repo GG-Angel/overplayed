@@ -14,7 +14,7 @@ export const AppRouter = () => {
           <Route index element={<LandingPage />} />
           <Route path="/playlists" element={<ProtectedRoute />}>
             <Route index element={<PlaylistSelectionPage />} />
-            <Route path="/playlists/:id" element={<PlaylistSwipePage />} />
+            <Route path="/playlists/:playlistId" element={<PlaylistSwipePage />} />
           </Route>
         </Route>
         <Route path="*" element={<ErrorPage />} />
