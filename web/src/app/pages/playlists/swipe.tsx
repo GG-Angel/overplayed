@@ -3,45 +3,85 @@ import TrackCard from "@/components/TrackCard";
 import { useEffect, useState } from "react";
 import type { SpotifyPlaylistTracks } from "@/types/api";
 import { api, routes } from "@/lib/api-client";
-import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { LoadingPage } from "../loading";
 import Button from "@/components/ui/Button";
 
-const getPlaylistTracks = async (id: string, offset: number): Promise<SpotifyPlaylistTracks> =>
-  api.get(routes.playlists.tracks(id, offset));
+const PAGE_SIZE = 25;
+const PREFETCH_THRESHOLD = 20; // fetch next page when 20 tracks remain
+
+type Decision = "like" | "dislike";
+
+type Swipe = {
+  id: string;
+  decision: Decision;
+};
+
+const getPlaylistTracks = async (
+  id: string,
+  offset: number,
+  limit: number
+): Promise<SpotifyPlaylistTracks> => api.get(routes.playlists.tracks(id, offset, limit));
 
 const PlaylistSwipePage = () => {
-  const queryClient = useQueryClient();
   const { id } = useParams();
-  const [offset, setOffset] = useState(0);
+  const [index, setIndex] = useState(0);
+  const [swipes, setSwipes] = useState<Swipe[]>([]);
 
-  const { data, isPlaceholderData } = useQuery({
-    queryKey: ["playlists", id, "tracks", offset],
-    queryFn: () => getPlaylistTracks(id!, offset),
-    placeholderData: keepPreviousData,
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery({
+    queryKey: ["playlists", id, "tracks"],
+    queryFn: ({ pageParam }) => getPlaylistTracks(id!, pageParam, PAGE_SIZE),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) =>
+      lastPage.has_more ? allPages.length * PAGE_SIZE : undefined,
     enabled: !!id,
   });
 
-  // prefetch the next page
-  useEffect(() => {
-    if (!isPlaceholderData && data?.has_more) {
-      queryClient.prefetchQuery({
-        queryKey: ["playlists", id, "tracks", offset + 100],
-        queryFn: () => getPlaylistTracks(id!, offset + 100),
-      });
-    }
-  }, [data, isPlaceholderData, offset, id, queryClient]);
+  const tracks = data?.pages.flatMap((p) => p.tracks) ?? [];
+  const currentTrack = tracks.at(index);
+  const decisionCounter = swipes.reduce(
+    (acc, swipe) => {
+      acc[swipe.decision]++;
+      return acc;
+    },
+    { like: 0, dislike: 0 }
+  );
 
-  if (!data) {
-    return <LoadingPage />;
-  }
+  // prefetch next page when user is near end of loaded page
+  useEffect(() => {
+    const remaining = tracks.length - index;
+    if (remaining < PREFETCH_THRESHOLD && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [index, tracks.length, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const handleSwipe = (decision: Decision) => {
+    if (!currentTrack) return;
+    setSwipes((prev) => [...prev, { id: currentTrack.track.id, decision }]);
+    setIndex((i) => i + 1);
+  };
+
+  const handleUndo = () => {
+    if (!currentTrack || index <= 0) return;
+    setSwipes((prev) => prev.slice(0, -1));
+    setIndex((i) => i - 1);
+  };
+
+  if (isLoading) return <LoadingPage />;
+  if (!currentTrack) return <div>Done!</div>;
 
   return (
     <div>
-      {data.tracks.map((t) => (
-        <TrackCard key={t.track.id} track={t} />
-      ))}
-      <Button onClick={() => setOffset((prev) => prev + 100)}>Click me! Offset={offset}</Button>
+      <TrackCard track={currentTrack} />
+      <Button onClick={() => handleUndo()}>Undo</Button>
+      <Button onClick={() => handleSwipe("dislike")}>Pass</Button>
+      <Button onClick={() => handleSwipe("like")}>Like</Button>
+      <div>
+        {index + 1} / {tracks.length}
+        {hasNextPage ? "+" : ""}
+      </div>
+      <p>Likes: {decisionCounter.like}</p>
+      <p>Dislikes: {decisionCounter.dislike}</p>
     </div>
   );
 };
