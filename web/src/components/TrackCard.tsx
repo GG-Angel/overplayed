@@ -15,16 +15,16 @@ const TrackCard = ({ track }: TrackCardProps) => {
         alt={`${track.track.name} cover`}
         draggable={false}
       />
-      <div className="text-left whitespace-nowrap">
+      <div className="text-left whitespace-nowrap truncate">
         <a
           href={track.track.external_urls.spotify}
-          className="font-medium truncate hover:underline"
+          className="font-medium hover:underline"
           target="_blank"
           rel="noopener noreferrer"
         >
           {track.track.name}
         </a>
-        <p className="text-muted truncate text-sm">{artistList}</p>
+        <p className="text-muted text-sm">{artistList}</p>
       </div>
     </div>
   );

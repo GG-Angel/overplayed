@@ -5,7 +5,8 @@ import type { SpotifyPlaylistTracks } from "@/types/api";
 import { api, routes } from "@/lib/api-client";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { LoadingPage } from "../loading";
-import Button from "@/components/ui/Button";
+import { Check, Heart, Undo, X } from "lucide-react";
+import SwipeButton from "@/components/SwipeButton";
 
 const PAGE_SIZE = 25;
 const PREFETCH_THRESHOLD = 20; // fetch next page when 20 tracks remain
@@ -62,7 +63,7 @@ const PlaylistSwipePage = () => {
   };
 
   const handleUndo = () => {
-    if (!currentTrack || index <= 0) return;
+    if (index <= 0) return;
     setSwipes((prev) => prev.slice(0, -1));
     setIndex((i) => i - 1);
   };
@@ -73,9 +74,21 @@ const PlaylistSwipePage = () => {
   return (
     <div>
       <TrackCard track={currentTrack} />
-      <Button onClick={() => handleUndo()}>Undo</Button>
-      <Button onClick={() => handleSwipe("dislike")}>Pass</Button>
-      <Button onClick={() => handleSwipe("like")}>Like</Button>
+      <div className="flex items-end gap-2">
+        <div className="flex items-end gap-2">
+          <SwipeButton
+            icon={Undo}
+            size="sm"
+            onClick={handleUndo}
+            disabled={index <= 0}
+            intent="undo"
+          />
+          <SwipeButton icon={X} onClick={() => handleSwipe("dislike")} intent="dislike" />
+          <SwipeButton icon={Heart} onClick={() => handleSwipe("like")} intent="like" />
+          <SwipeButton icon={Check} size="sm" intent="finish" />
+        </div>
+      </div>
+
       <div>
         {index + 1} / {tracks.length}
         {hasNextPage ? "+" : ""}
