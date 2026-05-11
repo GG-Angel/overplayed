@@ -24,12 +24,10 @@ const PlaylistSwipePage = () => {
     <div>
       <TrackCard track={currentTrack} />
       <div className="flex items-end gap-2">
-        <div className="flex items-end gap-2">
-          <SwipeButton icon={Undo} size="sm" onClick={undo} disabled={isFirst} intent="undo" />
-          <SwipeButton icon={X} onClick={() => swipe("dislike")} intent="dislike" />
-          <SwipeButton icon={Heart} onClick={() => swipe("like")} intent="like" />
-          <SwipeButton icon={Check} size="sm" intent="finish" />
-        </div>
+        <SwipeButton icon={Undo} size="sm" onClick={undo} disabled={isFirst} intent="undo" />
+        <SwipeButton icon={X} onClick={() => swipe("dislike")} intent="dislike" />
+        <SwipeButton icon={Heart} onClick={() => swipe("like")} intent="like" />
+        <SwipeButton icon={Check} size="sm" intent="finish" />
       </div>
 
       <p>Likes: {decisionCounter.like}</p>

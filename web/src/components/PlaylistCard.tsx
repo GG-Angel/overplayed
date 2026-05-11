@@ -29,7 +29,7 @@ const PlaylistCard = ({ playlist, onClick }: PlaylistCardProps) => {
         src={coverUrl}
         alt={`${playlist.name} cover`}
         loading="lazy"
-        className="z-10 aspect-square h-full shrink-0 rounded-sm bg-sp-black object-cover text-transparent transition-transform"
+        className="z-10 aspect-square h-full shrink-0 rounded-sm object-cover transition-transform"
       />
 
       {/* Text + icon */}

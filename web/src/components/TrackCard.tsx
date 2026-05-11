@@ -7,6 +7,7 @@ type TrackCardProps = {
 const TrackCard = ({ track }: TrackCardProps) => {
   const coverUrl = track.track.album.images.at(0)?.url;
   const artistList = track.track.artists.map((t) => t.name).join(", ");
+
   return (
     <div className="flex flex-col gap-3 w-64 p-4 select-none bg-sp-gray border-2 border-sp-gray-light rounded-xl overflow-hidden">
       <img
