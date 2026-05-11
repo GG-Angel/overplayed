@@ -5,11 +5,12 @@ import type { HTMLAttributes } from "react";
 const cardVariants = cva("flex bg-sp-gray border-2 border-sp-gray-light", {
   variants: {
     size: {
-      default: "px-4 py-3 rounded-xl",
+      sm: "px-3 py-2 rounded-lg",
+      md: "px-4 py-3 rounded-xl",
     },
   },
   defaultVariants: {
-    size: "default",
+    size: "md",
   },
 });
 
