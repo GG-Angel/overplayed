@@ -1,4 +1,4 @@
-import type { SpotifyPlaylistTrack } from "@/types/api";
+import type { SpotifyPlaylistTrack } from "@/lib/spotify/types";
 
 type TrackCardProps = {
   track: SpotifyPlaylistTrack;

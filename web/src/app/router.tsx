@@ -1,24 +1,29 @@
-import Layout from "@/components/Layout";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { LandingPage } from "./pages/landing";
-import { ErrorPage } from "./pages/error";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
 import PlaylistSelectionPage from "./pages/playlists/selection";
 import PlaylistSwipePage from "./pages/playlists/swipe";
+import Layout from "@/components/Layout";
+import ErrorState from "@/components/states/ErrorState";
+import { ProtectedRoute } from "@/features/auth/ProtectedRoute";
 
-export const AppRouter = () => {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<LandingPage />} />
-          <Route path="/playlists" element={<ProtectedRoute />}>
-            <Route index element={<PlaylistSelectionPage />} />
-            <Route path="/playlists/:playlistId" element={<PlaylistSwipePage />} />
-          </Route>
-        </Route>
-        <Route path="*" element={<ErrorPage />} />
-      </Routes>
-    </BrowserRouter>
-  );
-};
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Layout />,
+    errorElement: <ErrorState />,
+    children: [
+      { index: true, element: <LandingPage /> },
+      {
+        path: "playlists",
+        element: <ProtectedRoute />,
+        children: [
+          { index: true, element: <PlaylistSelectionPage /> },
+          { path: ":playlistId", element: <PlaylistSwipePage /> },
+        ],
+      },
+    ],
+  },
+  { path: "*", element: <ErrorState /> },
+]);
+
+export const AppRouter = () => <RouterProvider router={router} />;

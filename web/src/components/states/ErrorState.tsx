@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 const kaomojis = ["(¬`‸´¬)", "(๑•̀ᗝ•́)૭", 'C(ò_ó")9', "(≖_≖ )", "(ᗜ _ ᗜ)"];
 
-export const ErrorPage = () => {
+const ErrorState = () => {
   const [kaomoji] = useState(() => kaomojis[Math.floor(Math.random() * kaomojis.length)]);
 
   return (
@@ -16,3 +16,5 @@ export const ErrorPage = () => {
     </div>
   );
 };
+
+export default ErrorState;

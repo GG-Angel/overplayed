@@ -1,4 +1,4 @@
-import type { SpotifyPlaylist } from "@/types/api";
+import type { SpotifyPlaylist } from "@/lib/spotify/types";
 import { ArrowUpRight } from "lucide-react";
 
 type PlaylistCardProps = {

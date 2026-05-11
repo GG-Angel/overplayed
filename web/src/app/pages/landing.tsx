@@ -1,24 +1,24 @@
 import Button from "@/components/ui/Button";
-import { useUserContext } from "@/context/UserContext";
 import SpotifyIcon from "@/assets/spotify.svg?react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import LoadingState from "@/components/states/LoadingState";
+import useAuth from "@/features/auth/useAuth";
 
 export const LandingPage = () => {
-  const { user, login } = useUserContext();
+  const location = useLocation();
   const navigate = useNavigate();
+  const { user, isLoading, login } = useAuth();
 
-  const handleViewPlaylists = () => {
-    navigate("/playlists");
-  };
+  if (isLoading) return <LoadingState />;
 
   return (
     <>
       {user ? (
-        <Button variant="outline" onClick={handleViewPlaylists}>
+        <Button variant="outline" onClick={() => navigate("/playlists")}>
           View your playlists
         </Button>
       ) : (
-        <Button icon={<SpotifyIcon className="size-5" />} onClick={login}>
+        <Button icon={<SpotifyIcon className="size-5" />} onClick={() => login(location.pathname)}>
           Log in with Spotify
         </Button>
       )}

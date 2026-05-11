@@ -1,13 +1,13 @@
-import { useUserContext } from "@/context/UserContext";
 import { Outlet, useLocation } from "react-router-dom";
 import { isAxiosError } from "axios";
-import { routes } from "@/lib/api-client";
+import { routes } from "@/lib/api";
 import { useEffect } from "react";
-import { LoadingPage } from "@/app/pages/loading";
-import { ErrorPage } from "@/app/pages/error";
+import ErrorState from "@/components/states/ErrorState";
+import LoadingState from "@/components/states/LoadingState";
+import useAuth from "./useAuth";
 
 export const ProtectedRoute = () => {
-  const { isLoading, isError, error } = useUserContext();
+  const { isLoading, isError, error } = useAuth();
   const location = useLocation();
 
   const status = isAxiosError(error) ? error.response?.status : null;
@@ -18,8 +18,8 @@ export const ProtectedRoute = () => {
     }
   }, [status, location.pathname]);
 
-  if (isLoading || status === 401) return <LoadingPage />;
-  if (isError) return <ErrorPage />;
+  if (isLoading || status === 401) return <LoadingState />;
+  if (isError) return <ErrorState />;
 
   return <Outlet />;
 };

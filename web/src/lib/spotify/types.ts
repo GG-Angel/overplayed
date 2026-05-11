@@ -81,7 +81,3 @@ export type SpotifyPlaylistTracks = {
   has_more: boolean;
   tracks: SpotifyPlaylistTrack[];
 };
-
-export type DeezerTrackPreview = {
-  preview: string;
-};

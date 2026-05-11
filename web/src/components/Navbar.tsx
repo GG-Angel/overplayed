@@ -1,11 +1,11 @@
 import { SkipForward } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import Avatar from "@/components/Avatar";
 import Button from "./ui/Button";
-import { useUserContext } from "@/context/UserContext";
-import Avatar from "./Avatar";
+import useAuth from "@/features/auth/useAuth";
 
 const Navbar = () => {
-  const { user, login } = useUserContext();
+  const { user, login } = useAuth();
   const location = useLocation();
 
   return (

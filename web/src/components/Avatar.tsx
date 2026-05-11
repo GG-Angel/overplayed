@@ -1,4 +1,4 @@
-import type { SpotifyCurrentUser } from "@/types/api";
+import type { SpotifyCurrentUser } from "@/lib/spotify/types";
 
 type AvatarProps = {
   user: SpotifyCurrentUser;

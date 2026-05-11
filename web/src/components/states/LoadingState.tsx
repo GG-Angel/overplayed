@@ -1,9 +1,11 @@
-import { Spinner } from "@/components/Spinner";
+import { Spinner } from "@/components/ui/Spinner";
 
-export const LoadingPage = () => {
+const LoadingState = () => {
   return (
     <div className="h-full flex items-center justify-center">
       <Spinner />
     </div>
   );
 };
+
+export default LoadingState;
