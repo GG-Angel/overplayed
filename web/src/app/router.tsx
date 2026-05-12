@@ -23,7 +23,7 @@ const router = createBrowserRouter([
       },
     ],
   },
-  { path: "*", element: <ErrorState /> },
+  { path: "*", element: <ErrorState message="Page not found" /> },
 ]);
 
 export const AppRouter = () => <RouterProvider router={router} />;

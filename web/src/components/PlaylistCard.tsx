@@ -12,7 +12,7 @@ const PlaylistCard = ({ playlist, onClick }: PlaylistCardProps) => {
     <button
       type="button"
       onClick={() => onClick?.(playlist.id)}
-      className="group relative flex h-32 w-full gap-4 overflow-hidden rounded-xl border-2 border-sp-gray-light bg-sp-gray px-4 py-3 text-left"
+      className="group relative flex h-32 w-full gap-4 overflow-hidden rounded-xl border-2 border-sp-gray-light bg-sp-gray px-4 py-3 text-left hover:cursor-pointer"
     >
       {/* Blurred backdrop */}
       <img

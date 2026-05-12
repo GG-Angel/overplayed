@@ -13,7 +13,7 @@ export const ProtectedRoute = () => {
   }, [isUnauthorized, location.pathname, redirectToLogin]);
 
   if (isLoading || isUnauthorized) return <LoadingState />;
-  if (isError) return <ErrorState />;
+  if (isError) return <ErrorState message="Login required" />;
   if (!user) return <LoadingState />;
 
   return <Outlet />;

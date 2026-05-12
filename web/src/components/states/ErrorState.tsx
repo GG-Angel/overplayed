@@ -7,7 +7,7 @@ type ErrorStateProps = {
   message?: string;
 };
 
-const ErrorState = ({ message = "Unexpected Error" }: ErrorStateProps) => {
+const ErrorState = ({ message = "Unexpected error" }: ErrorStateProps) => {
   const [kaomoji] = useState(() => kaomojis[Math.floor(Math.random() * kaomojis.length)]);
 
   return (
