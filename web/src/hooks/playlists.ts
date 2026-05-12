@@ -1,9 +1,8 @@
+import { getPlaylist, getPlaylistItems, getPlaylists } from "@/lib/api";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { getPlaylist, getPlaylists, getPlaylistTracks } from "./api";
 import { useState, useEffect } from "react";
 
-const PAGE_SIZE = 50;
-const PREFETCH_THRESHOLD = 20; // fetch next page when 20 tracks remain
+const PLAYLIST_ITEMS_PREFETCH_THRESHOLD = 25;
 
 type Decision = "like" | "dislike";
 
@@ -13,10 +12,10 @@ type Swipe = {
 };
 
 const playlistKeys = {
-  all: ["playlists"] as const,
-  one: (id: string) => [...playlistKeys.all, id] as const,
-  tracks: (id: string) => [...playlistKeys.one(id), "tracks"] as const,
-};
+  all: ["playlists"],
+  one: (id: string) => [...playlistKeys.all, id],
+  tracks: (id: string) => [...playlistKeys.one(id), "tracks"],
+} as const;
 
 export const usePlaylist = (id: string | undefined) =>
   useQuery({
@@ -31,29 +30,29 @@ export const usePlaylists = () =>
     queryFn: getPlaylists,
   });
 
-const usePlaylistTracks = (id: string | undefined) =>
+const usePlaylistItems = (id: string | undefined) =>
   useInfiniteQuery({
     queryKey: playlistKeys.tracks(id!),
-    queryFn: ({ pageParam }) => getPlaylistTracks(id!, pageParam, PAGE_SIZE),
+    queryFn: ({ pageParam }) => getPlaylistItems(id!, pageParam),
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) =>
-      lastPage.has_more ? allPages.length * PAGE_SIZE : undefined,
+      lastPage.has_more ? allPages.flatMap((p) => p.tracks).length : undefined,
     enabled: !!id,
   });
 
 export const usePlaylistSwipe = (id: string | undefined) => {
   const [swipes, setSwipes] = useState<Swipe[]>([]);
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = usePlaylistTracks(id);
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = usePlaylistItems(id);
 
   const tracks = data?.pages.flatMap((p) => p.tracks) ?? [];
 
   const index = swipes.length;
   const currentTrack = tracks.at(index);
-  const isFirst = index <= 0;
 
+  // prefetch next page when the number of remaining tracks is low
   useEffect(() => {
     const remaining = tracks.length - index;
-    if (remaining < PREFETCH_THRESHOLD && hasNextPage && !isFetchingNextPage) {
+    if (remaining < PLAYLIST_ITEMS_PREFETCH_THRESHOLD && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
   }, [index, tracks.length, hasNextPage, isFetchingNextPage, fetchNextPage]);
@@ -74,6 +73,6 @@ export const usePlaylistSwipe = (id: string | undefined) => {
     swipe,
     undo,
     isLoading,
-    isFirst,
+    index,
   };
 };

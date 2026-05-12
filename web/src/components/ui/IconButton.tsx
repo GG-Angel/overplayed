@@ -1,6 +1,7 @@
-import { cn } from "@/utils/cn";
+import { cn } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 import type { LucideIcon } from "lucide-react";
+import type { ComponentProps } from "react";
 
 const buttonVariants = cva(
   "flex items-center justify-center rounded-full border-2 active:opacity-75 disabled:opacity-25 disabled:pointer-events-none transition-opacity",
@@ -32,27 +33,14 @@ const iconVariants = cva("shrink-0", {
   },
 });
 
-export type IconButtonProps = VariantProps<typeof buttonVariants> & {
-  icon: LucideIcon;
-  disabled?: boolean;
-  className?: string;
-  onClick?: () => void;
-};
+export type IconButtonProps = ComponentProps<"button"> &
+  VariantProps<typeof buttonVariants> & {
+    icon: LucideIcon;
+  };
 
-const IconButton = ({
-  icon: Icon,
-  size,
-  intent,
-  className,
-  onClick,
-  disabled,
-}: IconButtonProps) => {
+const IconButton = ({ icon: Icon, size, intent, className, ...props }: IconButtonProps) => {
   return (
-    <button
-      className={cn(buttonVariants({ size, intent }), className)}
-      onClick={onClick}
-      disabled={disabled}
-    >
+    <button className={cn(buttonVariants({ size, intent }), className)} {...props}>
       <Icon className={iconVariants({ size })} />
     </button>
   );

@@ -1,10 +1,9 @@
-import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from "react";
+import { type ComponentProps, type ReactNode } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
-import { Spinner } from "@/components/ui/Spinner";
-import { cn } from "@/utils/cn";
+import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
@@ -24,24 +23,16 @@ const buttonVariants = cva(
   }
 );
 
-type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> &
+type ButtonProps = ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
-    isLoading?: boolean;
     icon?: ReactNode;
   };
 
-const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, children, isLoading, icon, ...props }, ref) => {
-    return (
-      <button className={cn(buttonVariants({ variant, size }), className)} ref={ref} {...props}>
-        {isLoading && <Spinner size="sm" className="text-current" />}
-        {!isLoading && icon && <span className="mr-2">{icon}</span>}
-        <span>{children}</span>
-      </button>
-    );
-  }
+const Button = ({ className, variant, size, icon, children, ...props }: ButtonProps) => (
+  <button className={cn(buttonVariants({ variant, size }), className)} {...props}>
+    {icon}
+    <span>{children}</span>
+  </button>
 );
-
-Button.displayName = "Button";
 
 export default Button;

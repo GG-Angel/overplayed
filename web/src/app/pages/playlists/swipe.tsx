@@ -1,8 +1,8 @@
 import { useParams } from "react-router-dom";
-import TrackCard from "@/features/playlists/components/TrackCard";
+import TrackCard from "@/components/TrackCard";
 import { Check, Heart, Undo, X } from "lucide-react";
 import IconButton from "@/components/ui/IconButton";
-import { usePlaylistSwipe } from "@/features/playlists/hooks";
+import { usePlaylistSwipe } from "@/hooks/playlists";
 import LoadingState from "@/components/states/LoadingState";
 import PreviewPlayer from "@/features/previews/components/PreviewPlayer";
 

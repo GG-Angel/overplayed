@@ -1,6 +1,6 @@
-import PlaylistCard from "@/features/playlists/components/PlaylistCard";
+import PlaylistCard from "@/components/PlaylistCard";
 import { useNavigate } from "react-router-dom";
-import { usePlaylists } from "@/features/playlists/hooks";
+import { usePlaylists } from "@/hooks/playlists";
 import LoadingState from "@/components/states/LoadingState";
 
 const PlaylistSelectionPage = () => {

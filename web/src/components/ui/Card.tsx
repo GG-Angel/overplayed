@@ -1,6 +1,6 @@
-import { cn } from "@/utils/cn";
+import { cn } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
-import type { HTMLAttributes } from "react";
+import type { ComponentProps } from "react";
 
 const cardVariants = cva("flex bg-sp-gray border-2 border-sp-gray-light", {
   variants: {
@@ -14,7 +14,7 @@ const cardVariants = cva("flex bg-sp-gray border-2 border-sp-gray-light", {
   },
 });
 
-type CardProps = HTMLAttributes<HTMLDivElement> & VariantProps<typeof cardVariants>;
+type CardProps = ComponentProps<"div"> & VariantProps<typeof cardVariants>;
 
 const Card = ({ className, size, children, ...props }: CardProps) => {
   return (

@@ -1,6 +1,6 @@
+import { cn } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
-import { LoaderCircle } from "lucide-react";
-import { cn } from "@/utils/cn";
+import { LoaderCircle, type LucideProps } from "lucide-react";
 
 const spinnerVariants = cva("animate-spin", {
   variants: {
@@ -16,15 +16,8 @@ const spinnerVariants = cva("animate-spin", {
   },
 });
 
-export type SpinnerProps = VariantProps<typeof spinnerVariants> & {
-  className?: string;
-};
+export type SpinnerProps = LucideProps & VariantProps<typeof spinnerVariants>;
 
-export const Spinner = ({ size, className }: SpinnerProps) => {
-  return (
-    <>
-      <LoaderCircle className={cn(spinnerVariants({ size }), className)} />
-      <span className="sr-only">Loading...</span>
-    </>
-  );
-};
+export const Spinner = ({ size, className }: SpinnerProps) => (
+  <LoaderCircle className={cn(spinnerVariants({ size }), className)} />
+);

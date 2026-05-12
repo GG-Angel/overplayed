@@ -1,39 +1,44 @@
-import { env } from "@/lib/env";
-import Axios, { type InternalAxiosRequestConfig } from "axios";
+import z from "zod";
+import api from "./api-client";
+import {
+  currentUserSchema,
+  playlistItemsPageSchema,
+  playlistSchema,
+  trackPreviewSchema,
+} from "./types";
 
-export const routes = {
-  auth: {
-    login: (redirectTo?: string | null | undefined) =>
-      `${env.API_URL}/auth/login${
-        redirectTo ? `?redirect_to=${encodeURIComponent(redirectTo)}` : ""
-      }`,
-    logout: () => "/auth/logout",
-  },
-  profile: () => "/users/me",
-  previews: (isrc: string) => `/previews/${isrc}`,
-  playlists: {
-    all: () => "/playlists",
-    one: (id: string) => `/playlists/${id}`,
-    tracks: (id: string, offset: number, limit: number = 100) =>
-      `/playlists/${id}/tracks?offset=${offset}&limit=${limit}`,
-  },
-} as const;
+const DEFAULT_PLAYLIST_ITEMS_LIMIT = 100;
 
-function authRequestInterceptor(config: InternalAxiosRequestConfig) {
-  config.headers.Accept = "application/json";
-  config.withCredentials = true;
-  return config;
-}
+export const getUser = async () => {
+  const { data } = await api.get("/users/me");
+  return currentUserSchema.parse(data);
+};
 
-const api = Axios.create({
-  baseURL: env.API_URL,
-});
+export const getPlaylists = async () => {
+  const { data } = await api.get("/playlists");
+  return z.array(playlistSchema).parse(data);
+};
 
-api.interceptors.request.use(authRequestInterceptor);
-api.interceptors.response.use(
-  (response) => response.data,
-  (error) => Promise.reject(error)
-);
+export const getPlaylist = async (id: string) => {
+  const { data } = await api.get(`/playlists/${id}`);
+  return playlistSchema.parse(data);
+};
 
-export const get = async <T>(url: string) => await api.get<T, T>(url);
-export const post = async <T>(url: string) => await api.post<T, T>(url);
+export const getPlaylistItems = async (
+  id: string,
+  offset: number,
+  limit: number = DEFAULT_PLAYLIST_ITEMS_LIMIT
+) => {
+  const { data } = await api.get(
+    `/playlists/${id}/tracks?${new URLSearchParams({
+      offset: offset.toString(),
+      limit: limit.toString(),
+    })}`
+  );
+  return playlistItemsPageSchema.parse(data);
+};
+
+export const getTrackPreview = async (isrc: string) => {
+  const { data } = await api.get(`/previews/${isrc}`);
+  return trackPreviewSchema.parse(data);
+};

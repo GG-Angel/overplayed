@@ -1,8 +1,8 @@
-import type { SpotifyPlaylist } from "@/lib/spotify/types";
+import type { Playlist } from "@/lib/types";
 import { ArrowUpRight } from "lucide-react";
 
 type PlaylistCardProps = {
-  playlist: SpotifyPlaylist;
+  playlist: Playlist;
   onClick?: (id: string) => void;
 };
 

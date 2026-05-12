@@ -4,7 +4,7 @@ import PlaylistSelectionPage from "./pages/playlists/selection";
 import PlaylistSwipePage from "./pages/playlists/swipe";
 import Layout from "@/components/Layout";
 import ErrorState from "@/components/states/ErrorState";
-import { ProtectedRoute } from "@/features/auth/ProtectedRoute";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 const router = createBrowserRouter([
   {
