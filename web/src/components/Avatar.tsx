@@ -8,7 +8,7 @@ type AvatarProps = ComponentProps<"button"> & {
 const Avatar = ({ user, ...props }: AvatarProps) => {
   return (
     <button
-      className="inline-flex rounded-full overflow-hidden size-8 shrink-0 bg-sp-gray hover:scale-110 transition-transform"
+      className="inline-flex rounded-full overflow-hidden size-8 shrink-0 hover:scale-110 transition-transform"
       {...props}
     >
       <img

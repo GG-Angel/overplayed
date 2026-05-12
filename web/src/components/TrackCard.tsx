@@ -9,7 +9,7 @@ const TrackCard = ({ track }: TrackCardProps) => {
   const artistList = track.artists.map((t) => t.name).join(", ");
 
   return (
-    <div className="flex flex-col gap-3 w-64 p-4 select-none bg-sp-gray border-2 border-sp-gray-light rounded-xl overflow-hidden">
+    <div className="flex flex-col gap-3 w-64 p-4 select-none bg-card text-card-foreground border-2 border-card-border rounded-xl overflow-hidden">
       <img
         className="aspect-square object-cover w-full rounded-sm"
         src={coverUrl}
@@ -25,7 +25,7 @@ const TrackCard = ({ track }: TrackCardProps) => {
         >
           {track.name}
         </a>
-        <p className="text-muted text-sm">{artistList}</p>
+        <p className="text-muted-foreground text-sm">{artistList}</p>
       </div>
     </div>
   );

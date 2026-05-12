@@ -3,16 +3,38 @@
 
 @theme {
   --color-sp-green: oklch(0.7697 0.2124 148.67);
-  --color-sp-white: oklch(1 0 0);
+  --color-sp-red: oklch(0.628 0.2577 27.33);
   --color-sp-black: oklch(0.1822 0 0);
   --color-sp-gray: oklch(0.25 0 0);
   --color-sp-gray-light: oklch(27.685% 0.00003 271.152);
   --color-sp-muted: oklch(0.65 0 0);
+  --color-sp-white: oklch(1 0 0);
 
   --color-background: var(--color-sp-black);
   --color-foreground: var(--color-sp-white);
+
+  --color-card: var(--color-sp-gray);
+  --color-card-border: var(--color-sp-gray-light);
+  --color-card-foreground: var(--color-sp-white);
+
+  --color-primary: var(--color-sp-green);
+  --color-primary-foreground: var(--color-sp-black);
+
+  --color-secondary: var(--color-sp-gray);
+  --color-secondary-foreground: var(--color-sp-white);
+
+  --color-muted: var(--color-sp-gray);
+  --color-muted-foreground: var(--color-sp-muted);
+
   --color-accent: var(--color-sp-green);
-  --color-muted: var(--color-sp-muted);
+  --color-accent-foreground: var(--color-sp-black);
+
+  --color-destructive: var(--color-sp-red);
+  --color-destructive-foreground: var(--color-sp-white);
+
+  --color-border: var(--color-sp-gray-light);
+  --color-input: var(--color-sp-gray-light);
+  --color-ring: var(--color-sp-green);
 
   --font-sans: "Geist Variable", system-ui, sans-serif;
 }

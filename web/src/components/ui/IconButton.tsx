@@ -9,7 +9,7 @@ const buttonVariants = cva(
     variants: {
       size: { xs: "p-2.5", sm: "p-4", md: "p-4.5" },
       intent: {
-        none: "text-muted border-sp-gray-light",
+        none: "text-muted-foreground border-muted",
         like: "text-emerald-400 border-emerald-400/50",
         dislike: "text-rose-400 border-rose-400/50",
         undo: "text-amber-400 border-amber-400/50",

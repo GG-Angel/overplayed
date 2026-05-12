@@ -14,7 +14,7 @@ export const LandingPage = () => {
   return (
     <>
       {user ? (
-        <Button variant="outline" onClick={() => navigate("/playlists")}>
+        <Button variant="secondary" onClick={() => navigate("/playlists")}>
           View your playlists
         </Button>
       ) : (

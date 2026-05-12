@@ -7,8 +7,8 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        filled: "bg-accent text-background shadow hover:bg-accent/90",
-        outline: "bg-accent/15 text-accent shadow-sm hover:bg-accent/20",
+        primary: "bg-primary text-primary-foreground shadow hover:bg-primary/90",
+        secondary: "bg-primary/15 text-primary shadow-sm hover:bg-primary/20",
       },
       size: {
         sm: "h-8 rounded-md px-3 text-xs",
@@ -17,7 +17,7 @@ const buttonVariants = cva(
       },
     },
     defaultVariants: {
-      variant: "filled",
+      variant: "primary",
       size: "md",
     },
   }

@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 import type { ComponentProps } from "react";
 
-const cardVariants = cva("flex bg-sp-gray border-2 border-sp-gray-light", {
+const cardVariants = cva("flex bg-card text-card-foreground border-2 border-card-border", {
   variants: {
     size: {
       sm: "px-3 py-2 rounded-lg",

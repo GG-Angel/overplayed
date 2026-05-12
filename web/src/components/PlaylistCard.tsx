@@ -12,7 +12,7 @@ const PlaylistCard = ({ playlist, onClick }: PlaylistCardProps) => {
     <button
       type="button"
       onClick={() => onClick?.(playlist.id)}
-      className="group relative flex h-32 w-full gap-4 overflow-hidden rounded-xl border-2 border-sp-gray-light bg-sp-gray px-4 py-3 text-left hover:cursor-pointer"
+      className="group relative flex h-32 w-full gap-4 overflow-hidden rounded-xl border-2 border-card-border bg-card px-4 py-3 text-left hover:cursor-pointer"
     >
       {/* Blurred backdrop */}
       <img
@@ -34,10 +34,10 @@ const PlaylistCard = ({ playlist, onClick }: PlaylistCardProps) => {
 
       {/* Text + icon */}
       <div className="z-10 flex w-full flex-col justify-between overflow-hidden">
-        <ArrowUpRight className="origin-top-right self-end transition group-hover:scale-125 group-hover:text-accent" />
+        <ArrowUpRight className="origin-top-right self-end transition group-hover:scale-125 group-hover:text-primary" />
         <div>
           <p className="truncate font-semibold text-text-h">{playlist.name}</p>
-          <p className="truncate text-muted">{playlist.tracks.total} tracks</p>
+          <p className="truncate text-muted-foreground">{playlist.tracks.total} tracks</p>
         </div>
       </div>
     </button>

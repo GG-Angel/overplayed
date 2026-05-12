@@ -11,7 +11,7 @@ const ErrorState = ({ message = "Unexpected error" }: ErrorStateProps) => {
   const [kaomoji] = useState(() => kaomojis[Math.floor(Math.random() * kaomojis.length)]);
 
   return (
-    <div className="h-svh flex flex-col gap-2 justify-center text-center text-muted">
+    <div className="h-svh flex flex-col gap-2 justify-center text-center text-muted-foreground">
       <p className="text-4xl font-medium">{kaomoji}</p>
       <p>{message}</p>
       <Link to="/" className="mt-4 text-accent underline font-medium">
