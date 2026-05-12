@@ -4,26 +4,23 @@ import { Check, Heart, Undo, X } from "lucide-react";
 import IconButton from "@/components/ui/IconButton";
 import { usePlaylistSwipe } from "@/hooks/playlists";
 import LoadingState from "@/components/states/LoadingState";
-import PreviewPlayer from "@/features/previews/components/PreviewPlayer";
 
 const PlaylistSwipePage = () => {
   const { playlistId } = useParams();
-  const { currentTrack, swipe, undo, isLoading, isFirst } = usePlaylistSwipe(playlistId);
+  const { currentItem, swipe, undo, isLoading, index } = usePlaylistSwipe(playlistId);
 
   if (isLoading) return <LoadingState />;
-  if (!currentTrack) return <div>Done!</div>;
+  if (!currentItem) return <div>Done!</div>;
 
   return (
     <div>
-      <TrackCard track={currentTrack} />
+      <TrackCard track={currentItem.track} />
       <div className="flex items-end gap-2">
-        <IconButton icon={Undo} size="sm" onClick={undo} disabled={isFirst} intent="undo" />
+        <IconButton icon={Undo} size="sm" onClick={undo} disabled={index <= 0} intent="undo" />
         <IconButton icon={X} onClick={() => swipe("dislike")} intent="dislike" />
         <IconButton icon={Heart} onClick={() => swipe("like")} intent="like" />
-        {/* TODO: make finish button functional */}
         <IconButton icon={Check} size="sm" intent="finish" />
       </div>
-      <PreviewPlayer isrc={currentTrack.track.external_ids.isrc} />
     </div>
   );
 };

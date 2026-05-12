@@ -7,38 +7,32 @@ import {
   trackPreviewSchema,
 } from "./types";
 
-const DEFAULT_PLAYLIST_ITEMS_LIMIT = 100;
-
 export const getUser = async () => {
-  const { data } = await api.get("/users/me");
-  return currentUserSchema.parse(data);
+  const response = await api.get("/users/me");
+  const result = currentUserSchema.parse(response);
+  return result;
 };
 
 export const getPlaylists = async () => {
-  const { data } = await api.get("/playlists");
-  return z.array(playlistSchema).parse(data);
+  const response = await api.get("/playlists");
+  return z.array(playlistSchema).parse(response);
 };
 
 export const getPlaylist = async (id: string) => {
-  const { data } = await api.get(`/playlists/${id}`);
-  return playlistSchema.parse(data);
+  const response = await api.get(`/playlists/${id}`);
+  return playlistSchema.parse(response);
 };
 
-export const getPlaylistItems = async (
-  id: string,
-  offset: number,
-  limit: number = DEFAULT_PLAYLIST_ITEMS_LIMIT
-) => {
-  const { data } = await api.get(
-    `/playlists/${id}/tracks?${new URLSearchParams({
-      offset: offset.toString(),
-      limit: limit.toString(),
+export const getPlaylistItems = async (id: string, page: number) => {
+  const response = await api.get(
+    `/playlists/${id}/items?${new URLSearchParams({
+      page: page.toString(),
     })}`
   );
-  return playlistItemsPageSchema.parse(data);
+  return playlistItemsPageSchema.parse(response);
 };
 
 export const getTrackPreview = async (isrc: string) => {
-  const { data } = await api.get(`/previews/${isrc}`);
-  return trackPreviewSchema.parse(data);
+  const response = await api.get(`/previews/${isrc}`);
+  return trackPreviewSchema.parse(response);
 };

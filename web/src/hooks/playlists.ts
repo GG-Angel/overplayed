@@ -36,7 +36,7 @@ const usePlaylistItems = (id: string | undefined) =>
     queryFn: ({ pageParam }) => getPlaylistItems(id!, pageParam),
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) =>
-      lastPage.has_more ? allPages.flatMap((p) => p.tracks).length : undefined,
+      lastPage.has_more ? allPages.flatMap((p) => p.items).length : undefined,
     enabled: !!id,
   });
 
@@ -44,22 +44,21 @@ export const usePlaylistSwipe = (id: string | undefined) => {
   const [swipes, setSwipes] = useState<Swipe[]>([]);
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = usePlaylistItems(id);
 
-  const tracks = data?.pages.flatMap((p) => p.tracks) ?? [];
-
   const index = swipes.length;
-  const currentTrack = tracks.at(index);
+  const items = data?.pages.flatMap((p) => p.items) ?? [];
+  const currentItem = items.at(index);
 
-  // prefetch next page when the number of remaining tracks is low
+  // prefetch next page when the number of remaining items is low
   useEffect(() => {
-    const remaining = tracks.length - index;
+    const remaining = items.length - index;
     if (remaining < PLAYLIST_ITEMS_PREFETCH_THRESHOLD && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
-  }, [index, tracks.length, hasNextPage, isFetchingNextPage, fetchNextPage]);
+  }, [index, items.length, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const swipe = (decision: Decision) => {
-    if (!currentTrack) return;
-    setSwipes((prev) => [...prev, { id: currentTrack.track.id, decision }]);
+    if (!currentItem) return;
+    setSwipes((prev) => [...prev, { id: currentItem.track.id, decision }]);
   };
 
   const undo = () => {
@@ -68,7 +67,7 @@ export const usePlaylistSwipe = (id: string | undefined) => {
   };
 
   return {
-    currentTrack,
+    currentItem,
     swipes,
     swipe,
     undo,

@@ -81,7 +81,7 @@ export const playlistItemSchema = z.object({
 export const playlistItemsPageSchema = z.object({
   total: z.number().int().nonnegative(),
   has_more: z.boolean(),
-  tracks: z.array(playlistItemSchema),
+  items: z.array(playlistItemSchema),
 });
 
 export const trackPreviewSchema = z.object({

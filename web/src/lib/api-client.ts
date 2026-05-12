@@ -8,7 +8,7 @@ function authRequestInterceptor(config: InternalAxiosRequestConfig) {
 }
 
 const api = Axios.create({
-  baseURL: env.API_URL,
+  baseURL: env.API_BASE_URL,
 });
 
 api.interceptors.request.use(authRequestInterceptor);

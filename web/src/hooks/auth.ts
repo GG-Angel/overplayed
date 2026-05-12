@@ -5,7 +5,7 @@ import api from "@/lib/api-client";
 import { env } from "@/lib/env";
 
 const redirectToLogin = (currentPath: string) => {
-  window.location.href = `${env.API_URL}/auth/login?${new URLSearchParams({
+  window.location.href = `${env.API_BASE_URL}/auth/login?${new URLSearchParams({
     redirect_to: currentPath,
   })}`;
 };
