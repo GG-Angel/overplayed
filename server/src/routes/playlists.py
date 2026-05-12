@@ -7,24 +7,24 @@ from models import (
     PlaylistItems,
 )
 from dependencies import get_spotify_service
-from fastapi import APIRouter, Depends, HTTPException, Path
+from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from services.spotify import SpotifyService, PlaylistNotOwnedError
 
+PLAYLIST_ITEMS_PAGE_LIMIT = 100
+
+ResourceId = Annotated[str, Path(pattern=r"^[0-9A-Za-z]{22}$")]
 
 router = APIRouter()
 
 
-ResourceId = Annotated[str, Path(pattern=r"^[0-9A-Za-z]{22}$")]
-
-
-@router.get("/", status_code=200)
+@router.get("/")
 async def handle_get_playlists(
     service: SpotifyService = Depends(get_spotify_service),
 ) -> List[Playlist]:
     return await service.get_user_playlists()
 
 
-@router.post("/", status_code=201)
+@router.post("/")
 async def handle_create_playlist(
     body: CreatePlaylistRequest,
     service: SpotifyService = Depends(get_spotify_service),
@@ -35,7 +35,7 @@ async def handle_create_playlist(
         raise HTTPException(status_code=500, detail="Failed to create playlist.")
 
 
-@router.get("/{playlist_id}", status_code=200)
+@router.get("/{playlist_id}")
 async def handle_get_playlist(
     playlist_id: ResourceId,
     service: SpotifyService = Depends(get_spotify_service),
@@ -48,7 +48,7 @@ async def handle_get_playlist(
         raise HTTPException(status_code=500, detail="Failed to get playlist.")
 
 
-@router.delete("/{playlist_id}", status_code=200)
+@router.delete("/{playlist_id}")
 async def handle_delete_playlist(
     playlist_id: ResourceId, service: SpotifyService = Depends(get_spotify_service)
 ) -> None:
@@ -58,16 +58,17 @@ async def handle_delete_playlist(
         raise HTTPException(status_code=500, detail="Failed to delete playlist.")
 
 
-@router.get("/{playlist_id}/items", status_code=200)
+@router.get("/{playlist_id}/items")
 async def handle_get_playlist_items(
     playlist_id: ResourceId,
-    page: int = 0,
+    page: int = Query(0, ge=0),
     service: SpotifyService = Depends(get_spotify_service),
 ) -> PlaylistItems:
     try:
-        limit = 100
         return await service.get_playlist_items(
-            playlist_id, offset=page * limit, limit=limit
+            playlist_id,
+            offset=page * PLAYLIST_ITEMS_PAGE_LIMIT,
+            limit=PLAYLIST_ITEMS_PAGE_LIMIT,
         )
     except PlaylistNotOwnedError:
         raise HTTPException(status_code=403, detail="Forbidden.")
@@ -75,7 +76,7 @@ async def handle_get_playlist_items(
         raise HTTPException(status_code=500, detail="Failed to get items.")
 
 
-@router.post("/{playlist_id}/items", status_code=204)
+@router.post("/{playlist_id}/items")
 async def handle_add_playlist_items(
     playlist_id: ResourceId,
     body: ItemUrisRequest,
@@ -87,7 +88,7 @@ async def handle_add_playlist_items(
         raise HTTPException(status_code=500, detail="Failed to add items.")
 
 
-@router.delete("/{playlist_id}/items", status_code=204)
+@router.delete("/{playlist_id}/items")
 async def handle_delete_playlist_items(
     playlist_id: ResourceId,
     body: ItemUrisRequest,

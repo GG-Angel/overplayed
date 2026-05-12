@@ -72,9 +72,115 @@ class TestAPI:
             assert isinstance(preview, dict)
             assert preview.get("preview_url") not in (None, "NO_PREVIEW")
 
-    async def test_track_preview_not_found(self, client: ClientSession, run: str):
-        async with client.get("/previews/123") as response:
-            assert response.status == 404
+
+class TestInputValidation:
+    @pytest.mark.parametrize(
+        "playlist_id",
+        [
+            "123",  # too short
+            "a" * 21,  # one char short
+            "a" * 23,  # one char over
+            "!" * 22,  # invalid characters
+            "abc-defghijklmnopqrstu",  # hyphen not allowed
+            " " * 22,  # whitespace
+        ],
+    )
+    async def test_get_playlist_invalid_id(
+        self, client: ClientSession, playlist_id: str
+    ):
+        async with client.get(f"/playlists/{playlist_id}") as response:
+            assert response.status == 422
+
+    @pytest.mark.parametrize("playlist_id", ["123", "a" * 23, "!" * 22])
+    async def test_delete_playlist_invalid_id(
+        self, client: ClientSession, playlist_id: str
+    ):
+        async with client.delete(f"/playlists/{playlist_id}") as response:
+            assert response.status == 422
+
+    @pytest.mark.parametrize("page", [-1, -100, "abc", "1.5"])
+    async def test_get_playlist_items_invalid_page(
+        self, client: ClientSession, test_playlist: dict, page
+    ):
+        async with client.get(
+            f"/playlists/{test_playlist['id']}/items?page={page}"
+        ) as response:
+            assert response.status == 422
+
+    async def test_get_playlist_items_invalid_id(self, client: ClientSession):
+        async with client.get("/playlists/bad-id/items") as response:
+            assert response.status == 422
+
+    @pytest.mark.parametrize(
+        "body",
+        [
+            {},  # missing name
+            {"name": ""},  # empty name
+            {"name": "a" * 101},  # name too long
+            {"name": "ok", "description": "a" * 301},  # description too long
+            {"name": 123},  # wrong type
+            {"description": "no name"},  # missing required name
+        ],
+    )
+    async def test_create_playlist_invalid_body(
+        self, client: ClientSession, body: dict
+    ):
+        async with client.post("/playlists", json=body) as response:
+            assert response.status == 422
+
+    @pytest.mark.parametrize(
+        "body",
+        [
+            {},  # missing item_uris
+            {"item_uris": []},  # empty list
+            {"item_uris": ["not-a-uri"]},
+            {"item_uris": ["spotify:track:short"]},
+            {"item_uris": ["spotify:album:1oNYiuCvyixmwcyNZyq3Dd"]},  # wrong type
+            {"item_uris": ["spotify:track:1oNYiuCvyixmwcyNZyq3D!"]},  # bad char
+            {"item_uris": ["spotify:track:1oNYiuCvyixmwcyNZyq3Dd", "bad"]},  # one bad
+            {"item_uris": "spotify:track:1oNYiuCvyixmwcyNZyq3Dd"},  # not a list
+        ],
+    )
+    async def test_add_playlist_items_invalid_body(
+        self, client: ClientSession, empty_playlist: dict, body: dict
+    ):
+        async with client.post(
+            f"/playlists/{empty_playlist['id']}/items", json=body
+        ) as response:
+            assert response.status == 422
+
+    @pytest.mark.parametrize(
+        "body",
+        [
+            {},
+            {"item_uris": []},
+            {"item_uris": ["not-a-uri"]},
+        ],
+    )
+    async def test_delete_playlist_items_invalid_body(
+        self, client: ClientSession, empty_playlist: dict, body: dict
+    ):
+        async with client.delete(
+            f"/playlists/{empty_playlist['id']}/items", json=body
+        ) as response:
+            assert response.status == 422
+
+    @pytest.mark.parametrize(
+        "isrc",
+        [
+            "123",  # too short
+            "USRC1234567",  # one char short
+            "USRC172607810",  # one char over
+            "1234567890AB",  # wrong shape
+            "US-RC17260781",  # invalid character
+            "USRC1726078A",  # letter where digit required
+        ],
+    )
+    async def test_get_track_preview_invalid_isrc(
+        self, client: ClientSession, isrc: str
+    ):
+        async with client.get(f"/previews/{isrc}") as response:
+            assert response.status == 422
 
 
 async def test_add_playlist_items(client: ClientSession, empty_playlist: dict):

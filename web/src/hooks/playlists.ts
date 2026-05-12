@@ -35,8 +35,7 @@ const usePlaylistItems = (id: string | undefined) =>
     queryKey: playlistKeys.tracks(id!),
     queryFn: ({ pageParam }) => getPlaylistItems(id!, pageParam),
     initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) =>
-      lastPage.has_more ? allPages.flatMap((p) => p.items).length : undefined,
+    getNextPageParam: (lastPage, allPages) => (lastPage.has_more ? allPages.length : undefined),
     enabled: !!id,
   });
 

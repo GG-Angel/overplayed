@@ -1,5 +1,5 @@
-from typing import Optional, List
-from pydantic import BaseModel
+from typing import Optional, List, Annotated
+from pydantic import BaseModel, Field
 
 
 class TokenInfo(BaseModel):
@@ -103,10 +103,13 @@ class PlaylistItems(BaseModel):
     items: List[PlaylistItem]
 
 
+SpotifyUri = Annotated[str, Field(pattern=r"^spotify:(track|episode):[0-9A-Za-z]{22}$")]
+
+
 class ItemUrisRequest(BaseModel):
-    item_uris: List[str]
+    item_uris: List[SpotifyUri] = Field(min_length=1)
 
 
 class CreatePlaylistRequest(BaseModel):
-    name: str
-    description: str = ""
+    name: str = Field(min_length=1, max_length=100)
+    description: str = Field(default="", max_length=300)
