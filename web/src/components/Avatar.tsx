@@ -1,14 +1,18 @@
 import type { CurrentUser } from "@/lib/types";
-import type { ComponentProps } from "react";
+import { cn } from "@/lib/utils";
+import { type ComponentProps } from "react";
 
 type AvatarProps = ComponentProps<"button"> & {
   user: CurrentUser;
 };
 
-const Avatar = ({ user, ...props }: AvatarProps) => {
+const Avatar = ({ user, className, ...props }: AvatarProps) => {
   return (
     <button
-      className="inline-flex rounded-full overflow-hidden size-8 shrink-0 hover:scale-110 transition-transform"
+      className={cn(
+        "inline-flex items-center rounded-full overflow-hidden size-8 shrink-0 hover:scale-110 transition-transform hover:cursor-pointer",
+        className
+      )}
       {...props}
     >
       <img

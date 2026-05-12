@@ -7,7 +7,7 @@ type PlaylistCardProps = {
 };
 
 const PlaylistCard = ({ playlist, onClick }: PlaylistCardProps) => {
-  const coverUrl = playlist.images?.at(-1)?.url;
+  const coverUrl = playlist.images?.at(0)?.url;
   return (
     <button
       type="button"

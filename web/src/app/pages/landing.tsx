@@ -5,9 +5,9 @@ import LoadingState from "@/components/states/LoadingState";
 import { useAuth } from "@/hooks/auth";
 
 export const LandingPage = () => {
+  const { user, isLoading, redirectToLogin } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, isLoading, redirectToLogin } = useAuth();
 
   if (isLoading) return <LoadingState />;
 

@@ -1,8 +1,6 @@
 import { SkipForward } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
-import Avatar from "@/components/Avatar";
-import Button from "./ui/Button";
-import { useAuth } from "@/hooks/auth";
+import { Link } from "react-router-dom";
+import AvatarControl from "./AvatarControl";
 
 const Logo = () => (
   <Link to="/" className="inline-flex items-center gap-1.5 select-none">
@@ -11,24 +9,11 @@ const Logo = () => (
   </Link>
 );
 
-const AuthControl = () => {
-  const { user, redirectToLogin } = useAuth();
-  const location = useLocation();
-
-  if (user) return <Avatar user={user} />;
-
-  return (
-    <Button variant="secondary" onClick={() => redirectToLogin(location.pathname)}>
-      Log in
-    </Button>
-  );
-};
-
 const Navbar = () => {
   return (
     <div className="flex justify-between items-center py-2">
       <Logo />
-      <AuthControl />
+      <AvatarControl />
     </div>
   );
 };
