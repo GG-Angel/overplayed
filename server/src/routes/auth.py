@@ -5,7 +5,7 @@ from settings import Settings
 from redis.asyncio import RedisError
 from spotipy import SpotifyOauthError, SpotifyOAuth, Spotify, SpotifyException
 from dependencies import get_oauth, get_redis, get_settings
-from models import TokenInfo, SessionInfo, SpotifyCurrentUser
+from models import TokenInfo, SessionInfo, CurrentUser
 from typing import Optional
 from fastapi import APIRouter, Depends, Cookie, HTTPException
 from fastapi.responses import JSONResponse, RedirectResponse
@@ -46,7 +46,7 @@ async def handle_callback(
     try:
         token_info = TokenInfo(**oauth.get_access_token(code, check_cache=False))
         spotify = Spotify(auth=token_info.access_token)
-        user = SpotifyCurrentUser(**await asyncio.to_thread(spotify.current_user))
+        user = CurrentUser(**await asyncio.to_thread(spotify.current_user))
 
         session_info = SessionInfo(user_id=user.id, **token_info.model_dump())
         session_id = await redis.create_session(session_info)

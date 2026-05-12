@@ -1,10 +1,10 @@
 from spotipy import SpotifyException
 from typing import List, Annotated
 from models import (
-    SpotifyPlaylist,
+    Playlist,
     CreatePlaylistRequest,
-    TrackUrisRequest,
-    SpotifyPlaylistTracks,
+    ItemUrisRequest,
+    PlaylistItems,
 )
 from dependencies import get_spotify_service
 from fastapi import APIRouter, Depends, HTTPException, Path
@@ -14,13 +14,13 @@ from services.spotify import SpotifyService, PlaylistNotOwnedError
 router = APIRouter()
 
 
-SpotifyID = Annotated[str, Path(pattern=r"^[0-9A-Za-z]{22}$")]
+ResourceId = Annotated[str, Path(pattern=r"^[0-9A-Za-z]{22}$")]
 
 
 @router.get("/", status_code=200)
 async def handle_get_playlists(
     service: SpotifyService = Depends(get_spotify_service),
-) -> List[SpotifyPlaylist]:
+) -> List[Playlist]:
     return await service.get_user_playlists()
 
 
@@ -28,7 +28,7 @@ async def handle_get_playlists(
 async def handle_create_playlist(
     body: CreatePlaylistRequest,
     service: SpotifyService = Depends(get_spotify_service),
-) -> SpotifyPlaylist:
+) -> Playlist:
     try:
         return await service.create_playlist(body.name, body.description)
     except SpotifyException:
@@ -37,9 +37,9 @@ async def handle_create_playlist(
 
 @router.get("/{playlist_id}", status_code=200)
 async def handle_get_playlist(
-    playlist_id: SpotifyID,
+    playlist_id: ResourceId,
     service: SpotifyService = Depends(get_spotify_service),
-) -> SpotifyPlaylist:
+) -> Playlist:
     try:
         return await service.get_playlist(playlist_id)
     except PlaylistNotOwnedError:
@@ -50,52 +50,52 @@ async def handle_get_playlist(
 
 @router.delete("/{playlist_id}", status_code=200)
 async def handle_delete_playlist(
-    playlist_id: SpotifyID, service: SpotifyService = Depends(get_spotify_service)
+    playlist_id: ResourceId, service: SpotifyService = Depends(get_spotify_service)
 ) -> None:
     try:
         await service.delete_playlist(playlist_id)
     except SpotifyException:
-        raise HTTPException(status_code=500, detail="Failed to add tracks.")
+        raise HTTPException(status_code=500, detail="Failed to delete playlist.")
 
 
-@router.get("/{playlist_id}/tracks", status_code=200)
-async def handle_get_playlist_tracks(
-    playlist_id: SpotifyID,
-    offset: int = 0,
-    limit: int = 100,
+@router.get("/{playlist_id}/items", status_code=200)
+async def handle_get_playlist_items(
+    playlist_id: ResourceId,
+    page: int = 0,
     service: SpotifyService = Depends(get_spotify_service),
-) -> SpotifyPlaylistTracks:
+) -> PlaylistItems:
     try:
-        return await service.get_playlist_tracks(
-            playlist_id, offset=offset, limit=limit
+        limit = 100
+        return await service.get_playlist_items(
+            playlist_id, offset=page * limit, limit=limit
         )
     except PlaylistNotOwnedError:
         raise HTTPException(status_code=403, detail="Forbidden.")
     except SpotifyException:
-        raise HTTPException(status_code=500, detail="Failed to get tracks.")
+        raise HTTPException(status_code=500, detail="Failed to get items.")
 
 
-@router.post("/{playlist_id}/tracks", status_code=204)
-async def handle_add_playlist_tracks(
-    playlist_id: SpotifyID,
-    body: TrackUrisRequest,
+@router.post("/{playlist_id}/items", status_code=204)
+async def handle_add_playlist_items(
+    playlist_id: ResourceId,
+    body: ItemUrisRequest,
     service: SpotifyService = Depends(get_spotify_service),
 ) -> None:
     try:
-        await service.add_playlist_tracks(playlist_id, body.track_uris)
+        await service.add_playlist_items(playlist_id, body.item_uris)
     except SpotifyException:
-        raise HTTPException(status_code=500, detail="Failed to add tracks.")
+        raise HTTPException(status_code=500, detail="Failed to add items.")
 
 
-@router.delete("/{playlist_id}/tracks", status_code=204)
-async def handle_delete_playlist_tracks(
-    playlist_id: SpotifyID,
-    body: TrackUrisRequest,
+@router.delete("/{playlist_id}/items", status_code=204)
+async def handle_delete_playlist_items(
+    playlist_id: ResourceId,
+    body: ItemUrisRequest,
     service: SpotifyService = Depends(get_spotify_service),
 ) -> None:
     try:
-        await service.delete_playlist_tracks(playlist_id, body.track_uris)
+        await service.delete_playlist_items(playlist_id, body.item_uris)
     except PlaylistNotOwnedError:
         raise HTTPException(status_code=403, detail="Forbidden.")
     except SpotifyException:
-        raise HTTPException(status_code=500, detail="Failed to remove tracks.")
+        raise HTTPException(status_code=500, detail="Failed to remove items.")

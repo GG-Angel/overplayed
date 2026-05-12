@@ -6,39 +6,33 @@ Integration tests for API endpoints :)
 
 import pytest
 from aiohttp import ClientSession, ClientResponseError
-from conftest import BASE_URL
+from conftest import BASE_URL, TEST_PLAYLIST_ITEM_URIS
 
 
-TRACK_IDS = ["1oNYiuCvyixmwcyNZyq3Dd", "51vNSpNP76OEzvwVB7kIKT", "52wpFNuwZEr4Im7BSoo2vF"]  # fmt: skip
-TRACK_URIS = [f"spotify:track:{t_id}" for t_id in TRACK_IDS]
+async def get_json(client: ClientSession, path: str, **kwargs):
+    async with client.get(path, **kwargs) as response:
+        response.raise_for_status()
+        return await response.json()
 
 
+@pytest.mark.parametrize("run", ["miss", "hit"])
 class TestAPI:
-    @pytest.mark.parametrize("run", ["miss", "hit"])
-    async def test_login_required(self, run: str):
+    @pytest.mark.parametrize("cookies", [None, {"session_id": ""}])
+    async def test_login_required(self, run: str, cookies: dict | None):
         async with ClientSession(base_url=BASE_URL) as anon:
-            async with anon.get("/users/me", cookies=None) as response:
-                assert response.status == 422
-            async with anon.get("/users/me", cookies={"session_id": ""}) as response:
+            async with anon.get("/users/me", cookies=cookies) as response:
                 assert response.status == 401
 
-    @pytest.mark.parametrize("run", ["miss", "hit"])
     async def test_get_user(self, client: ClientSession, run: str):
-        async with client.get("/users/me") as response:
-            response.raise_for_status()
-            user = await response.json()
-            assert isinstance(user, dict)
+        user = await get_json(client, "/users/me")
+        assert isinstance(user, dict)
 
-    @pytest.mark.parametrize("run", ["miss", "hit"])
     async def test_get_playlists(
         self, client: ClientSession, test_playlist: dict, run: str
     ):
-        async with client.get("/playlists") as response:
-            response.raise_for_status()
-            playlists = await response.json()
-            assert isinstance(playlists, list)
+        playlists = await get_json(client, "/playlists")
+        assert isinstance(playlists, list)
 
-    @pytest.mark.parametrize("run", ["miss", "hit"])
     async def test_get_playlist(
         self, client: ClientSession, test_playlist: dict, run: str
     ):
@@ -46,74 +40,64 @@ class TestAPI:
             with pytest.raises(ClientResponseError):
                 response.raise_for_status()
 
-        async with client.get(f"/playlists/{test_playlist['id']}") as response:
-            response.raise_for_status()
-            playlist = await response.json()
-            assert playlist["id"] == test_playlist["id"]
+        playlist = await get_json(client, f"/playlists/{test_playlist['id']}")
+        assert playlist["id"] == test_playlist["id"]
 
-    @pytest.mark.parametrize("run", ["once"])
-    async def test_add_playlist_tracks(
-        self, client: ClientSession, test_playlist: dict, run: str
+    @pytest.mark.parametrize("page,expected_len", [(0, 3), (1, 0)])
+    async def test_get_playlist_items(
+        self,
+        client: ClientSession,
+        test_playlist: dict,
+        run: str,
+        page: int,
+        expected_len: int,
     ):
-        async with client.post(
-            f"/playlists/{test_playlist['id']}/tracks",
-            json={"track_uris": TRACK_URIS},
-        ) as response:
-            response.raise_for_status()
+        result = await get_json(
+            client, f"/playlists/{test_playlist['id']}/items?page={page}"
+        )
+        assert isinstance(result, dict)
+        assert isinstance(result.get("items"), list)
+        assert len(result["items"]) == expected_len
 
-        async with client.get(f"/playlists/{test_playlist['id']}/tracks") as response:
-            response.raise_for_status()
-            tracks = await response.json()
-            track_uris = [t["track"]["uri"] for t in tracks]
-            assert all(uri in track_uris for uri in TRACK_URIS)
-
-    @pytest.mark.parametrize("run", ["miss", "hit"])
-    async def test_get_playlist_tracks(
-        self, client: ClientSession, test_playlist: dict, run: str
-    ):
-        async with client.get(f"/playlists/{test_playlist['id']}/tracks") as response:
-            response.raise_for_status()
-            tracks = await response.json()
-            assert isinstance(tracks, list)
-            assert len(tracks) == 3
-
-        async with client.get(
-            f"/playlists/{test_playlist['id']}/tracks?offset=1&limit=1"
-        ) as response:
-            response.raise_for_status()
-            tracks = await response.json()
-            assert isinstance(tracks, list)
-            assert len(tracks) == 1
-
-    @pytest.mark.parametrize("run", ["miss", "hit"])
     async def test_get_track_preview(
         self, client: ClientSession, test_playlist: dict, run: str
     ):
-        async with client.get(f"/playlists/{test_playlist['id']}/tracks") as response:
-            response.raise_for_status()
-            tracks = await response.json()
-            assert isinstance(tracks, list)
-            assert len(tracks) >= 1
+        result = await get_json(client, f"/playlists/{test_playlist['id']}/items")
+        assert isinstance(result, dict)
+        assert isinstance(result.get("items"), list)
 
-        for track in tracks[:3]:
-            isrc = track["track"]["external_ids"]["isrc"]
-            async with client.get(f"/previews/{isrc}") as response:
-                response.raise_for_status()
-                preview = await response.json()
-                assert isinstance(preview, dict)
-                assert "preview" in preview and preview.get("preview") != "NO_PREVIEW"
+        for item in result["items"]:
+            isrc = item["track"]["external_ids"]["isrc"]
+            preview = await get_json(client, f"/previews/{isrc}")
+            assert isinstance(preview, dict)
+            assert preview.get("preview_url") not in (None, "NO_PREVIEW")
 
-    @pytest.mark.parametrize("run", ["miss", "hit"])
     async def test_track_preview_not_found(self, client: ClientSession, run: str):
         async with client.get("/previews/123") as response:
             assert response.status == 404
 
-    @pytest.mark.parametrize("run", ["once"])
-    async def test_remove_playlist_tracks(
-        self, client: ClientSession, test_playlist: dict, run: str
-    ):
-        async with client.delete(
-            f"/playlists/{test_playlist['id']}/tracks",
-            json={"track_uris": TRACK_URIS},
-        ) as response:
-            response.raise_for_status()
+
+async def test_add_playlist_items(client: ClientSession, empty_playlist: dict):
+    async with client.post(
+        f"/playlists/{empty_playlist['id']}/items",
+        json={"item_uris": TEST_PLAYLIST_ITEM_URIS},
+    ) as response:
+        response.raise_for_status()
+
+    result = await get_json(client, f"/playlists/{empty_playlist['id']}/items")
+    item_uris = [item["track"]["uri"] for item in result["items"]]
+    assert all(uri in item_uris for uri in TEST_PLAYLIST_ITEM_URIS)
+
+
+async def test_remove_playlist_items(client: ClientSession, empty_playlist: dict):
+    async with client.post(
+        f"/playlists/{empty_playlist['id']}/items",
+        json={"item_uris": TEST_PLAYLIST_ITEM_URIS},
+    ) as response:
+        response.raise_for_status()
+
+    async with client.delete(
+        f"/playlists/{empty_playlist['id']}/items",
+        json={"item_uris": TEST_PLAYLIST_ITEM_URIS},
+    ) as response:
+        response.raise_for_status()

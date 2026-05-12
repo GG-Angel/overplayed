@@ -15,92 +15,96 @@ class SessionInfo(TokenInfo):
     user_id: str
 
 
-class SpotifyExternalUrls(BaseModel):
+class ExternalUrls(BaseModel):
     spotify: str
 
 
-class SpotifyExternalIds(BaseModel):
+class ExternalIds(BaseModel):
     isrc: str
 
 
-class SpotifyId(BaseModel):
+class Resource(BaseModel):
     href: str
     id: str
     uri: str
 
 
-class SpotifyImage(BaseModel):
+class Image(BaseModel):
     width: Optional[int]
     height: Optional[int]
     url: str
 
 
-class SpotifyUser(SpotifyId):
+class User(Resource):
     display_name: Optional[str]
-    external_urls: SpotifyExternalUrls
+    external_urls: ExternalUrls
 
 
-class SpotifyCurrentUser(SpotifyUser):
-    images: List[SpotifyImage]
+class CurrentUser(User):
+    images: List[Image]
 
 
-class SpotifyPlaylistTracksInfo(BaseModel):
+class PlaylistItemCount(BaseModel):
     total: int
 
 
-class SpotifyPlaylist(SpotifyId):
+class Playlist(Resource):
     collaborative: bool
     description: Optional[str]
-    images: Optional[List[SpotifyImage]]
+    images: Optional[List[Image]]
     name: str
-    owner: SpotifyUser
+    owner: User
     public: bool
     snapshot_id: str
-    tracks: SpotifyPlaylistTracksInfo
-    external_urls: SpotifyExternalUrls
+    tracks: PlaylistItemCount
+    external_urls: ExternalUrls
 
 
-class SpotifyArtist(SpotifyId):
+class Artist(Resource):
     name: str
-    external_urls: SpotifyExternalUrls
+    external_urls: ExternalUrls
 
 
-class SpotifyAlbum(SpotifyId):
+class Album(Resource):
     album_type: str
-    images: List[SpotifyImage]
+    images: List[Image]
     name: str
     release_date: str
-    artists: List[SpotifyArtist]
+    artists: List[Artist]
     total_tracks: int
-    external_urls: SpotifyExternalUrls
+    external_urls: ExternalUrls
 
 
-class SpotifyTrack(SpotifyId):
+class Track(Resource):
     explicit: bool
-    album: SpotifyAlbum
-    artists: List[SpotifyArtist]
+    album: Album
+    artists: List[Artist]
     duration_ms: int
     name: str
     is_local: bool
-    external_urls: SpotifyExternalUrls
-    external_ids: SpotifyExternalIds
+    external_urls: ExternalUrls
+    external_ids: ExternalIds
 
 
-class SpotifyPlaylistTrack(BaseModel):
+class TrackPreview(BaseModel):
+    preview_url: str
+
+
+class PlaylistItem(BaseModel):
     added_at: str
-    added_by: SpotifyId
+    added_by: Resource
     is_local: bool
-    track: SpotifyTrack
+    track: Track
 
 
-class SpotifyPlaylistTracks(BaseModel):
+class PlaylistItems(BaseModel):
     total: int
     has_more: bool
-    tracks: List[SpotifyPlaylistTrack]
+    items: List[PlaylistItem]
 
 
-class TrackUrisRequest(BaseModel):
-    track_uris: List[str]
+class ItemUrisRequest(BaseModel):
+    item_uris: List[str]
 
 
 class CreatePlaylistRequest(BaseModel):

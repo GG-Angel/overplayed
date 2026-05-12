@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from settings import SpotifySettings
 from typing import List, Callable, AsyncGenerator, AsyncIterator
 from loguru import logger
-from models import SpotifyCurrentUser, SpotifyPlaylist, SpotifyPlaylistTrack
+from models import CurrentUser, Playlist, PlaylistItem
 from spotipy import Spotify, SpotifyException
 from clients.spotify.utils import spotify_fields
 
@@ -14,29 +14,29 @@ class SpotifyClient:
         self.settings = settings
         self.user_id = user_id
 
-    async def get_user(self) -> SpotifyCurrentUser:
+    async def get_user(self) -> CurrentUser:
         """Gets the profile of the current user."""
         async with self._handle_error("get current user"):
             user = await self._run(self.spotify.me)
-            return SpotifyCurrentUser(**user)
+            return CurrentUser(**user)
 
-    async def get_playlist(self, playlist_id: str) -> SpotifyPlaylist:
+    async def get_playlist(self, playlist_id: str) -> Playlist:
         """Gets playlist metadata."""
         async with self._handle_error("get playlist"):
             playlist = await self._run(
                 self.spotify.playlist,
                 playlist_id=playlist_id,
-                fields=spotify_fields(SpotifyPlaylist),
+                fields=spotify_fields(Playlist),
             )
             self._log(f"Got playlist: {playlist_id}")
-            return SpotifyPlaylist(**playlist)
+            return Playlist(**playlist)
 
-    async def get_user_playlists(self) -> List[SpotifyPlaylist]:
+    async def get_user_playlists(self) -> List[Playlist]:
         """Gets all playlists saved by a user."""
         async with self._handle_error("get user playlists"):
             self._log("Getting user playlists")
             playlists = [
-                SpotifyPlaylist(**p)
+                Playlist(**p)
                 async for p in self._paginate(
                     self.spotify.current_user_playlists,
                     limit=self.settings.lim_playlists,
@@ -45,33 +45,33 @@ class SpotifyClient:
             self._log(f"Got {len(playlists)} playlists")
             return playlists
 
-    async def get_playlist_tracks(self, playlist_id: str) -> List[SpotifyPlaylistTrack]:
-        """Gets all tracks from a playlist."""
-        async with self._handle_error("get tracks from playlist"):
-            self._log(f"Getting tracks from playlist: {playlist_id}")
-            tracks = [
-                SpotifyPlaylistTrack(**t)
+    async def get_playlist_items(self, playlist_id: str) -> List[PlaylistItem]:
+        """Gets all items from a playlist."""
+        async with self._handle_error("get items from playlist"):
+            self._log(f"Getting items from playlist: {playlist_id}")
+            items = [
+                PlaylistItem(**t)
                 async for t in self._paginate(
                     self.spotify.playlist_items,
-                    limit=self.settings.lim_tracks,
+                    limit=self.settings.lim_playlist_items,
                     playlist_id=playlist_id,
-                    fields=spotify_fields(SpotifyPlaylistTrack, is_nested=True),
+                    fields=spotify_fields(PlaylistItem, is_nested=True),
                 )
                 if not t.get("is_local") and t.get("track")
             ]
-            self._log(f"Got {len(tracks)} tracks from playlist: {playlist_id}")
-            return tracks
+            self._log(f"Got {len(items)} items from playlist: {playlist_id}")
+            return items
 
-    async def remove_playlist_tracks(
-        self, playlist_id: str, snapshot_id: str, track_uris: List[str]
+    async def remove_playlist_items(
+        self, playlist_id: str, snapshot_id: str, item_uris: List[str]
     ) -> None:
-        """Removes tracks from a playlist and returns the new snapshot ID."""
-        async with self._handle_error("remove tracks from playlist"):
+        """Removes items from a playlist and returns the new snapshot ID."""
+        async with self._handle_error("remove items from playlist"):
             last_snapshot_id = snapshot_id
-            for offset in range(0, len(track_uris), self.settings.lim_tracks):
-                batch = track_uris[offset : offset + self.settings.lim_tracks]
+            for offset in range(0, len(item_uris), self.settings.lim_playlist_items):
+                batch = item_uris[offset : offset + self.settings.lim_playlist_items]
                 self._log(
-                    f"Removing tracks from playlist: {playlist_id} (offset={offset})"
+                    f"Removing items from playlist: {playlist_id} (offset={offset})"
                 )
                 last_snapshot_id = await self._run(
                     self.spotify.playlist_remove_all_occurrences_of_items,
@@ -79,11 +79,9 @@ class SpotifyClient:
                     items=batch,
                     snapshot_id=last_snapshot_id,
                 )
-            self._log(f"Removed {len(track_uris)} tracks from playlist: {playlist_id}")
+            self._log(f"Removed {len(item_uris)} items from playlist: {playlist_id}")
 
-    async def create_playlist(
-        self, name: str, description: str = ""
-    ) -> SpotifyPlaylist:
+    async def create_playlist(self, name: str, description: str = "") -> Playlist:
         """Creates a new empty playlist."""
         async with self._handle_error("create playlist"):
             playlist = await self._run(
@@ -95,18 +93,16 @@ class SpotifyClient:
                 collaborative=False,
             )
             self._log(f"Created playlist: '{name}'")
-            return SpotifyPlaylist(**playlist)
+            return Playlist(**playlist)
 
-    async def add_playlist_tracks(
-        self, playlist_id: str, track_uris: List[str]
-    ) -> None:
-        """Appends tracks to an existing playlist in batches."""
-        async with self._handle_error("add tracks to playlist"):
-            for offset in range(0, len(track_uris), self.settings.lim_tracks):
-                batch = track_uris[offset : offset + self.settings.lim_tracks]
-                self._log(f"Adding tracks to playlist: {playlist_id} (offset={offset})")
+    async def add_playlist_items(self, playlist_id: str, item_uris: List[str]) -> None:
+        """Appends items to an existing playlist in batches."""
+        async with self._handle_error("add items to playlist"):
+            for offset in range(0, len(item_uris), self.settings.lim_playlist_items):
+                batch = item_uris[offset : offset + self.settings.lim_playlist_items]
+                self._log(f"Adding items to playlist: {playlist_id} (offset={offset})")
                 await self._run(self.spotify.playlist_add_items, playlist_id, batch)
-            self._log(f"Added {len(track_uris)} tracks to playlist: {playlist_id}")
+            self._log(f"Added {len(item_uris)} items to playlist: {playlist_id}")
 
     async def delete_playlist(self, playlist_id: str) -> None:
         """Deletes a playlist."""

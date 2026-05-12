@@ -10,16 +10,16 @@ from secrets import token_urlsafe
 from loguru import logger
 from models import (
     SessionInfo,
-    SpotifyCurrentUser,
-    SpotifyPlaylist,
-    SpotifyPlaylistTrack,
-    SpotifyPlaylistTracks,
+    CurrentUser,
+    Playlist,
+    PlaylistItem,
+    PlaylistItems,
 )
 
 _SESSIONS_KEY = "sessions"
 _USERS_KEY = "users"
 _PLAYLISTS_KEY = "playlists"
-_TRACKS_KEY = "tracks"
+_ITEMS_KEY = "items"
 _SNAPSHOT_KEY = "snapshot"
 _PREVIEWS_KEY = "previews"
 
@@ -43,13 +43,11 @@ class RedisClient:
             decrypted = self._decrypt(encrypted)
             return SessionInfo.model_validate_json(decrypted)
 
-    async def get_user(self, user_id: str) -> Optional[SpotifyCurrentUser]:
+    async def get_user(self, user_id: str) -> Optional[CurrentUser]:
         async with self._handle_error("get user"):
-            return await self._get_model(SpotifyCurrentUser, self._user_key(user_id))
+            return await self._get_model(CurrentUser, self._user_key(user_id))
 
-    async def get_playlist(
-        self, user_id: str, playlist_id: str
-    ) -> Optional[SpotifyPlaylist]:
+    async def get_playlist(self, user_id: str, playlist_id: str) -> Optional[Playlist]:
         async with self._handle_error("get playlist"):
             key = self._playlists_key(user_id)
 
@@ -59,9 +57,9 @@ class RedisClient:
                 return None
 
             logger.debug(f"HIT: {key} (id={playlist_id})")
-            return SpotifyPlaylist.model_validate_json(playlist)
+            return Playlist.model_validate_json(playlist)
 
-    async def get_playlists(self, user_id: str) -> Optional[List[SpotifyPlaylist]]:
+    async def get_playlists(self, user_id: str) -> Optional[List[Playlist]]:
         async with self._handle_error("get playlists"):
             key = self._playlists_key(user_id)
 
@@ -71,11 +69,9 @@ class RedisClient:
                 return None
 
             logger.debug(f"HIT: {key} (all playlists)")
-            return [
-                SpotifyPlaylist.model_validate_json(p) for p in playlist_map.values()
-            ]
+            return [Playlist.model_validate_json(p) for p in playlist_map.values()]
 
-    async def get_playlist_tracks(
+    async def get_playlist_items(
         self,
         user_id: str,
         playlist_id: str,
@@ -83,25 +79,25 @@ class RedisClient:
         *,
         offset: int = 0,
         limit: int = 100,
-    ) -> Optional[SpotifyPlaylistTracks]:
-        async with self._handle_error("get playlist tracks"):
+    ) -> Optional[PlaylistItems]:
+        async with self._handle_error("get playlist items"):
             snapshot_key = self._playlist_snapshot_key(user_id, playlist_id)
-            tracks_key = self._playlist_tracks_key(user_id, playlist_id)
+            items_key = self._playlist_items_key(user_id, playlist_id)
 
             async with self.redis.pipeline() as pipe:
                 pipe.get(snapshot_key)
-                pipe.exists(tracks_key)
-                pipe.lrange(tracks_key, start=offset, end=offset + limit - 1)
-                pipe.llen(tracks_key)
+                pipe.exists(items_key)
+                pipe.lrange(items_key, start=offset, end=offset + limit - 1)
+                pipe.llen(items_key)
                 cached_snapshot_id, hit, page, total = await pipe.execute()
 
             if not hit or cached_snapshot_id != snapshot_id:
-                logger.debug(f"MISS: {tracks_key}")
+                logger.debug(f"MISS: {items_key}")
                 return None
 
-            logger.debug(f"HIT: {tracks_key}")
-            return SpotifyPlaylistTracks(
-                tracks=[SpotifyPlaylistTrack.model_validate_json(t) for t in page],
+            logger.debug(f"HIT: {items_key}")
+            return PlaylistItems(
+                items=[PlaylistItem.model_validate_json(item) for item in page],
                 total=total,
                 has_more=offset + limit < total,
             )
@@ -120,13 +116,13 @@ class RedisClient:
                 self._session_key(session_id), encrypted, self.settings.ttl_sessions
             )
 
-    async def set_user(self, user: SpotifyCurrentUser) -> None:
+    async def set_user(self, user: CurrentUser) -> None:
         async with self._handle_error("set user"):
             await self._set_model(
                 user, self._user_key(user.id), self.settings.ttl_users
             )
 
-    async def set_playlist(self, user_id: str, playlist: SpotifyPlaylist) -> None:
+    async def set_playlist(self, user_id: str, playlist: Playlist) -> None:
         async with self._handle_error("set playlist"):
             key = self._playlists_key(user_id)
             ttl = self.settings.ttl_playlists
@@ -143,9 +139,7 @@ class RedisClient:
 
             logger.debug(f"CACHED: playlist {playlist.id} (key={key}, ttl={ttl}s)")
 
-    async def set_playlists(
-        self, user_id: str, playlists: List[SpotifyPlaylist]
-    ) -> None:
+    async def set_playlists(self, user_id: str, playlists: List[Playlist]) -> None:
         async with self._handle_error("set playlists"):
             key = self._playlists_key(user_id)
             ttl = self.settings.ttl_playlists
@@ -159,30 +153,30 @@ class RedisClient:
 
             logger.debug(f"CACHED: {len(playlists)} playlists (key={key}, ttl={ttl}s)")
 
-    async def set_playlist_tracks(
+    async def set_playlist_items(
         self,
         user_id: str,
         playlist_id: str,
         snapshot_id: str,
-        tracks: List[SpotifyPlaylistTrack],
+        items: List[PlaylistItem],
     ) -> None:
-        async with self._handle_error("set playlist tracks"):
-            tracks_key = self._playlist_tracks_key(user_id, playlist_id)
+        async with self._handle_error("set playlist items"):
+            items_key = self._playlist_items_key(user_id, playlist_id)
             snapshot_key = self._playlist_snapshot_key(user_id, playlist_id)
-            ttl = self.settings.ttl_tracks
-            serialized = [t.model_dump_json() for t in tracks]
+            ttl = self.settings.ttl_playlist_items
+            serialized = [t.model_dump_json() for t in items]
 
             async with self.redis.pipeline() as pipe:
-                pipe.delete(tracks_key)
+                pipe.delete(items_key)
                 if serialized:
-                    pipe.rpush(tracks_key, *serialized)
-                    pipe.expire(tracks_key, ttl)
+                    pipe.rpush(items_key, *serialized)
+                    pipe.expire(items_key, ttl)
                     pipe.set(snapshot_key, snapshot_id, ex=ttl)
                 else:
-                    pipe.delete(snapshot_key)  # keep snapshot/tracks in sync
+                    pipe.delete(snapshot_key)  # keep snapshot/items in sync
                 await pipe.execute()
 
-            logger.debug(f"CACHED: {len(tracks)} tracks (key={tracks_key}, ttl={ttl}s)")
+            logger.debug(f"CACHED: {len(items)} items (key={items_key}, ttl={ttl}s)")
 
     async def set_track_preview_url(
         self, isrc: str, preview_url: Optional[str]
@@ -211,12 +205,12 @@ class RedisClient:
     async def invalidate_playlist(self, user_id: str, playlist_id: str) -> None:
         async with self._handle_error("invalidate playlist"):
             playlists_key = self._playlists_key(user_id)
-            tracks_key = self._playlist_tracks_key(user_id, playlist_id)
+            items_key = self._playlist_items_key(user_id, playlist_id)
             snapshot_key = self._playlist_snapshot_key(user_id, playlist_id)
 
             async with self.redis.pipeline() as pipe:
                 pipe.hdel(playlists_key, playlist_id)  # remove single entry from hash
-                pipe.delete(tracks_key, snapshot_key)  # delete these keys entirely
+                pipe.delete(items_key, snapshot_key)  # delete these keys entirely
                 await pipe.execute()
 
             logger.debug(f"Invalidated playlist {playlist_id} for user: {user_id}")
@@ -275,10 +269,10 @@ class RedisClient:
         return RedisClient._key(RedisClient._user_key(user_id), _PLAYLISTS_KEY)
 
     @staticmethod
-    def _playlist_tracks_key(user_id: str, playlist_id: str) -> str:
-        """users:{user_id}:playlists:{playlist_id}:tracks"""
+    def _playlist_items_key(user_id: str, playlist_id: str) -> str:
+        """users:{user_id}:playlists:{playlist_id}:items"""
         return RedisClient._key(
-            RedisClient._playlists_key(user_id), playlist_id, _TRACKS_KEY
+            RedisClient._playlists_key(user_id), playlist_id, _ITEMS_KEY
         )
 
     @staticmethod

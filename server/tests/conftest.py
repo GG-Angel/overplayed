@@ -8,6 +8,9 @@ from loguru import logger
 BASE_URL = "http://127.0.0.1:8080"
 SESSION_ID = environ["SESSION_ID"]
 
+TEST_PLAYLIST_ITEM_IDS = ["1oNYiuCvyixmwcyNZyq3Dd", "51vNSpNP76OEzvwVB7kIKT", "52wpFNuwZEr4Im7BSoo2vF"]  # fmt: skip
+TEST_PLAYLIST_ITEM_URIS = [f"spotify:track:{t_id}" for t_id in TEST_PLAYLIST_ITEM_IDS]
+
 
 class _PropagateHandler(logging.Handler):
     def emit(self, record: logging.LogRecord) -> None:
@@ -34,14 +37,33 @@ async def client():
 
 @pytest.fixture(scope="session")
 async def test_playlist(client: ClientSession):
-    """Creates a playlist at the start of the session and deletes it at the end."""
+    """Session-scoped playlist pre-populated with items, for read tests."""
     async with client.post("/playlists", json={"name": "pytest"}) as response:
         response.raise_for_status()
         playlist = await response.json()
         logger.info(f"Created test playlist: {playlist['name']}")
+
+    async with client.post(
+        f"/playlists/{playlist['id']}/items",
+        json={"item_uris": TEST_PLAYLIST_ITEM_URIS},
+    ) as response:
+        response.raise_for_status()
 
     yield playlist
 
     async with client.delete(f"/playlists/{playlist['id']}") as response:
         response.raise_for_status()
         logger.info(f"Deleted test playlist: {playlist['name']}")
+
+
+@pytest.fixture
+async def empty_playlist(client: ClientSession):
+    """Function-scoped empty playlist, for mutation tests."""
+    async with client.post("/playlists", json={"name": "pytest-mutations"}) as response:
+        response.raise_for_status()
+        playlist = await response.json()
+
+    yield playlist
+
+    async with client.delete(f"/playlists/{playlist['id']}") as response:
+        response.raise_for_status()
