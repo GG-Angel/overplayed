@@ -4,11 +4,14 @@ import { useLocation } from "react-router-dom";
 import Avatar from "./Avatar";
 import { useState } from "react";
 import AvatarDropdown from "./AvatarDropdown";
+import { useClickOutside } from "@/hooks/ux";
 
 const AvatarControl = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { user, redirectToLogin } = useAuth();
   const location = useLocation();
+
+  const containerRef = useClickOutside<HTMLDivElement>(() => setIsOpen(false), isOpen);
 
   if (!user)
     return (
@@ -18,7 +21,7 @@ const AvatarControl = () => {
     );
 
   return (
-    <div className="inline-flex relative">
+    <div ref={containerRef} className="inline-flex relative">
       <Avatar user={user} onClick={() => setIsOpen((prev) => !prev)} />
       {isOpen && <AvatarDropdown className="absolute top-full right-0 mt-2 z-50 w-64" />}
     </div>
