@@ -36,3 +36,10 @@ export const getTrackPreview = async (isrc: string) => {
   const response = await api.get(`/previews/${isrc}`);
   return trackPreviewSchema.parse(response);
 };
+
+export const getTrackPreviewAudio = async (isrc: string) => {
+  const { preview_url } = await getTrackPreview(isrc);
+  const audio = new Audio(preview_url);
+  audio.preload = "auto";
+  return audio;
+};

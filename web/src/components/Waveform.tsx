@@ -16,13 +16,13 @@ export type WaveformHandler = {
 };
 
 type WaveformProps = ComponentProps<"div"> & {
-  audioUrl: string | undefined;
+  audio: HTMLAudioElement | undefined;
   waveformRef?: Ref<WaveformHandler>;
   onPlay?: () => void;
   onPause?: () => void;
 };
 
-const Waveform = ({ audioUrl, waveformRef, onPlay, onPause, ...props }: WaveformProps) => {
+const Waveform = ({ audio, waveformRef, onPlay, onPause, ...props }: WaveformProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [wavesurfer, setWavesurfer] = useState<WaveSurfer | null>(null);
 
@@ -64,9 +64,9 @@ const Waveform = ({ audioUrl, waveformRef, onPlay, onPause, ...props }: Waveform
 
   // load new tracks
   useEffect(() => {
-    if (!wavesurfer || !audioUrl) return;
-    wavesurfer.load(audioUrl);
-  }, [audioUrl, wavesurfer]);
+    if (!wavesurfer || !audio) return;
+    wavesurfer.load(audio.src);
+  }, [audio, wavesurfer]);
 
   // handle player events
   useEffect(() => {

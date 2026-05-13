@@ -1,8 +1,10 @@
 import { getPlaylist, getPlaylistItems, getPlaylists } from "@/lib/api";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueries, useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
+import { trackPreviewQueryOptions } from "./previews";
 
 const PLAYLIST_ITEMS_PREFETCH_THRESHOLD = 25;
+const TRACK_PREVIEW_PREFETCH_LIMIT = 10;
 
 type Decision = "like" | "dislike";
 
@@ -43,17 +45,25 @@ export const usePlaylistSwipe = (id: string | undefined) => {
   const [swipes, setSwipes] = useState<Swipe[]>([]);
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = usePlaylistItems(id);
 
-  const index = swipes.length;
   const items = data?.pages.flatMap((p) => p.items) ?? [];
-  const currentItem = items.at(index);
+  const currentIndex = swipes.length;
+  const currentItem = items.at(currentIndex);
+
+  const isrcs = items
+    .slice(currentIndex, currentIndex + TRACK_PREVIEW_PREFETCH_LIMIT)
+    .map((item) => item.track.external_ids.isrc);
+  const audios = useQueries({
+    queries: isrcs.map((isrc) => trackPreviewQueryOptions(isrc)),
+  });
+  const currentAudio = audios[0]?.data;
 
   // prefetch next page when the number of remaining items is low
   useEffect(() => {
-    const remaining = items.length - index;
+    const remaining = items.length - currentIndex;
     if (remaining < PLAYLIST_ITEMS_PREFETCH_THRESHOLD && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
-  }, [index, items.length, hasNextPage, isFetchingNextPage, fetchNextPage]);
+  }, [currentIndex, items.length, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const swipe = (decision: Decision) => {
     if (!currentItem) return;
@@ -61,16 +71,17 @@ export const usePlaylistSwipe = (id: string | undefined) => {
   };
 
   const undo = () => {
-    if (index <= 0) return;
+    if (currentIndex <= 0) return;
     setSwipes((prev) => prev.slice(0, -1));
   };
 
   return {
     currentItem,
+    currentAudio,
     swipes,
     swipe,
     undo,
     isLoading,
-    index,
+    index: currentIndex,
   };
 };

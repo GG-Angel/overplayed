@@ -1,9 +1,10 @@
-import { getTrackPreview } from "@/lib/api";
-import { useQuery } from "@tanstack/react-query";
+import { getTrackPreviewAudio } from "@/lib/api";
+import { queryOptions } from "@tanstack/react-query";
 
-export const useTrackPreview = (isrc: string | undefined) =>
-  useQuery({
+export const trackPreviewQueryOptions = (isrc: string) =>
+  queryOptions({
     queryKey: ["preview", isrc],
-    queryFn: () => getTrackPreview(isrc!),
-    enabled: !!isrc,
+    queryFn: () => getTrackPreviewAudio(isrc),
+    staleTime: 10 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
