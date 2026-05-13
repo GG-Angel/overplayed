@@ -4,6 +4,7 @@ import { Check, Heart, Undo, X } from "lucide-react";
 import IconButton from "@/components/ui/IconButton";
 import { usePlaylistSwipe } from "@/hooks/playlists";
 import LoadingState from "@/components/states/LoadingState";
+import TrackPlayer from "@/components/TrackPlayer";
 
 const PlaylistSwipePage = () => {
   const { playlistId } = useParams();
@@ -21,6 +22,7 @@ const PlaylistSwipePage = () => {
         <IconButton icon={Heart} onClick={() => swipe("like")} intent="like" />
         <IconButton icon={Check} size="sm" intent="finish" />
       </div>
+      <TrackPlayer track={currentItem.track} />
     </div>
   );
 };

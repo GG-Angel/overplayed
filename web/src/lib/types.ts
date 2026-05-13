@@ -85,7 +85,7 @@ export const playlistItemsPageSchema = z.object({
 });
 
 export const trackPreviewSchema = z.object({
-  preview: z.url(),
+  preview_url: z.url(),
 });
 
 export type Image = z.infer<typeof imageSchema>;

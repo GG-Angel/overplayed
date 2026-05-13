@@ -121,6 +121,7 @@ class SpotifyClient:
             response = await self._run(
                 spotify_method, offset=offset, limit=limit, **kwargs
             )
+            
             items = response["items"]
             for item in items:
                 yield item
