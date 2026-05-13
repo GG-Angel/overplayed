@@ -4,26 +4,26 @@ import type { LucideIcon } from "lucide-react";
 import type { ComponentProps } from "react";
 
 const buttonVariants = cva(
-  "flex items-center justify-center rounded-full border-2 hover:cursor-pointer active:opacity-75 disabled:opacity-25 disabled:pointer-events-none transition-opacity",
+  "inline-flex items-center justify-center rounded-full border-2 hover:cursor-pointer active:opacity-75 disabled:opacity-25 disabled:pointer-events-none transition-opacity",
   {
     variants: {
       size: { xs: "p-2.5", sm: "p-4", md: "p-4.5" },
-      intent: {
-        none: "text-muted-foreground border-muted",
-        like: "text-emerald-400 border-emerald-400/50",
-        dislike: "text-rose-400 border-rose-400/50",
-        undo: "text-amber-400 border-amber-400/50",
-        finish: "text-sky-400 border-sky-400/50",
+      variant: {
+        neutral: "text-muted-foreground border-muted",
+        green: "text-emerald-400 border-emerald-400/50",
+        red: "text-rose-400 border-rose-400/50",
+        yellow: "text-amber-400 border-amber-400/50",
+        blue: "text-sky-400 border-sky-400/50",
       },
     },
-    defaultVariants: { size: "md", intent: "none" },
+    defaultVariants: { size: "md", variant: "neutral" },
   }
 );
 
 const iconVariants = cva("shrink-0", {
   variants: {
     size: {
-      xs: "size-4.5",
+      xs: "size-4",
       sm: "size-5",
       md: "size-7",
     },
@@ -38,9 +38,9 @@ export type IconButtonProps = ComponentProps<"button"> &
     icon: LucideIcon;
   };
 
-const IconButton = ({ icon: Icon, size, intent, className, ...props }: IconButtonProps) => {
+const IconButton = ({ icon: Icon, size, variant, className, ...props }: IconButtonProps) => {
   return (
-    <button className={cn(buttonVariants({ size, intent }), className)} {...props}>
+    <button className={cn(buttonVariants({ size, variant }), className)} {...props}>
       <Icon className={iconVariants({ size })} />
     </button>
   );
