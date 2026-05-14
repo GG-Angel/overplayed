@@ -14,13 +14,15 @@ const PlaylistSwipePage = () => {
   if (!currentItem) return <div>Done!</div>;
 
   return (
-    <div>
-      <TrackCard track={currentItem.track} />
-      <div className="flex items-end gap-2">
-        <IconButton icon={Undo} size="sm" onClick={undo} disabled={index <= 0} variant="yellow" />
-        <IconButton icon={X} onClick={() => swipe("dislike")} variant="red" />
-        <IconButton icon={Heart} onClick={() => swipe("like")} variant="green" />
-        <IconButton icon={Check} size="sm" variant="blue" />
+    <div className="flex flex-col h-screen py-6">
+      <div className="flex-1 flex flex-col items-center justify-center gap-6">
+        <TrackCard track={currentItem.track} />
+        <div className="flex items-end gap-2">
+          <IconButton icon={Undo} size="sm" onClick={undo} disabled={index <= 0} variant="yellow" />
+          <IconButton icon={X} onClick={() => swipe("dislike")} variant="red" />
+          <IconButton icon={Heart} onClick={() => swipe("like")} variant="green" />
+          <IconButton icon={Check} size="sm" variant="blue" />
+        </div>
       </div>
       <AudioPlayer audio={currentAudio.data} isError={currentAudio.isError} />
     </div>
