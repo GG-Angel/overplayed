@@ -5,7 +5,7 @@ import SwipeCardDecisionOverlay from "./SwipeCardDecisionOverlay";
 import { animate, motion, useMotionValue, useTransform } from "framer-motion";
 import { useCallback, useEffect, useImperativeHandle, type Ref } from "react";
 import { cn } from "@/lib/utils";
-import { VISIBLE_CARD_COUNT } from "@/app/pages/playlists/swipe";
+import { VISIBLE_CARD_COUNT } from "@/app/pages/playlists/swipe/SwipeView";
 
 export type Direction = "left" | "right";
 

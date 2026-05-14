@@ -6,9 +6,9 @@ import { trackPreviewQueryOptions } from "./previews";
 const PLAYLIST_ITEMS_PREFETCH_THRESHOLD = 25;
 const TRACK_PREVIEW_PREFETCH_LIMIT = 5;
 
-type Decision = "like" | "dislike";
+export type Decision = "like" | "dislike";
 
-type Swipe = {
+export type Swipe = {
   id: string;
   decision: Decision;
 };
@@ -62,7 +62,7 @@ export const usePlaylistSwipe = (id: string | undefined) => {
     queries: isrcs.map((isrc) => trackPreviewQueryOptions(isrc)),
   });
 
-  const currentAudio = audios[0];
+  const currentAudio = audios.at(0);
 
   // prefetch next page when the number of remaining items is low
   useEffect(() => {
@@ -84,7 +84,8 @@ export const usePlaylistSwipe = (id: string | undefined) => {
 
   return {
     item: currentItem,
-    audio: currentAudio,
+    audio: currentAudio?.data,
+    isAudioError: currentAudio?.isError ?? true,
     index: currentIndex,
     total: totalItems,
     items,

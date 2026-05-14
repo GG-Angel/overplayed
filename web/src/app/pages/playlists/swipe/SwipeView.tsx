@@ -1,40 +1,61 @@
-import { useParams } from "react-router-dom";
-import { Check, Heart, Undo, X } from "lucide-react";
-import IconButton from "@/components/ui/IconButton";
-import { usePlaylistSwipe } from "@/hooks/playlists";
-import LoadingState from "@/components/states/LoadingState";
 import AudioPlayer from "@/components/AudioPlayer";
+import type { Direction, SwipeCardHandler } from "@/components/SwipeCard";
+import SwipeCard from "@/components/SwipeCard";
 import SwipeProgress from "@/components/SwipeProgress";
-import SwipeCard, { type Direction, type SwipeCardHandler } from "@/components/SwipeCard";
-import { useRef, useState } from "react";
+import IconButton from "@/components/ui/IconButton";
+import type { Decision } from "@/hooks/playlists";
+import type { PlaylistItem } from "@/lib/types";
 import { AnimatePresence } from "framer-motion";
-import ErrorState from "@/components/states/ErrorState";
+import { Undo, X, Heart, Check } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 export const VISIBLE_CARD_COUNT = 3;
 
-const PlaylistSwipePage = () => {
-  const cardRef = useRef<SwipeCardHandler | null>(null);
-  const [isSwiping, setIsSwiping] = useState(false);
-  const { playlistId } = useParams();
-  const { items, audio, index, total, likes, dislikes, swipe, undo, isLoading } =
-    usePlaylistSwipe(playlistId);
+type SwipeViewProps = {
+  items: PlaylistItem[];
+  audio: HTMLAudioElement | undefined;
+  isAudioError: boolean;
+  index: number;
+  likes: number;
+  dislikes: number;
+  total: number;
+  onSwipe: (decision: Decision) => void;
+  onUndo: () => void;
+  onFinish: () => void;
+};
 
-  const visibleItems = items.slice(index, index + VISIBLE_CARD_COUNT);
+const SwipeView = ({
+  items,
+  audio,
+  isAudioError,
+  index,
+  likes,
+  dislikes,
+  total,
+  onSwipe,
+  onUndo,
+  onFinish,
+}: SwipeViewProps) => {
+  const activeCardRef = useRef<SwipeCardHandler | null>(null);
+
+  const [isSwiping, setIsSwiping] = useState(false);
 
   const handleSwipe = (direction: Direction) => {
     setIsSwiping(false);
     if (direction === "left") {
-      swipe("dislike");
+      onSwipe("dislike");
     } else {
-      swipe("like");
+      onSwipe("like");
     }
   };
 
-  const handleFinish = () => {};
+  useEffect(() => {
+    if (index === total) {
+      onFinish();
+    }
+  }, [index, total, onFinish]);
 
-  if (isLoading || !total) return <LoadingState message="Loading tracks..." />;
-  if (total === 0) return <ErrorState message="Playlist is empty" />;
-  if (index === total) handleFinish();
+  const visibleItems = items.slice(index, index + VISIBLE_CARD_COUNT);
 
   return (
     <div className="flex flex-col w-full max-w-2xl self-center h-screen py-6">
@@ -47,7 +68,7 @@ const PlaylistSwipePage = () => {
                 className="col-start-1 row-start-1"
                 key={item.track.uri}
                 track={item.track}
-                ref={i === 0 ? cardRef : undefined}
+                ref={i === 0 ? activeCardRef : undefined}
                 zIndex={visibleItems.length - i}
                 baseRotate={i === 0 ? 0 : (i % 2 === 0 ? 1 : -1) * 3}
                 onSwipeStart={() => setIsSwiping(true)}
@@ -60,34 +81,34 @@ const PlaylistSwipePage = () => {
           <IconButton
             icon={Undo}
             size="sm"
-            onClick={undo}
+            onClick={onUndo}
             disabled={isSwiping || index === 0}
             variant="yellow"
           />
           <IconButton
             icon={X}
-            onClick={() => cardRef.current?.swipe("left")}
+            onClick={() => activeCardRef.current?.swipe("left")}
             disabled={isSwiping || index === total}
             variant="red"
           />
           <IconButton
             icon={Heart}
-            onClick={() => cardRef.current?.swipe("right")}
+            onClick={() => activeCardRef.current?.swipe("right")}
             disabled={isSwiping || index === total}
             variant="green"
           />
           <IconButton
             icon={Check}
             size="sm"
-            onClick={handleFinish}
+            onClick={onFinish}
             disabled={isSwiping || index === total}
             variant="blue"
           />
         </div>
       </div>
-      <AudioPlayer audio={audio.data} isError={audio.isError} />
+      <AudioPlayer audio={audio} isError={isAudioError} />
     </div>
   );
 };
 
-export default PlaylistSwipePage;
+export default SwipeView;
