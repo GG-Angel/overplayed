@@ -8,6 +8,7 @@ import SwipeProgress from "@/components/SwipeProgress";
 import SwipeCard, { type Direction, type SwipeCardHandler } from "@/components/SwipeCard";
 import { useRef, useState } from "react";
 import { AnimatePresence } from "framer-motion";
+import ErrorState from "@/components/states/ErrorState";
 
 export const VISIBLE_CARD_COUNT = 3;
 
@@ -18,6 +19,8 @@ const PlaylistSwipePage = () => {
   const { items, audio, index, total, likes, dislikes, swipe, undo, isLoading } =
     usePlaylistSwipe(playlistId);
 
+  const visibleItems = items.slice(index, index + VISIBLE_CARD_COUNT);
+
   const handleSwipe = (direction: Direction) => {
     setIsSwiping(false);
     if (direction === "left") {
@@ -27,10 +30,11 @@ const PlaylistSwipePage = () => {
     }
   };
 
-  const visibleItems = items.slice(index, index + VISIBLE_CARD_COUNT);
+  const handleFinish = () => {};
 
   if (isLoading || !total) return <LoadingState message="Loading tracks..." />;
-  if (index === total) return <div>Done!</div>;
+  if (total === 0) return <ErrorState message="Playlist is empty" />;
+  if (index === total) handleFinish();
 
   return (
     <div className="flex flex-col w-full max-w-2xl self-center h-screen py-6">
@@ -57,22 +61,28 @@ const PlaylistSwipePage = () => {
             icon={Undo}
             size="sm"
             onClick={undo}
-            disabled={isSwiping || index <= 0}
+            disabled={isSwiping || index === 0}
             variant="yellow"
           />
           <IconButton
             icon={X}
             onClick={() => cardRef.current?.swipe("left")}
-            disabled={isSwiping}
+            disabled={isSwiping || index === total}
             variant="red"
           />
           <IconButton
             icon={Heart}
             onClick={() => cardRef.current?.swipe("right")}
-            disabled={isSwiping}
+            disabled={isSwiping || index === total}
             variant="green"
           />
-          <IconButton icon={Check} size="sm" disabled={isSwiping} variant="blue" />
+          <IconButton
+            icon={Check}
+            size="sm"
+            onClick={handleFinish}
+            disabled={isSwiping || index === total}
+            variant="blue"
+          />
         </div>
       </div>
       <AudioPlayer audio={audio.data} isError={audio.isError} />

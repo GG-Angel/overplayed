@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { trackPreviewQueryOptions } from "./previews";
 
 const PLAYLIST_ITEMS_PREFETCH_THRESHOLD = 25;
-const TRACK_PREVIEW_PREFETCH_LIMIT = 10;
+const TRACK_PREVIEW_PREFETCH_LIMIT = 5;
 
 type Decision = "like" | "dislike";
 
