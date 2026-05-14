@@ -5,13 +5,12 @@ import { queryKeys } from "@/lib/query";
 
 const PREFETCH_THRESHOLD = 25;
 
-const usePaginatedPlaylistItems = (id: string | undefined, index: number = 0) => {
+const usePlaylistItems = (id: string, index: number) => {
   const { data, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteQuery({
-    queryKey: queryKeys.playlists.tracks(id!),
-    queryFn: ({ pageParam }) => getPlaylistItems(id!, pageParam),
+    queryKey: queryKeys.playlists.tracks(id),
+    queryFn: ({ pageParam }) => getPlaylistItems(id, pageParam),
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => (lastPage.has_more ? allPages.length : undefined),
-    enabled: !!id,
   });
 
   const items = data?.pages.flatMap((p) => p.items) ?? [];
@@ -28,4 +27,4 @@ const usePaginatedPlaylistItems = (id: string | undefined, index: number = 0) =>
   return { items, total, isLoading };
 };
 
-export default usePaginatedPlaylistItems;
+export default usePlaylistItems;

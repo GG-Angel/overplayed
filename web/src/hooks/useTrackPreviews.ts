@@ -1,5 +1,6 @@
 import { useQueries } from "@tanstack/react-query";
 import { getTrackPreviewAudio } from "@/lib/api";
+import { queryKeys } from "@/lib/query";
 
 const QUEUE_SIZE = 5;
 const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
@@ -9,7 +10,7 @@ const useTrackPreviews = (isrcs: string[], index: number) => {
 
   const previews = useQueries({
     queries: window.map((isrc) => ({
-      queryKey: ["preview", isrc],
+      queryKey: queryKeys.preview(isrc),
       queryFn: () => getTrackPreviewAudio(isrc),
       staleTime: CACHE_TTL,
       gcTime: CACHE_TTL,

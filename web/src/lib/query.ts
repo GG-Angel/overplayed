@@ -14,4 +14,5 @@ export const queryKeys = {
     one: (id: string) => [...queryKeys.playlists.all, id],
     tracks: (id: string) => [...queryKeys.playlists.one(id), "tracks"],
   },
+  preview: (isrc: string) => ["preview", isrc]
 } as const;

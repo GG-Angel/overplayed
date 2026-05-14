@@ -18,7 +18,7 @@ const useUser = () =>
     retry: (failureCount, err) => {
       // don't retry 401s, they're expected for logged-out users
       if (isAxiosError(err) && err.response?.status === 401) return false;
-      return failureCount < 2;
+      return failureCount < 3;
     },
   });
 
