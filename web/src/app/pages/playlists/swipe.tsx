@@ -7,17 +7,17 @@ import AudioPlayer from "@/components/AudioPlayer";
 import SwipeProgress from "@/components/SwipeProgress";
 import SwipeCard, { type Direction, type SwipeCardHandler } from "@/components/SwipeCard";
 import { useRef, useState } from "react";
+import { AnimatePresence } from "framer-motion";
 
 const PlaylistSwipePage = () => {
   const { playlistId } = useParams();
-  const { item, audio, index, total, likes, dislikes, swipe, undo, isLoading } =
+  const { items, audio, index, total, likes, dislikes, swipe, undo, isLoading } =
     usePlaylistSwipe(playlistId);
 
   const cardRef = useRef<SwipeCardHandler | null>(null);
   const [isSwiping, setIsSwiping] = useState(false);
 
-  if (isLoading || !total) return <LoadingState message="Loading tracks..." />;
-  if (!item) return <div>Done!</div>;
+  const visibleItems = items.slice(index, index + 2);
 
   const handleSwipe = (direction: Direction) => {
     setIsSwiping(false);
@@ -28,17 +28,28 @@ const PlaylistSwipePage = () => {
     }
   };
 
+  if (isLoading || !total) return <LoadingState message="Loading tracks..." />;
+  if (index === total) return <div>Done!</div>;
+
   return (
     <div className="flex flex-col w-full max-w-2xl self-center h-screen py-6">
       <SwipeProgress likes={likes} dislikes={dislikes} total={total} />
       <div className="flex-1 flex flex-col items-center justify-center gap-6 overflow-hidden">
-        <SwipeCard
-          key={item.track.id}
-          track={item.track}
-          ref={cardRef}
-          onSwipeStart={() => setIsSwiping(true)}
-          onSwipeEnd={handleSwipe}
-        />
+        <div className="grid place-items-center touch-none">
+          <AnimatePresence>
+            {visibleItems.map((item, i) => (
+              <SwipeCard
+                className="col-start-1 row-start-1"
+                key={item.track.uri}
+                track={item.track}
+                ref={i === 0 ? cardRef : undefined}
+                zIndex={visibleItems.length - i}
+                onSwipeStart={() => setIsSwiping(true)}
+                onSwipeEnd={handleSwipe}
+              />
+            ))}
+          </AnimatePresence>
+        </div>
         <div className="flex items-end gap-2">
           <IconButton
             icon={Undo}

@@ -4,6 +4,7 @@ import type { Track } from "@/lib/types";
 import SwipeCardDecisionOverlay from "./SwipeCardDecisionOverlay";
 import { animate, motion, useMotionValue, useTransform } from "framer-motion";
 import { useCallback, useImperativeHandle, type Ref } from "react";
+import { cn } from "@/lib/utils";
 
 const OPACITY_DISTANCE = 200;
 const OVERLAY_DISTANCE = 80;
@@ -18,12 +19,14 @@ export type SwipeCardHandler = {
 
 type SwipeCardProps = {
   track: Track;
+  className?: string;
+  zIndex?: number;
   ref?: Ref<SwipeCardHandler>;
   onSwipeStart?: () => void;
   onSwipeEnd?: (direction: Direction) => void;
 };
 
-const SwipeCard = ({ track, onSwipeStart, onSwipeEnd, ref }: SwipeCardProps) => {
+const SwipeCard = ({ track, onSwipeStart, onSwipeEnd, zIndex, className, ref }: SwipeCardProps) => {
   const x = useMotionValue(0);
 
   const likeOpacity = useTransform(x, [0, OVERLAY_DISTANCE], [0, 1]);
@@ -73,11 +76,11 @@ const SwipeCard = ({ track, onSwipeStart, onSwipeEnd, ref }: SwipeCardProps) => 
       dragConstraints={{ left: 0, right: 0 }}
       whileHover={{ cursor: "grab" }}
       whileTap={{ scale: 1.05, cursor: "grabbing" }}
-      style={{ x, rotate: cardRotate, opacity: cardOpacity }}
+      style={{ x, rotate: cardRotate, opacity: cardOpacity, zIndex }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       onDragEnd={handleDragEnd}
-      className="relative origin-bottom"
+      className={cn("relative origin-bottom", className)}
     >
       <SwipeCardDecisionOverlay
         icon={Heart}

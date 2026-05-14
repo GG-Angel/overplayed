@@ -46,7 +46,7 @@ export const usePlaylistSwipe = (id: string | undefined) => {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = usePlaylistItems(id);
 
   const items = data?.pages.flatMap((p) => p.items) ?? [];
-  const totalItems = data?.pages[0].total;
+  const totalItems = data?.pages.at(-1)?.total;
   const currentIndex = swipes.length;
   const currentItem = items.at(currentIndex);
 
@@ -87,6 +87,7 @@ export const usePlaylistSwipe = (id: string | undefined) => {
     audio: currentAudio,
     index: currentIndex,
     total: totalItems,
+    items,
     swipes,
     likes,
     dislikes,
