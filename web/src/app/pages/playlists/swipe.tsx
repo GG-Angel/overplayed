@@ -22,7 +22,7 @@ const PlaylistSwipePage = () => {
         <IconButton icon={Heart} onClick={() => swipe("like")} variant="green" />
         <IconButton icon={Check} size="sm" variant="blue" />
       </div>
-      <AudioPlayer audio={currentAudio} />
+      <AudioPlayer audio={currentAudio.data} isError={currentAudio.isError} />
     </div>
   );
 };

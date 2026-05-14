@@ -12,6 +12,9 @@ const api = Axios.create({
 });
 
 api.interceptors.request.use(authRequestInterceptor);
-api.interceptors.response.use((response) => response.data);
+api.interceptors.response.use(
+  (response) => response.data,
+  (error) => Promise.reject(error)
+);
 
 export default api;

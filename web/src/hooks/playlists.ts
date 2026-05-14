@@ -55,7 +55,7 @@ export const usePlaylistSwipe = (id: string | undefined) => {
   const audios = useQueries({
     queries: isrcs.map((isrc) => trackPreviewQueryOptions(isrc)),
   });
-  const currentAudio = audios[0]?.data;
+  const currentAudio = audios[0];
 
   // prefetch next page when the number of remaining items is low
   useEffect(() => {

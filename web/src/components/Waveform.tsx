@@ -1,12 +1,6 @@
 import WaveSurfer from "wavesurfer.js";
-import {
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  useState,
-  type ComponentProps,
-  type Ref,
-} from "react";
+import { useEffect, useImperativeHandle, useRef, useState, type Ref } from "react";
+import { cn } from "@/lib/utils";
 
 export type WaveformHandler = {
   play: () => void;
@@ -15,14 +9,21 @@ export type WaveformHandler = {
   isPlaying: () => boolean;
 };
 
-type WaveformProps = ComponentProps<"div"> & {
+type WaveformProps = {
   audio: HTMLAudioElement | undefined;
   waveformRef?: Ref<WaveformHandler>;
+  className?: string;
   onPlay?: () => void;
   onPause?: () => void;
 };
 
-const Waveform = ({ audio, waveformRef, onPlay, onPause, ...props }: WaveformProps) => {
+export const WaveformSkeleton = ({ className }: { className?: string }) => (
+  <div
+    className={cn("animate-pulse rounded-md bg-card-border [animation-duration:1s]", className)}
+  />
+);
+
+const Waveform = ({ audio, waveformRef, className, onPlay, onPause }: WaveformProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [wavesurfer, setWavesurfer] = useState<WaveSurfer | null>(null);
 
@@ -50,9 +51,9 @@ const Waveform = ({ audio, waveformRef, onPlay, onPause, ...props }: WaveformPro
       barWidth: 1,
       barGap: 2,
       barRadius: 1,
-      dragToSeek: true,
       normalize: true,
       autoplay: true,
+      dragToSeek: true,
     });
 
     setWavesurfer(wavesurfer);
@@ -64,7 +65,11 @@ const Waveform = ({ audio, waveformRef, onPlay, onPause, ...props }: WaveformPro
 
   // load new tracks
   useEffect(() => {
-    if (!wavesurfer || !audio) return;
+    if (!wavesurfer) return;
+    if (!audio) {
+      wavesurfer.empty();
+      return;
+    }
     wavesurfer.load(audio.src);
   }, [audio, wavesurfer]);
 
@@ -89,7 +94,7 @@ const Waveform = ({ audio, waveformRef, onPlay, onPause, ...props }: WaveformPro
     };
   }, [wavesurfer, onPause, onPlay]);
 
-  return <div ref={containerRef} {...props} />;
+  return <div ref={containerRef} className={className} />;
 };
 
 export default Waveform;
