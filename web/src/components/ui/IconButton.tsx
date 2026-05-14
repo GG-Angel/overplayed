@@ -10,8 +10,8 @@ const buttonVariants = cva(
       size: { xs: "p-2.5", sm: "p-4", md: "p-4.5" },
       variant: {
         neutral: "text-muted-foreground border-muted",
-        green: "text-emerald-400 border-emerald-400/50",
-        red: "text-rose-400 border-rose-400/50",
+        green: "text-primary border-primary/50",
+        red: "text-destructive border-destructive/50",
         yellow: "text-amber-400 border-amber-400/50",
         blue: "text-sky-400 border-sky-400/50",
       },
@@ -36,12 +36,20 @@ const iconVariants = cva("shrink-0", {
 export type IconButtonProps = ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
     icon: LucideIcon;
+    filled?: boolean;
   };
 
-const IconButton = ({ icon: Icon, size, variant, className, ...props }: IconButtonProps) => {
+const IconButton = ({
+  icon: Icon,
+  size,
+  variant,
+  filled = false,
+  className,
+  ...props
+}: IconButtonProps) => {
   return (
     <button className={cn(buttonVariants({ size, variant }), className)} {...props}>
-      <Icon className={iconVariants({ size })} />
+      <Icon className={iconVariants({ size })} fill={filled ? "currentColor" : "none"} />
     </button>
   );
 };

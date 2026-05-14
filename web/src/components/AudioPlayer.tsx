@@ -19,7 +19,7 @@ const AudioPlayer = ({ audio, isError }: AudioPlayerProps) => {
       <IconButton
         size="xs"
         variant="green"
-        icon={isPlaying ? Pause : Play}
+        icon={!isError && isPlaying ? Pause : Play}
         disabled={isError}
         onClick={() => waveformRef.current?.playPause()}
       />
@@ -31,7 +31,7 @@ const AudioPlayer = ({ audio, isError }: AudioPlayerProps) => {
           onPlay={() => setIsPlaying(true)}
           onPause={() => setIsPlaying(false)}
         />
-        {isError && <WaveformSkeleton className="absolute inset-0" />}
+        {isError && <WaveformSkeleton className="absolute inset-0" message="no preview :(" />}
       </div>
     </Card>
   );

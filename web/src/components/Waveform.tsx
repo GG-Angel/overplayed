@@ -17,10 +17,21 @@ type WaveformProps = {
   onPause?: () => void;
 };
 
-export const WaveformSkeleton = ({ className }: { className?: string }) => (
+export const WaveformSkeleton = ({
+  className,
+  message,
+}: {
+  className?: string;
+  message?: string;
+}) => (
   <div
-    className={cn("animate-pulse rounded-md bg-card-border [animation-duration:1s]", className)}
-  />
+    className={cn(
+      "rounded-md bg-card-border flex justify-center items-center text-muted-foreground",
+      className
+    )}
+  >
+    {message}
+  </div>
 );
 
 const Waveform = ({ audio, waveformRef, className, onPlay, onPause }: WaveformProps) => {

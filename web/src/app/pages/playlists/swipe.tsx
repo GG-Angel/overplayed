@@ -1,11 +1,11 @@
 import { useParams } from "react-router-dom";
-import TrackCard from "@/components/TrackCard";
 import { Check, Heart, Undo, X } from "lucide-react";
 import IconButton from "@/components/ui/IconButton";
 import { usePlaylistSwipe } from "@/hooks/playlists";
 import LoadingState from "@/components/states/LoadingState";
 import AudioPlayer from "@/components/AudioPlayer";
 import SwipeProgress from "@/components/SwipeProgress";
+import SwipeCard from "@/components/SwipeCard";
 
 const PlaylistSwipePage = () => {
   const { playlistId } = useParams();
@@ -19,7 +19,7 @@ const PlaylistSwipePage = () => {
     <div className="flex flex-col w-full max-w-2xl self-center h-screen py-6">
       <SwipeProgress likes={likes} dislikes={dislikes} total={total} />
       <div className="flex-1 flex flex-col items-center justify-center gap-6">
-        <TrackCard track={item.track} />
+        <SwipeCard track={item.track} />
         <div className="flex items-end gap-2">
           <IconButton icon={Undo} size="sm" onClick={undo} disabled={index <= 0} variant="yellow" />
           <IconButton icon={X} onClick={() => swipe("dislike")} variant="red" />
