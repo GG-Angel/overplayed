@@ -1,5 +1,4 @@
 import { useParams } from "react-router-dom";
-import { usePlaylistSwipe } from "@/hooks/playlists";
 import LoadingState from "@/components/states/LoadingState";
 import { useState } from "react";
 import ErrorState from "@/components/states/ErrorState";

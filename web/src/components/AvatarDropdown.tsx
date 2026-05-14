@@ -1,7 +1,7 @@
 import type { ComponentProps, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { cn, openExternalUrl } from "@/lib/utils";
-import { useAuth } from "@/hooks/auth";
+import { useAuth } from "@/hooks/useAuth";
 import { Link, LogOut, User } from "lucide-react";
 
 type AvatarDropdownProps = ComponentProps<"div">;

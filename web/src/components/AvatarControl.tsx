@@ -1,9 +1,9 @@
-import { useAuth } from "@/hooks/auth";
+import { useAuth } from "@/hooks/useAuth";
 import Button from "./ui/Button";
 import { useLocation } from "react-router-dom";
 import Avatar from "./Avatar";
 import { useState } from "react";
-import { useClickOutside } from "@/hooks/ux";
+import { useClickOutside } from "@/hooks/useClickOutside";
 import { AnimatePresence, motion } from "framer-motion";
 import AvatarDropdown from "./AvatarDropdown";
 

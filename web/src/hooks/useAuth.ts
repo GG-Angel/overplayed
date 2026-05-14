@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getUser } from "@/lib/api";
 import api from "@/lib/api-client";
 import { env } from "@/lib/env";
+import { queryKeys } from "@/lib/query";
 
 const redirectToLogin = (currentPath: string) => {
   window.location.href = `${env.API_BASE_URL}/auth/login?${new URLSearchParams({
@@ -10,16 +11,9 @@ const redirectToLogin = (currentPath: string) => {
   })}`;
 };
 
-export const useAuth = () => {
-  const queryClient = useQueryClient();
-
-  const {
-    data: user,
-    isLoading,
-    isError,
-    error,
-  } = useQuery({
-    queryKey: ["user"],
+const useUser = () =>
+  useQuery({
+    queryKey: queryKeys.user,
     queryFn: getUser,
     retry: (failureCount, err) => {
       // don't retry 401s, they're expected for logged-out users
@@ -28,12 +22,16 @@ export const useAuth = () => {
     },
   });
 
+const useAuth = () => {
+  const queryClient = useQueryClient();
+
+  const { data: user, isLoading, isError, error } = useUser();
+
   const isUnauthorized = isAxiosError(error) && error.response?.status === 401;
 
   const logout = async () => {
     await api.post("/auth/logout");
-    queryClient.setQueryData(["user"], null);
-    queryClient.removeQueries({ predicate: (q) => q.queryKey[0] !== "user" });
+    queryClient.clear();
   };
 
   return {
@@ -45,3 +43,5 @@ export const useAuth = () => {
     logout,
   };
 };
+
+export default useAuth;
