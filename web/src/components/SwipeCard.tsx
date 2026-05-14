@@ -5,11 +5,7 @@ import SwipeCardDecisionOverlay from "./SwipeCardDecisionOverlay";
 import { animate, motion, useMotionValue, useTransform } from "framer-motion";
 import { useCallback, useImperativeHandle, type Ref } from "react";
 import { cn } from "@/lib/utils";
-
-const OPACITY_DISTANCE = 200;
-const OVERLAY_DISTANCE = 80;
-const SWIPE_DISTANCE = 40;
-const ROTATE_LIMIT = 5;
+import { VISIBLE_CARD_COUNT } from "@/app/pages/playlists/swipe";
 
 export type Direction = "left" | "right";
 
@@ -21,31 +17,50 @@ type SwipeCardProps = {
   track: Track;
   className?: string;
   zIndex?: number;
+  baseRotate?: number;
+  overlayDistance?: number;
+  opacityDistance?: number;
+  swipeDistance?: number;
+  rotateAmount?: number;
+  mountOffset?: number;
   ref?: Ref<SwipeCardHandler>;
   onSwipeStart?: () => void;
   onSwipeEnd?: (direction: Direction) => void;
 };
 
-const SwipeCard = ({ track, onSwipeStart, onSwipeEnd, zIndex, className, ref }: SwipeCardProps) => {
+const SwipeCard = ({
+  track,
+  onSwipeStart,
+  onSwipeEnd,
+  className,
+  ref,
+  overlayDistance = 80,
+  opacityDistance = 200,
+  swipeDistance = 40,
+  rotateAmount = 5,
+  mountOffset = 20,
+  zIndex = 0,
+  baseRotate = 0,
+}: SwipeCardProps) => {
   const x = useMotionValue(0);
 
-  const likeOpacity = useTransform(x, [0, OVERLAY_DISTANCE], [0, 1]);
-  const dislikeOpacity = useTransform(x, [-OVERLAY_DISTANCE, 0], [1, 0]);
+  const likeOpacity = useTransform(x, [0, overlayDistance], [0, 1]);
+  const dislikeOpacity = useTransform(x, [-overlayDistance, 0], [1, 0]);
   const cardOpacity = useTransform(
     x,
-    [-OPACITY_DISTANCE, -OVERLAY_DISTANCE, OVERLAY_DISTANCE, OPACITY_DISTANCE],
+    [-opacityDistance, -overlayDistance, overlayDistance, opacityDistance],
     [0, 1, 1, 0]
   );
 
   const cardRotate = useTransform(
     x,
-    [-OPACITY_DISTANCE, 0, OPACITY_DISTANCE],
-    [-ROTATE_LIMIT, 0, ROTATE_LIMIT]
+    [-opacityDistance, 0, opacityDistance],
+    [baseRotate - rotateAmount, baseRotate, baseRotate + rotateAmount]
   );
 
   const handleSwipe = useCallback(
     (direction: Direction) => {
-      const target = direction === "right" ? OPACITY_DISTANCE : -OPACITY_DISTANCE;
+      const target = direction === "right" ? opacityDistance : -opacityDistance;
       animate(x, target, {
         duration: 0.3,
         ease: "easeOut",
@@ -53,12 +68,12 @@ const SwipeCard = ({ track, onSwipeStart, onSwipeEnd, zIndex, className, ref }: 
         onComplete: () => onSwipeEnd?.(direction),
       });
     },
-    [onSwipeStart, onSwipeEnd, x]
+    [onSwipeStart, onSwipeEnd, opacityDistance, x]
   );
 
   const handleDragEnd = () => {
-    if (x.get() >= SWIPE_DISTANCE) handleSwipe("right");
-    if (x.get() <= -SWIPE_DISTANCE) handleSwipe("left");
+    if (x.get() >= swipeDistance) handleSwipe("right");
+    if (x.get() <= -swipeDistance) handleSwipe("left");
   };
 
   useImperativeHandle(
@@ -77,10 +92,14 @@ const SwipeCard = ({ track, onSwipeStart, onSwipeEnd, zIndex, className, ref }: 
       whileHover={{ cursor: "grab" }}
       whileTap={{ scale: 1.05, cursor: "grabbing" }}
       style={{ x, rotate: cardRotate, opacity: cardOpacity, zIndex }}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
+      initial={{ y: zIndex === VISIBLE_CARD_COUNT ? -mountOffset : 0 }}
+      animate={{ y: 0 }}
       onDragEnd={handleDragEnd}
-      className={cn("relative origin-bottom", className)}
+      className={cn(
+        "relative origin-bottom transition-shadow",
+        zIndex === VISIBLE_CARD_COUNT && "drop-shadow-lg drop-shadow-black/50",
+        className
+      )}
     >
       <SwipeCardDecisionOverlay
         icon={Heart}

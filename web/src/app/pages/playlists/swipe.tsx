@@ -9,15 +9,14 @@ import SwipeCard, { type Direction, type SwipeCardHandler } from "@/components/S
 import { useRef, useState } from "react";
 import { AnimatePresence } from "framer-motion";
 
+export const VISIBLE_CARD_COUNT = 3;
+
 const PlaylistSwipePage = () => {
+  const cardRef = useRef<SwipeCardHandler | null>(null);
+  const [isSwiping, setIsSwiping] = useState(false);
   const { playlistId } = useParams();
   const { items, audio, index, total, likes, dislikes, swipe, undo, isLoading } =
     usePlaylistSwipe(playlistId);
-
-  const cardRef = useRef<SwipeCardHandler | null>(null);
-  const [isSwiping, setIsSwiping] = useState(false);
-
-  const visibleItems = items.slice(index, index + 2);
 
   const handleSwipe = (direction: Direction) => {
     setIsSwiping(false);
@@ -27,6 +26,8 @@ const PlaylistSwipePage = () => {
       swipe("like");
     }
   };
+
+  const visibleItems = items.slice(index, index + VISIBLE_CARD_COUNT);
 
   if (isLoading || !total) return <LoadingState message="Loading tracks..." />;
   if (index === total) return <div>Done!</div>;
@@ -44,6 +45,7 @@ const PlaylistSwipePage = () => {
                 track={item.track}
                 ref={i === 0 ? cardRef : undefined}
                 zIndex={visibleItems.length - i}
+                baseRotate={i === 0 ? 0 : (i % 2 === 0 ? 1 : -1) * 3}
                 onSwipeStart={() => setIsSwiping(true)}
                 onSwipeEnd={handleSwipe}
               />
