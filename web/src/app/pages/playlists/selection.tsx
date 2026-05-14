@@ -12,7 +12,7 @@ const PlaylistSelectionPage = () => {
   };
 
   if (isLoadingPlaylists) {
-    return <LoadingState />;
+    return <LoadingState message="Loading playlists..." />;
   }
 
   return (

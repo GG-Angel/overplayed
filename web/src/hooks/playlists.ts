@@ -46,15 +46,22 @@ export const usePlaylistSwipe = (id: string | undefined) => {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = usePlaylistItems(id);
 
   const items = data?.pages.flatMap((p) => p.items) ?? [];
+  const totalItems = data?.pages[0].total;
   const currentIndex = swipes.length;
   const currentItem = items.at(currentIndex);
 
+  const likes = swipes.filter((s) => s.decision == "like").length;
+  const dislikes = swipes.length - likes;
+
+  // prefetch audio
   const isrcs = items
     .slice(currentIndex, currentIndex + TRACK_PREVIEW_PREFETCH_LIMIT)
     .map((item) => item.track.external_ids.isrc);
+
   const audios = useQueries({
     queries: isrcs.map((isrc) => trackPreviewQueryOptions(isrc)),
   });
+
   const currentAudio = audios[0];
 
   // prefetch next page when the number of remaining items is low
@@ -76,12 +83,15 @@ export const usePlaylistSwipe = (id: string | undefined) => {
   };
 
   return {
-    currentItem,
-    currentAudio,
+    item: currentItem,
+    audio: currentAudio,
+    index: currentIndex,
+    total: totalItems,
     swipes,
+    likes,
+    dislikes,
     swipe,
     undo,
     isLoading,
-    index: currentIndex,
   };
 };

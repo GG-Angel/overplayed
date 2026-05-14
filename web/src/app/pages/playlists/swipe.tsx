@@ -5,18 +5,21 @@ import IconButton from "@/components/ui/IconButton";
 import { usePlaylistSwipe } from "@/hooks/playlists";
 import LoadingState from "@/components/states/LoadingState";
 import AudioPlayer from "@/components/AudioPlayer";
+import SwipeProgress from "@/components/SwipeProgress";
 
 const PlaylistSwipePage = () => {
   const { playlistId } = useParams();
-  const { currentItem, currentAudio, swipe, undo, isLoading, index } = usePlaylistSwipe(playlistId);
+  const { item, audio, index, total, likes, dislikes, swipe, undo, isLoading } =
+    usePlaylistSwipe(playlistId);
 
-  if (isLoading) return <LoadingState />;
-  if (!currentItem) return <div>Done!</div>;
+  if (isLoading || !total) return <LoadingState message="Loading tracks..." />;
+  if (!item) return <div>Done!</div>;
 
   return (
-    <div className="flex flex-col h-screen py-6">
+    <div className="flex flex-col w-full max-w-2xl self-center h-screen py-6">
+      <SwipeProgress likes={likes} dislikes={dislikes} total={total} />
       <div className="flex-1 flex flex-col items-center justify-center gap-6">
-        <TrackCard track={currentItem.track} />
+        <TrackCard track={item.track} />
         <div className="flex items-end gap-2">
           <IconButton icon={Undo} size="sm" onClick={undo} disabled={index <= 0} variant="yellow" />
           <IconButton icon={X} onClick={() => swipe("dislike")} variant="red" />
@@ -24,7 +27,7 @@ const PlaylistSwipePage = () => {
           <IconButton icon={Check} size="sm" variant="blue" />
         </div>
       </div>
-      <AudioPlayer audio={currentAudio.data} isError={currentAudio.isError} />
+      <AudioPlayer audio={audio.data} isError={audio.isError} />
     </div>
   );
 };
