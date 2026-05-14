@@ -31,8 +31,9 @@ const AvatarControl = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.1 }}
+            className="absolute top-full right-0 mt-2 z-50 w-64"
           >
-            <AvatarDropdown className="absolute top-full right-0 mt-2 z-50 w-64" />
+            <AvatarDropdown />
           </motion.div>
         )}
       </AnimatePresence>
