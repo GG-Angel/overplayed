@@ -3,7 +3,7 @@ import TrackCard from "./TrackCard";
 import type { Track } from "@/lib/types";
 import SwipeCardDecisionOverlay from "./SwipeCardDecisionOverlay";
 import { animate, motion, useMotionValue, useTransform } from "framer-motion";
-import { useCallback, useImperativeHandle, type Ref } from "react";
+import { useCallback, useEffect, useImperativeHandle, type Ref } from "react";
 import { cn } from "@/lib/utils";
 import { VISIBLE_CARD_COUNT } from "@/app/pages/playlists/swipe";
 
@@ -21,6 +21,7 @@ type SwipeCardProps = {
   overlayDistance?: number;
   opacityDistance?: number;
   swipeDistance?: number;
+  swipeDuration?: number;
   rotateAmount?: number;
   mountOffset?: number;
   ref?: Ref<SwipeCardHandler>;
@@ -37,6 +38,7 @@ const SwipeCard = ({
   overlayDistance = 80,
   opacityDistance = 200,
   swipeDistance = 40,
+  swipeDuration = 0.3,
   rotateAmount = 5,
   mountOffset = 20,
   zIndex = 0,
@@ -52,23 +54,31 @@ const SwipeCard = ({
     [0, 1, 1, 0]
   );
 
-  const cardRotate = useTransform(
-    x,
-    [-opacityDistance, 0, opacityDistance],
-    [baseRotate - rotateAmount, baseRotate, baseRotate + rotateAmount]
-  );
+  const baseRotateMV = useMotionValue(baseRotate);
+  useEffect(() => {
+    const controls = animate(baseRotateMV, baseRotate, {
+      duration: swipeDuration,
+      ease: "easeOut",
+    });
+    return () => controls.stop();
+  }, [baseRotate, baseRotateMV, swipeDuration]);
+
+  const cardRotate = useTransform<number, number>([x, baseRotateMV], ([xVal, base]) => {
+    const clamped = Math.max(-opacityDistance, Math.min(opacityDistance, xVal));
+    return base + (clamped / opacityDistance) * rotateAmount;
+  });
 
   const handleSwipe = useCallback(
     (direction: Direction) => {
       const target = direction === "right" ? opacityDistance : -opacityDistance;
       animate(x, target, {
-        duration: 0.3,
+        duration: swipeDuration,
         ease: "easeOut",
         onPlay: () => onSwipeStart?.(),
         onComplete: () => onSwipeEnd?.(direction),
       });
     },
-    [onSwipeStart, onSwipeEnd, opacityDistance, x]
+    [onSwipeStart, onSwipeEnd, opacityDistance, swipeDuration, x]
   );
 
   const handleDragEnd = () => {
