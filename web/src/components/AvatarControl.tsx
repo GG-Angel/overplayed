@@ -3,8 +3,9 @@ import Button from "./ui/Button";
 import { useLocation } from "react-router-dom";
 import Avatar from "./Avatar";
 import { useState } from "react";
-import AvatarDropdown from "./AvatarDropdown";
 import { useClickOutside } from "@/hooks/ux";
+import { AnimatePresence, motion } from "framer-motion";
+import AvatarDropdown from "./AvatarDropdown";
 
 const AvatarControl = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -23,7 +24,18 @@ const AvatarControl = () => {
   return (
     <div ref={containerRef} className="inline-flex relative">
       <Avatar user={user} onClick={() => setIsOpen((prev) => !prev)} />
-      {isOpen && <AvatarDropdown className="absolute top-full right-0 mt-2 z-50 w-64" />}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.1 }}
+          >
+            <AvatarDropdown className="absolute top-full right-0 mt-2 z-50 w-64" />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
