@@ -1,9 +1,10 @@
+import type { PlaylistItem } from "@/lib/types";
 import usePlaylistItems from "./usePlaylistItems";
 import useSwipes, { type Decision } from "./useSwipes";
 import useTrackPreviews from "./useTrackPreviews";
 
 export const usePlaylistSwipe = (id: string) => {
-  const decisions = useSwipes();
+  const decisions = useSwipes<PlaylistItem>();
   const index = decisions.swipes.length;
 
   const playlist = usePlaylistItems(id, index);
@@ -16,7 +17,7 @@ export const usePlaylistSwipe = (id: string) => {
 
   const swipe = (decision: Decision) => {
     if (!item) return;
-    decisions.record(item.track.id, decision);
+    decisions.record(item, decision);
   };
 
   return {
