@@ -20,16 +20,8 @@ const ReviewView = () => {
     <div className="flex flex-col gap-6">
       <p className="text-2xl font-medium">Review Changes</p>
       <div className="flex gap-3">
-        <Metric
-          amount={dislikes.length}
-          label="Dislikes"
-          className="text-destructive bg-destructive/5 border-destructive/10"
-        />
-        <Metric
-          amount={likes.length}
-          label="Likes"
-          className="text-primary bg-primary/5 border-primary/10"
-        />
+        <Metric amount={dislikes.length} label="Dislikes" tone="negative" />
+        <Metric amount={likes.length} label="Likes" tone="positive" />
       </div>
       <p>The following tracks will be removed:</p>
       <div className="flex flex-col gap-3 max-h-107 overflow-y-auto snap-y snap-mandatory">
