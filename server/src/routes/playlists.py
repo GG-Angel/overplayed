@@ -21,7 +21,9 @@ router = APIRouter()
 async def handle_get_playlists(
     service: SpotifyService = Depends(get_spotify_service),
 ) -> List[Playlist]:
-    return await service.get_user_playlists()
+    playlists = await service.get_user_playlists()
+    playlists.sort(key=lambda p: p.tracks.total, reverse=True)
+    return playlists
 
 
 @router.post("/")

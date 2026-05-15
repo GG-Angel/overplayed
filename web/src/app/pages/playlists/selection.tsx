@@ -18,7 +18,7 @@ const PlaylistSelectionPage = () => {
   return (
     <>
       <p className="text-4xl text-center font-medium mb-4">Select a Playlist</p>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-6 pb-4">
         {playlists &&
           playlists.map((p) => (
             <PlaylistCard key={p.id} playlist={p} onClick={navigateToPlaylist} />
