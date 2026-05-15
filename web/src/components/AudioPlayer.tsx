@@ -8,9 +8,10 @@ import { cn } from "@/lib/utils";
 type AudioPlayerProps = {
   audio: HTMLAudioElement | undefined;
   isError?: boolean;
+  errorMessage?: string;
 };
 
-const AudioPlayer = ({ audio, isError }: AudioPlayerProps) => {
+const AudioPlayer = ({ audio, isError, errorMessage = "no audio :(" }: AudioPlayerProps) => {
   const waveformRef = useRef<WaveformHandler>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
@@ -31,7 +32,7 @@ const AudioPlayer = ({ audio, isError }: AudioPlayerProps) => {
           onPlay={() => setIsPlaying(true)}
           onPause={() => setIsPlaying(false)}
         />
-        {isError && <WaveformSkeleton className="absolute inset-0" message="no preview :(" />}
+        {isError && <WaveformSkeleton className="absolute inset-0" message={errorMessage} />}
       </div>
     </Card>
   );

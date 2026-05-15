@@ -1,12 +1,11 @@
+import { useSwipeContext } from "@/app/pages/playlists/swipe/SwipeContext";
 import { Heart, X } from "lucide-react";
 
-type SwipeProgressProps = {
-  likes: number;
-  dislikes: number;
-  total: number;
-};
+const SwipeProgress = () => {
+  const { likes, dislikes, total } = useSwipeContext();
 
-const SwipeProgress = ({ likes, dislikes, total }: SwipeProgressProps) => {
+  if (!total) return null;
+
   const toPercent = (value: number) => (total > 0 ? (value / total) * 100 : 0);
   const remaining = Math.max(total - likes - dislikes, 0);
 
@@ -25,7 +24,6 @@ const SwipeProgress = ({ likes, dislikes, total }: SwipeProgressProps) => {
       <div className="flex items-center gap-2">
         <p className="text-destructive min-w-12 text-right text-sm">{dislikes}</p>
         <X className="text-destructive" />
-
         <div
           className="flex mx-2 h-1 w-full overflow-hidden rounded-full bg-card"
           role="progressbar"
@@ -42,7 +40,6 @@ const SwipeProgress = ({ likes, dislikes, total }: SwipeProgressProps) => {
             />
           ))}
         </div>
-
         <Heart className="size-4.75 text-primary" />
         <p className="text-primary min-w-12 text-left text-sm">{likes}</p>
       </div>

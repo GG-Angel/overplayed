@@ -10,7 +10,7 @@ const TrackCard = ({ track }: TrackCardProps) => {
   const artistList = track.artists.map((t) => t.name).join(", ");
 
   return (
-    <Card padding="square" className="flex flex-col gap-3 w-64 sm:w-72 select-none">
+    <Card padding="square" className="flex flex-col gap-3 w-full max-w-64 sm:max-w-72 lg:max-w-84 select-none">
       <img
         className="aspect-square object-cover w-full rounded-sm"
         src={coverUrl}

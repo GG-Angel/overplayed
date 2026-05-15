@@ -7,7 +7,7 @@ export type Swipe = {
   decision: Decision;
 };
 
-const useSwipeDecisions = () => {
+const useSwipes = () => {
   const [swipes, setSwipes] = useState<Swipe[]>([]);
 
   const record = (id: string, decision: Decision) =>
@@ -23,4 +23,4 @@ const useSwipeDecisions = () => {
   return { swipes, likes, dislikes, record, undo, reset };
 };
 
-export default useSwipeDecisions;
+export default useSwipes;

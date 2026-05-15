@@ -3,63 +3,47 @@ import type { Direction, SwipeCardHandler } from "@/components/SwipeCard";
 import SwipeCard from "@/components/SwipeCard";
 import SwipeProgress from "@/components/SwipeProgress";
 import IconButton from "@/components/ui/IconButton";
-import type { Decision } from "@/hooks/useSwipeDecisions";
-import type { PlaylistItem } from "@/lib/types";
 import { AnimatePresence } from "framer-motion";
 import { Undo, X, Heart, Check } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useSwipeContext } from "./SwipeContext";
 
 export const VISIBLE_CARD_COUNT = 3;
 
 type SwipeViewProps = {
-  items: PlaylistItem[];
-  audio: HTMLAudioElement | undefined;
-  isAudioError: boolean;
-  index: number;
-  likes: number;
-  dislikes: number;
-  total: number;
-  onSwipe: (decision: Decision) => void;
-  onUndo: () => void;
-  onFinish: () => void;
+  onFinish?: () => void;
 };
 
-const SwipeView = ({
-  items,
-  audio,
-  isAudioError,
-  index,
-  likes,
-  dislikes,
-  total,
-  onSwipe,
-  onUndo,
-  onFinish,
-}: SwipeViewProps) => {
+const SwipeView = ({ onFinish }: SwipeViewProps) => {
   const activeCardRef = useRef<SwipeCardHandler | null>(null);
-
+  const { index, total, items, swipe, undo, audio, isAudioError } = useSwipeContext();
   const [isSwiping, setIsSwiping] = useState(false);
-
-  const handleSwipe = (direction: Direction) => {
-    setIsSwiping(false);
-    if (direction === "left") {
-      onSwipe("dislike");
-    } else {
-      onSwipe("like");
-    }
-  };
-
-  useEffect(() => {
-    if (index === total) {
-      onFinish();
-    }
-  }, [index, total, onFinish]);
 
   const visibleItems = items.slice(index, index + VISIBLE_CARD_COUNT);
 
+  const triggerSwipe = (direction: Direction) => {
+    setIsSwiping(true);
+    activeCardRef.current?.swipe(direction);
+  };
+
+  const recordSwipe = (direction: Direction) => {
+    if (direction === "left") {
+      swipe("dislike");
+    } else {
+      swipe("like");
+    }
+    setIsSwiping(false);
+  };
+
+  useEffect(() => {
+    if (total && index >= total) {
+      onFinish?.();
+    }
+  }, [total, index, onFinish]);
+
   return (
     <div className="flex flex-col w-full max-w-2xl self-center h-screen py-6">
-      <SwipeProgress likes={likes} dislikes={dislikes} total={total} />
+      <SwipeProgress />
       <div className="flex-1 flex flex-col items-center justify-center gap-6 overflow-hidden">
         <div className="grid place-items-center touch-none">
           <AnimatePresence>
@@ -72,7 +56,7 @@ const SwipeView = ({
                 zIndex={visibleItems.length - i}
                 baseRotate={i === 0 ? 0 : (i % 2 === 0 ? 1 : -1) * 3}
                 onSwipeStart={() => setIsSwiping(true)}
-                onSwipeEnd={handleSwipe}
+                onSwipeEnd={recordSwipe}
               />
             ))}
           </AnimatePresence>
@@ -81,19 +65,19 @@ const SwipeView = ({
           <IconButton
             icon={Undo}
             size="sm"
-            onClick={onUndo}
+            onClick={undo}
             disabled={isSwiping || index === 0}
             variant="yellow"
           />
           <IconButton
             icon={X}
-            onClick={() => activeCardRef.current?.swipe("left")}
+            onClick={() => triggerSwipe("left")}
             disabled={isSwiping || index === total}
             variant="red"
           />
           <IconButton
             icon={Heart}
-            onClick={() => activeCardRef.current?.swipe("right")}
+            onClick={() => triggerSwipe("right")}
             disabled={isSwiping || index === total}
             variant="green"
           />
@@ -106,7 +90,7 @@ const SwipeView = ({
           />
         </div>
       </div>
-      <AudioPlayer audio={audio} isError={isAudioError} />
+      <AudioPlayer audio={audio} isError={isAudioError} errorMessage="no preview :(" />
     </div>
   );
 };

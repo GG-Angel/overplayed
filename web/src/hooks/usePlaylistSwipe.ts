@@ -1,36 +1,34 @@
 import usePlaylistItems from "./usePlaylistItems";
-import useSwipeDecisions, { type Decision } from "./useSwipeDecisions";
+import useSwipes, { type Decision } from "./useSwipes";
 import useTrackPreviews from "./useTrackPreviews";
 
 export const usePlaylistSwipe = (id: string) => {
-  const { swipes, likes, dislikes, undo, record } = useSwipeDecisions();
-  const currentIndex = swipes.length;
+  const decisions = useSwipes();
+  const index = decisions.swipes.length;
 
-  const { items, total, isLoading } = usePlaylistItems(id, currentIndex);
+  const playlist = usePlaylistItems(id, index);
   const { audio, isError: isAudioError } = useTrackPreviews(
-    items.map((item) => item.track.external_ids.isrc),
-    currentIndex
+    playlist.items.map((item) => item.track.external_ids.isrc),
+    index
   );
 
-  const currentItem = items.at(currentIndex);
+  const item = playlist.items.at(index);
 
   const swipe = (decision: Decision) => {
-    if (!currentItem) return;
-    record(currentItem.track.id, decision);
+    if (!item) return;
+    decisions.record(item.track.id, decision);
   };
 
   return {
-    index: currentIndex,
-    item: currentItem,
+    index,
+    item,
     audio,
     isAudioError,
-    total,
-    items,
-    swipes,
-    likes,
-    dislikes,
     swipe,
-    undo,
-    isLoading,
+    swipes: decisions.swipes,
+    likes: decisions.likes,
+    dislikes: decisions.dislikes,
+    undo: decisions.undo,
+    ...playlist,
   };
 };
