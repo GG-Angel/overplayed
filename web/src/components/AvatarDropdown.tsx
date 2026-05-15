@@ -1,8 +1,8 @@
 import type { ComponentProps, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { cn, openExternalUrl } from "@/lib/utils";
-import { useAuth } from "@/hooks/useAuth";
 import { Link, LogOut, User } from "lucide-react";
+import useAuth from "@/hooks/useAuth";
 
 type AvatarDropdownProps = ComponentProps<"div">;
 
@@ -33,7 +33,7 @@ const AvatarDropdown = ({ className, ...props }: AvatarDropdownProps) => {
     navigate("/");
   };
 
-  if (!user) return <></>;
+  if (!user) return null;
 
   return (
     <div

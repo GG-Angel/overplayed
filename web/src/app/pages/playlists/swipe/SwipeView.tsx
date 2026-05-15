@@ -3,7 +3,7 @@ import type { Direction, SwipeCardHandler } from "@/components/SwipeCard";
 import SwipeCard from "@/components/SwipeCard";
 import SwipeProgress from "@/components/SwipeProgress";
 import IconButton from "@/components/ui/IconButton";
-import type { Decision } from "@/hooks/playlists";
+import type { Decision } from "@/hooks/useSwipeDecisions";
 import type { PlaylistItem } from "@/lib/types";
 import { AnimatePresence } from "framer-motion";
 import { Undo, X, Heart, Check } from "lucide-react";

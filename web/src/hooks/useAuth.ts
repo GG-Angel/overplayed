@@ -24,7 +24,6 @@ const useUser = () =>
 
 const useAuth = () => {
   const queryClient = useQueryClient();
-
   const { data: user, isLoading, isError, error } = useUser();
 
   const isUnauthorized = isAxiosError(error) && error.response?.status === 401;

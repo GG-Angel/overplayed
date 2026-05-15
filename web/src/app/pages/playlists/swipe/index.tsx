@@ -4,6 +4,7 @@ import { useState } from "react";
 import ErrorState from "@/components/states/ErrorState";
 import SwipeView from "./SwipeView";
 import ReviewView from "./ReviewView";
+import { usePlaylistSwipe } from "@/hooks/usePlaylistSwipe";
 
 type Phase = "swipe" | "review";
 

@@ -9,10 +9,10 @@ export const queryConfig = {
 
 export const queryKeys = {
   user: ["user"],
+  preview: (isrc: string) => ["preview", isrc],
   playlists: {
     all: ["playlists"],
     one: (id: string) => [...queryKeys.playlists.all, id],
     tracks: (id: string) => [...queryKeys.playlists.one(id), "tracks"],
   },
-  preview: (isrc: string) => ["preview", isrc]
 } as const;

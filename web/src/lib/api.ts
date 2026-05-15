@@ -38,8 +38,8 @@ export const getTrackPreview = async (isrc: string) => {
 };
 
 export const getTrackPreviewAudio = async (isrc: string) => {
-  const { preview_url } = await getTrackPreview(isrc);
-  const audio = new Audio(preview_url);
+  const { preview_url: previewUrl } = await getTrackPreview(isrc);
+  const audio = new Audio(previewUrl);
   audio.preload = "auto";
   return audio;
 };
