@@ -24,6 +24,7 @@ type SwipeCardProps = {
   swipeDuration?: number;
   rotateAmount?: number;
   mountOffset?: number;
+  isDragEnabled?: boolean;
   ref?: Ref<SwipeCardHandler>;
   onSwipeStart?: () => void;
   onSwipeEnd?: (direction: Direction) => void;
@@ -43,6 +44,7 @@ const SwipeCard = ({
   mountOffset = 20,
   zIndex = 0,
   baseRotate = 0,
+  isDragEnabled = true,
 }: SwipeCardProps) => {
   const xMV = useMotionValue(0);
 
@@ -70,11 +72,11 @@ const SwipeCard = ({
 
   const handleSwipe = useCallback(
     (direction: Direction) => {
+      onSwipeStart?.();
       const target = direction === "right" ? opacityDistance : -opacityDistance;
       animate(xMV, target, {
         duration: swipeDuration,
         ease: "easeOut",
-        onPlay: () => onSwipeStart?.(),
         onComplete: () => onSwipeEnd?.(direction),
       });
     },
@@ -96,7 +98,7 @@ const SwipeCard = ({
 
   return (
     <motion.div
-      drag="x"
+      drag={isDragEnabled ? "x" : false}
       dragElastic={0.6}
       dragConstraints={{ left: 0, right: 0 }}
       whileHover={{ cursor: "grab" }}
@@ -114,12 +116,12 @@ const SwipeCard = ({
       <SwipeCardDecisionOverlay
         icon={Heart}
         opacity={likeOpacity}
-        className="text-accent from-accent/50 absolute inset-0"
+        className="text-accent from-accent/50"
       />
       <SwipeCardDecisionOverlay
         icon={X}
         opacity={dislikeOpacity}
-        className="text-destructive from-destructive/50 absolute inset-0"
+        className="text-destructive from-destructive/50"
       />
       <TrackCard track={track} />
     </motion.div>
