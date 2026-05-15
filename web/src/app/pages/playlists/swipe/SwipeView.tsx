@@ -44,9 +44,9 @@ const SwipeView = ({ onFinish }: SwipeViewProps) => {
   if (status === "loading" || status === "error") return null;
 
   return (
-    <div className="flex flex-col gap-4 w-full max-w-2xl self-center h-screen py-6 overflow-hidden">
-      <SwipeProgress />
-      <div className="flex-1 flex flex-col items-center justify-center gap-6 overflow-hidden">
+    <div className="flex flex-col items-center gap-4 w-full self-center h-screen py-6 overflow-hidden">
+      <SwipeProgress className="w-full max-w-3xl" />
+      <div className="flex-1 flex flex-col w-full items-center justify-center gap-6 overflow-hidden">
         <div className="grid place-items-center touch-none">
           <AnimatePresence>
             {visibleItems.map((item, i) => (
@@ -92,7 +92,12 @@ const SwipeView = ({ onFinish }: SwipeViewProps) => {
           />
         </div>
       </div>
-      <AudioPlayer audio={audio} isError={isAudioError} errorMessage="no preview :(" />
+      <AudioPlayer
+        className="w-full max-w-3xl"
+        audio={audio}
+        isError={isAudioError}
+        errorMessage="no preview :("
+      />
     </div>
   );
 };

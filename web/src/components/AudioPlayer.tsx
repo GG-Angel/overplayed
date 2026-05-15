@@ -9,14 +9,20 @@ type AudioPlayerProps = {
   audio: HTMLAudioElement | undefined;
   isError?: boolean;
   errorMessage?: string;
+  className?: string;
 };
 
-const AudioPlayer = ({ audio, isError, errorMessage = "no audio :(" }: AudioPlayerProps) => {
+const AudioPlayer = ({
+  audio,
+  className,
+  isError,
+  errorMessage = "no audio :(",
+}: AudioPlayerProps) => {
   const waveformRef = useRef<WaveformHandler>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
   return (
-    <Card size="sm" className="flex items-center gap-3">
+    <Card size="sm" className={cn("flex items-center gap-3", className)}>
       <IconButton
         size="xs"
         variant="green"
@@ -27,7 +33,7 @@ const AudioPlayer = ({ audio, isError, errorMessage = "no audio :(" }: AudioPlay
       <div className="relative flex-1 self-stretch">
         <Waveform
           waveformRef={waveformRef}
-          className={cn("absolute inset-0", isError && "invisible")}
+          className={cn("absolute inset-0 min-w-1", isError && "invisible")}
           audio={audio}
           onPlay={() => setIsPlaying(true)}
           onPause={() => setIsPlaying(false)}

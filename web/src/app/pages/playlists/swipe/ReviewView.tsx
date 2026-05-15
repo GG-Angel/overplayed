@@ -1,34 +1,25 @@
 import TrackCard from "@/components/TrackCard";
 import Card from "@/components/ui/Card";
 import Metric from "@/components/ui/Metric";
-import { useState } from "react";
-import { useSwipeContext } from "./SwipeContext";
 import Checkbox from "@/components/ui/Checkbox";
-
-type ReviewForm = {
-  savePlaylist: {
-    enabled: boolean;
-    name: string;
-    description: string;
-  };
-};
+import { useSwipeContext } from "./SwipeContext";
+import { useReviewForm } from "@/hooks/useReviewForm";
+import SavePlaylistFields from "./SavePlaylistFIelds";
+import Button from "@/components/ui/Button";
 
 const ReviewView = () => {
   const { likes, dislikes } = useSwipeContext();
-  const [form, setForm] = useState<ReviewForm>({
-    savePlaylist: { enabled: true, name: "Overplayed", description: "Your removed tracks :3" },
-  });
+  const { form, errors, toggleSavePlaylist, updateSavePlaylistFields, validate } = useReviewForm();
 
-  const updateSavePlaylist = (patch: Partial<ReviewForm["savePlaylist"]>) =>
-    setForm((prev) => ({
-      ...prev,
-      savePlaylist: { ...prev.savePlaylist, ...patch },
-    }));
+  const handleSubmit = () => {
+    const result = validate();
+    if (!result.success) return;
+    console.log("submitting!", result.data);
+  };
 
   return (
     <div className="flex flex-col gap-6 py-2">
-      <h1 className="text-2xl font-medium">Review Changes</h1>
-
+      <p className="text-2xl font-medium">Review Changes</p>
       <div className="flex gap-3">
         <Metric amount={dislikes.length} label="Dislikes" tone="negative" />
         <Metric amount={likes.length} label="Likes" tone="positive" />
@@ -48,7 +39,7 @@ const ReviewView = () => {
         </div>
       </div>
 
-      <Card className="flex flex-col gap-2">
+      <Card className="flex flex-col gap-4">
         <div className="flex flex-1 justify-between items-center gap-4 pr-2">
           <div>
             <p>Save removed tracks to a new playlist?</p>
@@ -56,13 +47,21 @@ const ReviewView = () => {
               Keep these {dislikes.length} tracks accessible after removal.
             </p>
           </div>
-          <Checkbox
-            enabled={form.savePlaylist.enabled}
-            onEnabledChange={() => updateSavePlaylist({ enabled: !form.savePlaylist.enabled })}
-          />
+          <Checkbox enabled={form.savePlaylist.enabled} onEnabledChange={toggleSavePlaylist} />
         </div>
-        {form.savePlaylist.enabled && <div>hi</div>}
+        {form.savePlaylist.enabled && (
+          <SavePlaylistFields
+            name={form.savePlaylist.name}
+            description={form.savePlaylist.description}
+            errors={errors}
+            onChange={updateSavePlaylistFields}
+          />
+        )}
       </Card>
+
+      <Button variant="secondary" onClick={handleSubmit}>
+        Confirm Deletion
+      </Button>
     </div>
   );
 };

@@ -1,7 +1,12 @@
 import { useSwipeContext } from "@/app/pages/playlists/swipe/SwipeContext";
+import { cn } from "@/lib/utils";
 import { Heart, X } from "lucide-react";
 
-const SwipeProgress = () => {
+type SwipeProgressProps = {
+  className?: string;
+};
+
+const SwipeProgress = ({ className }: SwipeProgressProps) => {
   const { likes, dislikes, total } = useSwipeContext();
 
   if (!total) return null;
@@ -20,7 +25,7 @@ const SwipeProgress = () => {
   ];
 
   return (
-    <div className="flex flex-col">
+    <div className={cn("flex flex-col", className)}>
       <div className="flex items-center gap-2">
         <p className="text-destructive min-w-12 text-right text-sm">{dislikes.length}</p>
         <X className="text-destructive" />
