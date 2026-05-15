@@ -11,7 +11,7 @@ const ReviewView = () => {
         <p>
           The following tracks will be <span className="text-destructive">removed:</span>
         </p>
-        <div className="flex flex-col gap-3 max-h-96 overflow-y-auto snap-y snap-mandatory">
+        <div className="flex flex-col gap-3 max-h-107 overflow-y-auto snap-y snap-mandatory">
           {dislikes.map((item) => (
             <TrackCard
               key={item.track.uri}
