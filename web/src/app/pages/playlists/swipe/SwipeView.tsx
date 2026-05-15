@@ -42,7 +42,7 @@ const SwipeView = ({ onFinish }: SwipeViewProps) => {
   }, [total, index, onFinish]);
 
   return (
-    <div className="flex flex-col w-full max-w-2xl self-center h-screen py-6">
+    <div className="flex flex-col gap-4 w-full max-w-2xl self-center h-screen py-6 overflow-hidden">
       <SwipeProgress />
       <div className="flex-1 flex flex-col items-center justify-center gap-6 overflow-hidden">
         <div className="grid place-items-center touch-none">

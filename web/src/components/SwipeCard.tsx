@@ -44,12 +44,12 @@ const SwipeCard = ({
   zIndex = 0,
   baseRotate = 0,
 }: SwipeCardProps) => {
-  const x = useMotionValue(0);
+  const xMV = useMotionValue(0);
 
-  const likeOpacity = useTransform(x, [0, overlayDistance], [0, 1]);
-  const dislikeOpacity = useTransform(x, [-overlayDistance, 0], [1, 0]);
+  const likeOpacity = useTransform(xMV, [0, overlayDistance], [0, 1]);
+  const dislikeOpacity = useTransform(xMV, [-overlayDistance, 0], [1, 0]);
   const cardOpacity = useTransform(
-    x,
+    xMV,
     [-opacityDistance, -overlayDistance, overlayDistance, opacityDistance],
     [0, 1, 1, 0]
   );
@@ -63,7 +63,7 @@ const SwipeCard = ({
     return () => controls.stop();
   }, [baseRotate, baseRotateMV, swipeDuration]);
 
-  const cardRotate = useTransform<number, number>([x, baseRotateMV], ([xVal, base]) => {
+  const cardRotate = useTransform<number, number>([xMV, baseRotateMV], ([xVal, base]) => {
     const clamped = Math.max(-opacityDistance, Math.min(opacityDistance, xVal));
     return base + (clamped / opacityDistance) * rotateAmount;
   });
@@ -71,19 +71,19 @@ const SwipeCard = ({
   const handleSwipe = useCallback(
     (direction: Direction) => {
       const target = direction === "right" ? opacityDistance : -opacityDistance;
-      animate(x, target, {
+      animate(xMV, target, {
         duration: swipeDuration,
         ease: "easeOut",
         onPlay: () => onSwipeStart?.(),
         onComplete: () => onSwipeEnd?.(direction),
       });
     },
-    [onSwipeStart, onSwipeEnd, opacityDistance, swipeDuration, x]
+    [onSwipeStart, onSwipeEnd, opacityDistance, swipeDuration, xMV]
   );
 
   const handleDragEnd = () => {
-    if (x.get() >= swipeDistance) handleSwipe("right");
-    if (x.get() <= -swipeDistance) handleSwipe("left");
+    if (xMV.get() >= swipeDistance) handleSwipe("right");
+    if (xMV.get() <= -swipeDistance) handleSwipe("left");
   };
 
   useImperativeHandle(
@@ -101,7 +101,7 @@ const SwipeCard = ({
       dragConstraints={{ left: 0, right: 0 }}
       whileHover={{ cursor: "grab" }}
       whileTap={{ scale: 1.05, cursor: "grabbing" }}
-      style={{ x, rotate: cardRotate, opacity: cardOpacity, zIndex }}
+      style={{ x: xMV, rotate: cardRotate, opacity: cardOpacity, zIndex }}
       initial={{ y: zIndex === VISIBLE_CARD_COUNT ? -mountOffset : 0 }}
       animate={{ y: 0 }}
       onDragEnd={handleDragEnd}
