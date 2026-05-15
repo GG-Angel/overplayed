@@ -16,7 +16,7 @@ type SwipeViewProps = {
 
 const SwipeView = ({ onFinish }: SwipeViewProps) => {
   const activeCardRef = useRef<SwipeCardHandler | null>(null);
-  const { index, total, items, swipe, undo, audio, isAudioError } = useSwipeContext();
+  const { index, total, items, swipe, undo, audio, isAudioError, status } = useSwipeContext();
   const [isSwiping, setIsSwiping] = useState(false);
 
   const visibleItems = items.slice(index, index + VISIBLE_CARD_COUNT);
@@ -40,6 +40,8 @@ const SwipeView = ({ onFinish }: SwipeViewProps) => {
       onFinish?.();
     }
   }, [total, index, onFinish]);
+
+  if (status === "loading" || status === "error") return null;
 
   return (
     <div className="flex flex-col gap-4 w-full max-w-2xl self-center h-screen py-6 overflow-hidden">
@@ -66,26 +68,26 @@ const SwipeView = ({ onFinish }: SwipeViewProps) => {
             icon={Undo}
             size="sm"
             onClick={undo}
-            disabled={isSwiping || index === 0}
+            disabled={isSwiping || index <= 0}
             variant="yellow"
           />
           <IconButton
             icon={X}
             onClick={() => triggerSwipe("left")}
-            disabled={isSwiping || index === total}
+            disabled={isSwiping || index >= total}
             variant="red"
           />
           <IconButton
             icon={Heart}
             onClick={() => triggerSwipe("right")}
-            disabled={isSwiping || index === total}
+            disabled={isSwiping || index >= total}
             variant="green"
           />
           <IconButton
             icon={Check}
             size="sm"
             onClick={onFinish}
-            disabled={isSwiping || index === total}
+            disabled={isSwiping || index <= 0}
             variant="blue"
           />
         </div>
