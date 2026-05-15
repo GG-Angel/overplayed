@@ -1,5 +1,5 @@
 import type { CurrentUser } from "@/lib/types";
-import { cn } from "@/lib/utils";
+import { cn, extractImageUrl } from "@/lib/utils";
 import { type ComponentProps } from "react";
 
 type AvatarProps = ComponentProps<"button"> & {
@@ -7,6 +7,7 @@ type AvatarProps = ComponentProps<"button"> & {
 };
 
 const Avatar = ({ user, className, ...props }: AvatarProps) => {
+  const pictureUrl = extractImageUrl(user.images, "sm");
   return (
     <button
       className={cn(
@@ -16,7 +17,7 @@ const Avatar = ({ user, className, ...props }: AvatarProps) => {
       {...props}
     >
       <img
-        src={user.images[0]?.url}
+        src={pictureUrl}
         className="size-full object-cover"
         alt={`${user.display_name}'s profile picture`}
       />

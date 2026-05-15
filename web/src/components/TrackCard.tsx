@@ -1,19 +1,20 @@
 import type { Track } from "@/lib/types";
 import Card from "./ui/Card";
+import { extractImageUrl } from "@/lib/utils";
 
 type TrackCardProps = {
   track: Track;
 };
 
 const TrackCard = ({ track }: TrackCardProps) => {
-  const coverUrl = track.album.images.at(0)?.url;
+  const coverUrl = extractImageUrl(track.album.images, "lg");
   const artistList = track.artists.map((t) => t.name).join(", ");
 
   return (
     <Card padding="square" className="flex flex-col gap-3 w-64 sm:w-72 lg:w-84 select-none">
       <img
-        className="aspect-square object-cover w-full rounded-sm"
         src={coverUrl}
+        className="aspect-square object-cover w-full rounded-sm"
         alt={`${track.name} cover`}
         draggable={false}
       />

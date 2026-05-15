@@ -2,16 +2,19 @@ import { SkipForward } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import AvatarControl from "./AvatarControl";
 import { usePlaylist } from "@/hooks/usePlaylist";
+import { extractImageUrl } from "@/lib/utils";
 
 const PlaylistCrumb = ({ id }: { id: string }) => {
   const { data: playlist } = usePlaylist(id);
 
   if (!playlist) return null;
 
+  const coverUrl = extractImageUrl(playlist.images ?? [], "sm");
+
   return (
     <span className="inline-flex items-center gap-1.5 text-muted-foreground min-w-0">
       <span>/</span>
-      <img src={playlist.images?.at(-1)?.url} className="size-5 rounded shrink-0" />
+      <img src={coverUrl} className="size-5 rounded shrink-0" />
       <span className="truncate">{playlist.name}</span>
     </span>
   );
