@@ -35,7 +35,7 @@ const usePlaylistItems = (id: string, index: number): PlaylistItemsResult => {
     return { status: "error", items: [], total: undefined, error: error };
   }
 
-  if (isLoading || !total) {
+  if (isLoading || total === undefined) {
     return { status: "loading", items: [], total: undefined, error: null };
   }
 
