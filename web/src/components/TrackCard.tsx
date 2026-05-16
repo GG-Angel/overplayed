@@ -1,5 +1,5 @@
 import type { Track } from "@/lib/types";
-import Card from "./ui/Card";
+import Card, { type CardProps } from "./ui/Card";
 import { cn, extractImageUrl } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 
@@ -27,18 +27,23 @@ const imageVariants = cva("aspect-square object-cover rounded-sm", {
   },
 });
 
-type TrackCardProps = VariantProps<typeof cardVariants> & {
-  track: Track;
-  className?: string;
-};
+type TrackCardProps = Omit<CardProps, "padding"> &
+  VariantProps<typeof cardVariants> & {
+    track: Track;
+  };
 
-const TrackCard = ({ track, orientation, className }: TrackCardProps) => {
+const TrackCard = ({ track, size, orientation, className, ...props }: TrackCardProps) => {
   const coverUrl = extractImageUrl(track.album.images, "lg");
   const artistList = track.artists.map((t) => t.name).join(", ");
   const padding = orientation === "horizontal" ? "wide" : "square";
 
   return (
-    <Card padding={padding} className={cn(cardVariants({ orientation }), className)}>
+    <Card
+      size={size}
+      padding={padding}
+      className={cn(cardVariants({ orientation }), className)}
+      {...props}
+    >
       <img
         src={coverUrl}
         className={imageVariants({ orientation })}

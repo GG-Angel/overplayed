@@ -25,7 +25,7 @@ const cardVariants = cva("flex bg-card text-card-foreground border-2 border-card
   },
 });
 
-type CardProps = ComponentProps<"div"> & VariantProps<typeof cardVariants>;
+export type CardProps = ComponentProps<"div"> & VariantProps<typeof cardVariants>;
 
 const Card = ({ className, size, padding, children, ...props }: CardProps) => {
   return (

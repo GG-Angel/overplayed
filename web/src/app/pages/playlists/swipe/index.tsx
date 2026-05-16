@@ -33,7 +33,14 @@ const PlaylistSwipePageInner = () => {
     case "swipe":
       return <SwipeView onFinish={() => setPhase("review")} />;
     case "review":
-      return <ReviewView />;
+      return (
+        <ReviewView
+          onReturn={() => setPhase("swipe")}
+          onSubmit={(form) => {
+            console.log(form);
+          }}
+        />
+      );
   }
 };
 
