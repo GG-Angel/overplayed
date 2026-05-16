@@ -11,6 +11,10 @@ const ReviewView = () => {
   const { likes, dislikes } = useSwipeContext();
   const { form, errors, toggleSavePlaylist, updateSavePlaylistFields, validate } = useReviewForm();
 
+  const formatCount = (label: string, amount: number) => {
+    return `${label}${amount > 1 ? "s" : ""}`;
+  };
+
   const handleSubmit = () => {
     const result = validate();
     if (!result.success) return;
@@ -21,8 +25,12 @@ const ReviewView = () => {
     <div className="flex flex-col gap-6 py-2">
       <p className="text-2xl font-medium">Review Changes</p>
       <div className="flex gap-3">
-        <Metric amount={dislikes.length} label="Dislikes" tone="negative" />
-        <Metric amount={likes.length} label="Likes" tone="positive" />
+        <Metric
+          amount={dislikes.length}
+          label={formatCount("Dislike", dislikes.length)}
+          tone="negative"
+        />
+        <Metric amount={likes.length} label={formatCount("Like", likes.length)} tone="positive" />
       </div>
 
       <div>
