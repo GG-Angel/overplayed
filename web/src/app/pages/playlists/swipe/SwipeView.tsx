@@ -5,9 +5,8 @@ import SwipeProgress from "@/components/SwipeProgress";
 import IconButton from "@/components/ui/IconButton";
 import { AnimatePresence } from "framer-motion";
 import { Undo, X, Heart, Check } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useSwipeContext } from "./SwipeContext";
-import TrackCard from "@/components/TrackCard";
 
 export const VISIBLE_CARD_COUNT = 3;
 const STACK_ROTATE_DEGREES = 3;
@@ -41,10 +40,6 @@ const SwipeView = ({ onFinish }: SwipeViewProps) => {
     setIsSwiping(false);
   };
 
-  // useEffect(() => {
-  //   if (isComplete) onFinish?.();
-  // }, [isComplete, onFinish]);
-
   if (status === "loading" || status === "error") return null;
 
   return (
@@ -52,7 +47,7 @@ const SwipeView = ({ onFinish }: SwipeViewProps) => {
       <SwipeProgress className="w-full max-w-3xl" />
 
       <div className="flex-1 flex flex-col w-full items-center justify-center gap-6 overflow-hidden">
-        <div className="grid place-items-center touch-none">
+        <div className="grid place-items-center touch-none w-64 sm:w-72 lg:w-84">
           {!isComplete ? (
             <AnimatePresence>
               {visibleItems.map((item, i) => {
@@ -73,11 +68,11 @@ const SwipeView = ({ onFinish }: SwipeViewProps) => {
               })}
             </AnimatePresence>
           ) : (
-            <div className="text-center">
+            <div className="col-start-1 row-start-1 text-center">
               <p>You've reached the end!</p>
               <p className="text-muted-foreground">
-                Press <Check className="inline-block" /> to finish or{" "}
-                <Undo className="inline-block" /> to rewind.
+                Press <Undo className="inline-block" /> to rewind or{" "}
+                <Check className="inline-block" /> to finish.
               </p>
             </div>
           )}

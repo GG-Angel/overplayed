@@ -6,7 +6,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 const cardVariants = cva("flex gap-3 select-none", {
   variants: {
     orientation: {
-      vertical: "flex-col w-64 sm:w-72 lg:w-84",
+      vertical: "flex-col",
       horizontal: "items-center",
     },
   },
