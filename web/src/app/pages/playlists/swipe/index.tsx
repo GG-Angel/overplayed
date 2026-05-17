@@ -8,6 +8,7 @@ import SwipeProvider from "./SwipeProvider";
 import { useSwipeContext } from "./SwipeContext";
 import NothingView from "./NothingView";
 import type { ReviewForm } from "@/hooks/useReviewForm";
+import SubmitView from "./SubmitView";
 
 type Phase = "swipe" | "nothing" | "review" | "submit";
 
@@ -50,10 +51,12 @@ const PlaylistSwipePageInner = () => {
   switch (phase) {
     case "swipe":
       return <SwipeView onFinish={handleFinish} />;
-    case "review":
-      return <ReviewView onBack={() => setPhase("swipe")} onSubmit={handleSubmit} />;
     case "nothing":
       return <NothingView onBack={() => setPhase("swipe")} onHome={handleHome} />;
+    case "review":
+      return <ReviewView onBack={() => setPhase("swipe")} onSubmit={handleSubmit} />;
+    case "submit":
+      return <SubmitView />;
   }
 };
 
