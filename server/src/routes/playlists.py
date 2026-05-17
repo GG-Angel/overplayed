@@ -2,7 +2,6 @@ from spotipy import SpotifyException
 from typing import List, Annotated
 from models import (
     Playlist,
-    CreatePlaylistRequest,
     ItemUrisRequest,
     PlaylistItems,
 )
@@ -28,11 +27,10 @@ async def handle_get_playlists(
 
 @router.post("/")
 async def handle_create_playlist(
-    body: CreatePlaylistRequest,
     service: SpotifyService = Depends(get_spotify_service),
 ) -> Playlist:
     try:
-        return await service.create_playlist(body.name, body.description)
+        return await service.create_playlist()
     except SpotifyException:
         raise HTTPException(status_code=500, detail="Failed to create playlist.")
 

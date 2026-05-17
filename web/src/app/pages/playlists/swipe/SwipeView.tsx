@@ -7,6 +7,7 @@ import { AnimatePresence } from "framer-motion";
 import { Undo, X, Heart, Check } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useSwipeContext } from "./SwipeContext";
+import TrackCard from "@/components/TrackCard";
 
 export const VISIBLE_CARD_COUNT = 3;
 const STACK_ROTATE_DEGREES = 3;
@@ -40,9 +41,9 @@ const SwipeView = ({ onFinish }: SwipeViewProps) => {
     setIsSwiping(false);
   };
 
-  useEffect(() => {
-    if (isComplete) onFinish?.();
-  }, [isComplete, onFinish]);
+  // useEffect(() => {
+  //   if (isComplete) onFinish?.();
+  // }, [isComplete, onFinish]);
 
   if (status === "loading" || status === "error") return null;
 
@@ -52,24 +53,34 @@ const SwipeView = ({ onFinish }: SwipeViewProps) => {
 
       <div className="flex-1 flex flex-col w-full items-center justify-center gap-6 overflow-hidden">
         <div className="grid place-items-center touch-none">
-          <AnimatePresence>
-            {visibleItems.map((item, i) => {
-              const isActive = i === 0;
-              return (
-                <SwipeCard
-                  key={item.track.uri}
-                  ref={isActive ? activeCardRef : undefined}
-                  track={item.track}
-                  className="col-start-1 row-start-1"
-                  zIndex={visibleItems.length - i}
-                  baseRotate={isActive ? 0 : (i % 2 === 0 ? 1 : -1) * STACK_ROTATE_DEGREES}
-                  isDragEnabled={isActive && !isSwiping}
-                  onSwipeStart={() => setIsSwiping(true)}
-                  onSwipeEnd={recordSwipe}
-                />
-              );
-            })}
-          </AnimatePresence>
+          {!isComplete ? (
+            <AnimatePresence>
+              {visibleItems.map((item, i) => {
+                const isActive = i === 0;
+                return (
+                  <SwipeCard
+                    key={item.track.uri}
+                    ref={isActive ? activeCardRef : undefined}
+                    track={item.track}
+                    className="col-start-1 row-start-1"
+                    zIndex={visibleItems.length - i}
+                    baseRotate={isActive ? 0 : (i % 2 === 0 ? 1 : -1) * STACK_ROTATE_DEGREES}
+                    isDragEnabled={isActive && !isSwiping}
+                    onSwipeStart={() => setIsSwiping(true)}
+                    onSwipeEnd={recordSwipe}
+                  />
+                );
+              })}
+            </AnimatePresence>
+          ) : (
+            <div className="text-center">
+              <p>You've reached the end!</p>
+              <p className="text-muted-foreground">
+                Press <Check className="inline-block" /> to finish or{" "}
+                <Undo className="inline-block" /> to rewind.
+              </p>
+            </div>
+          )}
         </div>
         <div className="flex items-end gap-2">
           <IconButton icon={Undo} size="sm" variant="yellow" onClick={undo} disabled={!canUndo} />

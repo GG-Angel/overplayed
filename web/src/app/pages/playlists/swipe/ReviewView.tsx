@@ -4,7 +4,6 @@ import Metric from "@/components/ui/Metric";
 import Checkbox from "@/components/ui/Checkbox";
 import { useSwipeContext } from "./SwipeContext";
 import { useReviewForm, type ReviewForm } from "@/hooks/useReviewForm";
-import SavePlaylistFields from "./SavePlaylistFIelds";
 import Button from "@/components/ui/Button";
 
 type ReviewViewProps = {
@@ -14,7 +13,7 @@ type ReviewViewProps = {
 
 const ReviewView = ({ onReturn, onSubmit }: ReviewViewProps) => {
   const { likes, dislikes } = useSwipeContext();
-  const { form, errors, toggleSavePlaylist, updateSavePlaylistFields, validate } = useReviewForm();
+  const { form, toggleSavePlaylist, validate } = useReviewForm();
 
   const formatCount = (label: string, amount: number) => {
     return `${label}${amount > 1 ? "s" : ""}`;
@@ -65,16 +64,8 @@ const ReviewView = ({ onReturn, onSubmit }: ReviewViewProps) => {
               Keep these {dislikes.length} tracks accessible after removal.
             </p>
           </div>
-          <Checkbox enabled={form.savePlaylist.enabled} onEnabledChange={toggleSavePlaylist} />
+          <Checkbox enabled={form.savePlaylist} onEnabledChange={toggleSavePlaylist} />
         </div>
-        {form.savePlaylist.enabled && (
-          <SavePlaylistFields
-            name={form.savePlaylist.name}
-            description={form.savePlaylist.description}
-            errors={errors}
-            onChange={updateSavePlaylistFields}
-          />
-        )}
       </Card>
 
       <div className="flex justify-end gap-2">

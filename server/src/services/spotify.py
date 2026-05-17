@@ -1,3 +1,4 @@
+from utils import get_formatted_date
 from typing import List
 from models import (
     Playlist,
@@ -73,8 +74,9 @@ class SpotifyService:
             has_more=offset + limit < len(items),
         )
 
-    async def create_playlist(self, name: str, description: str = "") -> Playlist:
-        playlist = await self.spotify.create_playlist(name, description)
+    async def create_playlist(self) -> Playlist:
+        name = f"Overplayed - {get_formatted_date()}"
+        playlist = await self.spotify.create_playlist(name=name)
         await self.redis.invalidate_playlists(self.user_id)
         return playlist
 

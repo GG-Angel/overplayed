@@ -33,10 +33,10 @@ async def start(state: State):
     app.state[STATE_KEY] = state
 
     app.include_router(home.router)
-    app.include_router(auth.router, prefix="/auth", tags=["spotify", "auth"])  # fmt: skip
-    app.include_router(users.router, prefix="/users", tags=["spotify", "users"])  # fmt: skip
-    app.include_router(playlists.router, prefix="/playlists", tags=["spotify", "playlists"])  # fmt: skip
-    app.include_router(previews.router, prefix="/previews", tags=["spotify", "previews"])  # fmt: skip
+    app.include_router(auth.router, prefix="/auth", tags=["auth"])
+    app.include_router(users.router, prefix="/users", tags=["users"])
+    app.include_router(playlists.router, prefix="/playlists", tags=["playlists"])
+    app.include_router(previews.router, prefix="/previews", tags=["previews"])
 
     config = uvicorn.Config(app, host="0.0.0.0", port=8080)
     server = uvicorn.Server(config)
