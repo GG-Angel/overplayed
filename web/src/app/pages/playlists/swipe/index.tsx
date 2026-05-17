@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import LoadingState from "@/components/states/LoadingState";
 import { useState } from "react";
 import ErrorState from "@/components/states/ErrorState";
@@ -6,8 +6,10 @@ import SwipeView from "./SwipeView";
 import ReviewView from "./ReviewView";
 import SwipeProvider from "./SwipeProvider";
 import { useSwipeContext } from "./SwipeContext";
+import NothingView from "./NothingView";
+import type { ReviewForm } from "@/hooks/useReviewForm";
 
-type Phase = "swipe" | "review";
+type Phase = "swipe" | "nothing" | "review" | "submit";
 
 const PlaylistSwipePage = () => {
   const { playlistId } = useParams();
@@ -23,7 +25,23 @@ const PlaylistSwipePage = () => {
 
 const PlaylistSwipePageInner = () => {
   const [phase, setPhase] = useState<Phase>("swipe");
-  const { status, total } = useSwipeContext();
+  const { status, total, dislikes } = useSwipeContext();
+  const navigate = useNavigate();
+
+  const handleHome = () => {
+    navigate("/", { replace: true });
+  };
+
+  const handleFinish = () => {
+    const nextPhase = dislikes.length === 0 ? "nothing" : "review";
+    setPhase(nextPhase);
+  };
+
+  const handleSubmit = (form: ReviewForm) => {
+    // TODO: validate conditions for submitting
+    console.log(form);
+    setPhase("submit");
+  };
 
   if (status === "error") return <ErrorState message="Failed to load playlist" />;
   if (status === "loading") return <LoadingState message="Loading tracks..." />;
@@ -31,16 +49,11 @@ const PlaylistSwipePageInner = () => {
 
   switch (phase) {
     case "swipe":
-      return <SwipeView onFinish={() => setPhase("review")} />;
+      return <SwipeView onFinish={handleFinish} />;
     case "review":
-      return (
-        <ReviewView
-          onReturn={() => setPhase("swipe")}
-          onSubmit={(form) => {
-            console.log(form);
-          }}
-        />
-      );
+      return <ReviewView onBack={() => setPhase("swipe")} onSubmit={handleSubmit} />;
+    case "nothing":
+      return <NothingView onBack={() => setPhase("swipe")} onHome={handleHome} />;
   }
 };
 

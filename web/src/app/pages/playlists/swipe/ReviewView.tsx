@@ -7,11 +7,11 @@ import { useReviewForm, type ReviewForm } from "@/hooks/useReviewForm";
 import Button from "@/components/ui/Button";
 
 type ReviewViewProps = {
-  onReturn?: () => void;
+  onBack?: () => void;
   onSubmit?: (form: ReviewForm) => void;
 };
 
-const ReviewView = ({ onReturn, onSubmit }: ReviewViewProps) => {
+const ReviewView = ({ onBack, onSubmit }: ReviewViewProps) => {
   const { likes, dislikes } = useSwipeContext();
   const { form, toggleSavePlaylist, validate } = useReviewForm();
 
@@ -19,8 +19,8 @@ const ReviewView = ({ onReturn, onSubmit }: ReviewViewProps) => {
     return `${label}${amount > 1 ? "s" : ""}`;
   };
 
-  const handleReturn = () => {
-    onReturn?.();
+  const handleBack = () => {
+    onBack?.();
   };
 
   const handleSubmit = () => {
@@ -60,16 +60,20 @@ const ReviewView = ({ onReturn, onSubmit }: ReviewViewProps) => {
         <div className="flex flex-1 justify-between items-center gap-4 pr-2">
           <div>
             <p>Save removed tracks to a new playlist?</p>
-            <p className="text-sm text-muted-foreground">
-              Keep these {dislikes.length} tracks accessible after removal.
-            </p>
+            {form.savePlaylist ? (
+              <p className="text-sm text-muted-foreground">
+                Keep these tracks accessible after removal.
+              </p>
+            ) : (
+              <p className="text-sm text-destructive">Removed tracks will be lost permanently.</p>
+            )}
           </div>
           <Checkbox enabled={form.savePlaylist} onEnabledChange={toggleSavePlaylist} />
         </div>
       </Card>
 
       <div className="flex justify-end gap-2">
-        <Button variant="secondary" onClick={handleReturn}>
+        <Button variant="secondary" onClick={handleBack}>
           Keep Swiping
         </Button>
         <Button variant="primary" onClick={handleSubmit}>
