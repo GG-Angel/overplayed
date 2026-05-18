@@ -1,8 +1,8 @@
 import { SkipForward } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
-import AvatarControl from "./AvatarControl";
-import { usePlaylist } from "@/hooks/usePlaylist";
+import { usePlaylist } from "@/features/playlist/hooks/usePlaylist";
 import { extractImageUrl } from "@/lib/utils";
+import AvatarControl from "@/features/user/components/AvatarControl";
 
 const PlaylistCrumb = ({ id }: { id: string }) => {
   const { data: playlist } = usePlaylist(id);

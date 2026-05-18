@@ -1,11 +1,11 @@
-import TrackCard from "@/components/TrackCard";
 import Card from "@/components/ui/Card";
 import Metric from "@/components/ui/Metric";
 import Checkbox from "@/components/ui/Checkbox";
-import { useSwipeContext } from "./SwipeContext";
-import { useReviewForm, type ReviewForm } from "@/hooks/useReviewForm";
+import { useSwipeContext } from "../context/SwipeContext";
+import { useReviewForm, type ReviewForm } from "@/features/swipe/hooks/useReviewForm";
 import Button from "@/components/ui/Button";
 import { pluralize } from "@/lib/utils";
+import TrackCard from "@/features/playlist/components/TrackCard";
 
 type ReviewViewProps = {
   onBack?: () => void;

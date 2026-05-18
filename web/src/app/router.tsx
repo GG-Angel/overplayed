@@ -1,10 +1,10 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { LandingPage } from "./pages/landing";
-import PlaylistSelectionPage from "./pages/playlists/selection";
-import PlaylistSwipePage from "./pages/playlists/swipe";
-import Layout from "@/components/Layout";
+import SelectionPage from "./pages/playlists/selection";
 import ErrorState from "@/components/states/ErrorState";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { ProtectedRoute } from "@/features/user/auth/ProtectedRoute";
+import { Layout } from "lucide-react";
+import SwipePage from "./pages/playlists/swipe";
 
 const router = createBrowserRouter([
   {
@@ -17,8 +17,8 @@ const router = createBrowserRouter([
         path: "playlists",
         element: <ProtectedRoute />,
         children: [
-          { index: true, element: <PlaylistSelectionPage /> },
-          { path: ":playlistId", element: <PlaylistSwipePage /> },
+          { index: true, element: <SelectionPage /> },
+          { path: ":playlistId", element: <SwipePage /> },
         ],
       },
     ],

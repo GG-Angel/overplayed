@@ -1,5 +1,5 @@
-import { usePlaylistSwipe } from "@/hooks/usePlaylistSwipe";
 import { createContext, useContext } from "react";
+import type { usePlaylistSwipe } from "../hooks/usePlaylistSwipe";
 
 type SwipeContextValue = ReturnType<typeof usePlaylistSwipe>;
 

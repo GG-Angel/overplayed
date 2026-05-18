@@ -1,9 +1,9 @@
-import PlaylistCard from "@/components/PlaylistCard";
+import PlaylistCard from "@/features/playlist/components/PlaylistCard";
 import { useNavigate } from "react-router-dom";
 import LoadingState from "@/components/states/LoadingState";
-import { usePlaylists } from "@/hooks/usePlaylists";
+import { usePlaylists } from "@/features/playlist/hooks/usePlaylists";
 
-const PlaylistSelectionPage = () => {
+const SelectionPage = () => {
   const { data: playlists, isLoading: isLoadingPlaylists } = usePlaylists();
   const navigate = useNavigate();
 
@@ -28,4 +28,4 @@ const PlaylistSelectionPage = () => {
   );
 };
 
-export default PlaylistSelectionPage;
+export default SelectionPage;

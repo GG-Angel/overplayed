@@ -1,9 +1,9 @@
-import useSubmitChanges, { type StepStatus } from "@/hooks/useSubmitChanges";
-import { useSwipeContext } from "./SwipeContext";
+import { useSwipeContext } from "../context/SwipeContext";
 import { Ban, Check, Ellipsis, LoaderCircle, X } from "lucide-react";
 import { cn, pluralize } from "@/lib/utils";
 import { useEffect, useEffectEvent } from "react";
-import type { ReviewForm } from "@/hooks/useReviewForm";
+import type { ReviewForm } from "@/features/swipe/hooks/useReviewForm";
+import useSubmitChanges, { type StepStatus } from "../hooks/useSubmitChanges";
 
 type ActionItemProps = {
   label: string;

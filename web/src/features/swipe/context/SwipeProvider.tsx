@@ -1,6 +1,6 @@
-import { usePlaylistSwipe } from "@/hooks/usePlaylistSwipe";
 import type { ReactNode } from "react";
 import { SwipeContext } from "./SwipeContext";
+import { usePlaylistSwipe } from "../hooks/usePlaylistSwipe";
 
 type SwipeProviderProps = {
   playlistId: string;

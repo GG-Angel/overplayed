@@ -2,13 +2,13 @@ import { useNavigate, useParams } from "react-router-dom";
 import LoadingState from "@/components/states/LoadingState";
 import { useState } from "react";
 import ErrorState from "@/components/states/ErrorState";
-import SwipeView from "./SwipeView";
-import ReviewView from "./ReviewView";
-import SwipeProvider from "./SwipeProvider";
-import { useSwipeContext } from "./SwipeContext";
-import NothingView from "./NothingView";
-import type { ReviewForm } from "@/hooks/useReviewForm";
-import SubmitView from "./SubmitView";
+import type { ReviewForm } from "@/features/swipe/hooks/useReviewForm";
+import { useSwipeContext } from "@/features/swipe/context/SwipeContext";
+import SwipeProvider from "@/features/swipe/context/SwipeProvider";
+import NothingView from "@/features/swipe/views/NothingView";
+import ReviewView from "@/features/swipe/views/ReviewView";
+import SubmitView from "@/features/swipe/views/SubmitView";
+import SwipeView from "@/features/swipe/views/SwipeView";
 
 type PhaseState =
   | { kind: "swipe" }
@@ -16,19 +16,19 @@ type PhaseState =
   | { kind: "review" }
   | { kind: "submit"; form: ReviewForm };
 
-const PlaylistSwipePage = () => {
+const SwipePage = () => {
   const { playlistId } = useParams();
 
   if (!playlistId) return <ErrorState message="Playlist not found" />;
 
   return (
     <SwipeProvider playlistId={playlistId}>
-      <PlaylistSwipePageInner />
+      <SwipePageInner />
     </SwipeProvider>
   );
 };
 
-const PlaylistSwipePageInner = () => {
+const SwipePageInner = () => {
   const [phase, setPhase] = useState<PhaseState>({ kind: "swipe" });
 
   const { status, total, dislikes } = useSwipeContext();
@@ -64,4 +64,4 @@ const PlaylistSwipePageInner = () => {
   }
 };
 
-export default PlaylistSwipePage;
+export default SwipePage;

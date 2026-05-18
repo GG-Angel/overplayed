@@ -1,12 +1,12 @@
-import AudioPlayer from "@/components/AudioPlayer";
-import type { Direction, SwipeCardHandler } from "@/components/SwipeCard";
-import SwipeCard from "@/components/SwipeCard";
-import SwipeProgress from "@/components/SwipeProgress";
+import type { Direction, SwipeCardHandler } from "@/features/swipe/components/SwipeCard";
+import SwipeCard from "@/features/swipe/components/SwipeCard";
+import SwipeProgress from "@/features/swipe/components/SwipeProgress";
 import IconButton from "@/components/ui/IconButton";
 import { AnimatePresence } from "framer-motion";
 import { Undo, X, Heart, Check } from "lucide-react";
 import { useRef, useState } from "react";
-import { useSwipeContext } from "./SwipeContext";
+import { useSwipeContext } from "../context/SwipeContext";
+import AudioPlayer from "@/features/previews/components/AudioPlayer";
 
 const VISIBLE_CARD_COUNT = 3;
 const STACK_ROTATE_DEGREES = 3;

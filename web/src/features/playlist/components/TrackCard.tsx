@@ -1,5 +1,5 @@
+import Card, { type CardProps } from "@/components/ui/Card";
 import type { Track } from "@/lib/types";
-import Card, { type CardProps } from "./ui/Card";
 import { cn, extractImageUrl } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 

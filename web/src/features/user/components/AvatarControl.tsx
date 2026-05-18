@@ -1,11 +1,11 @@
-import Button from "./ui/Button";
 import { useLocation } from "react-router-dom";
-import Avatar from "./Avatar";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import AvatarDropdown from "./AvatarDropdown";
-import useAuth from "@/hooks/useAuth";
+import useAuth from "@/features/user/auth/useAuth";
 import useClickOutside from "@/hooks/useClickOutside";
+import Button from "@/components/ui/Button";
+import Avatar from "./Avatar";
+import AvatarDropdown from "./AvatarDropdown";
 
 const AvatarControl = () => {
   const [isOpen, setIsOpen] = useState(false);

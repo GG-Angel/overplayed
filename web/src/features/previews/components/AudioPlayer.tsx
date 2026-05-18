@@ -1,9 +1,9 @@
-import Card from "./ui/Card";
-import Waveform, { WaveformSkeleton, type WaveformHandler } from "./Waveform";
 import { useRef, useState } from "react";
-import IconButton from "./ui/IconButton";
 import { Pause, Play } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Card from "@/components/ui/Card";
+import IconButton from "@/components/ui/IconButton";
+import Waveform, { type WaveformHandler, WaveformSkeleton } from "./Waveform";
 
 type AudioPlayerProps = {
   audio: HTMLAudioElement | undefined;
