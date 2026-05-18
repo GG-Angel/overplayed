@@ -1,10 +1,10 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { LandingPage } from "./pages/landing";
 import SelectionPage from "./pages/playlists/selection";
 import ErrorState from "@/components/states/ErrorState";
 import { ProtectedRoute } from "@/features/user/auth/ProtectedRoute";
-import { Layout } from "lucide-react";
 import SwipePage from "./pages/playlists/swipe";
+import LandingPage from "./pages/landing";
+import Layout from "@/components/layout/Layout";
 
 const router = createBrowserRouter([
   {

@@ -109,8 +109,7 @@ const SwipeCard = ({
       animate={{ y: 0 }}
       onDragEnd={handleDragEnd}
       className={cn(
-        "relative origin-bottom transition-shadow",
-        isTopCard && "drop-shadow-lg drop-shadow-black/50",
+        "relative origin-bottom transition-shadow drop-shadow-lg drop-shadow-black/25",
         className
       )}
     >

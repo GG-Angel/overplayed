@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import LoadingState from "@/components/states/LoadingState";
 import useAuth from "@/features/user/auth/useAuth";
 
-export const LandingPage = () => {
+const LandingPage = () => {
   const { user, isLoading, redirectToLogin } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -28,3 +28,5 @@ export const LandingPage = () => {
     </>
   );
 };
+
+export default LandingPage;
