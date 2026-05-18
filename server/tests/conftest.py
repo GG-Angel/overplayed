@@ -38,14 +38,14 @@ async def client():
 @pytest.fixture(scope="session")
 async def test_playlist(client: ClientSession):
     """Session-scoped playlist pre-populated with items, for read tests."""
-    async with client.post("/playlists", json={"name": "pytest"}) as response:
+    async with client.post("/playlists") as response:
         response.raise_for_status()
         playlist = await response.json()
         logger.info(f"Created test playlist: {playlist['name']}")
 
     async with client.post(
-        f"/playlists/{playlist['id']}/items",
-        json={"item_uris": TEST_PLAYLIST_ITEM_URIS},
+        f"/playlists/{playlist['id']}/items?action=add",
+        json={"uris": TEST_PLAYLIST_ITEM_URIS},
     ) as response:
         response.raise_for_status()
 
@@ -59,7 +59,7 @@ async def test_playlist(client: ClientSession):
 @pytest.fixture
 async def empty_playlist(client: ClientSession):
     """Function-scoped empty playlist, for mutation tests."""
-    async with client.post("/playlists", json={"name": "pytest-mutations"}) as response:
+    async with client.post("/playlists") as response:
         response.raise_for_status()
         playlist = await response.json()
 

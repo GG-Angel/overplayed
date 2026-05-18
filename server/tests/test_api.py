@@ -111,57 +111,44 @@ class TestInputValidation:
         async with client.get("/playlists/bad-id/items") as response:
             assert response.status == 422
 
+    @pytest.mark.parametrize("action", ["add", "remove"])
     @pytest.mark.parametrize(
         "body",
         [
-            {},  # missing name
-            {"name": ""},  # empty name
-            {"name": "a" * 101},  # name too long
-            {"name": "ok", "description": "a" * 301},  # description too long
-            {"name": 123},  # wrong type
-            {"description": "no name"},  # missing required name
+            {},  # missing uris
+            {"uris": []},  # empty list
+            {"uris": ["not-a-uri"]},
+            {"uris": ["spotify:track:short"]},
+            {"uris": ["spotify:album:1oNYiuCvyixmwcyNZyq3Dd"]},  # wrong type
+            {"uris": ["spotify:track:1oNYiuCvyixmwcyNZyq3D!"]},  # bad char
+            {"uris": ["spotify:track:1oNYiuCvyixmwcyNZyq3Dd", "bad"]},  # one bad
+            {"uris": "spotify:track:1oNYiuCvyixmwcyNZyq3Dd"},  # not a list
         ],
     )
-    async def test_create_playlist_invalid_body(
-        self, client: ClientSession, body: dict
-    ):
-        async with client.post("/playlists", json=body) as response:
-            assert response.status == 422
-
-    @pytest.mark.parametrize(
-        "body",
-        [
-            {},  # missing item_uris
-            {"item_uris": []},  # empty list
-            {"item_uris": ["not-a-uri"]},
-            {"item_uris": ["spotify:track:short"]},
-            {"item_uris": ["spotify:album:1oNYiuCvyixmwcyNZyq3Dd"]},  # wrong type
-            {"item_uris": ["spotify:track:1oNYiuCvyixmwcyNZyq3D!"]},  # bad char
-            {"item_uris": ["spotify:track:1oNYiuCvyixmwcyNZyq3Dd", "bad"]},  # one bad
-            {"item_uris": "spotify:track:1oNYiuCvyixmwcyNZyq3Dd"},  # not a list
-        ],
-    )
-    async def test_add_playlist_items_invalid_body(
-        self, client: ClientSession, empty_playlist: dict, body: dict
+    async def test_update_playlist_items_invalid_body(
+        self, client: ClientSession, empty_playlist: dict, action: str, body: dict
     ):
         async with client.post(
-            f"/playlists/{empty_playlist['id']}/items", json=body
+            f"/playlists/{empty_playlist['id']}/items?action={action}", json=body
         ) as response:
             assert response.status == 422
 
-    @pytest.mark.parametrize(
-        "body",
-        [
-            {},
-            {"item_uris": []},
-            {"item_uris": ["not-a-uri"]},
-        ],
-    )
-    async def test_delete_playlist_items_invalid_body(
-        self, client: ClientSession, empty_playlist: dict, body: dict
+    @pytest.mark.parametrize("action", ["", "delete", "ADD", "foo"])
+    async def test_update_playlist_items_invalid_action(
+        self, client: ClientSession, empty_playlist: dict, action: str
     ):
-        async with client.delete(
-            f"/playlists/{empty_playlist['id']}/items", json=body
+        async with client.post(
+            f"/playlists/{empty_playlist['id']}/items?action={action}",
+            json={"uris": ["spotify:track:1oNYiuCvyixmwcyNZyq3Dd"]},
+        ) as response:
+            assert response.status == 422
+
+    async def test_update_playlist_items_missing_action(
+        self, client: ClientSession, empty_playlist: dict
+    ):
+        async with client.post(
+            f"/playlists/{empty_playlist['id']}/items",
+            json={"uris": ["spotify:track:1oNYiuCvyixmwcyNZyq3Dd"]},
         ) as response:
             assert response.status == 422
 
@@ -185,8 +172,8 @@ class TestInputValidation:
 
 async def test_add_playlist_items(client: ClientSession, empty_playlist: dict):
     async with client.post(
-        f"/playlists/{empty_playlist['id']}/items",
-        json={"item_uris": TEST_PLAYLIST_ITEM_URIS},
+        f"/playlists/{empty_playlist['id']}/items?action=add",
+        json={"uris": TEST_PLAYLIST_ITEM_URIS},
     ) as response:
         response.raise_for_status()
 
@@ -197,13 +184,13 @@ async def test_add_playlist_items(client: ClientSession, empty_playlist: dict):
 
 async def test_remove_playlist_items(client: ClientSession, empty_playlist: dict):
     async with client.post(
-        f"/playlists/{empty_playlist['id']}/items",
-        json={"item_uris": TEST_PLAYLIST_ITEM_URIS},
+        f"/playlists/{empty_playlist['id']}/items?action=add",
+        json={"uris": TEST_PLAYLIST_ITEM_URIS},
     ) as response:
         response.raise_for_status()
 
-    async with client.delete(
-        f"/playlists/{empty_playlist['id']}/items",
-        json={"item_uris": TEST_PLAYLIST_ITEM_URIS},
+    async with client.post(
+        f"/playlists/{empty_playlist['id']}/items?action=remove",
+        json={"uris": TEST_PLAYLIST_ITEM_URIS},
     ) as response:
         response.raise_for_status()

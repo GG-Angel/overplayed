@@ -85,10 +85,10 @@ async def handle_update_playlist_items(
 ) -> None:
     try:
         match action:
-            case "remove":
-                await service.delete_playlist_items(playlist_id, body.uris)
             case "add":
                 await service.add_playlist_items(playlist_id, body.uris)
+            case "remove":
+                await service.delete_playlist_items(playlist_id, body.uris)
     except PlaylistNotOwnedError:
         raise HTTPException(status_code=403, detail="Forbidden.")
     except SpotifyException:
