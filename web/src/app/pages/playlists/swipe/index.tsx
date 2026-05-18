@@ -10,7 +10,11 @@ import NothingView from "./NothingView";
 import type { ReviewForm } from "@/hooks/useReviewForm";
 import SubmitView from "./SubmitView";
 
-type Phase = "swipe" | "nothing" | "review" | "submit";
+type PhaseState =
+  | { kind: "swipe" }
+  | { kind: "nothing" }
+  | { kind: "review" }
+  | { kind: "submit"; form: ReviewForm };
 
 const PlaylistSwipePage = () => {
   const { playlistId } = useParams();
@@ -25,8 +29,7 @@ const PlaylistSwipePage = () => {
 };
 
 const PlaylistSwipePageInner = () => {
-  const [phase, setPhase] = useState<Phase>("swipe");
-  const [form, setForm] = useState<ReviewForm | null>(null);
+  const [phase, setPhase] = useState<PhaseState>({ kind: "swipe" });
 
   const { status, total, dislikes } = useSwipeContext();
   const navigate = useNavigate();
@@ -36,29 +39,28 @@ const PlaylistSwipePageInner = () => {
   };
 
   const handleFinish = () => {
-    const nextPhase = dislikes.length === 0 ? "nothing" : "review";
-    setPhase(nextPhase);
+    setPhase({ kind: dislikes.length === 0 ? "nothing" : "review" });
   };
 
   const handleSubmit = (form: ReviewForm) => {
-    setForm(form);
-    setPhase("submit");
+    setPhase({ kind: "submit", form });
   };
+
+  const backToSwipe = () => setPhase({ kind: "swipe" });
 
   if (status === "error") return <ErrorState message="Failed to load playlist" />;
   if (status === "loading") return <LoadingState message="Loading tracks..." />;
   if (total === 0) return <ErrorState message="Playlist is empty" />;
 
-  switch (phase) {
+  switch (phase.kind) {
     case "swipe":
       return <SwipeView onFinish={handleFinish} />;
     case "nothing":
-      return <NothingView onBack={() => setPhase("swipe")} onHome={handleHome} />;
+      return <NothingView onBack={backToSwipe} onHome={handleHome} />;
     case "review":
-      return <ReviewView onBack={() => setPhase("swipe")} onSubmit={handleSubmit} />;
+      return <ReviewView onBack={backToSwipe} onSubmit={handleSubmit} />;
     case "submit":
-      if (!form) return null;
-      return <SubmitView form={form} />;
+      return <SubmitView form={phase.form} />;
   }
 };
 

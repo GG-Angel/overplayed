@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 export type Decision = "like" | "dislike";
 
@@ -17,8 +17,14 @@ const useSwipes = <T>() => {
 
   const reset = () => setSwipes([]);
 
-  const likes = swipes.filter((s) => s.decision === "like").map((s) => s.item);
-  const dislikes = swipes.filter((s) => s.decision === "dislike").map((s) => s.item);
+  const { likes, dislikes } = useMemo(() => {
+    const likes: T[] = [];
+    const dislikes: T[] = [];
+    for (const s of swipes) {
+      (s.decision === "like" ? likes : dislikes).push(s.item);
+    }
+    return { likes, dislikes };
+  }, [swipes]);
 
   return { swipes, likes, dislikes, record, undo, reset };
 };

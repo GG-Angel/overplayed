@@ -21,7 +21,8 @@ type SwipeViewProps = {
 };
 
 const SwipeView = ({ onFinish }: SwipeViewProps) => {
-  const { index, total, items, swipe, undo, audio, isAudioError, status } = useSwipeContext();
+  const { index, total, items, swipe, undo, audio, isAudioError, status, likes, dislikes } =
+    useSwipeContext();
   const activeCardRef = useRef<SwipeCardHandler | null>(null);
   const [isSwiping, setIsSwiping] = useState(false);
 
@@ -44,25 +45,31 @@ const SwipeView = ({ onFinish }: SwipeViewProps) => {
 
   return (
     <div className="flex flex-col items-center gap-4 w-full self-center h-screen py-6 overflow-hidden">
-      <SwipeProgress className="w-full max-w-3xl" />
+      <SwipeProgress
+        className="w-full max-w-3xl"
+        likes={likes.length}
+        dislikes={dislikes.length}
+        total={total}
+      />
 
       <div className="flex-1 flex flex-col w-full items-center justify-center gap-6 overflow-hidden">
         <div className="grid place-items-center touch-none">
           {!isComplete ? (
             <AnimatePresence>
               {visibleItems.map((item, i) => {
-                const isActive = i === 0;
+                const isTopCard = i === 0;
                 return (
                   <SwipeCard
-                    key={item.track.uri}
-                    ref={isActive ? activeCardRef : undefined}
-                    track={item.track}
                     className="col-start-1 row-start-1 w-64 sm:w-72 lg:w-84"
-                    zIndex={visibleItems.length - i}
-                    baseRotate={isActive ? 0 : (i % 2 === 0 ? 1 : -1) * STACK_ROTATE_DEGREES}
-                    isDragEnabled={isActive && !isSwiping}
+                    ref={isTopCard ? activeCardRef : undefined}
+                    key={item.track.uri}
+                    track={item.track}
                     onSwipeStart={() => setIsSwiping(true)}
                     onSwipeEnd={recordSwipe}
+                    isDragEnabled={isTopCard && !isSwiping}
+                    isTopCard={isTopCard}
+                    zIndex={visibleItems.length - i}
+                    baseRotate={isTopCard ? 0 : (i % 2 === 0 ? 1 : -1) * STACK_ROTATE_DEGREES}
                   />
                 );
               })}

@@ -5,6 +5,7 @@ import Checkbox from "@/components/ui/Checkbox";
 import { useSwipeContext } from "./SwipeContext";
 import { useReviewForm, type ReviewForm } from "@/hooks/useReviewForm";
 import Button from "@/components/ui/Button";
+import { pluralize } from "@/lib/utils";
 
 type ReviewViewProps = {
   onBack?: () => void;
@@ -13,19 +14,13 @@ type ReviewViewProps = {
 
 const ReviewView = ({ onBack, onSubmit }: ReviewViewProps) => {
   const { likes, dislikes } = useSwipeContext();
-  const { form, toggleSavePlaylist, validate } = useReviewForm();
-
-  const formatCount = (label: string, amount: number) => {
-    return `${label}${amount > 1 ? "s" : ""}`;
-  };
+  const { form, toggleSavePlaylist } = useReviewForm();
 
   const handleBack = () => {
     onBack?.();
   };
 
   const handleSubmit = () => {
-    const result = validate();
-    if (!result.success) return;
     onSubmit?.(form);
   };
 
@@ -35,10 +30,10 @@ const ReviewView = ({ onBack, onSubmit }: ReviewViewProps) => {
       <div className="flex gap-3">
         <Metric
           amount={dislikes.length}
-          label={formatCount("Dislike", dislikes.length)}
+          label={pluralize("Dislike", dislikes.length)}
           tone="negative"
         />
-        <Metric amount={likes.length} label={formatCount("Like", likes.length)} tone="positive" />
+        <Metric amount={likes.length} label={pluralize("Like", likes.length)} tone="positive" />
       </div>
 
       <div>

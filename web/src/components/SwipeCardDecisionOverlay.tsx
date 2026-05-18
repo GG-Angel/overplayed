@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
 import { motion, type MotionValue } from "framer-motion";
 
-type SwipeCardDecisionOverlay = {
+type SwipeCardDecisionOverlayProps = {
   icon: LucideIcon;
   opacity?: number | MotionValue<number>;
   className?: string;
@@ -12,10 +12,13 @@ const SwipeCardDecisionOverlay = ({
   icon: Icon,
   opacity = 1,
   className = "",
-}: SwipeCardDecisionOverlay) => (
+}: SwipeCardDecisionOverlayProps) => (
   <motion.div
     style={{ opacity }}
-    className={cn("absolute inset-0 flex justify-center items-center bg-linear-to-t rounded-xl", className)}
+    className={cn(
+      "absolute inset-0 flex justify-center items-center bg-linear-to-t rounded-xl",
+      className
+    )}
   >
     <Icon
       fill="currentColor"

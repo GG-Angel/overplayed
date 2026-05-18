@@ -7,7 +7,7 @@ export type StepStatus = "pending" | "active" | "success" | "error" | "skipped";
 
 type SubmitState = {
   creating: StepStatus;
-  adding: StepStatus;
+  backingUp: StepStatus;
   removing: StepStatus;
   error: Error | null;
   newPlaylist: Playlist | null;
@@ -15,13 +15,13 @@ type SubmitState = {
 
 const initialState: SubmitState = {
   creating: "pending",
-  adding: "pending",
+  backingUp: "pending",
   removing: "pending",
   error: null,
   newPlaylist: null,
 };
 
-const useSubmitReview = (playlistId: string) => {
+const useSubmitChanges = (playlistId: string) => {
   const [state, setState] = useState<SubmitState>(initialState);
   const hasSubmitted = useRef(false);
 
@@ -36,14 +36,14 @@ const useSubmitReview = (playlistId: string) => {
         setState((s) => ({
           ...s,
           creating: "success",
-          adding: "active",
+          backingUp: "active",
           newPlaylist,
         }));
 
         await updatePlaylistItems(newPlaylist.id, uris, "add");
-        setState((s) => ({ ...s, adding: "success" }));
+        setState((s) => ({ ...s, backingUp: "success" }));
       } else {
-        setState((s) => ({ ...s, creating: "skipped", adding: "skipped" }));
+        setState((s) => ({ ...s, creating: "skipped", backingUp: "skipped" }));
       }
 
       setState((s) => ({ ...s, removing: "active" }));
@@ -55,7 +55,7 @@ const useSubmitReview = (playlistId: string) => {
         ...s,
         // mark whichever step is currently active as errored
         creating: s.creating === "active" ? "error" : s.creating,
-        adding: s.adding === "active" ? "error" : s.adding,
+        backingUp: s.backingUp === "active" ? "error" : s.backingUp,
         removing: s.removing === "active" ? "error" : s.removing,
         error,
       }));
@@ -65,4 +65,4 @@ const useSubmitReview = (playlistId: string) => {
   return { state, submit };
 };
 
-export default useSubmitReview;
+export default useSubmitChanges;

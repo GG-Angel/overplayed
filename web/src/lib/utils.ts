@@ -14,3 +14,7 @@ export function extractImageUrl(images: Image[], size: "sm" | "lg"): string {
   const index = size === "sm" ? -1 : 0;
   return images.at(index)?.url ?? "/placeholder.webp";
 }
+
+export function pluralize(label: string, amount: number): string {
+  return `${label}${amount === 1 ? "" : "s"}`;
+}

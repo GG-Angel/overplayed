@@ -5,7 +5,6 @@ import SwipeCardDecisionOverlay from "./SwipeCardDecisionOverlay";
 import { animate, motion, useMotionValue, useTransform } from "framer-motion";
 import { useCallback, useEffect, useImperativeHandle, type Ref } from "react";
 import { cn } from "@/lib/utils";
-import { VISIBLE_CARD_COUNT } from "@/app/pages/playlists/swipe/SwipeView";
 
 export type Direction = "left" | "right";
 
@@ -25,6 +24,7 @@ type SwipeCardProps = {
   rotateAmount?: number;
   mountOffset?: number;
   isDragEnabled?: boolean;
+  isTopCard?: boolean;
   ref?: Ref<SwipeCardHandler>;
   onSwipeStart?: () => void;
   onSwipeEnd?: (direction: Direction) => void;
@@ -45,6 +45,7 @@ const SwipeCard = ({
   zIndex = 0,
   baseRotate = 0,
   isDragEnabled = true,
+  isTopCard = true,
 }: SwipeCardProps) => {
   const xMV = useMotionValue(0);
 
@@ -104,12 +105,12 @@ const SwipeCard = ({
       whileHover={{ cursor: "grab" }}
       whileTap={{ scale: 1.05, cursor: "grabbing" }}
       style={{ x: xMV, rotate: cardRotate, opacity: cardOpacity, zIndex }}
-      initial={{ y: zIndex === VISIBLE_CARD_COUNT ? -mountOffset : 0 }}
+      initial={{ y: isTopCard ? -mountOffset : 0 }}
       animate={{ y: 0 }}
       onDragEnd={handleDragEnd}
       className={cn(
         "relative origin-bottom transition-shadow",
-        zIndex === VISIBLE_CARD_COUNT && "drop-shadow-lg drop-shadow-black/50",
+        isTopCard && "drop-shadow-lg drop-shadow-black/50",
         className
       )}
     >

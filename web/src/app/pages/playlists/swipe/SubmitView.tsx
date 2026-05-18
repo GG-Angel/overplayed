@@ -1,7 +1,7 @@
-import useSubmitReview, { type StepStatus } from "@/hooks/useSubmitChanges";
+import useSubmitChanges, { type StepStatus } from "@/hooks/useSubmitChanges";
 import { useSwipeContext } from "./SwipeContext";
 import { Ban, Check, Ellipsis, LoaderCircle, X } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, pluralize } from "@/lib/utils";
 import { useEffect, useEffectEvent } from "react";
 import type { ReviewForm } from "@/hooks/useReviewForm";
 
@@ -49,13 +49,11 @@ type SubmitViewProps = {
 
 const SubmitView = ({ form }: SubmitViewProps) => {
   const { id, dislikes } = useSwipeContext();
-  const { state, submit } = useSubmitReview(id);
+  const { state, submit } = useSubmitChanges(id);
 
-  const kaomoji = "( ◡̀_◡́)ᕤ";
-
-  const runSubmit = useEffectEvent(() => {
+  const runSubmit = useEffectEvent(async () => {
     const uris = dislikes.map((item) => item.track.uri);
-    submit(form, uris);
+    await submit(form, uris);
   });
 
   useEffect(() => {
@@ -65,14 +63,14 @@ const SubmitView = ({ form }: SubmitViewProps) => {
   return (
     <div className="flex flex-col h-full justify-center gap-6">
       <div className="text-center">
-        <p className="text-4xl mb-2">{kaomoji}</p>
+        <p className="text-4xl mb-2">{"( ◡̀_◡́)ᕤ"}</p>
         <p className="text-xl font-medium">Processing Changes</p>
       </div>
       <div className="flex flex-col items-start self-center gap-3">
         <ActionItem label="Create new playlist" status={state.creating} />
-        <ActionItem label="Back up removed tracks" status={state.adding} />
+        <ActionItem label="Back up tracks" status={state.backingUp} />
         <ActionItem
-          label={`Remove ${dislikes.length} track(s) from playlist`}
+          label={`Remove ${dislikes.length} ${pluralize("track", dislikes.length)}`}
           status={state.removing}
         />
       </div>
