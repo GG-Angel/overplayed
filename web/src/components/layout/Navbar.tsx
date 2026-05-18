@@ -1,36 +1,5 @@
-import { SkipForward } from "lucide-react";
-import { Link, useParams } from "react-router-dom";
-import { usePlaylist } from "@/features/playlist/hooks/usePlaylist";
-import { extractImageUrl } from "@/lib/utils";
 import AvatarControl from "@/features/user/components/AvatarControl";
-
-const PlaylistCrumb = ({ id }: { id: string }) => {
-  const { data: playlist } = usePlaylist(id);
-
-  if (!playlist) return null;
-
-  const coverUrl = extractImageUrl(playlist.images ?? [], "sm");
-
-  return (
-    <span className="inline-flex items-center gap-1.5 text-muted-foreground min-w-0">
-      <span>/</span>
-      <img src={coverUrl} className="size-5 rounded shrink-0" />
-      <span className="truncate">{playlist.name}</span>
-    </span>
-  );
-};
-
-const Logo = () => {
-  const { playlistId } = useParams();
-
-  return (
-    <Link to="/" className="inline-flex items-center gap-1.5 select-none overflow-hidden">
-      <SkipForward className="text-primary shrink-0" />
-      <span className="text-lg font-semibold hidden sm:block">Overplayed</span>
-      {playlistId && <PlaylistCrumb id={playlistId} />}
-    </Link>
-  );
-};
+import Logo from "../ui/Logo";
 
 const Navbar = () => {
   return (
