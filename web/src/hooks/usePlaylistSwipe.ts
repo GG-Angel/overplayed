@@ -21,6 +21,7 @@ export const usePlaylistSwipe = (id: string) => {
   };
 
   return {
+    id,
     index,
     item,
     audio,

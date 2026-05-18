@@ -47,7 +47,7 @@ const SwipeView = ({ onFinish }: SwipeViewProps) => {
       <SwipeProgress className="w-full max-w-3xl" />
 
       <div className="flex-1 flex flex-col w-full items-center justify-center gap-6 overflow-hidden">
-        <div className="grid place-items-center touch-none w-64 sm:w-72 lg:w-84">
+        <div className="grid place-items-center touch-none">
           {!isComplete ? (
             <AnimatePresence>
               {visibleItems.map((item, i) => {
@@ -57,7 +57,7 @@ const SwipeView = ({ onFinish }: SwipeViewProps) => {
                     key={item.track.uri}
                     ref={isActive ? activeCardRef : undefined}
                     track={item.track}
-                    className="col-start-1 row-start-1"
+                    className="col-start-1 row-start-1 w-64 sm:w-72 lg:w-84"
                     zIndex={visibleItems.length - i}
                     baseRotate={isActive ? 0 : (i % 2 === 0 ? 1 : -1) * STACK_ROTATE_DEGREES}
                     isDragEnabled={isActive && !isSwiping}

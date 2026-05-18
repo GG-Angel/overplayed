@@ -26,6 +26,8 @@ const PlaylistSwipePage = () => {
 
 const PlaylistSwipePageInner = () => {
   const [phase, setPhase] = useState<Phase>("swipe");
+  const [form, setForm] = useState<ReviewForm | null>(null);
+
   const { status, total, dislikes } = useSwipeContext();
   const navigate = useNavigate();
 
@@ -39,8 +41,7 @@ const PlaylistSwipePageInner = () => {
   };
 
   const handleSubmit = (form: ReviewForm) => {
-    // TODO: validate conditions for submitting
-    console.log(form);
+    setForm(form);
     setPhase("submit");
   };
 
@@ -56,7 +57,8 @@ const PlaylistSwipePageInner = () => {
     case "review":
       return <ReviewView onBack={() => setPhase("swipe")} onSubmit={handleSubmit} />;
     case "submit":
-      return <SubmitView />;
+      if (!form) return null;
+      return <SubmitView form={form} />;
   }
 };
 

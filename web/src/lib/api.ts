@@ -49,6 +49,6 @@ export const createNewPlaylist = async () => {
   return playlistSchema.parse(response);
 };
 
-export const addPlaylistItems = async (id: string, uris: string[]) => {
-  await api.post(`/playlists/${id}/items`, { item_uris: uris });
+export const updatePlaylistItems = async (id: string, uris: string[], action: "add" | "remove") => {
+  await api.post(`/playlists/${id}/items?${new URLSearchParams({ action })}`, { uris });
 };
