@@ -75,8 +75,10 @@ class SpotifyService:
         )
 
     async def create_playlist(self) -> Playlist:
-        name = f"Overplayed - {get_formatted_date()}"
-        playlist = await self.spotify.create_playlist(name=name)
+        playlist = await self.spotify.create_playlist(
+            name="Overplayed",
+            description=f"Generated on {get_formatted_date()}",
+        )
         await self.redis.invalidate_playlists(self.user_id)
         return playlist
 

@@ -8,7 +8,7 @@ import { Undo, X, Heart, Check } from "lucide-react";
 import { useRef, useState } from "react";
 import { useSwipeContext } from "./SwipeContext";
 
-export const VISIBLE_CARD_COUNT = 3;
+const VISIBLE_CARD_COUNT = 3;
 const STACK_ROTATE_DEGREES = 3;
 
 const directionToDecision = {
