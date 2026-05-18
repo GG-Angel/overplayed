@@ -4,8 +4,11 @@ import { createNewPlaylist, updatePlaylistItems } from "@/lib/api";
 import type { Playlist } from "@/lib/types";
 
 export type StepStatus = "pending" | "active" | "success" | "error" | "skipped";
+type StepName = "creating" | "backingUp" | "removing";
+type SubmitPhase = "idle" | "running" | "done" | "failed";
 
 type SubmitState = {
+  phase: SubmitPhase;
   creating: StepStatus;
   backingUp: StepStatus;
   removing: StepStatus;
@@ -14,6 +17,7 @@ type SubmitState = {
 };
 
 const initialState: SubmitState = {
+  phase: "idle",
   creating: "pending",
   backingUp: "pending",
   removing: "pending",
@@ -21,48 +25,46 @@ const initialState: SubmitState = {
   newPlaylist: null,
 };
 
-const useSubmitChanges = (playlistId: string) => {
+const useSubmitChanges = (currentPlaylistId: string) => {
   const [state, setState] = useState<SubmitState>(initialState);
   const hasSubmitted = useRef(false);
+
+  const runStep = async <T>(name: StepName, fn: () => Promise<T>): Promise<T> => {
+    setState((s) => ({ ...s, [name]: "active" }));
+    const result = await fn();
+    setState((s) => ({ ...s, [name]: "success" }));
+    return result;
+  };
 
   const submit = async (form: ReviewForm, uris: string[]) => {
     if (hasSubmitted.current) return;
     hasSubmitted.current = true;
+    setState((s) => ({ ...s, phase: "running" }));
 
     try {
+      // create new playlist, back up removed tracks to it
       if (form.savePlaylist) {
-        setState((s) => ({ ...s, creating: "active" }));
-        const newPlaylist = await createNewPlaylist();
-        setState((s) => ({
-          ...s,
-          creating: "success",
-          backingUp: "active",
-          newPlaylist,
-        }));
-
-        await updatePlaylistItems(newPlaylist.id, uris, "add");
-        setState((s) => ({ ...s, backingUp: "success" }));
+        const newPlaylist = await runStep("creating", createNewPlaylist);
+        setState((s) => ({ ...s, newPlaylist }));
+        await runStep("backingUp", () => updatePlaylistItems(newPlaylist.id, uris, "add"));
       } else {
         setState((s) => ({ ...s, creating: "skipped", backingUp: "skipped" }));
       }
-
-      setState((s) => ({ ...s, removing: "active" }));
-      await updatePlaylistItems(playlistId, uris, "remove");
-      setState((s) => ({ ...s, removing: "success" }));
+      // remove tracks from original playlist
+      await runStep("removing", () => updatePlaylistItems(currentPlaylistId, uris, "remove"));
+      setState((s) => ({ ...s, phase: "done" }));
     } catch (e) {
       const error = e instanceof Error ? e : new Error(String(e));
-      setState((s) => ({
-        ...s,
-        // mark whichever step is currently active as errored
-        creating: s.creating === "active" ? "error" : s.creating,
-        backingUp: s.backingUp === "active" ? "error" : s.backingUp,
-        removing: s.removing === "active" ? "error" : s.removing,
-        error,
-      }));
+      setState((s) => {
+        const names: StepName[] = ["creating", "backingUp", "removing"];
+        const updates = Object.fromEntries(
+          names.map((n) => [n, s[n] === "active" ? "error" : s[n]])
+        );
+        return { ...s, ...updates, phase: "failed", error };
+      });
     }
   };
 
   return { state, submit };
 };
-
 export default useSubmitChanges;

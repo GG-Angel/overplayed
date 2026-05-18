@@ -9,12 +9,16 @@ import NothingView from "@/features/swipe/views/NothingView";
 import ReviewView from "@/features/swipe/views/ReviewView";
 import SubmitView from "@/features/swipe/views/SubmitView";
 import SwipeView from "@/features/swipe/views/SwipeView";
+import type { Playlist } from "@/lib/types";
+import SuccessView from "@/features/swipe/views/SuccessView";
 
 type PhaseState =
   | { kind: "swipe" }
   | { kind: "nothing" }
   | { kind: "review" }
-  | { kind: "submit"; form: ReviewForm };
+  | { kind: "submit"; form: ReviewForm }
+  | { kind: "success"; newPlaylist: Playlist | null }
+  | { kind: "error"; error: Error | null };
 
 const SwipePage = () => {
   const { playlistId } = useParams();
@@ -30,23 +34,18 @@ const SwipePage = () => {
 
 const SwipePageInner = () => {
   const [phase, setPhase] = useState<PhaseState>({ kind: "swipe" });
-
   const { status, total, dislikes } = useSwipeContext();
   const navigate = useNavigate();
 
-  const handleHome = () => {
-    navigate("/", { replace: true });
-  };
-
-  const handleFinish = () => {
-    setPhase({ kind: dislikes.length === 0 ? "nothing" : "review" });
-  };
-
-  const handleSubmit = (form: ReviewForm) => {
-    setPhase({ kind: "submit", form });
-  };
-
   const backToSwipe = () => setPhase({ kind: "swipe" });
+  const handleHome = () => navigate("/", { replace: true });
+
+  const handleFinish = () => setPhase({ kind: dislikes.length === 0 ? "nothing" : "review" });
+  const handleSubmit = (form: ReviewForm) => setPhase({ kind: "submit", form });
+
+  const handleError = (error: Error | null) => setPhase({ kind: "error", error });
+  const handleSuccess = (newPlaylist: Playlist | null) =>
+    setPhase({ kind: "success", newPlaylist });
 
   if (status === "error") return <ErrorState message="Failed to load playlist" />;
   if (status === "loading") return <LoadingState message="Loading tracks..." />;
@@ -60,7 +59,11 @@ const SwipePageInner = () => {
     case "review":
       return <ReviewView onBack={backToSwipe} onSubmit={handleSubmit} />;
     case "submit":
-      return <SubmitView form={phase.form} />;
+      return <SubmitView form={phase.form} onSuccess={handleSuccess} onError={handleError} />;
+    case "success":
+      return <SuccessView newPlaylist={phase.newPlaylist} />;
+    case "error":
+      return <ErrorState message="Something went wrong" />;
   }
 };
 

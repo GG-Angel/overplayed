@@ -4,6 +4,7 @@ import { cn, pluralize } from "@/lib/utils";
 import { useEffect, useEffectEvent } from "react";
 import type { ReviewForm } from "@/features/swipe/hooks/useReviewForm";
 import useSubmitChanges, { type StepStatus } from "../hooks/useSubmitChanges";
+import type { Playlist } from "@/lib/types";
 
 type ActionItemProps = {
   label: string;
@@ -45,9 +46,11 @@ const ActionItem = ({ label, status }: ActionItemProps) => {
 
 type SubmitViewProps = {
   form: ReviewForm;
+  onSuccess?: (newPlaylist: Playlist | null) => void;
+  onError?: (error: Error | null) => void;
 };
 
-const SubmitView = ({ form }: SubmitViewProps) => {
+const SubmitView = ({ form, onSuccess, onError }: SubmitViewProps) => {
   const { id, dislikes } = useSwipeContext();
   const { state, submit } = useSubmitChanges(id);
 
@@ -59,6 +62,19 @@ const SubmitView = ({ form }: SubmitViewProps) => {
   useEffect(() => {
     runSubmit();
   }, []);
+
+  useEffect(() => {
+    if (state.phase !== "done" && state.phase !== "failed") return;
+
+    const timer = setTimeout(() => {
+      if (state.phase === "done") onSuccess?.(state.newPlaylist);
+      if (state.phase === "failed") onError?.(state.error);
+    }, 2500); // wait 2.5 sec before moving to next page
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [state.phase, state.error, state.newPlaylist, onError, onSuccess]);
 
   return (
     <div className="flex flex-col h-full justify-center gap-6">
