@@ -1,8 +1,8 @@
 from spotipy import SpotifyException
-from typing import List, Annotated
+from typing import List, Annotated, Literal
 from models import (
     Playlist,
-    ItemUrisRequest,
+    PlaylistItemsRequest,
     PlaylistItems,
 )
 from dependencies import get_spotify_service
@@ -77,26 +77,19 @@ async def handle_get_playlist_items(
 
 
 @router.post("/{playlist_id}/items")
-async def handle_add_playlist_items(
+async def handle_update_playlist_items(
     playlist_id: ResourceId,
-    body: ItemUrisRequest,
+    action: Literal["add", "remove"],
+    body: PlaylistItemsRequest,
     service: SpotifyService = Depends(get_spotify_service),
 ) -> None:
     try:
-        await service.add_playlist_items(playlist_id, body.item_uris)
-    except SpotifyException:
-        raise HTTPException(status_code=500, detail="Failed to add items.")
-
-
-@router.delete("/{playlist_id}/items")
-async def handle_delete_playlist_items(
-    playlist_id: ResourceId,
-    body: ItemUrisRequest,
-    service: SpotifyService = Depends(get_spotify_service),
-) -> None:
-    try:
-        await service.delete_playlist_items(playlist_id, body.item_uris)
+        match action:
+            case "remove":
+                await service.delete_playlist_items(playlist_id, body.uris)
+            case "add":
+                await service.add_playlist_items(playlist_id, body.uris)
     except PlaylistNotOwnedError:
         raise HTTPException(status_code=403, detail="Forbidden.")
     except SpotifyException:
-        raise HTTPException(status_code=500, detail="Failed to remove items.")
+        raise HTTPException(status_code=500, detail="Failed to update items.")

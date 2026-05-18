@@ -43,3 +43,12 @@ export const getTrackPreviewAudio = async (isrc: string) => {
   audio.preload = "auto";
   return audio;
 };
+
+export const createNewPlaylist = async () => {
+  const response = await api.post("/playlists");
+  return playlistSchema.parse(response);
+};
+
+export const addPlaylistItems = async (id: string, uris: string[]) => {
+  await api.post(`/playlists/${id}/items`, { item_uris: uris });
+};

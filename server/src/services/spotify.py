@@ -81,6 +81,7 @@ class SpotifyService:
         return playlist
 
     async def add_playlist_items(self, playlist_id: str, item_uris: List[str]) -> None:
+        await self.get_playlist(playlist_id)  # verify owner
         await self.spotify.add_playlist_items(playlist_id, item_uris)
         await self.redis.invalidate_playlist(self.user_id, playlist_id)
 
