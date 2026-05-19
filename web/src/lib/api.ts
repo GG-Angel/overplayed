@@ -18,14 +18,14 @@ export const getPlaylists = async () => {
   return z.array(playlistSchema).parse(response);
 };
 
-export const getPlaylist = async (id: string) => {
-  const response = await api.get(`/playlists/${id}`);
+export const getPlaylist = async (playlistId: string) => {
+  const response = await api.get(`/playlists/${playlistId}`);
   return playlistSchema.parse(response);
 };
 
-export const getPlaylistItems = async (id: string, page: number) => {
+export const getPlaylistItems = async (playlistId: string, page: number) => {
   const response = await api.get(
-    `/playlists/${id}/items?${new URLSearchParams({
+    `/playlists/${playlistId}/items?${new URLSearchParams({
       page: page.toString(),
     })}`
   );
@@ -49,6 +49,10 @@ export const createNewPlaylist = async () => {
   return playlistSchema.parse(response);
 };
 
-export const updatePlaylistItems = async (id: string, uris: string[], action: "add" | "remove") => {
-  await api.post(`/playlists/${id}/items?${new URLSearchParams({ action })}`, { uris });
+export const updatePlaylistItems = async (
+  playlistId: string,
+  uris: string[],
+  action: "add" | "remove"
+) => {
+  await api.post(`/playlists/${playlistId}/items?${new URLSearchParams({ action })}`, { uris });
 };

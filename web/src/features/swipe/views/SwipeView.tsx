@@ -21,15 +21,25 @@ type SwipeViewProps = {
 };
 
 const SwipeView = ({ onFinish }: SwipeViewProps) => {
-  const { index, total, items, swipe, undo, audio, isAudioError, status, likes, dislikes } =
-    useSwipeContext();
+  const {
+    currentIndex,
+    currentAudio,
+    total,
+    items,
+    swipe,
+    undo,
+    isAudioError,
+    status,
+    likes,
+    dislikes,
+  } = useSwipeContext();
   const activeCardRef = useRef<SwipeCardHandler | null>(null);
   const [isSwiping, setIsSwiping] = useState(false);
 
-  const visibleItems = items.slice(index, index + VISIBLE_CARD_COUNT);
-  const isComplete = total !== undefined && index >= total;
+  const visibleItems = items.slice(currentIndex, currentIndex + VISIBLE_CARD_COUNT);
+  const isComplete = total !== undefined && currentIndex >= total;
   const canSwipe = !isSwiping && !isComplete;
-  const canUndo = !isSwiping && index > 0;
+  const canUndo = !isSwiping && currentIndex > 0;
 
   const triggerSwipe = (direction: Direction) => {
     setIsSwiping(true);
@@ -109,7 +119,7 @@ const SwipeView = ({ onFinish }: SwipeViewProps) => {
       </div>
 
       <AudioPlayer
-        audio={audio}
+        audio={currentAudio}
         isError={isAudioError}
         errorMessage="no preview :("
         className="w-full max-w-3xl"

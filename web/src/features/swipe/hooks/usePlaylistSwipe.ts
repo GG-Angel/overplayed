@@ -5,32 +5,32 @@ import useSwipes, { type Decision } from "./useSwipes";
 
 export const usePlaylistSwipe = (playlistId: string) => {
   const decisions = useSwipes<PlaylistItem>();
-  const index = decisions.swipes.length;
+  const currentIndex = decisions.swipes.length;
 
-  const playlist = usePlaylistItems(playlistId, index);
-  const { audio, isError: isAudioError } = useTrackPreviews(
+  const playlist = usePlaylistItems(playlistId, currentIndex);
+  const previews = useTrackPreviews(
     playlist.items.map((item) => item.track.external_ids.isrc),
-    index
+    currentIndex
   );
 
-  const item = playlist.items.at(index);
+  const currentItem = playlist.items.at(currentIndex);
 
   const swipe = (decision: Decision) => {
-    if (!item) return;
-    decisions.record(item, decision);
+    if (!currentItem) return;
+    decisions.record(currentItem, decision);
   };
 
   return {
-    id: playlistId,
-    index,
-    item,
-    audio,
-    isAudioError,
-    swipe,
+    playlistId,
+    ...playlist,
+    currentIndex,
+    currentItem,
+    currentAudio: previews.audio,
+    isAudioError: previews.isError,
     swipes: decisions.swipes,
     likes: decisions.likes,
     dislikes: decisions.dislikes,
+    swipe: swipe,
     undo: decisions.undo,
-    ...playlist,
   };
 };

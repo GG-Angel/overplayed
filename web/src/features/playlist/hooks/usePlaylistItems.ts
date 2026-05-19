@@ -33,13 +33,11 @@ const usePlaylistItems = (playlistId: string, index: number): PlaylistItemsResul
 
   if (isError) {
     return { status: "error", items: [], total: undefined, error: error };
-  }
-
-  if (isLoading || total === undefined) {
+  } else if (isLoading || total === undefined) {
     return { status: "loading", items: [], total: undefined, error: null };
+  } else {
+    return { status: "success", items, total, error: null };
   }
-
-  return { status: "success", items, total, error: null };
 };
 
 export default usePlaylistItems;

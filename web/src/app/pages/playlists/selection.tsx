@@ -7,8 +7,8 @@ const SelectionPage = () => {
   const { data: playlists, isLoading } = usePlaylists();
   const navigate = useNavigate();
 
-  const navigateToPlaylist = (id: string) => {
-    navigate(`/playlists/${id}`);
+  const navigateToPlaylist = (playlistId: string) => {
+    navigate(`/playlists/${playlistId}`);
   };
 
   if (isLoading) return <LoadingState message="Loading playlists..." />;

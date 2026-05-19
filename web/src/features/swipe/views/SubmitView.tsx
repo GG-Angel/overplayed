@@ -13,8 +13,8 @@ type SubmitViewProps = {
 };
 
 const SubmitView = ({ form, onSuccess, onError }: SubmitViewProps) => {
-  const { id, dislikes } = useSwipeContext();
-  const { state, submit } = useSubmitChanges(id);
+  const { playlistId, dislikes } = useSwipeContext();
+  const { state, submit } = useSubmitChanges(playlistId);
 
   const runSubmit = useEffectEvent(async () => {
     const uris = dislikes.map((item) => item.track.uri);

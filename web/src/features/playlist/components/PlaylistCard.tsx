@@ -4,7 +4,7 @@ import { ArrowUpRight } from "lucide-react";
 
 type PlaylistCardProps = {
   playlist: Playlist;
-  onClick?: (id: string) => void;
+  onClick?: (playlistId: string) => void;
 };
 
 const PlaylistCard = ({ playlist, onClick }: PlaylistCardProps) => {
