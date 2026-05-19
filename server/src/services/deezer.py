@@ -1,6 +1,6 @@
 from typing import Optional
 from clients.deezer.client import DeezerClient
-from cache.client import RedisClient
+from cache.client import RedisClient, NO_PREVIEW
 
 
 class DeezerService:
@@ -9,8 +9,11 @@ class DeezerService:
         self.redis = redis
 
     async def get_track_preview_url(self, isrc: str) -> Optional[str]:
-        if cached := await self.redis.get_track_preview_url(isrc):
-            return cached if cached != "NO_PREVIEW" else None
+        cached = await self.redis.get_track_preview_url(isrc)
+        if cached == NO_PREVIEW:
+            return None
+        if cached is not None:
+            return cached
 
         preview_url = await self.deezer.get_track_preview_url(isrc)
         await self.redis.set_track_preview_url(isrc, preview_url)

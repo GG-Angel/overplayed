@@ -1,6 +1,8 @@
 import { useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import type { ReviewForm } from "./useReviewForm";
 import { createNewPlaylist, updatePlaylistItems } from "@/lib/api";
+import { queryKeys } from "@/lib/query";
 import type { Playlist } from "@/lib/types";
 
 export type StepStatus = "pending" | "active" | "success" | "error" | "skipped";
@@ -28,6 +30,7 @@ const initialState: SubmitState = {
 const useSubmitChanges = (currentPlaylistId: string) => {
   const [state, setState] = useState<SubmitState>(initialState);
   const hasSubmitted = useRef(false);
+  const queryClient = useQueryClient();
 
   const runStep = async <T>(name: StepName, fn: () => Promise<T>): Promise<T> => {
     setState((s) => ({ ...s, [name]: "active" }));
@@ -42,7 +45,6 @@ const useSubmitChanges = (currentPlaylistId: string) => {
     setState((s) => ({ ...s, phase: "running" }));
 
     try {
-      // create new playlist, back up removed tracks to it
       if (form.savePlaylist) {
         const newPlaylist = await runStep("creating", createNewPlaylist);
         setState((s) => ({ ...s, newPlaylist }));
@@ -50,7 +52,7 @@ const useSubmitChanges = (currentPlaylistId: string) => {
       } else {
         setState((s) => ({ ...s, creating: "skipped", backingUp: "skipped" }));
       }
-      // remove tracks from original playlist
+
       await runStep("removing", () => updatePlaylistItems(currentPlaylistId, uris, "remove"));
       setState((s) => ({ ...s, phase: "done" }));
     } catch (e) {
@@ -62,6 +64,14 @@ const useSubmitChanges = (currentPlaylistId: string) => {
         );
         return { ...s, ...updates, phase: "failed", error };
       });
+    } finally {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.playlists.all, exact: true }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.playlists.one(currentPlaylistId),
+          exact: true,
+        }),
+      ]);
     }
   };
 

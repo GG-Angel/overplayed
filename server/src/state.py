@@ -22,10 +22,9 @@ class State:
         )
 
         self._redis_pool: ConnectionPool = create_pool(self.settings.redis)
-
-    def redis(self) -> RedisClient:
-        return RedisClient(
-            redis=Redis(connection_pool=self._redis_pool), settings=self.settings.redis
+        self.redis: RedisClient = RedisClient(
+            redis=Redis(connection_pool=self._redis_pool),
+            settings=self.settings.redis,
         )
 
     async def __aenter__(self):

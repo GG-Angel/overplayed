@@ -29,7 +29,7 @@ class RedisSettings(BaseModel):
 
     ttl_sessions: int = 60 * 60 * 24 * 30  # sessions, 30 days
     ttl_users: int = 60 * 60 * 2  # spotify profiles, 2 hr
-    ttl_playlists: int = 60 * 5  # playlists, 5 min (check snapshots frequently)
+    ttl_playlists: int = 60 * 2  # playlists, 2 min (check snapshots frequently)
     ttl_playlist_items: int = 60 * 60 * 24 * 7  # playlist items, 7 days
     ttl_previews_hit: int = 60 * 10  # track previews (hit), 10 min (url expires in 15)
     ttl_previews_miss: int = 60 * 60 * 2  # track previews (miss), 2 hours

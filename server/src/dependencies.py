@@ -20,7 +20,7 @@ def get_state(request: Request) -> State:
 
 
 def get_redis(request: Request) -> RedisClient:
-    return get_state(request).redis()
+    return get_state(request).redis
 
 
 def get_settings(request: Request) -> Settings:
@@ -64,8 +64,8 @@ async def get_spotify_service(
     )
 
 
-async def get_deezer_service(state: State = Depends(get_state)) -> DeezerService:
+def get_deezer_service(state: State = Depends(get_state)) -> DeezerService:
     return DeezerService(
         deezer=DeezerClient(state.deezer_session, state.settings.deezer),
-        redis=state.redis(),
+        redis=state.redis,
     )

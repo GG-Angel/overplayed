@@ -25,6 +25,8 @@ _PREVIEWS_KEY = "previews"
 
 _SESSION_ID_LENGTH = 32
 
+NO_PREVIEW: Literal["NO_PREVIEW"] = "NO_PREVIEW"
+
 M = TypeVar("M", bound=BaseModel)
 
 
@@ -86,12 +88,11 @@ class RedisClient:
 
             async with self.redis.pipeline() as pipe:
                 pipe.get(snapshot_key)
-                pipe.exists(items_key)
                 pipe.lrange(items_key, start=offset, end=offset + limit - 1)
                 pipe.llen(items_key)
-                cached_snapshot_id, hit, page, total = await pipe.execute()
+                cached_snapshot_id, page, total = await pipe.execute()
 
-            if not hit or cached_snapshot_id != snapshot_id:
+            if cached_snapshot_id != snapshot_id:
                 logger.debug(f"MISS: {items_key}")
                 return None
 
@@ -106,7 +107,10 @@ class RedisClient:
         self, isrc: str
     ) -> str | Literal["NO_PREVIEW"] | None:
         async with self._handle_error("get track preview"):
-            return await self._get(self._track_preview_key(isrc))
+            cached = await self._get(self._track_preview_key(isrc))
+            if cached is None:
+                return None
+            return NO_PREVIEW if cached == NO_PREVIEW else cached
 
     async def set_session(self, session_id: str, session: SessionInfo) -> None:
         async with self._handle_error("set session"):
@@ -184,7 +188,7 @@ class RedisClient:
         async with self._handle_error("set track preview"):
             await self._set(
                 self._track_preview_key(isrc),
-                preview_url if preview_url else "NO_PREVIEW",
+                preview_url if preview_url else NO_PREVIEW,
                 self.settings.ttl_previews_hit
                 if preview_url
                 else self.settings.ttl_previews_miss,
