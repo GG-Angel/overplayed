@@ -69,7 +69,7 @@ const SubmitView = ({ form, onSuccess, onError }: SubmitViewProps) => {
     const timer = setTimeout(() => {
       if (state.phase === "done") onSuccess?.(state.newPlaylist);
       if (state.phase === "failed") onError?.(state.error);
-    }, 2500); // wait 2.5 sec before moving to next page
+    }, 2000);
 
     return () => {
       clearTimeout(timer);

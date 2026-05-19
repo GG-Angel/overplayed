@@ -208,11 +208,7 @@ class RedisClient:
             items_key = self._playlist_items_key(user_id, playlist_id)
             snapshot_key = self._playlist_snapshot_key(user_id, playlist_id)
 
-            async with self.redis.pipeline() as pipe:
-                pipe.hdel(playlists_key, playlist_id)  # remove single entry from hash
-                pipe.delete(items_key, snapshot_key)  # delete these keys entirely
-                await pipe.execute()
-
+            await self.redis.delete(playlists_key, items_key, snapshot_key)
             logger.debug(f"Invalidated playlist {playlist_id} for user: {user_id}")
 
     async def invalidate_playlists(self, user_id: str) -> None:

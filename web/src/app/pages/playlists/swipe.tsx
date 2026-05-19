@@ -61,7 +61,14 @@ const SwipePageInner = () => {
     case "submit":
       return <SubmitView form={phase.form} onSuccess={handleSuccess} onError={handleError} />;
     case "success":
-      return <SuccessView newPlaylist={phase.newPlaylist} />;
+      return (
+        <SuccessView
+          newPlaylist={phase.newPlaylist}
+          onHome={handleHome}
+          dislikes={dislikes.length}
+          total={total}
+        />
+      );
     case "error":
       return <ErrorState message="Something went wrong" />;
   }

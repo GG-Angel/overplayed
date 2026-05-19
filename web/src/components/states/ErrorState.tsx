@@ -15,7 +15,7 @@ const ErrorState = ({ message = "Unexpected error" }: ErrorStateProps) => {
       <p className="text-4xl font-medium">{kaomoji}</p>
       <p>{message}</p>
       <Link to="/" className="mt-4 text-accent underline font-medium">
-        Return to Home
+        Return Home
       </Link>
     </div>
   );

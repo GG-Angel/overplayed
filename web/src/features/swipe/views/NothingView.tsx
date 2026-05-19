@@ -19,7 +19,7 @@ const NothingView = ({ onBack, onHome }: NothingViewProps) => {
           Keep Swiping
         </Button>
         <Button variant="primary" onClick={onHome}>
-          Return to Home
+          Return Home
         </Button>
       </div>
     </div>
