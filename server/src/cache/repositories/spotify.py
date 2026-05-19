@@ -1,3 +1,4 @@
+from settings import RedisSettings
 from typing import Optional, List
 from secrets import token_urlsafe
 from loguru import logger
@@ -14,8 +15,9 @@ _SESSION_ID_LEN = 32
 
 
 class SpotifyCache:
-    def __init__(self, core: RedisCore):
+    def __init__(self, core: RedisCore, settings: RedisSettings):
         self.core = core
+        self.settings = settings
 
     async def create_session(self, info: SessionInfo) -> str:
         session_id = token_urlsafe(_SESSION_ID_LEN)
@@ -27,7 +29,7 @@ class SpotifyCache:
         await self.core.set_model_secure(
             session,
             self._session_key(session_id),
-            self.core.settings.ttl_sessions,
+            self.settings.ttl_sessions,
         )
 
     async def get_session(self, session_id: str) -> Optional[SessionInfo]:
@@ -44,7 +46,7 @@ class SpotifyCache:
 
     async def set_user(self, user: CurrentUser) -> None:
         await self.core.set_model(
-            user, self._user_key(user.id), self.core.settings.ttl_users
+            user, self._user_key(user.id), self.settings.ttl_users
         )
 
     async def get_playlist(self, user_id: str, playlist_id: str) -> Optional[Playlist]:
@@ -59,7 +61,7 @@ class SpotifyCache:
         await self.core.hset_models(
             self._playlists_key(user_id),
             {p.id: p for p in playlists},
-            self.core.settings.ttl_playlists,
+            self.settings.ttl_playlists,
         )
 
     async def invalidate_playlist(self, user_id: str, playlist_id: str) -> None:
@@ -110,7 +112,7 @@ class SpotifyCache:
     ) -> None:
         items_key = self._playlist_items_key(user_id, playlist_id)
         snapshot_key = self._playlist_snapshot_key(user_id, playlist_id)
-        ttl = self.core.settings.ttl_playlist_items
+        ttl = self.settings.ttl_playlist_items
 
         async with self.core.redis.pipeline() as pipe:
             pipe.delete(items_key)

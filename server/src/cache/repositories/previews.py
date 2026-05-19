@@ -1,3 +1,4 @@
+from settings import RedisSettings
 from typing import Literal, Optional
 from cache.core import RedisCore
 
@@ -5,8 +6,9 @@ NO_PREVIEW = "NO_PREVIEW"
 
 
 class PreviewCache:
-    def __init__(self, core: RedisCore):
+    def __init__(self, core: RedisCore, settings: RedisSettings):
         self.core = core
+        self.settings = settings
 
     async def get_preview_url(self, isrc: str) -> str | Literal["NO_PREVIEW"] | None:
         cached = await self.core.get(self._preview_key(isrc))
@@ -19,9 +21,9 @@ class PreviewCache:
         await self.core.set(
             self._preview_key(isrc),
             preview_url if has_preview else NO_PREVIEW,
-            self.core.settings.ttl_previews_hit
+            self.settings.ttl_previews_hit
             if has_preview
-            else self.core.settings.ttl_previews_miss,
+            else self.settings.ttl_previews_miss,
         )
 
     @staticmethod

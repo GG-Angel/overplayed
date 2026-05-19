@@ -4,7 +4,6 @@ from pydantic import BaseModel
 from loguru import logger
 from typing import Optional, Type, TypeVar, List
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-from settings import RedisSettings
 from redis.asyncio import Redis
 
 
@@ -12,10 +11,9 @@ M = TypeVar("M", bound=BaseModel)
 
 
 class RedisCore:
-    def __init__(self, redis: Redis, settings: RedisSettings):
+    def __init__(self, redis: Redis, encryption_key: bytes):
         self.redis = redis
-        self.settings = settings
-        self._aesgcm = AESGCM(settings.encryption_key)
+        self._aesgcm = AESGCM(encryption_key)
 
     async def get(self, key: str) -> Optional[str]:
         data = await self.redis.get(key)
@@ -80,6 +78,12 @@ class RedisCore:
             pipe.expire(key, ttl)
             await pipe.execute()
         logger.debug(f"CACHED: {len(instances)} entries (key={key}, ttl={ttl}s)")
+
+    async def increment(self, key: str, amount: int = 1) -> None:
+        if amount <= 0:
+            raise ValueError("Increment amount must be positive")
+        new = await self.redis.incrby(key, amount)
+        logger.debug(f"INCREMENTED: {key} (amount={amount}, new={new})")
 
     def _encrypt(self, plaintext: str) -> str:
         nonce = urandom(12)
