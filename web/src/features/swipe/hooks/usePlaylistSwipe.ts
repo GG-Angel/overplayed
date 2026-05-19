@@ -3,11 +3,11 @@ import useTrackPreviews from "@/features/previews/hooks/useTrackPreviews";
 import type { PlaylistItem } from "@/lib/types";
 import useSwipes, { type Decision } from "./useSwipes";
 
-export const usePlaylistSwipe = (id: string) => {
+export const usePlaylistSwipe = (playlistId: string) => {
   const decisions = useSwipes<PlaylistItem>();
   const index = decisions.swipes.length;
 
-  const playlist = usePlaylistItems(id, index);
+  const playlist = usePlaylistItems(playlistId, index);
   const { audio, isError: isAudioError } = useTrackPreviews(
     playlist.items.map((item) => item.track.external_ids.isrc),
     index
@@ -21,7 +21,7 @@ export const usePlaylistSwipe = (id: string) => {
   };
 
   return {
-    id,
+    id: playlistId,
     index,
     item,
     audio,

@@ -1,11 +1,11 @@
 import Button from "@/components/ui/Button";
 
-type NothingViewProps = {
+type NoChangesViewProps = {
   onBack?: () => void;
   onHome?: () => void;
 };
 
-const NothingView = ({ onBack, onHome }: NothingViewProps) => {
+const NoChangesView = ({ onBack, onHome }: NoChangesViewProps) => {
   return (
     <div className="flex flex-col h-full justify-center gap-6">
       <div className="text-center">
@@ -26,4 +26,4 @@ const NothingView = ({ onBack, onHome }: NothingViewProps) => {
   );
 };
 
-export default NothingView;
+export default NoChangesView;

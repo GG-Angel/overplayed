@@ -4,16 +4,14 @@ import LoadingState from "@/components/states/LoadingState";
 import { usePlaylists } from "@/features/playlist/hooks/usePlaylists";
 
 const SelectionPage = () => {
-  const { data: playlists, isLoading: isLoadingPlaylists } = usePlaylists();
+  const { data: playlists, isLoading } = usePlaylists();
   const navigate = useNavigate();
 
   const navigateToPlaylist = (id: string) => {
     navigate(`/playlists/${id}`);
   };
 
-  if (isLoadingPlaylists) {
-    return <LoadingState message="Loading playlists..." />;
-  }
+  if (isLoading) return <LoadingState message="Loading playlists..." />;
 
   return (
     <>

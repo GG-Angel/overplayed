@@ -11,3 +11,7 @@
 ## Bugs
 
 - Partial caching causes refetch of playlist on refresh in swipe page after user playlists expire.
+
+## Nice to Haves
+
+- Pile in the background on completion of deleted tracks.

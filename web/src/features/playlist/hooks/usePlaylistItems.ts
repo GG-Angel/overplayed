@@ -11,11 +11,11 @@ type PlaylistItemsResult =
   | { status: "error"; items: []; total: undefined; error: Error }
   | { status: "success"; items: PlaylistItem[]; total: number; error: null };
 
-const usePlaylistItems = (id: string, index: number): PlaylistItemsResult => {
+const usePlaylistItems = (playlistId: string, index: number): PlaylistItemsResult => {
   const { data, isLoading, isError, error, hasNextPage, isFetchingNextPage, fetchNextPage } =
     useInfiniteQuery({
-      queryKey: queryKeys.playlists.tracks(id),
-      queryFn: ({ pageParam }) => getPlaylistItems(id, pageParam),
+      queryKey: queryKeys.playlists.tracks(playlistId),
+      queryFn: ({ pageParam }) => getPlaylistItems(playlistId, pageParam),
       initialPageParam: 0,
       getNextPageParam: (lastPage, allPages) => (lastPage.has_more ? allPages.length : undefined),
     });

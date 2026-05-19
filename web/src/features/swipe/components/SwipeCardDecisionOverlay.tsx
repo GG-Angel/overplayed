@@ -10,8 +10,8 @@ type SwipeCardDecisionOverlayProps = {
 
 const SwipeCardDecisionOverlay = ({
   icon: Icon,
+  className,
   opacity = 1,
-  className = "",
 }: SwipeCardDecisionOverlayProps) => (
   <motion.div
     style={{ opacity }}
