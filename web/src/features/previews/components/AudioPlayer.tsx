@@ -3,7 +3,8 @@ import { Pause, Play } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Card from "@/components/ui/Card";
 import IconButton from "@/components/ui/IconButton";
-import Waveform, { type WaveformHandler, WaveformSkeleton } from "./Waveform";
+import Waveform, { type WaveformHandler } from "./Waveform";
+import WaveformSkeleton from "./WaveformSkeleton";
 
 type AudioPlayerProps = {
   audio: HTMLAudioElement | undefined;

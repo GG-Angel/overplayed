@@ -1,6 +1,5 @@
 import WaveSurfer from "wavesurfer.js";
 import { useEffect, useImperativeHandle, useRef, useState, type Ref } from "react";
-import { cn } from "@/lib/utils";
 
 export type WaveformHandler = {
   play: () => void;
@@ -16,23 +15,6 @@ type WaveformProps = {
   onPlay?: () => void;
   onPause?: () => void;
 };
-
-export const WaveformSkeleton = ({
-  className,
-  message,
-}: {
-  className?: string;
-  message?: string;
-}) => (
-  <div
-    className={cn(
-      "rounded-md bg-card-border flex justify-center items-center text-muted-foreground",
-      className
-    )}
-  >
-    {message}
-  </div>
-);
 
 const Waveform = ({ audio, waveformRef, className, onPlay, onPause }: WaveformProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null);

@@ -1,28 +1,11 @@
-import type { ComponentProps, ReactNode } from "react";
+import type { ComponentProps } from "react";
 import { useNavigate } from "react-router-dom";
 import { cn, openExternalUrl } from "@/lib/utils";
 import { Link, LogOut, User } from "lucide-react";
 import useAuth from "@/features/user/auth/useAuth";
+import AvatarDropdownButton from "./AvatarDropdownButton";
 
 type AvatarDropdownProps = ComponentProps<"div">;
-
-type MenuItemProps = ComponentProps<"button"> & {
-  icon: ReactNode;
-};
-
-const AvatarDropdownButton = ({ icon, children, className, ...props }: MenuItemProps) => (
-  <button
-    role="menuitem"
-    className={cn(
-      "flex gap-1.5 items-center py-2 px-4 text-left hover:cursor-pointer hover:bg-card-border/50",
-      className
-    )}
-    {...props}
-  >
-    {icon}
-    {children}
-  </button>
-);
 
 const AvatarDropdown = ({ className, ...props }: AvatarDropdownProps) => {
   const { user, logout } = useAuth();

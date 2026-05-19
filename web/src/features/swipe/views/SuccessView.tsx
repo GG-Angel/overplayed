@@ -7,7 +7,7 @@ type SuccessViewProps = {
   newPlaylist: Playlist | null;
   dislikes: number;
   total: number;
-  onHome: () => void;
+  onHome?: () => void;
 };
 
 const SuccessView = ({ newPlaylist, dislikes, total, onHome }: SuccessViewProps) => {

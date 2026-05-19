@@ -10,6 +10,7 @@ import ReviewView from "./ReviewView";
 import SubmitView from "./SubmitView";
 import SuccessView from "./SuccessView";
 import SwipeView from "./SwipeView";
+import ErrorView from "./ErrorView";
 
 type PhaseState =
   | { kind: "swipe" }
@@ -17,7 +18,7 @@ type PhaseState =
   | { kind: "review" }
   | { kind: "submit"; form: ReviewForm }
   | { kind: "success"; newPlaylist: Playlist | null }
-  | { kind: "error"; error: Error | null };
+  | { kind: "error" };
 
 const SwipeStateHandler = () => {
   const [phase, setPhase] = useState<PhaseState>({ kind: "swipe" });
@@ -30,7 +31,7 @@ const SwipeStateHandler = () => {
   const handleFinish = () => setPhase({ kind: dislikes.length === 0 ? "nothing" : "review" });
   const handleSubmit = (form: ReviewForm) => setPhase({ kind: "submit", form });
 
-  const handleError = (error: Error | null) => setPhase({ kind: "error", error });
+  const handleError = () => setPhase({ kind: "error" });
   const handleSuccess = (newPlaylist: Playlist | null) =>
     setPhase({ kind: "success", newPlaylist });
 
@@ -57,7 +58,7 @@ const SwipeStateHandler = () => {
         />
       );
     case "error":
-      return <ErrorState message="Something went wrong" />;
+      return <ErrorView onHome={handleHome} onRetry={handleFinish} />;
   }
 };
 
