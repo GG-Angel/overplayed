@@ -34,7 +34,6 @@ class SpotifyService:
         if not self._is_playlist_owned(playlist):
             raise PlaylistNotOwnedError()
 
-        await self.redis.set_playlist(self.user_id, playlist)
         return playlist
 
     async def get_user_playlists(self) -> List[Playlist]:
@@ -60,7 +59,6 @@ class SpotifyService:
             return cached
 
         items = await self.spotify.get_playlist_items(playlist_id)
-        await self.redis.set_playlist(self.user_id, playlist)
         await self.redis.set_playlist_items(
             self.user_id,
             playlist_id,

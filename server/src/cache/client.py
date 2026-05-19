@@ -3,7 +3,7 @@ from base64 import b64encode, b64decode
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from contextlib import asynccontextmanager
 from pydantic import BaseModel
-from redis.asyncio import Redis, RedisError
+from redis.asyncio import Redis
 from settings import RedisSettings
 from typing import Optional, List, TypeVar, Type, Literal, AsyncIterator
 from secrets import token_urlsafe
@@ -16,13 +16,13 @@ from models import (
     PlaylistItems,
 )
 
+
 _SESSIONS_KEY = "sessions"
 _USERS_KEY = "users"
 _PLAYLISTS_KEY = "playlists"
 _ITEMS_KEY = "items"
 _SNAPSHOT_KEY = "snapshot"
 _PREVIEWS_KEY = "previews"
-
 _SESSION_ID_LENGTH = 32
 
 NO_PREVIEW: Literal["NO_PREVIEW"] = "NO_PREVIEW"
@@ -52,7 +52,6 @@ class RedisClient:
     async def get_playlist(self, user_id: str, playlist_id: str) -> Optional[Playlist]:
         async with self._handle_error("get playlist"):
             key = self._playlists_key(user_id)
-
             playlist = await self.redis.hget(key, playlist_id)  # ty:ignore[invalid-await]
             if not playlist:
                 logger.debug(f"MISS: {key} (id={playlist_id})")
@@ -64,7 +63,6 @@ class RedisClient:
     async def get_playlists(self, user_id: str) -> Optional[List[Playlist]]:
         async with self._handle_error("get playlists"):
             key = self._playlists_key(user_id)
-
             playlist_map = await self.redis.hgetall(key)  # ty:ignore[invalid-await]
             if not playlist_map:
                 logger.debug(f"MISS: {key} (no playlists)")
@@ -92,7 +90,7 @@ class RedisClient:
                 pipe.llen(items_key)
                 cached_snapshot_id, page, total = await pipe.execute()
 
-            if cached_snapshot_id != snapshot_id:
+            if snapshot_id != cached_snapshot_id:
                 logger.debug(f"MISS: {items_key}")
                 return None
 
@@ -114,10 +112,10 @@ class RedisClient:
 
     async def set_session(self, session_id: str, session: SessionInfo) -> None:
         async with self._handle_error("set session"):
-            plaintext = session.model_dump_json()
-            encrypted = self._encrypt(plaintext)
             await self._set(
-                self._session_key(session_id), encrypted, self.settings.ttl_sessions
+                self._session_key(session_id),
+                self._encrypt(session.model_dump_json()),
+                self.settings.ttl_sessions,
             )
 
     async def set_user(self, user: CurrentUser) -> None:
@@ -126,32 +124,15 @@ class RedisClient:
                 user, self._user_key(user.id), self.settings.ttl_users
             )
 
-    async def set_playlist(self, user_id: str, playlist: Playlist) -> None:
-        async with self._handle_error("set playlist"):
-            key = self._playlists_key(user_id)
-            ttl = self.settings.ttl_playlists
-
-            async with self.redis.pipeline() as pipe:
-                pipe.exists(key)
-                pipe.hset(key, mapping={playlist.id: playlist.model_dump_json()})
-                pipe.expire(key, ttl)
-                key_existed, _, _ = await pipe.execute()
-
-            if not key_existed:
-                await self.redis.delete(key)  # avoid partial entries
-                return
-
-            logger.debug(f"CACHED: playlist {playlist.id} (key={key}, ttl={ttl}s)")
-
     async def set_playlists(self, user_id: str, playlists: List[Playlist]) -> None:
         async with self._handle_error("set playlists"):
+            serialized = {p.id: p.model_dump_json() for p in playlists}
             key = self._playlists_key(user_id)
             ttl = self.settings.ttl_playlists
-            mapping = {p.id: p.model_dump_json() for p in playlists}
 
             async with self.redis.pipeline() as pipe:
                 pipe.delete(key)
-                pipe.hset(key, mapping=mapping)
+                pipe.hset(key, mapping=serialized)
                 pipe.expire(key, ttl)
                 await pipe.execute()
 
@@ -165,19 +146,18 @@ class RedisClient:
         items: List[PlaylistItem],
     ) -> None:
         async with self._handle_error("set playlist items"):
+            serialized = [t.model_dump_json() for t in items]
+            ttl = self.settings.ttl_playlist_items
+
             items_key = self._playlist_items_key(user_id, playlist_id)
             snapshot_key = self._playlist_snapshot_key(user_id, playlist_id)
-            ttl = self.settings.ttl_playlist_items
-            serialized = [t.model_dump_json() for t in items]
 
             async with self.redis.pipeline() as pipe:
                 pipe.delete(items_key)
-                if serialized:
-                    pipe.rpush(items_key, *serialized)
-                    pipe.expire(items_key, ttl)
-                    pipe.set(snapshot_key, snapshot_id, ex=ttl)
-                else:
-                    pipe.delete(snapshot_key)  # keep snapshot/items in sync
+                pipe.rpush(items_key, *serialized)
+                pipe.expire(items_key, ttl)
+
+                pipe.set(snapshot_key, snapshot_id, ex=ttl)
                 await pipe.execute()
 
             logger.debug(f"CACHED: {len(items)} items (key={items_key}, ttl={ttl}s)")
@@ -208,11 +188,11 @@ class RedisClient:
 
     async def invalidate_playlist(self, user_id: str, playlist_id: str) -> None:
         async with self._handle_error("invalidate playlist"):
-            playlists_key = self._playlists_key(user_id)
-            items_key = self._playlist_items_key(user_id, playlist_id)
-            snapshot_key = self._playlist_snapshot_key(user_id, playlist_id)
-
-            await self.redis.delete(playlists_key, items_key, snapshot_key)
+            await self.redis.delete(
+                self._playlists_key(user_id),
+                self._playlist_items_key(user_id, playlist_id),
+                self._playlist_snapshot_key(user_id, playlist_id),
+            )
             logger.debug(f"Invalidated playlist {playlist_id} for user: {user_id}")
 
     async def invalidate_playlists(self, user_id: str) -> None:
@@ -291,6 +271,6 @@ class RedisClient:
     async def _handle_error(self, operation: str) -> AsyncIterator[None]:
         try:
             yield
-        except RedisError as e:
+        except Exception as e:
             logger.error(f"Failed to {operation}: {e}")
             raise

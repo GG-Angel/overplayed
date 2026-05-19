@@ -1,4 +1,4 @@
-from typing import Optional, List, Annotated, Literal
+from typing import Optional, List, Annotated
 from pydantic import BaseModel, Field
 
 
@@ -103,8 +103,7 @@ class PlaylistItems(BaseModel):
     items: List[PlaylistItem]
 
 
-SpotifyUri = Annotated[str, Field(pattern=r"^spotify:(track|episode):[0-9A-Za-z]{22}$")]
-
-
 class PlaylistItemsRequest(BaseModel):
-    uris: List[SpotifyUri] = Field(min_length=1)
+    uris: List[Annotated[str, Field(pattern=r"^spotify:track:[0-9A-Za-z]{22}$")]] = (
+        Field(min_length=1)
+    )

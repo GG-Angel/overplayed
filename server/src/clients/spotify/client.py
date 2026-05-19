@@ -4,7 +4,7 @@ from settings import SpotifySettings
 from typing import List, Callable, AsyncGenerator, AsyncIterator
 from loguru import logger
 from models import CurrentUser, Playlist, PlaylistItem
-from spotipy import Spotify, SpotifyException
+from spotipy import Spotify
 from clients.spotify.utils import spotify_fields
 
 
@@ -142,6 +142,6 @@ class SpotifyClient:
     async def _handle_error(self, operation: str) -> AsyncIterator[None]:
         try:
             yield
-        except SpotifyException as e:
+        except Exception as e:
             logger.error(f"[{self.user_id}] Failed to {operation}: {e}")
             raise
