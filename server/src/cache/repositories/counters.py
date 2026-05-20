@@ -1,13 +1,21 @@
+from enum import StrEnum
 from cache.core import RedisCore
+
+
+class Event(StrEnum):
+    TRACKS_DELETED = "tracks_deleted"
 
 
 class EventCounters:
     def __init__(self, core: RedisCore):
         self.core = core
 
-    async def increment(self, event: str, amount: int = 1) -> None:
+    async def get(self, event: Event) -> int:
+        return await self.core.get_count(self._counter_key(event))
+
+    async def increment(self, event: Event, amount: int = 1) -> None:
         await self.core.increment(self._counter_key(event), amount)
 
     @staticmethod
-    def _counter_key(event: str) -> str:
-        return RedisCore.key("counters", event)
+    def _counter_key(event: Event) -> str:
+        return RedisCore.key("counters", event.value)

@@ -1,7 +1,7 @@
 from utils import get_formatted_date
 from typing import List
 from clients.spotify.client import SpotifyClient
-from cache.repositories import SpotifyCache, EventCounters
+from cache.repositories import Event, SpotifyCache, EventCounters
 from models import (
     Playlist,
     CurrentUser,
@@ -109,7 +109,7 @@ class SpotifyService:
         )
 
         await self.cache.invalidate_playlist(self.user_id, playlist_id)
-        await self.counters.increment("playlistItemsRemoved", len(item_uris))
+        await self.counters.increment(Event.TRACKS_DELETED, len(item_uris))
 
     async def delete_playlist(self, playlist_id: str) -> None:
         await self.spotify.delete_playlist(playlist_id)

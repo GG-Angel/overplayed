@@ -1,7 +1,6 @@
 from typing import Optional
 from clients.deezer.client import DeezerClient
-from cache.repositories import DeezerCache
-from cache.repositories.deezer import NO_PREVIEW
+from cache.repositories import DeezerCache, NO_PREVIEW
 
 
 class DeezerService:

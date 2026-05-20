@@ -9,7 +9,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from settings import STATE_KEY
 from state import State
-from routes import auth, home, users, playlists, previews
+from routes import auth, home, users, playlists, previews, stats
 
 
 async def start(state: State):
@@ -43,6 +43,7 @@ async def start(state: State):
     app.include_router(users.router, prefix="/users", tags=["users"])
     app.include_router(playlists.router, prefix="/playlists", tags=["playlists"])
     app.include_router(previews.router, prefix="/previews", tags=["previews"])
+    app.include_router(stats.router, prefix="/stats", tags=["stats"])
 
     config = uvicorn.Config(app, host="0.0.0.0", port=8080)
     server = uvicorn.Server(config)
