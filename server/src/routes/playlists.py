@@ -3,7 +3,7 @@ from typing import List, Literal, Annotated
 from dependencies import get_spotify_service
 from fastapi import APIRouter, Depends, HTTPException, Query, Path, Request
 from services.spotify import SpotifyService, PlaylistNotOwnedError
-from core import limiter
+from limiter import limiter
 from models import (
     Playlist,
     PlaylistItemsRequest,

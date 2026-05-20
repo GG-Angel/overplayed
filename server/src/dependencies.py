@@ -12,9 +12,7 @@ from services.deezer import DeezerService
 from clients.spotify.client import SpotifyClient
 from clients.deezer.client import DeezerClient
 from cache.core import RedisCore
-from cache.repositories.deezer import DeezerCache
-from cache.repositories.spotify import SpotifyCache
-from cache.repositories.counters import EventCounters
+from cache.repositories import SpotifyCache, DeezerCache, EventCounters
 
 
 TOKEN_EXPIRY_BUFFER = 120

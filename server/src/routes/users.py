@@ -2,7 +2,7 @@ from models import CurrentUser
 from fastapi import APIRouter, Depends, Request
 from dependencies import get_spotify_service
 from services.spotify import SpotifyService
-from core import limiter
+from limiter import limiter
 
 router = APIRouter()
 

@@ -1,6 +1,6 @@
 from fastapi.responses import Response
 from fastapi import APIRouter, Request
-from core import limiter
+from limiter import limiter
 
 router = APIRouter()
 

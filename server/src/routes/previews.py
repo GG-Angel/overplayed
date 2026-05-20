@@ -3,7 +3,7 @@ from models import TrackPreview, IsrcPattern
 from dependencies import get_deezer_service
 from fastapi import APIRouter, Depends, HTTPException, Path, Request
 from services.deezer import DeezerService
-from core import limiter
+from limiter import limiter
 
 
 router = APIRouter()
