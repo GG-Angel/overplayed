@@ -1,17 +1,16 @@
 from spotipy import SpotifyException
-from typing import List, Annotated, Literal
+from typing import List, Literal, Annotated
+from dependencies import get_spotify_service
+from fastapi import APIRouter, Depends, HTTPException, Query, Path
+from services.spotify import SpotifyService, PlaylistNotOwnedError
 from models import (
     Playlist,
     PlaylistItemsRequest,
     PlaylistItems,
+    SpotifyIdPattern,
 )
-from dependencies import get_spotify_service
-from fastapi import APIRouter, Depends, HTTPException, Path, Query
-from services.spotify import SpotifyService, PlaylistNotOwnedError
 
 PLAYLIST_ITEMS_PAGE_LIMIT = 100
-
-ResourceId = Annotated[str, Path(pattern=r"^[0-9A-Za-z]{22}$")]
 
 router = APIRouter()
 
@@ -37,7 +36,7 @@ async def handle_create_playlist(
 
 @router.get("/{playlist_id}")
 async def handle_get_playlist(
-    playlist_id: ResourceId,
+    playlist_id: Annotated[str, Path(pattern=SpotifyIdPattern)],
     service: SpotifyService = Depends(get_spotify_service),
 ) -> Playlist:
     try:
@@ -50,7 +49,8 @@ async def handle_get_playlist(
 
 @router.delete("/{playlist_id}")
 async def handle_delete_playlist(
-    playlist_id: ResourceId, service: SpotifyService = Depends(get_spotify_service)
+    playlist_id: Annotated[str, Path(pattern=SpotifyIdPattern)],
+    service: SpotifyService = Depends(get_spotify_service),
 ) -> None:
     try:
         await service.delete_playlist(playlist_id)
@@ -60,7 +60,7 @@ async def handle_delete_playlist(
 
 @router.get("/{playlist_id}/items")
 async def handle_get_playlist_items(
-    playlist_id: ResourceId,
+    playlist_id: Annotated[str, Path(pattern=SpotifyIdPattern)],
     page: int = Query(0, ge=0),
     service: SpotifyService = Depends(get_spotify_service),
 ) -> PlaylistItems:
@@ -78,7 +78,7 @@ async def handle_get_playlist_items(
 
 @router.post("/{playlist_id}/items")
 async def handle_update_playlist_items(
-    playlist_id: ResourceId,
+    playlist_id: Annotated[str, Path(pattern=SpotifyIdPattern)],
     action: Literal["add", "remove"],
     body: PlaylistItemsRequest,
     service: SpotifyService = Depends(get_spotify_service),

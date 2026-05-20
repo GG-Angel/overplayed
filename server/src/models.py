@@ -2,6 +2,14 @@ from typing import Optional, List, Annotated
 from pydantic import BaseModel, Field
 
 
+_SpotifyIdInner = r"[0-9A-Za-z]{22}"
+_IsrcInner = r"[A-Za-z]{2}[A-Za-z0-9]{3}[0-9]{7}"
+
+SpotifyIdPattern = rf"^{_SpotifyIdInner}$"
+SpotifyUriPattern = rf"^spotify:track:{_SpotifyIdInner}$"
+IsrcPattern = rf"^{_IsrcInner}$"
+
+
 class TokenInfo(BaseModel):
     access_token: str
     refresh_token: str
@@ -104,6 +112,4 @@ class PlaylistItems(BaseModel):
 
 
 class PlaylistItemsRequest(BaseModel):
-    uris: List[Annotated[str, Field(pattern=r"^spotify:track:[0-9A-Za-z]{22}$")]] = (
-        Field(min_length=1)
-    )
+    uris: List[Annotated[str, Field(pattern=SpotifyUriPattern)]] = Field(min_length=1)

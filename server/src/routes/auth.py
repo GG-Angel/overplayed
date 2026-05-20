@@ -4,12 +4,12 @@ import asyncio
 from settings import Settings
 from redis.asyncio import RedisError
 from spotipy import SpotifyOauthError, SpotifyOAuth, Spotify, SpotifyException
-from dependencies import get_oauth, get_redis, get_settings
+from dependencies import get_oauth, get_settings, get_spotify_cache
 from models import TokenInfo, SessionInfo, CurrentUser
 from typing import Optional
 from fastapi import APIRouter, Depends, Cookie, HTTPException
 from fastapi.responses import JSONResponse, RedirectResponse
-from cache.client import RedisClient
+from cache.repositories.spotify import SpotifyCache
 
 router = APIRouter()
 
@@ -31,7 +31,7 @@ async def handle_callback(
     error: Optional[str] = None,
     state: Optional[str] = None,
     oauth: SpotifyOAuth = Depends(get_oauth),
-    redis: RedisClient = Depends(get_redis),
+    cache: SpotifyCache = Depends(get_spotify_cache),
     settings: Settings = Depends(get_settings),
 ) -> RedirectResponse:
     """Exchanges the OAuth code for an access token and starts a new session."""
@@ -49,7 +49,7 @@ async def handle_callback(
         user = CurrentUser(**await asyncio.to_thread(spotify.current_user))
 
         session_info = SessionInfo(user_id=user.id, **token_info.model_dump())
-        session_id = await redis.create_session(session_info)
+        session_id = await cache.create_session(session_info)
     except (SpotifyOauthError, SpotifyException, RedisError):
         return redirect_error()
 
@@ -71,12 +71,12 @@ async def handle_callback(
 @router.post("/logout")
 async def handle_logout(
     session_id: str = Cookie(),
-    redis: RedisClient = Depends(get_redis),
+    cache: SpotifyCache = Depends(get_spotify_cache),
     settings: Settings = Depends(get_settings),
 ) -> JSONResponse:
     """Revoke the session token and delete the cookie on the client."""
     try:
-        await redis.end_session(session_id)
+        await cache.end_session(session_id)
     except RedisError:
         raise HTTPException(detail="Failed to log out.", status_code=500)
 
