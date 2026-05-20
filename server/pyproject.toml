@@ -12,6 +12,7 @@ dependencies = [
     "pydantic>=2.13.3",
     "pydantic-settings>=2.14.0",
     "redis[hiredis]>=5.0.0",
+    "slowapi>=0.1.9",
     "spotipy>=2.26.0",
     "uvicorn>=0.46.0",
 ]

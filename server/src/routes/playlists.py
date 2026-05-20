@@ -1,8 +1,9 @@
 from spotipy import SpotifyException
 from typing import List, Literal, Annotated
 from dependencies import get_spotify_service
-from fastapi import APIRouter, Depends, HTTPException, Query, Path
+from fastapi import APIRouter, Depends, HTTPException, Query, Path, Request
 from services.spotify import SpotifyService, PlaylistNotOwnedError
+from core import limiter
 from models import (
     Playlist,
     PlaylistItemsRequest,
@@ -16,7 +17,9 @@ router = APIRouter()
 
 
 @router.get("/")
+@limiter.limit("30/minute")
 async def handle_get_playlists(
+    request: Request,
     service: SpotifyService = Depends(get_spotify_service),
 ) -> List[Playlist]:
     playlists = await service.get_user_playlists()
@@ -25,7 +28,9 @@ async def handle_get_playlists(
 
 
 @router.post("/")
+@limiter.limit("20/minute")
 async def handle_create_playlist(
+    request: Request,
     service: SpotifyService = Depends(get_spotify_service),
 ) -> Playlist:
     try:
@@ -35,7 +40,9 @@ async def handle_create_playlist(
 
 
 @router.get("/{playlist_id}")
+@limiter.limit("60/minute")
 async def handle_get_playlist(
+    request: Request,
     playlist_id: Annotated[str, Path(pattern=SpotifyIdPattern)],
     service: SpotifyService = Depends(get_spotify_service),
 ) -> Playlist:
@@ -48,7 +55,9 @@ async def handle_get_playlist(
 
 
 @router.delete("/{playlist_id}")
+@limiter.limit("20/minute")
 async def handle_delete_playlist(
+    request: Request,
     playlist_id: Annotated[str, Path(pattern=SpotifyIdPattern)],
     service: SpotifyService = Depends(get_spotify_service),
 ) -> None:
@@ -59,7 +68,9 @@ async def handle_delete_playlist(
 
 
 @router.get("/{playlist_id}/items")
+@limiter.limit("60/minute")
 async def handle_get_playlist_items(
+    request: Request,
     playlist_id: Annotated[str, Path(pattern=SpotifyIdPattern)],
     page: int = Query(0, ge=0),
     service: SpotifyService = Depends(get_spotify_service),
@@ -77,7 +88,9 @@ async def handle_get_playlist_items(
 
 
 @router.post("/{playlist_id}/items")
+@limiter.limit("30/minute")
 async def handle_update_playlist_items(
+    request: Request,
     playlist_id: Annotated[str, Path(pattern=SpotifyIdPattern)],
     action: Literal["add", "remove"],
     body: PlaylistItemsRequest,

@@ -1,22 +1,26 @@
+import asyncio
 from loguru import logger
 from urllib.parse import urlencode, urlparse
-import asyncio
 from settings import Settings
 from redis.asyncio import RedisError
 from spotipy import SpotifyOauthError, SpotifyOAuth, Spotify, SpotifyException
 from dependencies import get_oauth, get_settings, get_spotify_cache
 from models import TokenInfo, SessionInfo, CurrentUser
 from typing import Optional
-from fastapi import APIRouter, Depends, Cookie, HTTPException
+from fastapi import APIRouter, Depends, Cookie, HTTPException, Request
 from fastapi.responses import JSONResponse, RedirectResponse
 from cache.repositories.spotify import SpotifyCache
+from core import limiter
 
 router = APIRouter()
 
 
 @router.get("/login")
+@limiter.limit("15/minute")
 def handle_login(
-    redirect_to: str = "/", oauth: SpotifyOAuth = Depends(get_oauth)
+    request: Request,
+    redirect_to: str = "/",
+    oauth: SpotifyOAuth = Depends(get_oauth),
 ) -> RedirectResponse:
     """Provides the Spotify OAuth url for this application."""
     parsed = urlparse(redirect_to)
@@ -26,7 +30,9 @@ def handle_login(
 
 
 @router.get("/callback")
+@limiter.limit("15/minute")
 async def handle_callback(
+    request: Request,
     code: Optional[str] = None,
     error: Optional[str] = None,
     state: Optional[str] = None,
@@ -69,7 +75,9 @@ async def handle_callback(
 
 
 @router.post("/logout")
+@limiter.limit("15/minute")
 async def handle_logout(
+    request: Request,
     session_id: str = Cookie(),
     cache: SpotifyCache = Depends(get_spotify_cache),
     settings: Settings = Depends(get_settings),
