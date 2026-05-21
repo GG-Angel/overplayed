@@ -34,8 +34,8 @@ def get_oauth(request: Request) -> SpotifyOAuth:
     return get_state(request).oauth
 
 
-def get_deezer_session(request: Request) -> ClientSession:
-    return get_state(request).deezer_session
+def get_session(request: Request) -> ClientSession:
+    return get_state(request).session
 
 
 def get_spotify_cache(
@@ -93,7 +93,7 @@ async def get_spotify_service(
 
 
 def get_deezer_service(
-    session: ClientSession = Depends(get_deezer_session),
+    session: ClientSession = Depends(get_session),
     cache: DeezerCache = Depends(get_deezer_cache),
     settings: Settings = Depends(get_settings),
 ) -> DeezerService:

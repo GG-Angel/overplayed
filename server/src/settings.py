@@ -22,15 +22,19 @@ class DeezerSettings(BaseModel):
 
 class PostgresSettings(BaseModel):
     password: str
+    host: str = "postgres"
+    port: int = 5432
+    user: str = "postgres"
+    database: str = "postgres"
 
     # pool config
-    min_pool_size = 5
-    max_pool_size = 20
-    command_timeout = 10
+    min_pool_size: int = 5
+    max_pool_size: int = 20
+    command_timeout: int = 10
 
     @property
     def url(self) -> str:
-        return f"postgres://postgres:{self.password}@localhost:5432/database"
+        return f"postgresql://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}"
 
 
 class RedisSettings(BaseModel):

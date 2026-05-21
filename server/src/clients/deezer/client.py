@@ -9,7 +9,9 @@ class DeezerClient:
         self.settings = settings
 
     async def get_track_preview_url(self, isrc: str) -> Optional[str]:
-        async with self.session.get(f"/track/isrc:{isrc}") as response:
+        async with self.session.get(
+            f"{self.settings.base_url}/track/isrc:{isrc}"
+        ) as response:
             response.raise_for_status()
             data = await response.json()
             return data.get("preview")

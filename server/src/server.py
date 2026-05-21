@@ -5,7 +5,6 @@ from slowapi import _rate_limit_exceeded_handler
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
-from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from settings import STATE_KEY
 from state import State
@@ -13,12 +12,7 @@ from routes import auth, home, users, playlists, previews, stats
 
 
 async def start(state: State):
-    @asynccontextmanager
-    async def lifespan(app: FastAPI):
-        async with state:
-            yield  # glues enter/exit signals to fastapi
-
-    app = FastAPI(lifespan=lifespan)
+    app = FastAPI()
 
     app.state[STATE_KEY] = state
 

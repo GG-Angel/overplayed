@@ -1,4 +1,5 @@
 import asyncpg
+from pathlib import Path
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
 from spotipy import SpotifyOAuth
@@ -36,6 +37,11 @@ async def build_state(settings: Settings) -> AsyncIterator[State]:
             command_timeout=settings.postgres.command_timeout,
         ) as db,
     ):
+        schema_path = Path(__file__).parent / "database" / "schemas.sql"
+        async with db.acquire() as conn:
+            with open(schema_path, "r") as sql:
+                await conn.execute(sql.read())
+
         redis_pool = ConnectionPool.from_url(
             settings.redis.url,
             password=settings.redis.password,
@@ -43,25 +49,26 @@ async def build_state(settings: Settings) -> AsyncIterator[State]:
             decode_responses=True,
         )
 
-        redis = RedisCore(
-            redis=Redis(connection_pool=redis_pool),
-            encryption_key=settings.redis.encryption_key,
-        )
+        try:
+            redis = RedisCore(
+                redis=Redis(connection_pool=redis_pool),
+                encryption_key=settings.redis.encryption_key,
+            )
 
-        oauth = SpotifyOAuth(
-            client_id=settings.spotify.client_id,
-            client_secret=settings.spotify.client_secret,
-            scope=settings.spotify.scope,
-            redirect_uri=settings.spotify.callback_url,
-            cache_handler=DummyCacheHandler(),
-        )
+            oauth = SpotifyOAuth(
+                client_id=settings.spotify.client_id,
+                client_secret=settings.spotify.client_secret,
+                scope=settings.spotify.scope,
+                redirect_uri=settings.spotify.callback_url,
+                cache_handler=DummyCacheHandler(),
+            )
 
-        yield State(
-            settings=settings,
-            db=db,
-            redis=redis,
-            session=session,
-            oauth=oauth,
-        )
-
-        await redis_pool.aclose()
+            yield State(
+                settings=settings,
+                db=db,
+                redis=redis,
+                session=session,
+                oauth=oauth,
+            )
+        finally:
+            await redis_pool.aclose()
