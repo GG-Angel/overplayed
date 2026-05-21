@@ -3,8 +3,8 @@ services:
         image: postgres:alpine
         container_name: overplayed-postgres
         restart: unless-stopped
-        networks:
-            - backend
+        # networks:
+        #     - backend
         ports:
             - 5432:5432
         environment:
