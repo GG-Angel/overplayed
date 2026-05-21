@@ -20,6 +20,19 @@ class DeezerSettings(BaseModel):
     base_url: str = "https://api.deezer.com"
 
 
+class PostgresSettings(BaseModel):
+    password: str
+
+    # pool config
+    min_pool_size = 5
+    max_pool_size = 20
+    command_timeout = 10
+
+    @property
+    def url(self) -> str:
+        return f"postgres://postgres:{self.password}@localhost:5432/database"
+
+
 class RedisSettings(BaseModel):
     url: str = "redis://redis:6379"
     password: Optional[str] = None
@@ -39,6 +52,7 @@ class Settings(BaseSettings):
     spotify: SpotifySettings = Field(default_factory=SpotifySettings)
     deezer: DeezerSettings = Field(default_factory=DeezerSettings)
     redis: RedisSettings = Field(default_factory=RedisSettings)
+    postgres: PostgresSettings = Field(default_factory=PostgresSettings)
 
     env: str = "development"
     frontend_url: str = "http://127.0.0.1:5173"

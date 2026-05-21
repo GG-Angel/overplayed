@@ -1,4 +1,16 @@
 services:
+    postgres:
+        image: postgres:alpine
+        container_name: overplayed-postgres
+        restart: unless-stopped
+        networks:
+            - backend
+        ports:
+            - 5432:5432
+        environment:
+            - POSTGRES_PASSWORD=${POSTGRES__PASSWORD}
+        # TODO: setup healthchecks
+
     redis:
         image: redis:alpine
         container_name: overplayed-redis
@@ -9,10 +21,13 @@ services:
         networks:
             - backend # isolate communication to server only
         healthcheck:
-            test: [ "CMD", "redis-cli", "-a", "${REDIS__PASSWORD}", "ping" ]
+            test: ["CMD", "redis-cli", "-a", "${REDIS__PASSWORD}", "ping"]
             interval: 10s
             timeout: 5s
             retries: 5
+        ports:
+            - 6379:6379
+
     server:
         build:
             context: server
@@ -35,7 +50,7 @@ services:
             redis:
                 condition: service_healthy
         healthcheck:
-            test: [ "CMD", "curl", "-f", "http://localhost:8080/" ]
+            test: ["CMD", "curl", "-f", "http://localhost:8080/"]
             interval: 10s
             timeout: 5s
             retries: 5
