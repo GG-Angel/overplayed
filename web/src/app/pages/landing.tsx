@@ -81,6 +81,9 @@ const LandingPage = () => {
         </div>
       </div>
       <div className="grid grid-cols-3 gap-4">
+        {/* TODO: Songs swiped, Avg. session, Cut rate */}
+        {/* Your "Liked Songs" has 4,000 tracks. You like maybe X. */}
+        {/* button: Find out which X */}
         <Metric amount={3} label="what" tone="muted" />
         <Metric amount={3} label="what" tone="muted" />
         <Metric amount={3} label="what" tone="muted" />
