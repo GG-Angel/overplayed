@@ -3,7 +3,7 @@ services:
         image: postgres:alpine
         container_name: overplayed-postgres
         restart: unless-stopped
-        networks:
+        networks:   
             - backend
         environment:
             - POSTGRES_PASSWORD=${POSTGRES__PASSWORD}
@@ -38,11 +38,6 @@ services:
         restart: unless-stopped
         ports:
             - 8080:8080
-        environment:
-            - SPOTIFY__CLIENT_ID
-            - SPOTIFY__CLIENT_SECRET
-            - REDIS__PASSWORD
-            - REDIS__ENCRYPTION_KEY
         env_file:
             - .env
         networks:

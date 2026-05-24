@@ -1,5 +1,7 @@
-from aiohttp import ClientSession
+from database import EventRepository
+import asyncpg
 import asyncio
+from aiohttp import ClientSession
 from typing import Optional
 from time import time
 from spotipy import SpotifyOAuth, Spotify
@@ -12,7 +14,7 @@ from services.deezer import DeezerService
 from clients.spotify.client import SpotifyClient
 from clients.deezer.client import DeezerClient
 from cache.core import RedisCore
-from cache.repositories import SpotifyCache, DeezerCache, EventCounters
+from cache.repositories import SpotifyCache, DeezerCache
 
 
 TOKEN_EXPIRY_BUFFER = 120
@@ -22,20 +24,28 @@ def get_state(request: Request) -> State:
     return request.app.state[STATE_KEY]
 
 
-def get_redis(request: Request) -> RedisCore:
-    return get_state(request).redis
+def get_redis(state: State = Depends(get_state)) -> RedisCore:
+    return state.redis
 
 
-def get_settings(request: Request) -> Settings:
-    return get_state(request).settings
+def get_db(state: State = Depends(get_state)) -> asyncpg.Pool:
+    return state.db
 
 
-def get_oauth(request: Request) -> SpotifyOAuth:
-    return get_state(request).oauth
+def get_settings(state: State = Depends(get_state)) -> Settings:
+    return state.settings
 
 
-def get_session(request: Request) -> ClientSession:
-    return get_state(request).session
+def get_oauth(state: State = Depends(get_state)) -> SpotifyOAuth:
+    return state.oauth
+
+
+def get_session(state: State = Depends(get_state)) -> ClientSession:
+    return state.session
+
+
+def get_event_repository(db: asyncpg.Pool = Depends(get_db)) -> EventRepository:
+    return EventRepository(db=db)
 
 
 def get_spotify_cache(
@@ -52,10 +62,6 @@ def get_deezer_cache(
     return DeezerCache(core=core, settings=settings.redis)
 
 
-def get_counters(core: RedisCore = Depends(get_redis)) -> EventCounters:
-    return EventCounters(core=core)
-
-
 def _is_token_expired(expires_at: int) -> bool:
     return expires_at - int(time()) < TOKEN_EXPIRY_BUFFER
 
@@ -69,7 +75,7 @@ async def get_spotify_service(
     session_id: Optional[str] = Cookie(default=None),
     oauth: SpotifyOAuth = Depends(get_oauth),
     cache: SpotifyCache = Depends(get_spotify_cache),
-    counters: EventCounters = Depends(get_counters),
+    events: EventRepository = Depends(get_event_repository),
     settings: Settings = Depends(get_settings),
 ) -> SpotifyService:
     if not session_id or not (session := await cache.get_session(session_id)):
@@ -87,7 +93,7 @@ async def get_spotify_service(
             user_id=session.user_id,
         ),
         cache=cache,
-        counters=counters,
+        events=events,
         user_id=session.user_id,
     )
 

@@ -1,16 +1,15 @@
+from dependencies import get_event_repository
+from database import EventRepository
 from limiter import limiter
-from dependencies import get_counters
 from fastapi import APIRouter, Request, Depends
-from cache.repositories import Event, EventCounters
 
 router = APIRouter()
 
 
-@router.get("/{event}")
+@router.get("/deletions")
 @limiter.limit("120/minute")
-async def get_counter(
+async def get_deletions(
     request: Request,
-    event: Event,
-    counters: EventCounters = Depends(get_counters),
-) -> dict[str, str | int]:
-    return {"event": event, "count": await counters.get(event)}
+    events: EventRepository = Depends(get_event_repository),
+) -> dict[str, int]:
+    return {"count": await events.get_total_deletions()}
