@@ -79,16 +79,6 @@ class RedisCore:
             await pipe.execute()
         logger.debug(f"CACHED: {len(instances)} entries (key={key}, ttl={ttl}s)")
 
-    async def get_count(self, key: str) -> int:
-        count = await self.get(key)
-        return int(count) if count is not None else 0
-
-    async def increment(self, key: str, amount: int = 1) -> None:
-        if amount <= 0:
-            raise ValueError("Increment amount must be positive")
-        new = await self.redis.incrby(key, amount)
-        logger.debug(f"INCREMENTED: {key} (amount={amount}, new={new})")
-
     def _encrypt(self, plaintext: str) -> str:
         nonce = urandom(12)
         ciphertext = self._aesgcm.encrypt(nonce, plaintext.encode(), None)
