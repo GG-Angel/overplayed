@@ -28,18 +28,10 @@ class State:
 async def build_state(settings: Settings) -> AsyncIterator[State]:
     async with (
         ClientSession() as session,
-        asyncpg.create_pool(
-            dsn=settings.postgres.url,
-            min_size=settings.postgres.min_pool_size,
-            max_size=settings.postgres.max_pool_size,
-            command_timeout=settings.postgres.command_timeout,
-        ) as db,
+        asyncpg.create_pool(dsn=settings.postgres.url) as db,
     ):
         redis_pool = ConnectionPool.from_url(
-            settings.redis.url,
-            password=settings.redis.password,
-            max_connections=settings.redis.max_connections,
-            decode_responses=True,
+            settings.redis.url, password=settings.redis.password, decode_responses=True
         )
 
         try:
@@ -52,7 +44,7 @@ async def build_state(settings: Settings) -> AsyncIterator[State]:
                 client_id=settings.spotify.client_id,
                 client_secret=settings.spotify.client_secret,
                 scope=settings.spotify.scope,
-                redirect_uri=settings.spotify.callback_url,
+                redirect_uri=settings.callback_url,
                 cache_handler=DummyCacheHandler(),
             )
 

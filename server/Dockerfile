@@ -12,5 +12,8 @@ RUN uv sync --frozen --no-cache
 # Copy the rest of the application into the container.
 COPY . .
 
+# Server port.
+EXPOSE 8080
+
 # Run the application.
 CMD ["uv", "run", "python", "src/main.py"]

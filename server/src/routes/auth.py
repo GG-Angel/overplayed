@@ -65,9 +65,9 @@ async def handle_callback(
         key="session_id",
         value=session_id,
         httponly=True,
-        secure=settings.is_production,
         samesite="lax",
         max_age=settings.redis.ttl_sessions,
+        secure=not settings.debug,
     )
 
     logger.info(f"Authorized user: {user.display_name}")
@@ -92,7 +92,7 @@ async def handle_logout(
     response.delete_cookie(
         key="session_id",
         httponly=True,
-        secure=settings.is_production,
         samesite="lax",
+        secure=not settings.debug,
     )
     return response
