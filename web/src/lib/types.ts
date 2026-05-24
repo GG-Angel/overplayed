@@ -89,7 +89,16 @@ export const trackPreviewSchema = z.object({
 });
 
 export const counterSchema = z.object({
-  count: z.number().int().nonnegative(),
+  metric: z.enum(["total_tracks_cut", "total_sessions"]),
+  value: z.number().int().nonnegative(),
+});
+
+export const swipeSessionLogSchema = z.object({
+  playlist_id: z.string(),
+  total_tracks: z.number().int().nonnegative(),
+  tracks_swiped: z.number().int().nonnegative(),
+  tracks_cut: z.number().int().nonnegative(),
+  started_at: z.iso.datetime(),
 });
 
 export type Image = z.infer<typeof imageSchema>;
@@ -104,3 +113,4 @@ export type PlaylistItem = z.infer<typeof playlistItemSchema>;
 export type PlaylistItemsPage = z.infer<typeof playlistItemsPageSchema>;
 export type TrackPreview = z.infer<typeof trackPreviewSchema>;
 export type Counter = z.infer<typeof counterSchema>;
+export type SwipeSessionLog = z.infer<typeof swipeSessionLogSchema>;

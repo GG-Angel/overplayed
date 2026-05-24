@@ -8,11 +8,27 @@ import SuccessView from "./SuccessView";
 import SwipeView from "./SwipeView";
 import ErrorView from "./ErrorView";
 import useSwipePhase from "../hooks/useSwipePhase";
+import useTimer from "@/hooks/useTimer";
+import { logSwipeSession } from "@/lib/api";
+import { useEffect } from "react";
 
 const SwipeStateHandler = () => {
-  const { status, total, dislikes } = useSwipeContext();
+  const { playlistId, status, total, dislikes, swipes } = useSwipeContext();
   const { phase, backToSwipe, handleHome, handleFinish, handleSubmit, handleError, handleSuccess } =
     useSwipePhase();
+  const timer = useTimer();
+
+  useEffect(() => {
+    if (phase.kind === "success" && total !== undefined) {
+      logSwipeSession({
+        playlist_id: playlistId,
+        total_tracks: total,
+        tracks_swiped: swipes.length,
+        tracks_cut: dislikes.length,
+        started_at: timer.stop().startedAt,
+      });
+    }
+  }, [phase.kind, playlistId, dislikes.length, swipes.length, timer, total]);
 
   if (status === "error") return <ErrorState message="Failed to load playlist" />;
   if (status === "loading") return <LoadingState message="Loading tracks..." />;

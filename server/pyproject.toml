@@ -16,6 +16,7 @@ dependencies = [
     "redis[hiredis]>=5.0.0",
     "slowapi>=0.1.9",
     "spotipy>=2.26.0",
+    "sqlalchemy[asyncio]>=2.0.50",
     "uvicorn>=0.46.0",
 ]
 

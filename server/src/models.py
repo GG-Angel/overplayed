@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional, List, Annotated
 from pydantic import BaseModel, Field
 
@@ -111,5 +112,9 @@ class PlaylistItems(BaseModel):
     items: List[PlaylistItem]
 
 
-class PlaylistItemsRequest(BaseModel):
-    uris: List[Annotated[str, Field(pattern=SpotifyUriPattern)]] = Field(min_length=1)
+class SwipeSessionRequest(BaseModel):
+    playlist_id: Annotated[str, Field(pattern=SpotifyIdPattern)]
+    total_tracks: int = Field(gt=0)
+    tracks_swiped: int = Field(ge=0)
+    tracks_cut: int = Field(ge=0)
+    started_at: datetime

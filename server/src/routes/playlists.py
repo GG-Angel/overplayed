@@ -1,18 +1,23 @@
-from database.repositories import MetricRepository
+from pydantic import BaseModel, Field
 from spotipy import SpotifyException
 from typing import List, Literal, Annotated
-from dependencies import get_spotify_service, get_metrics
+from dependencies import get_spotify_service
 from fastapi import APIRouter, Depends, HTTPException, Query, Path, Request
 from services import SpotifyService, PlaylistNotOwnedError
 from limiter import limiter
 from models import (
     Playlist,
-    PlaylistItemsRequest,
     PlaylistItems,
     SpotifyIdPattern,
+    SpotifyUriPattern,
 )
 
 PLAYLIST_ITEMS_PAGE_LIMIT = 100
+
+
+class PlaylistItemsRequest(BaseModel):
+    uris: List[Annotated[str, Field(pattern=SpotifyUriPattern)]] = Field(min_length=1)
+
 
 router = APIRouter()
 

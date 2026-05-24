@@ -1,4 +1,3 @@
-from pathlib import Path
 import uvicorn
 from limiter import limiter
 from slowapi.errors import RateLimitExceeded
@@ -39,11 +38,6 @@ async def start(state: State):
     app.include_router(playlists.router, prefix="/playlists", tags=["playlists"])
     app.include_router(previews.router, prefix="/previews", tags=["previews"])
     app.include_router(metrics.router, prefix="/metrics", tags=["metrics"])
-
-    schema_path = Path(__file__).parent / "database" / "schema.sql"
-    async with state.db.acquire() as conn:
-        with open(schema_path, "r") as sql:
-            await conn.execute(sql.read())
 
     config = uvicorn.Config(app, host="0.0.0.0", port=8080)
     server = uvicorn.Server(config)

@@ -1,35 +1,25 @@
-import asyncpg
+from models import SwipeSessionRequest
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
+from database.models import SwipeSession
 
 
 class MetricRepository:
-    def __init__(self, db: asyncpg.Pool):
+    def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def log_swipes(
-        self,
-        user_id: str,
-        playlist_id: str,
-        total_tracks: int,
-        tracks_cut: int,
+    async def record_swipe_session(
+        self, user_id: str, session: SwipeSessionRequest
     ) -> None:
-        await self.db.fetchrow(
-            """
-            INSERT INTO swipes (user_id, playlist_id, total_tracks, tracks_cut)
-            VALUES ($1, $2, $3, $4);
-            """,
-            user_id,
-            playlist_id,
-            total_tracks,
-            tracks_cut,
-        )
+        self.db.add(SwipeSession(user_id=user_id, **session.model_dump()))
+        await self.db.commit()
 
-    async def count_sessions(self) -> int:
-        return await self.db.fetchval("SELECT COUNT(*) FROM swipes;")
+    async def total_sessions(self) -> int:
+        stmt = select(func.coalesce(func.count(), 0)).select_from(SwipeSession)
+        return await self.db.scalar(stmt) or 0
 
-    async def count_tracks_cut(self) -> int:
-        return await self.db.fetchval(
-            """
-            SELECT COALESCE(SUM(tracks_cut), 0)
-            FROM swipes;
-            """
+    async def total_tracks_cut(self) -> int:
+        stmt = select(func.coalesce(func.sum(SwipeSession.tracks_cut), 0)).select_from(
+            SwipeSession
         )
+        return await self.db.scalar(stmt) or 0

@@ -1,8 +1,8 @@
+from sqlalchemy.ext.asyncio import AsyncSession
 from database import MetricRepository
-import asyncpg
 import asyncio
 from aiohttp import ClientSession
-from typing import Optional
+from typing import Optional, AsyncIterator
 from time import time
 from spotipy import SpotifyOAuth, Spotify
 from settings import STATE_KEY, Settings
@@ -25,8 +25,9 @@ def get_redis(state: State = Depends(get_state)) -> RedisCore:
     return state.redis
 
 
-def get_db(state: State = Depends(get_state)) -> asyncpg.Pool:
-    return state.db
+async def get_db(state: State = Depends(get_state)) -> AsyncIterator[AsyncSession]:
+    async with state.db() as session:
+        yield session
 
 
 def get_settings(state: State = Depends(get_state)) -> Settings:
@@ -41,7 +42,9 @@ def get_session(state: State = Depends(get_state)) -> ClientSession:
     return state.session
 
 
-def get_metrics(db: asyncpg.Pool = Depends(get_db)) -> MetricRepository:
+def get_metrics(
+    db: AsyncSession = Depends(get_db),
+) -> MetricRepository:
     return MetricRepository(db=db)
 
 
@@ -72,7 +75,6 @@ async def get_spotify_service(
     session_id: Optional[str] = Cookie(default=None),
     oauth: SpotifyOAuth = Depends(get_oauth),
     cache: SpotifyCache = Depends(get_spotify_cache),
-    metrics: MetricRepository = Depends(get_metrics),
     settings: Settings = Depends(get_settings),
 ) -> SpotifyService:
     if not session_id or not (session := await cache.get_session(session_id)):
@@ -90,7 +92,6 @@ async def get_spotify_service(
             user_id=session.user_id,
         ),
         cache=cache,
-        metrics=metrics,
         user_id=session.user_id,
     )
 
