@@ -9,7 +9,7 @@ from models import TokenInfo, SessionInfo, CurrentUser
 from typing import Optional
 from fastapi import APIRouter, Depends, Cookie, HTTPException, Request
 from fastapi.responses import JSONResponse, RedirectResponse
-from cache.repositories import SpotifyCache
+from cache import SpotifyCache
 from limiter import limiter
 
 router = APIRouter()

@@ -2,7 +2,7 @@ from spotipy import SpotifyException
 from typing import List, Literal, Annotated
 from dependencies import get_spotify_service
 from fastapi import APIRouter, Depends, HTTPException, Query, Path, Request
-from services.spotify import SpotifyService, PlaylistNotOwnedError
+from services import SpotifyService, PlaylistNotOwnedError
 from limiter import limiter
 from models import (
     Playlist,

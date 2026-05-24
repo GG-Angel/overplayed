@@ -5,8 +5,7 @@ from typing import AsyncIterator
 from spotipy import SpotifyOAuth
 from settings import Settings
 from aiohttp import ClientSession
-from cache.core import RedisCore
-from cache.dummy import DummyCacheHandler
+from cache import RedisCore, DummyCacheHandler
 from redis.asyncio import Redis, ConnectionPool
 
 

@@ -5,7 +5,7 @@ from typing import List, Callable, AsyncGenerator, AsyncIterator
 from loguru import logger
 from models import CurrentUser, Playlist, PlaylistItem
 from spotipy import Spotify
-from clients.spotify.utils import spotify_fields
+from .utils import spotify_fields
 
 
 class SpotifyClient:

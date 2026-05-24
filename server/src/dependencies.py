@@ -9,12 +9,9 @@ from settings import STATE_KEY, Settings
 from state import State
 from fastapi import Depends, Request, Cookie, HTTPException
 from models import TokenInfo, SessionInfo
-from services.spotify import SpotifyService
-from services.deezer import DeezerService
-from clients.spotify.client import SpotifyClient
-from clients.deezer.client import DeezerClient
-from cache.core import RedisCore
-from cache.repositories import SpotifyCache, DeezerCache
+from services import SpotifyService, DeezerService
+from clients import SpotifyClient, DeezerClient
+from cache import RedisCore, SpotifyCache, DeezerCache
 
 
 TOKEN_EXPIRY_BUFFER = 120

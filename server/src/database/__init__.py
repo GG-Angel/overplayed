@@ -1,3 +1,3 @@
-from .events import EventRepository
+from .repositories import EventRepository
 
 __all__ = ["EventRepository"]

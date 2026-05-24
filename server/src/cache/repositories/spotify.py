@@ -2,7 +2,7 @@ from settings import RedisSettings
 from typing import Optional, List
 from secrets import token_urlsafe
 from loguru import logger
-from cache.core import RedisCore
+from cache import RedisCore
 from models import (
     SessionInfo,
     CurrentUser,

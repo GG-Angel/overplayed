@@ -2,7 +2,7 @@ from typing import Annotated
 from models import TrackPreview, IsrcPattern
 from dependencies import get_deezer_service
 from fastapi import APIRouter, Depends, HTTPException, Path, Request
-from services.deezer import DeezerService
+from services import DeezerService
 from limiter import limiter
 
 

@@ -1,6 +1,6 @@
 from settings import RedisSettings
 from typing import Literal, Optional
-from cache.core import RedisCore
+from cache import RedisCore
 
 NO_PREVIEW = "NO_PREVIEW"
 

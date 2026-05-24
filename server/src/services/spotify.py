@@ -1,8 +1,8 @@
 from database import EventRepository
 from utils import get_formatted_date
 from typing import List
-from clients.spotify.client import SpotifyClient
-from cache.repositories import SpotifyCache
+from clients import SpotifyClient
+from cache import SpotifyCache
 from models import (
     Playlist,
     CurrentUser,
