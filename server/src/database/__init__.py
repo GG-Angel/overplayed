@@ -1,3 +1,3 @@
-from .repositories import EventRepository
+from .repositories import MetricRepository
 
-__all__ = ["EventRepository"]
+__all__ = ["MetricRepository"]

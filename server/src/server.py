@@ -1,3 +1,4 @@
+from pathlib import Path
 import uvicorn
 from limiter import limiter
 from slowapi.errors import RateLimitExceeded
@@ -8,7 +9,7 @@ from loguru import logger
 from fastapi import FastAPI, Request
 from settings import STATE_KEY
 from state import State
-from routes import auth, home, users, playlists, previews, stats
+from routes import auth, home, users, playlists, previews, metrics
 
 
 async def start(state: State):
@@ -37,7 +38,12 @@ async def start(state: State):
     app.include_router(users.router, prefix="/users", tags=["users"])
     app.include_router(playlists.router, prefix="/playlists", tags=["playlists"])
     app.include_router(previews.router, prefix="/previews", tags=["previews"])
-    app.include_router(stats.router, prefix="/stats", tags=["stats"])
+    app.include_router(metrics.router, prefix="/metrics", tags=["metrics"])
+
+    schema_path = Path(__file__).parent / "database" / "schema.sql"
+    async with state.db.acquire() as conn:
+        with open(schema_path, "r") as sql:
+            await conn.execute(sql.read())
 
     config = uvicorn.Config(app, host="0.0.0.0", port=8080)
     server = uvicorn.Server(config)

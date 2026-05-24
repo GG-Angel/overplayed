@@ -88,6 +88,10 @@ export const trackPreviewSchema = z.object({
   preview_url: z.url(),
 });
 
+export const counterSchema = z.object({
+  count: z.number().int().nonnegative(),
+});
+
 export type Image = z.infer<typeof imageSchema>;
 export type User = z.infer<typeof userSchema>;
 export type CurrentUser = z.infer<typeof currentUserSchema>;
@@ -99,3 +103,4 @@ export type PlaylistTrackCount = z.infer<typeof playlistTrackCountSchema>;
 export type PlaylistItem = z.infer<typeof playlistItemSchema>;
 export type PlaylistItemsPage = z.infer<typeof playlistItemsPageSchema>;
 export type TrackPreview = z.infer<typeof trackPreviewSchema>;
+export type Counter = z.infer<typeof counterSchema>;

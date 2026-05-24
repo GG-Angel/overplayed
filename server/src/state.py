@@ -1,5 +1,4 @@
 import asyncpg
-from pathlib import Path
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
 from spotipy import SpotifyOAuth
@@ -36,11 +35,6 @@ async def build_state(settings: Settings) -> AsyncIterator[State]:
             command_timeout=settings.postgres.command_timeout,
         ) as db,
     ):
-        schema_path = Path(__file__).parent / "database" / "schemas.sql"
-        async with db.acquire() as conn:
-            with open(schema_path, "r") as sql:
-                await conn.execute(sql.read())
-
         redis_pool = ConnectionPool.from_url(
             settings.redis.url,
             password=settings.redis.password,

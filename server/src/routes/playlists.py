@@ -1,6 +1,7 @@
+from database.repositories import MetricRepository
 from spotipy import SpotifyException
 from typing import List, Literal, Annotated
-from dependencies import get_spotify_service
+from dependencies import get_spotify_service, get_metrics
 from fastapi import APIRouter, Depends, HTTPException, Query, Path, Request
 from services import SpotifyService, PlaylistNotOwnedError
 from limiter import limiter

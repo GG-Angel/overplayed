@@ -1,4 +1,4 @@
-from database import EventRepository
+from database import MetricRepository
 import asyncpg
 import asyncio
 from aiohttp import ClientSession
@@ -41,8 +41,8 @@ def get_session(state: State = Depends(get_state)) -> ClientSession:
     return state.session
 
 
-def get_event_repository(db: asyncpg.Pool = Depends(get_db)) -> EventRepository:
-    return EventRepository(db=db)
+def get_metrics(db: asyncpg.Pool = Depends(get_db)) -> MetricRepository:
+    return MetricRepository(db=db)
 
 
 def get_spotify_cache(
@@ -72,7 +72,7 @@ async def get_spotify_service(
     session_id: Optional[str] = Cookie(default=None),
     oauth: SpotifyOAuth = Depends(get_oauth),
     cache: SpotifyCache = Depends(get_spotify_cache),
-    events: EventRepository = Depends(get_event_repository),
+    metrics: MetricRepository = Depends(get_metrics),
     settings: Settings = Depends(get_settings),
 ) -> SpotifyService:
     if not session_id or not (session := await cache.get_session(session_id)):
@@ -90,7 +90,7 @@ async def get_spotify_service(
             user_id=session.user_id,
         ),
         cache=cache,
-        events=events,
+        metrics=metrics,
         user_id=session.user_id,
     )
 

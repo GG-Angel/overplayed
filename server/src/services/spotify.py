@@ -1,4 +1,4 @@
-from database import EventRepository
+from database import MetricRepository
 from utils import get_formatted_date
 from typing import List
 from clients import SpotifyClient
@@ -19,12 +19,12 @@ class SpotifyService:
         self,
         spotify: SpotifyClient,
         cache: SpotifyCache,
-        events: EventRepository,
+        metrics: MetricRepository,
         user_id: str,
     ):
         self.spotify = spotify
         self.cache = cache
-        self.events = events
+        self.metrics = metrics
         self.user_id = user_id
 
     async def get_user(self) -> CurrentUser:
@@ -110,7 +110,9 @@ class SpotifyService:
         )
 
         await self.cache.invalidate_playlist(self.user_id, playlist_id)
-        await self.events.log_deletion(self.user_id, len(item_uris))
+        await self.metrics.log_swipes(
+            self.user_id, playlist.id, playlist.tracks.total, len(item_uris)
+        )
 
     async def delete_playlist(self, playlist_id: str) -> None:
         await self.spotify.delete_playlist(playlist_id)

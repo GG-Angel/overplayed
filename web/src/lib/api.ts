@@ -1,6 +1,7 @@
 import z from "zod";
 import api from "./api-client";
 import {
+  counterSchema,
   currentUserSchema,
   playlistItemsPageSchema,
   playlistSchema,
@@ -55,4 +56,9 @@ export const updatePlaylistItems = async (
   action: "add" | "remove"
 ) => {
   await api.post(`/playlists/${playlistId}/items?${new URLSearchParams({ action })}`, { uris });
+};
+
+export const getDeletedTrackCount = async () => {
+  const response = await api.get(`/stats/deletions`);
+  return counterSchema.parse(response);
 };

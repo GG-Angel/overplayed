@@ -1,3 +1,3 @@
-from .events import EventRepository
+from .metrics import MetricRepository
 
-__all__ = ["EventRepository"]
+__all__ = ["MetricRepository"]
