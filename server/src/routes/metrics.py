@@ -7,17 +7,22 @@ from database import MetricRepository
 from limiter import limiter
 from fastapi import APIRouter, Request, Depends, HTTPException
 
-router = APIRouter()
-
 
 class Metric(StrEnum):
-    TOTAL_TRACKS_CUT = "total_tracks_cut"
     TOTAL_SESSIONS = "total_sessions"
+    TOTAL_USERS = "total_users"
+    TOTAL_CUTS = "total_cuts"
+    CUT_RATE = "cut_rate"
+    SWIPE_DURATION = "swipe_duration"
+    SESSION_DURATION = "session_duration"
 
 
 class MetricResponse(BaseModel):
     metric: Metric
-    value: int
+    value: float
+
+
+router = APIRouter()
 
 
 @router.get("/{metric}")
@@ -28,12 +33,20 @@ async def get_metric(
     metrics: MetricRepository = Depends(get_metrics),
 ) -> MetricResponse:
     match metric:
-        case Metric.TOTAL_TRACKS_CUT:
-            value = await metrics.total_tracks_cut()
         case Metric.TOTAL_SESSIONS:
-            value = await metrics.total_sessions()
+            value = await metrics.get_total_sessions()
+        case Metric.TOTAL_USERS:
+            value = await metrics.get_unique_users()
+        case Metric.TOTAL_CUTS:
+            value = await metrics.get_total_tracks_cut()
+        case Metric.CUT_RATE:
+            value = await metrics.get_track_cut_rate()
+        case Metric.SWIPE_DURATION:
+            value = await metrics.get_average_swipe_duration()
+        case Metric.SESSION_DURATION:
+            value = await metrics.get_average_session_duration()
 
-    return MetricResponse(metric=metric, value=value)
+    return MetricResponse(metric=metric, value=float(value))
 
 
 @router.post("/swipe-sessions")

@@ -1,4 +1,4 @@
-from .repositories import MetricRepository
-from .models import Base
+from .metrics import MetricRepository
+from .schemas import Base, SwipeSession
 
-__all__ = ["MetricRepository", "Base"]
+__all__ = ["MetricRepository", "Base", "SwipeSession"]

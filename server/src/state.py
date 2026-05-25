@@ -1,4 +1,4 @@
-from database.models import Base
+from database import Base
 from contextlib import asynccontextmanager, AsyncExitStack
 from typing import AsyncIterator
 from spotipy import SpotifyOAuth

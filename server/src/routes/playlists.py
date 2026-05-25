@@ -1,6 +1,7 @@
+from enum import StrEnum
 from pydantic import BaseModel, Field
 from spotipy import SpotifyException
-from typing import List, Literal, Annotated
+from typing import List, Annotated
 from dependencies import get_spotify_service
 from fastapi import APIRouter, Depends, HTTPException, Query, Path, Request
 from services import SpotifyService, PlaylistNotOwnedError
@@ -17,6 +18,11 @@ PLAYLIST_ITEMS_PAGE_LIMIT = 100
 
 class PlaylistItemsRequest(BaseModel):
     uris: List[Annotated[str, Field(pattern=SpotifyUriPattern)]] = Field(min_length=1)
+
+
+class PlaylistUpdateAction(StrEnum):
+    ADD = "add"
+    REMOVE = "remove"
 
 
 router = APIRouter()
@@ -98,15 +104,15 @@ async def handle_get_playlist_items(
 async def handle_update_playlist_items(
     request: Request,
     playlist_id: Annotated[str, Path(pattern=SpotifyIdPattern)],
-    action: Literal["add", "remove"],
+    action: PlaylistUpdateAction,
     body: PlaylistItemsRequest,
     service: SpotifyService = Depends(get_spotify_service),
 ) -> None:
     try:
         match action:
-            case "add":
+            case PlaylistUpdateAction.ADD:
                 await service.add_playlist_items(playlist_id, body.uris)
-            case "remove":
+            case PlaylistUpdateAction.REMOVE:
                 await service.delete_playlist_items(playlist_id, body.uris)
     except PlaylistNotOwnedError:
         raise HTTPException(status_code=403, detail="Forbidden.")
