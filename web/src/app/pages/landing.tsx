@@ -2,7 +2,11 @@ import LoadingState from "@/components/states/LoadingState";
 import useAuth from "@/features/user/auth/useAuth";
 import Metric from "@/components/ui/Metric";
 import useMetrics from "@/features/swipe/hooks/useMetrics";
-import { formatCount } from "@/lib/utils";
+import { formatCount, formatPercentage } from "@/lib/utils";
+import { usePlaylists } from "@/features/playlist/hooks/usePlaylists";
+import Button from "@/components/ui/Button";
+import SpotifyIcon from "@/assets/spotify.svg?react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 // type StepCardProps = {
 //   index: number;
@@ -25,8 +29,12 @@ import { formatCount } from "@/lib/utils";
 // };
 
 const LandingPage = () => {
-  const { isLoading } = useAuth();
+  const { user, isLoading, isUnauthorized, redirectToLogin } = useAuth();
   const { data: metrics } = useMetrics();
+  const { data: playlists } = usePlaylists();
+
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // const steps: Omit<StepCardProps, "index">[] = [
   //   {
@@ -46,20 +54,60 @@ const LandingPage = () => {
   if (isLoading) return <LoadingState />;
 
   return (
-    <div className="flex flex-col max-w-4xl self-center">
+    <div className="flex flex-col gap-8 w-full max-w-3xl self-center">
+      <h1 className="text-3xl sm:text-4xl md:text-5xl tracking-tighter font-bold text-center">
+        <span className="block">Your playlist is bloated.</span>
+        <span className="block text-muted-foreground">
+          <span className="text-primary">Swipe</span> the dead weight away.
+        </span>
+      </h1>
+
+      <h3 className="text-center text-base sm:text-lg tracking-tight">
+        <span className="block font-medium">
+          Tinder for your playlists. Swipe right to keep, left to cut.
+        </span>
+        <span className="block">Clean up years of saved songs in minutes.</span>
+      </h3>
+
+      <Button
+        className="self-center"
+        size="lg"
+        icon={<SpotifyIcon className="size-5" />}
+        onClick={() => (user ? navigate("/playlists") : redirectToLogin(location.pathname))}
+      >
+        {!isUnauthorized ? "View your playlists" : "Log in with Spotify — it's free"}
+      </Button>
+
+      
+
       {metrics &&
         (() => {
-          const items = [
-            { label: "Tracks Swiped", amount: formatCount(metrics.total_swipes) },
-            { label: "Unique Users", amount: formatCount(metrics.total_users) },
-            { label: "Tracks Cut", amount: formatCount(metrics.total_cuts) },
+          const metricsSummary = [
+            { label: "Songs swiped", amount: formatCount(metrics.total_swipes) },
+            { label: "Cut rate", amount: formatPercentage(metrics.cut_rate) },
+            { label: "Songs cut", amount: formatCount(metrics.total_cuts) },
           ];
           return (
             <div className="grid grid-cols-3 gap-3">
-              {items.map((m) => (
+              {metricsSummary.map((m) => (
                 <Metric key={m.label} {...m} tone="muted" />
               ))}
             </div>
+          );
+        })()}
+
+      {playlists &&
+        metrics &&
+        (() => {
+          const mostTracksPlaylist = playlists.reduce((prev, curr) =>
+            curr.tracks.total > prev.tracks.total ? curr : prev
+          );
+          const estimatedSkips = Math.round(mostTracksPlaylist.tracks.total * metrics.cut_rate);
+          return (
+            <p className="text-muted-foreground text-center">
+              Your "{mostTracksPlaylist.name}" playlist has {mostTracksPlaylist.tracks.total}{" "}
+              tracks. You could cut maybe {estimatedSkips}.
+            </p>
           );
         })()}
     </div>
