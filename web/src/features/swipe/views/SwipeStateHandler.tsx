@@ -7,28 +7,9 @@ import SubmitView from "./SubmitView";
 import SuccessView from "./SuccessView";
 import SwipeView from "./SwipeView";
 import ErrorView from "./ErrorView";
-import useSwipePhase from "../hooks/useSwipePhase";
-import useTimer from "@/hooks/useTimer";
-import { logSwipeSession } from "@/lib/api";
-import { useEffect } from "react";
 
 const SwipeStateHandler = () => {
-  const { playlistId, status, total, dislikes, swipes } = useSwipeContext();
-  const { phase, backToSwipe, handleHome, handleFinish, handleSubmit, handleError, handleSuccess } =
-    useSwipePhase();
-  const timer = useTimer();
-
-  useEffect(() => {
-    if (phase.kind === "success" && total !== undefined) {
-      logSwipeSession({
-        playlist_id: playlistId,
-        total_tracks: total,
-        tracks_swiped: swipes.length,
-        tracks_cut: dislikes.length,
-        started_at: timer.stop().startedAt,
-      });
-    }
-  }, [phase.kind, playlistId, dislikes.length, swipes.length, timer, total]);
+  const { status, total, phase } = useSwipeContext();
 
   if (status === "error") return <ErrorState message="Failed to load playlist" />;
   if (status === "loading") return <LoadingState message="Loading tracks..." />;
@@ -36,24 +17,17 @@ const SwipeStateHandler = () => {
 
   switch (phase.kind) {
     case "swipe":
-      return <SwipeView onFinish={() => handleFinish(dislikes.length)} />;
+      return <SwipeView />;
     case "nothing":
-      return <NoChangesView onBack={backToSwipe} onHome={handleHome} />;
+      return <NoChangesView />;
     case "review":
-      return <ReviewView onBack={backToSwipe} onSubmit={handleSubmit} />;
+      return <ReviewView />;
     case "submit":
-      return <SubmitView form={phase.form} onSuccess={handleSuccess} onError={handleError} />;
+      return <SubmitView form={phase.form} />;
     case "success":
-      return (
-        <SuccessView
-          newPlaylist={phase.newPlaylist}
-          onHome={handleHome}
-          dislikes={dislikes.length}
-          total={total}
-        />
-      );
+      return <SuccessView newPlaylist={phase.newPlaylist} />;
     case "error":
-      return <ErrorView onHome={handleHome} onRetry={() => handleFinish(dislikes.length)} />;
+      return <ErrorView />;
   }
 };
 

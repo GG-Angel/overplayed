@@ -2,16 +2,15 @@ import Button from "@/components/ui/Button";
 import useConfetti from "@/hooks/useConfetti";
 import type { Playlist } from "@/lib/types";
 import { openExternalUrl } from "@/lib/utils";
+import { useSwipeContext } from "../context/SwipeContext";
 
 type SuccessViewProps = {
   newPlaylist: Playlist | null;
-  dislikes: number;
-  total: number;
-  onHome?: () => void;
 };
 
-const SuccessView = ({ newPlaylist, dislikes, total, onHome }: SuccessViewProps) => {
-  const ratio = total > 0 ? Math.round((dislikes / total) * 100) : 0;
+const SuccessView = ({ newPlaylist }: SuccessViewProps) => {
+  const { total, dislikes, goHome } = useSwipeContext();
+  const ratio = total && total > 0 ? Math.round((dislikes.length / total) * 100) : 0;
   useConfetti();
 
   return (
@@ -33,7 +32,7 @@ const SuccessView = ({ newPlaylist, dislikes, total, onHome }: SuccessViewProps)
             View Backup Playlist
           </Button>
         )}
-        <Button variant="primary" onClick={onHome}>
+        <Button variant="primary" onClick={goHome}>
           Return Home
         </Button>
       </div>

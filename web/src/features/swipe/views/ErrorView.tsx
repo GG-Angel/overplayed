@@ -1,11 +1,9 @@
 import Button from "@/components/ui/Button";
+import { useSwipeContext } from "../context/SwipeContext";
 
-type ErrorViewProps = {
-  onRetry?: () => void;
-  onHome?: () => void;
-};
+const ErrorView = () => {
+  const { finish, goHome } = useSwipeContext();
 
-const ErrorView = ({ onRetry, onHome }: ErrorViewProps) => {
   return (
     <div className="flex flex-col h-full justify-center gap-6">
       <div className="text-center">
@@ -15,10 +13,10 @@ const ErrorView = ({ onRetry, onHome }: ErrorViewProps) => {
         <p className="text-sm">We recommend trying again.</p>
       </div>
       <div className="flex justify-center gap-2">
-        <Button variant="secondary" onClick={onHome}>
+        <Button variant="secondary" onClick={goHome}>
           Return Home
         </Button>
-        <Button variant="primary" onClick={onRetry}>
+        <Button variant="primary" onClick={finish}>
           Try Again
         </Button>
       </div>

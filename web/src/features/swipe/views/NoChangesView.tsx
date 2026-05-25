@@ -1,11 +1,9 @@
 import Button from "@/components/ui/Button";
+import { useSwipeContext } from "../context/SwipeContext";
 
-type NoChangesViewProps = {
-  onBack?: () => void;
-  onHome?: () => void;
-};
+const NoChangesView = () => {
+  const { back, goHome } = useSwipeContext();
 
-const NoChangesView = ({ onBack, onHome }: NoChangesViewProps) => {
   return (
     <div className="flex flex-col h-full justify-center gap-6">
       <div className="text-center">
@@ -15,10 +13,10 @@ const NoChangesView = ({ onBack, onHome }: NoChangesViewProps) => {
         <p className="text-sm text-muted-foreground">(your playlist must be really good)</p>
       </div>
       <div className="flex justify-center gap-2">
-        <Button variant="secondary" onClick={onBack}>
+        <Button variant="secondary" onClick={back}>
           Keep Swiping
         </Button>
-        <Button variant="primary" onClick={onHome}>
+        <Button variant="primary" onClick={goHome}>
           Return Home
         </Button>
       </div>

@@ -2,27 +2,14 @@ import Card from "@/components/ui/Card";
 import Metric from "@/components/ui/Metric";
 import Checkbox from "@/components/ui/Checkbox";
 import { useSwipeContext } from "../context/SwipeContext";
-import { useReviewForm, type ReviewForm } from "@/features/swipe/hooks/useReviewForm";
+import { useReviewForm } from "@/features/swipe/hooks/useReviewForm";
 import Button from "@/components/ui/Button";
 import { pluralize } from "@/lib/utils";
 import TrackCard from "@/features/playlist/components/TrackCard";
 
-type ReviewViewProps = {
-  onBack?: () => void;
-  onSubmit?: (form: ReviewForm) => void;
-};
-
-const ReviewView = ({ onBack, onSubmit }: ReviewViewProps) => {
-  const { likes, dislikes } = useSwipeContext();
+const ReviewView = () => {
+  const { likes, dislikes, back, submit } = useSwipeContext();
   const { form, toggleSavePlaylist } = useReviewForm();
-
-  const handleBack = () => {
-    onBack?.();
-  };
-
-  const handleSubmit = () => {
-    onSubmit?.(form);
-  };
 
   return (
     <div className="flex flex-col gap-6 py-2">
@@ -68,10 +55,10 @@ const ReviewView = ({ onBack, onSubmit }: ReviewViewProps) => {
       </Card>
 
       <div className="flex justify-end gap-2">
-        <Button variant="secondary" onClick={handleBack}>
+        <Button variant="secondary" onClick={back}>
           Keep Swiping
         </Button>
-        <Button variant="primary" onClick={handleSubmit}>
+        <Button variant="primary" onClick={() => submit(form)}>
           Confirm Deletion
         </Button>
       </div>

@@ -3,17 +3,14 @@ import { pluralize } from "@/lib/utils";
 import { useEffect, useEffectEvent } from "react";
 import type { ReviewForm } from "@/features/swipe/hooks/useReviewForm";
 import useSubmitChanges from "../hooks/useSubmitChanges";
-import type { Playlist } from "@/lib/types";
 import SubmitAction from "../components/SubmitAction";
 
 type SubmitViewProps = {
   form: ReviewForm;
-  onSuccess?: (newPlaylist: Playlist | null) => void;
-  onError?: (error: Error | null) => void;
 };
 
-const SubmitView = ({ form, onSuccess, onError }: SubmitViewProps) => {
-  const { playlistId, dislikes } = useSwipeContext();
+const SubmitView = ({ form }: SubmitViewProps) => {
+  const { playlistId, dislikes, succeed, fail } = useSwipeContext();
   const { state, submit } = useSubmitChanges(playlistId);
 
   const runSubmit = useEffectEvent(async () => {
@@ -29,14 +26,14 @@ const SubmitView = ({ form, onSuccess, onError }: SubmitViewProps) => {
     if (state.phase !== "done" && state.phase !== "failed") return;
 
     const timer = setTimeout(() => {
-      if (state.phase === "done") onSuccess?.(state.newPlaylist);
-      if (state.phase === "failed") onError?.(state.error);
+      if (state.phase === "done") succeed(state.newPlaylist);
+      if (state.phase === "failed") fail();
     }, 2000);
 
     return () => {
       clearTimeout(timer);
     };
-  }, [state.phase, state.error, state.newPlaylist, onError, onSuccess]);
+  }, [state.phase, state.error, state.newPlaylist, succeed, fail]);
 
   return (
     <div className="flex flex-col h-full justify-center gap-6">

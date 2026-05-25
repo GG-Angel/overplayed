@@ -7,7 +7,6 @@ import { Undo, X, Heart, Check } from "lucide-react";
 import { useRef, useState } from "react";
 import { useSwipeContext } from "../context/SwipeContext";
 import AudioPlayer from "@/features/previews/components/AudioPlayer";
-import useTimer from "@/hooks/useTimer";
 
 const VISIBLE_CARD_COUNT = 3;
 const STACK_ROTATE_DEGREES = 3;
@@ -17,11 +16,7 @@ const directionToDecision = {
   right: "like",
 } as const;
 
-type SwipeViewProps = {
-  onFinish?: () => void;
-};
-
-const SwipeView = ({ onFinish }: SwipeViewProps) => {
+const SwipeView = () => {
   const {
     currentIndex,
     currentAudio,
@@ -33,10 +28,10 @@ const SwipeView = ({ onFinish }: SwipeViewProps) => {
     status,
     likes,
     dislikes,
+    finish,
   } = useSwipeContext();
   const [isSwiping, setIsSwiping] = useState(false);
   const activeCardRef = useRef<SwipeCardHandler | null>(null);
-  const timer = useTimer(); // TODO: figure out a way to do this that is not shit
 
   const visibleItems = items.slice(currentIndex, currentIndex + VISIBLE_CARD_COUNT);
   const isComplete = total !== undefined && currentIndex >= total;
@@ -114,7 +109,7 @@ const SwipeView = ({ onFinish }: SwipeViewProps) => {
             icon={Check}
             size="sm"
             variant="blue"
-            onClick={onFinish}
+            onClick={finish}
             disabled={!canUndo}
           />
         </div>
