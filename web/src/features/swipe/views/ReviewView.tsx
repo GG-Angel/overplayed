@@ -4,7 +4,7 @@ import Checkbox from "@/components/ui/Checkbox";
 import { useSwipeContext } from "../context/SwipeContext";
 import { useReviewForm } from "@/features/swipe/hooks/useReviewForm";
 import Button from "@/components/ui/Button";
-import { pluralize } from "@/lib/utils";
+import { formatCount, pluralize } from "@/lib/utils";
 import TrackCard from "@/features/playlist/components/TrackCard";
 
 const ReviewView = () => {
@@ -17,11 +17,15 @@ const ReviewView = () => {
 
       <div className="flex gap-3">
         <Metric
-          amount={dislikes.length}
+          amount={formatCount(dislikes.length)}
           label={pluralize("Dislike", dislikes.length)}
           tone="negative"
         />
-        <Metric amount={likes.length} label={pluralize("Like", likes.length)} tone="positive" />
+        <Metric
+          amount={formatCount(likes.length)}
+          label={pluralize("Like", likes.length)}
+          tone="positive"
+        />
       </div>
 
       <div>

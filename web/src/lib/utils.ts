@@ -20,5 +20,17 @@ export function pluralize(label: string, amount: number): string {
 }
 
 export function formatPercentage(n: number): string {
-  return `${n.toFixed(1)}%`;
+  return `${(n * 100).toFixed(1)}%`;
+}
+
+export function formatCount(n: number): string {
+  if (n < 1000) {
+    return n.toString();
+  }
+
+  if (n < 1_000_000) {
+    return `${(n / 1000).toFixed(2)}k`;
+  }
+
+  return `${(n / 1_000_000).toFixed(1)}m`;
 }

@@ -20,7 +20,7 @@ const metricVariants = cva(
 );
 
 type MetricProps = VariantProps<typeof metricVariants> & {
-  amount: number;
+  amount: number | string;
   label: string;
   className?: string;
 };

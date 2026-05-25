@@ -9,6 +9,7 @@ export const queryConfig = {
 
 export const queryKeys = {
   user: ["user"],
+  metrics: ["metrics"],
   preview: (isrc: string) => ["preview", isrc],
   playlists: {
     all: ["playlists"],

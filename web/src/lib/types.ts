@@ -91,6 +91,7 @@ export const trackPreviewSchema = z.object({
 export const metricsSchema = z.object({
   total_sessions: z.number().int().nonnegative(),
   total_users: z.number().int().nonnegative(),
+  total_swipes: z.number().int().nonnegative(),
   total_cuts: z.number().int().nonnegative(),
   cut_rate: z.number().nonnegative(),
   avg_swipe_duration: z.number().nonnegative(),
