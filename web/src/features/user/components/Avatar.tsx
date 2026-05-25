@@ -11,7 +11,7 @@ const Avatar = ({ user, className, ...props }: AvatarProps) => {
   return (
     <button
       className={cn(
-        "inline-flex items-center rounded-full overflow-hidden size-8 shrink-0 hover:scale-110 active:scale-100 transition-transform hover:cursor-pointer",
+        "inline-flex items-center rounded-full overflow-hidden size-8 shrink-0 hover:scale-110 active:scale-100 transition-transform cursor-pointer",
         className
       )}
       {...props}

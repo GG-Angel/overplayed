@@ -1,6 +1,27 @@
-from datetime import datetime
+from models import SpotifyIdPattern
+from typing import Annotated
+from pydantic import BaseModel, Field, model_validator
+from datetime import datetime, timezone
 from sqlalchemy import CheckConstraint, DateTime, func, String
 from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase
+
+
+class SwipeSessionDetails(BaseModel):
+    playlist_id: Annotated[str, Field(pattern=SpotifyIdPattern)]
+    total_tracks: Annotated[int, Field(gt=0)]
+    tracks_swiped: Annotated[int, Field(ge=0)]
+    tracks_cut: Annotated[int, Field(ge=0)]
+    started_at: datetime
+
+    @model_validator(mode="after")
+    def check_counts(self) -> "SwipeSessionDetails":
+        if self.started_at > datetime.now(timezone.utc):
+            raise ValueError("started_at cannot be in the future")
+        if self.tracks_swiped > self.total_tracks:
+            raise ValueError("tracks_swiped cannot exceed total_tracks")
+        if self.tracks_cut > self.tracks_swiped:
+            raise ValueError("tracks_cut cannot exceed tracks_swiped")
+        return self
 
 
 class Base(DeclarativeBase):

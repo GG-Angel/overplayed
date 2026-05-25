@@ -1,4 +1,4 @@
-import { Square, SquareCheck } from "lucide-react";
+import { Square, SquareCheckBig } from "lucide-react";
 
 type CheckboxProps = {
   enabled: boolean;
@@ -6,9 +6,9 @@ type CheckboxProps = {
 };
 
 const Checkbox = ({ enabled, onEnabledChange }: CheckboxProps) => {
-  const Icon = enabled ? SquareCheck : Square;
+  const Icon = enabled ? SquareCheckBig : Square;
   return (
-    <button onClick={onEnabledChange} className="hover:cursor-pointer text-primary">
+    <button onClick={onEnabledChange} className="cursor-pointer text-primary">
       <Icon />
     </button>
   );

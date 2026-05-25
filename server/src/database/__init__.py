@@ -1,4 +1,4 @@
-from .metrics import MetricRepository
-from .schemas import Base, SwipeSession
+from .metrics import MetricsRepository
+from .schemas import Base, SwipeSession, SwipeSessionDetails
 
-__all__ = ["MetricRepository", "Base", "SwipeSession"]
+__all__ = ["MetricsRepository", "Base", "SwipeSession", "SwipeSessionDetails"]

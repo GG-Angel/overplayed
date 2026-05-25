@@ -14,7 +14,7 @@ const AvatarDropdownButton = ({
   <button
     role="menuitem"
     className={cn(
-      "flex gap-1.5 items-center py-2 px-4 text-left hover:cursor-pointer hover:bg-card-border/50",
+      "flex gap-1.5 items-center py-2 px-4 text-left cursor-pointer hover:bg-card-border/50",
       className
     )}
     {...props}

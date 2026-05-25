@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from database import MetricRepository
+from database import MetricsRepository
 import asyncio
 from aiohttp import ClientSession
 from typing import Optional, AsyncIterator
@@ -44,8 +44,8 @@ def get_session(state: State = Depends(get_state)) -> ClientSession:
 
 def get_metrics(
     db: AsyncSession = Depends(get_db),
-) -> MetricRepository:
-    return MetricRepository(db=db)
+) -> MetricsRepository:
+    return MetricsRepository(db=db)
 
 
 def get_spotify_cache(

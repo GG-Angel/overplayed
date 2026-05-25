@@ -10,7 +10,7 @@ const ErrorView = () => {
         <p className="text-4xl mb-2 text-primary">{"(ᵕ ó ᴗ ò)"}</p>
         <p className="text-xl font-medium">Submission Failed</p>
         <p>One of the submission phases failed.</p>
-        <p className="text-sm">We recommend trying again.</p>
+        <p className="text-sm text-muted-foreground">We recommend trying again.</p>
       </div>
       <div className="flex justify-center gap-2">
         <Button variant="secondary" onClick={goHome}>

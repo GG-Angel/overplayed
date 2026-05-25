@@ -14,6 +14,7 @@ const ReviewView = () => {
   return (
     <div className="flex flex-col gap-6 py-2">
       <p className="text-2xl font-medium">Review Changes</p>
+
       <div className="flex gap-3">
         <Metric
           amount={dislikes.length}
@@ -38,23 +39,21 @@ const ReviewView = () => {
         </div>
       </div>
 
-      <Card className="flex flex-col gap-4">
-        <div className="flex flex-1 justify-between items-center gap-4 pr-2">
-          <div>
-            <p>Save removed tracks to a new playlist?</p>
-            {form.savePlaylist ? (
-              <p className="text-sm text-muted-foreground">
-                Keep these tracks accessible after removal.
-              </p>
-            ) : (
-              <p className="text-sm text-destructive">Removed tracks will be lost permanently.</p>
-            )}
-          </div>
-          <Checkbox enabled={form.savePlaylist} onEnabledChange={toggleSavePlaylist} />
+      <Card className="flex justify-between items-center gap-4 pr-6">
+        <div>
+          <p>Save removed tracks to a new playlist?</p>
+          {form.savePlaylist ? (
+            <p className="text-sm text-muted-foreground">
+              Keep these tracks accessible after removal.
+            </p>
+          ) : (
+            <p className="text-sm text-destructive">Removed tracks will be lost permanently.</p>
+          )}
         </div>
+        <Checkbox enabled={form.savePlaylist} onEnabledChange={toggleSavePlaylist} />
       </Card>
 
-      <div className="flex justify-end gap-2">
+      <div className="flex justify-end gap-3">
         <Button variant="secondary" onClick={back}>
           Keep Swiping
         </Button>
