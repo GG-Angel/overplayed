@@ -1,13 +1,12 @@
 import z from "zod";
 import api from "./api-client";
 import {
-  counterSchema,
   currentUserSchema,
+  metricsSchema,
   playlistItemsPageSchema,
   playlistSchema,
   trackPreviewSchema,
-  type Counter,
-  type SwipeSessionLog,
+  type SwipeSessionDetails,
 } from "./types";
 
 export const getUser = async () => {
@@ -60,11 +59,11 @@ export const updatePlaylistItems = async (
   await api.post(`/playlists/${playlistId}/items?${new URLSearchParams({ action })}`, { uris });
 };
 
-export const getMetric = async (metric: Counter["metric"]) => {
-  const response = await api.get(`/metrics/${metric}`);
-  return counterSchema.parse(response);
+export const getMetrics = async () => {
+  const response = await api.get(`/metrics/summary`);
+  return metricsSchema.parse(response);
 };
 
-export const logSwipeSession = async (data: SwipeSessionLog) => {
+export const logSwipeSession = async (data: SwipeSessionDetails) => {
   await api.post(`/metrics/swipe-sessions`, data);
 };

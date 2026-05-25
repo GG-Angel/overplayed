@@ -18,3 +18,7 @@ export function extractImageUrl(images: Image[], size: "sm" | "lg"): string {
 export function pluralize(label: string, amount: number): string {
   return `${label}${amount === 1 ? "" : "s"}`;
 }
+
+export function formatPercentage(n: number): string {
+  return `${n.toFixed(1)}%`;
+}
