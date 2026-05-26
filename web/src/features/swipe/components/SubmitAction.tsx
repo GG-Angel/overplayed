@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Ellipsis, LoaderCircle, Check, Ban, X } from "lucide-react";
-import type { StepStatus } from "../hooks/useSubmitChanges";
+import type { StepStatus } from "../hooks/useSwipeSubmit";
 
 type SubmitActionProps = {
   label: string;

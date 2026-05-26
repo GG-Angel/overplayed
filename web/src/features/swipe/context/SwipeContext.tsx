@@ -1,20 +1,20 @@
 import { createContext, useContext } from "react";
-import type { usePlaylistSwipe } from "../hooks/usePlaylistSwipe";
-import type { ReviewForm } from "../hooks/useReviewForm";
+import type { useSwipePlaylist } from "../hooks/useSwipePlaylist";
+import type { SwipeForm } from "../hooks/useSwipeForm";
 import type { Playlist } from "@/lib/types";
 
 export type PhaseState =
   | { kind: "swipe" }
   | { kind: "nothing" }
   | { kind: "review" }
-  | { kind: "submit"; form: ReviewForm }
+  | { kind: "submit"; form: SwipeForm }
   | { kind: "success"; newPlaylist: Playlist | null }
   | { kind: "error" };
 
-export type SwipeContextValue = ReturnType<typeof usePlaylistSwipe> & {
+export type SwipeContextValue = ReturnType<typeof useSwipePlaylist> & {
   phase: PhaseState;
   finish: () => void;
-  submit: (form: ReviewForm) => void;
+  submit: (form: SwipeForm) => void;
   succeed: (newPlaylist: Playlist | null) => void;
   fail: () => void;
   back: () => void;

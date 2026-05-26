@@ -1,10 +1,10 @@
 import usePlaylistItems from "@/features/playlist/hooks/usePlaylistItems";
 import useTrackPreviews from "@/features/previews/hooks/useTrackPreviews";
 import type { PlaylistItem } from "@/lib/types";
-import useSwipes, { type Decision } from "./useSwipes";
+import useSwipeManager, { type Decision } from "./useSwipeManager";
 
-export const usePlaylistSwipe = (playlistId: string) => {
-  const decisions = useSwipes<PlaylistItem>();
+export const useSwipePlaylist = (playlistId: string) => {
+  const decisions = useSwipeManager<PlaylistItem>();
   const currentIndex = decisions.swipes.length;
 
   const playlist = usePlaylistItems(playlistId, currentIndex);

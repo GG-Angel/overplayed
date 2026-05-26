@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import type { ReviewForm } from "./useReviewForm";
+import type { SwipeForm } from "./useSwipeForm";
 import { createNewPlaylist, updatePlaylistItems } from "@/lib/api";
 import { queryKeys } from "@/lib/query";
 import type { Playlist } from "@/lib/types";
@@ -27,7 +27,7 @@ const initialState: SubmitState = {
   newPlaylist: null,
 };
 
-const useSubmitChanges = (
+const useSwipeSubmit = (
   currentPlaylistId: string,
   onSuccess: (playlist: Playlist | null) => void = () => {},
   onFail: () => void = () => {},
@@ -44,7 +44,7 @@ const useSubmitChanges = (
     return result;
   };
 
-  const submit = async (form: ReviewForm, uris: string[]) => {
+  const submit = async (form: SwipeForm, uris: string[]) => {
     if (hasSubmitted.current) return;
     hasSubmitted.current = true;
     setState((s) => ({ ...s, phase: "running" }));
@@ -96,4 +96,4 @@ const useSubmitChanges = (
 
   return { state, submit };
 };
-export default useSubmitChanges;
+export default useSwipeSubmit;

@@ -7,7 +7,7 @@ import mockPlaylistJson from "../../../../public/landing-playlist-items.json";
 
 const SWIPE_DURATION = 1750;
 
-const usePlaylistSwipeMock = () => {
+const useSwipeCarousel = () => {
   const activeCardRef = useRef<SwipeCardHandler | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -40,4 +40,4 @@ const usePlaylistSwipeMock = () => {
   return { activeCardRef, items: visiblePlaylistItems, next };
 };
 
-export default usePlaylistSwipeMock;
+export default useSwipeCarousel;

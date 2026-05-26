@@ -1,19 +1,19 @@
 import { useSwipeContext } from "../context/SwipeContext";
 import { pluralize } from "@/lib/utils";
 import { useEffect, useEffectEvent } from "react";
-import type { ReviewForm } from "@/features/swipe/hooks/useReviewForm";
-import useSubmitChanges from "../hooks/useSubmitChanges";
+import type { SwipeForm } from "@/features/swipe/hooks/useSwipeForm";
+import useSwipeSubmit from "../hooks/useSwipeSubmit";
 import SubmitAction from "../components/SubmitAction";
 
 const SUBMISSION_DELAY = 2000;
 
 type SubmitViewProps = {
-  form: ReviewForm;
+  form: SwipeForm;
 };
 
 const SubmitView = ({ form }: SubmitViewProps) => {
   const { playlistId, dislikes, succeed, fail } = useSwipeContext();
-  const { state, submit } = useSubmitChanges(playlistId, succeed, fail, SUBMISSION_DELAY);
+  const { state, submit } = useSwipeSubmit(playlistId, succeed, fail, SUBMISSION_DELAY);
 
   // submit form on mount
   const runSubmit = useEffectEvent(async () => {

@@ -1,8 +1,8 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { SwipeContext, type PhaseState, type SwipeContextValue } from "./SwipeContext";
-import { usePlaylistSwipe } from "../hooks/usePlaylistSwipe";
-import type { ReviewForm } from "../hooks/useReviewForm";
+import { useSwipePlaylist } from "../hooks/useSwipePlaylist";
+import type { SwipeForm } from "../hooks/useSwipeForm";
 import type { Playlist } from "@/lib/types";
 import useTimer from "@/hooks/useTimer";
 import { logSwipeSession } from "@/lib/api";
@@ -15,13 +15,13 @@ type SwipeProviderProps = {
 const SwipeProvider = ({ playlistId, children }: SwipeProviderProps) => {
   const [phase, setPhase] = useState<PhaseState>({ kind: "swipe" });
   const navigate = useNavigate();
-  const swipe = usePlaylistSwipe(playlistId);
+  const swipe = useSwipePlaylist(playlistId);
   const timer = useTimer();
 
   const { total, swipes, dislikes } = swipe;
 
   const finish = () => setPhase({ kind: dislikes.length === 0 ? "nothing" : "review" });
-  const submit = (form: ReviewForm) => setPhase({ kind: "submit", form });
+  const submit = (form: SwipeForm) => setPhase({ kind: "submit", form });
   const succeed = (newPlaylist: Playlist | null) => setPhase({ kind: "success", newPlaylist });
   const fail = () => setPhase({ kind: "error" });
   const back = () => setPhase({ kind: "swipe" });

@@ -1,15 +1,15 @@
 import { useState } from "react";
 
-export type ReviewForm = {
+export type SwipeForm = {
   savePlaylist: boolean;
 };
 
-const initialForm: ReviewForm = {
+const initialForm: SwipeForm = {
   savePlaylist: true,
 };
 
-export const useReviewForm = () => {
-  const [form, setForm] = useState<ReviewForm>(initialForm);
+export const useSwipeForm = () => {
+  const [form, setForm] = useState<SwipeForm>(initialForm);
 
   const toggleSavePlaylist = () => {
     setForm((prev) => ({ ...prev, savePlaylist: !prev.savePlaylist }));

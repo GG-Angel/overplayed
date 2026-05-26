@@ -1,7 +1,7 @@
 import LoadingState from "@/components/states/LoadingState";
 import useAuth from "@/features/user/auth/useAuth";
 import Metric from "@/components/ui/Metric";
-import useMetrics from "@/features/swipe/hooks/useMetrics";
+import useMetrics from "@/features/metrics/useMetrics";
 import { formatCount, formatPercentage } from "@/lib/utils";
 import { usePlaylists } from "@/features/playlist/hooks/usePlaylists";
 import Button from "@/components/ui/Button";
@@ -10,14 +10,14 @@ import { useLocation, useNavigate } from "react-router-dom";
 import Card from "@/components/ui/Card";
 import Divider from "@/components/ui/Divider";
 import SwipeButtons from "@/features/swipe/components/SwipeButtons";
-import usePlaylistSwipeMock from "@/features/swipe/hooks/usePlaylistSwipeMock";
+import useSwipeCarousel from "@/features/swipe/hooks/useSwipeCarousel";
 import SwipeCardStack from "@/features/swipe/components/SwipeCardStack";
 
 const LandingPage = () => {
   const { user, isLoading, redirectToLogin } = useAuth();
   const { data: metrics } = useMetrics();
   const { data: playlists } = usePlaylists();
-  const { activeCardRef, items: mockPlaylistItems, next: nextMockItem } = usePlaylistSwipeMock();
+  const { activeCardRef, items: mockPlaylistItems, next: nextMockItem } = useSwipeCarousel();
 
   const navigate = useNavigate();
   const location = useLocation();

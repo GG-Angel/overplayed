@@ -2,14 +2,14 @@ import Card from "@/components/ui/Card";
 import Metric from "@/components/ui/Metric";
 import Checkbox from "@/components/ui/Checkbox";
 import { useSwipeContext } from "../context/SwipeContext";
-import { useReviewForm } from "@/features/swipe/hooks/useReviewForm";
+import { useSwipeForm } from "@/features/swipe/hooks/useSwipeForm";
 import Button from "@/components/ui/Button";
 import { formatCount, pluralize } from "@/lib/utils";
 import TrackCard from "@/features/playlist/components/TrackCard";
 
 const ReviewView = () => {
   const { likes, dislikes, back, submit } = useSwipeContext();
-  const { form, toggleSavePlaylist } = useReviewForm();
+  const { form, toggleSavePlaylist } = useSwipeForm();
 
   return (
     <div className="flex flex-col gap-6 py-2">
