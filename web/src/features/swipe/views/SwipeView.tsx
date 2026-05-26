@@ -1,12 +1,12 @@
 import type { Direction, SwipeCardHandler } from "@/features/swipe/components/SwipeCard";
 import SwipeCard from "@/features/swipe/components/SwipeCard";
 import SwipeProgress from "@/features/swipe/components/SwipeProgress";
-import IconButton from "@/components/ui/IconButton";
 import { AnimatePresence } from "framer-motion";
-import { Undo, X, Heart, Check } from "lucide-react";
+import { Undo, Check } from "lucide-react";
 import { useRef, useState } from "react";
 import { useSwipeContext } from "../context/SwipeContext";
 import AudioPlayer from "@/features/previews/components/AudioPlayer";
+import SwipeButtons from "../components/SwipeButtons";
 
 export const VISIBLE_CARD_COUNT = 3;
 export const STACK_ROTATE_DEGREES = 3;
@@ -36,7 +36,7 @@ const SwipeView = () => {
   const visibleItems = items.slice(currentIndex, currentIndex + VISIBLE_CARD_COUNT);
   const isComplete = total !== undefined && currentIndex >= total;
   const canSwipe = !isSwiping && !isComplete;
-  const canUndo = !isSwiping && currentIndex > 0;
+  const canUndoOrFinish = !isSwiping && currentIndex > 0;
 
   const triggerSwipe = (direction: Direction) => {
     setIsSwiping(true);
@@ -91,22 +91,15 @@ const SwipeView = () => {
             </div>
           )}
         </div>
-        <div className="flex items-end gap-2">
-          <IconButton icon={Undo} size="sm" variant="yellow" onClick={undo} disabled={!canUndo} />
-          <IconButton
-            icon={X}
-            variant="red"
-            onClick={() => triggerSwipe("left")}
-            disabled={!canSwipe}
-          />
-          <IconButton
-            icon={Heart}
-            variant="green"
-            onClick={() => triggerSwipe("right")}
-            disabled={!canSwipe}
-          />
-          <IconButton icon={Check} size="sm" variant="blue" onClick={finish} disabled={!canUndo} />
-        </div>
+        <SwipeButtons
+          onUndo={undo}
+          onDislike={() => triggerSwipe("left")}
+          onLike={() => triggerSwipe("right")}
+          onFinish={finish}
+          canUndo={canUndoOrFinish}
+          canFinish={canUndoOrFinish}
+          canSwipe={canSwipe}
+        />
       </div>
 
       <AudioPlayer

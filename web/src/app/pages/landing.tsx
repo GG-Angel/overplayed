@@ -14,9 +14,8 @@ import { playlistItemsPageSchema } from "@/lib/types";
 import { AnimatePresence } from "framer-motion";
 import SwipeCard, { type SwipeCardHandler } from "@/features/swipe/components/SwipeCard";
 import { STACK_ROTATE_DEGREES, VISIBLE_CARD_COUNT } from "@/features/swipe/views/SwipeView";
-import IconButton from "@/components/ui/IconButton";
-import { Check, Heart, Undo, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import SwipeButtons from "@/features/swipe/components/SwipeButtons";
 
 const SWIPE_DURATION = 1750;
 
@@ -101,12 +100,7 @@ const LandingPage = () => {
             })}
           </div>
         </AnimatePresence>
-        <div className="flex items-end gap-2">
-          <IconButton icon={Undo} size="sm" variant="yellow" />
-          <IconButton icon={X} variant="red" />
-          <IconButton icon={Heart} variant="green" />
-          <IconButton icon={Check} size="sm" variant="blue" />
-        </div>
+        <SwipeButtons />
       </Card>
 
       <div className="flex flex-col gap-3">
@@ -166,8 +160,6 @@ const LandingPage = () => {
         </div>
       )}
 
-      <Divider />
-
       {playlists &&
         metrics &&
         (() => {
@@ -176,10 +168,13 @@ const LandingPage = () => {
           );
           const estimatedSkips = Math.round(mostTracksPlaylist.tracks.total * metrics.cut_rate);
           return (
-            <p className="text-muted-foreground text-center">
-              Your "{mostTracksPlaylist.name}" playlist has {mostTracksPlaylist.tracks.total}{" "}
-              tracks. You could cut maybe {estimatedSkips}.
-            </p>
+            <>
+              <Divider />
+              <p className="text-muted-foreground text-center">
+                Your "{mostTracksPlaylist.name}" playlist has {mostTracksPlaylist.tracks.total}{" "}
+                tracks. You could cut maybe {estimatedSkips}.
+              </p>
+            </>
           );
         })()}
     </div>
