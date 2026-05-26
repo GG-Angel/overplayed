@@ -12,8 +12,6 @@ const usePlaylistSwipeMock = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const mockPlaylist = playlistItemsPageSchema.parse(mockPlaylistJson);
-  const total = mockPlaylist.items.length;
-
   const visiblePlaylistItems = wrapSlice(
     mockPlaylist.items,
     currentIndex,
@@ -39,7 +37,7 @@ const usePlaylistSwipeMock = () => {
     return () => clearTimeout(swiperId);
   }, []);
 
-  return { activeCardRef, items: visiblePlaylistItems, total, next };
+  return { activeCardRef, items: visiblePlaylistItems, next };
 };
 
 export default usePlaylistSwipeMock;

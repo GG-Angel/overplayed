@@ -1,15 +1,13 @@
 import type { Direction, SwipeCardHandler } from "@/features/swipe/components/SwipeCard";
-import SwipeCard from "@/features/swipe/components/SwipeCard";
 import SwipeProgress from "@/features/swipe/components/SwipeProgress";
-import { AnimatePresence } from "framer-motion";
 import { Undo, Check } from "lucide-react";
 import { useRef, useState } from "react";
 import { useSwipeContext } from "../context/SwipeContext";
 import AudioPlayer from "@/features/previews/components/AudioPlayer";
 import SwipeButtons from "../components/SwipeButtons";
+import SwipeCardStack from "../components/SwipeCardStack";
 
 export const VISIBLE_CARD_COUNT = 3;
-export const STACK_ROTATE_DEGREES = 3;
 
 const directionToDecision = {
   left: "dislike",
@@ -60,37 +58,23 @@ const SwipeView = () => {
       />
 
       <div className="flex-1 flex flex-col w-full items-center justify-center gap-6 overflow-hidden">
-        <div className="grid place-items-center touch-none">
-          {!isComplete ? (
-            <AnimatePresence>
-              {visibleItems.map((item, i) => {
-                const isTopCard = i === 0;
-                return (
-                  <SwipeCard
-                    className="col-start-1 row-start-1 w-64 sm:w-72 lg:w-84"
-                    ref={isTopCard ? activeCardRef : undefined}
-                    key={item.track.uri}
-                    track={item.track}
-                    onSwipeStart={() => setIsSwiping(true)}
-                    onSwipeEnd={recordSwipe}
-                    isDragEnabled={isTopCard && !isSwiping}
-                    isTopCard={isTopCard}
-                    zIndex={visibleItems.length - i}
-                    baseRotate={isTopCard ? 0 : (i % 2 === 0 ? 1 : -1) * STACK_ROTATE_DEGREES}
-                  />
-                );
-              })}
-            </AnimatePresence>
-          ) : (
-            <div className="col-start-1 row-start-1 text-center">
-              <p>You've reached the end!</p>
-              <p className="text-muted-foreground">
-                Press <Undo className="inline-block" /> to rewind or{" "}
-                <Check className="inline-block" /> to finish.
-              </p>
-            </div>
-          )}
-        </div>
+        {!isComplete ? (
+          <SwipeCardStack
+            topCardRef={activeCardRef}
+            items={visibleItems}
+            disabled={isSwiping}
+            onSwipeStart={() => setIsSwiping(true)}
+            onSwipeEnd={recordSwipe}
+          />
+        ) : (
+          <p className="text-center">
+            <span className="block">You've reached the end!</span>
+            <span className="block text-muted-foreground">
+              Press <Undo className="inline-block" /> to rewind or{" "}
+              <Check className="inline-block" /> to finish.
+            </span>
+          </p>
+        )}
         <SwipeButtons
           onUndo={undo}
           onDislike={() => triggerSwipe("left")}
