@@ -2,7 +2,7 @@ import LoadingState from "@/components/states/LoadingState";
 import useAuth from "@/features/user/auth/useAuth";
 import Metric from "@/components/ui/Metric";
 import useMetrics from "@/features/swipe/hooks/useMetrics";
-import { formatCount, formatPercentage } from "@/lib/utils";
+import { formatCount, formatPercentage, wrapSlice } from "@/lib/utils";
 import { usePlaylists } from "@/features/playlist/hooks/usePlaylists";
 import Button from "@/components/ui/Button";
 import SpotifyIcon from "@/assets/spotify.svg?react";
@@ -18,7 +18,7 @@ import IconButton from "@/components/ui/IconButton";
 import { Check, Heart, Undo, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-const SWIPE_DURATION = 2000;
+const SWIPE_DURATION = 1750;
 
 const LandingPage = () => {
   const { user, isLoading, redirectToLogin } = useAuth();
@@ -32,7 +32,7 @@ const LandingPage = () => {
   const activeCardRef = useRef<SwipeCardHandler | null>(null);
 
   const mockPlaylist = playlistItemsPageSchema.parse(mockPlaylistJson);
-  const visiblePlaylistItems = mockPlaylist.items.slice(index, index + VISIBLE_CARD_COUNT);
+  const visiblePlaylistItems = wrapSlice(mockPlaylist.items, index, index + VISIBLE_CARD_COUNT);
 
   useEffect(() => {
     let swiperId: ReturnType<typeof setTimeout>;
@@ -77,7 +77,7 @@ const LandingPage = () => {
       </Button>
 
       <Card
-        className="flex flex-col items-center gap-6 pointer-events-none"
+        className="flex flex-col items-center gap-6 pointer-events-none overflow-hidden"
         tone="muted"
         size="lg"
         padding="square"
@@ -146,21 +146,25 @@ const LandingPage = () => {
         })()}
       </div>
 
-      {metrics &&
-        (() => {
-          const metricsSummary = [
-            { label: "Songs swiped", amount: formatCount(metrics.total_swipes) },
-            { label: "Cut rate", amount: formatPercentage(metrics.cut_rate) },
-            { label: "Songs cut", amount: formatCount(metrics.total_cuts) },
-          ];
-          return (
-            <div className="grid grid-cols-3 gap-3">
-              {metricsSummary.map((m) => (
-                <Metric key={m.label} {...m} tone="muted" />
-              ))}
-            </div>
-          );
-        })()}
+      {metrics && (
+        <div className="flex flex-col gap-3">
+          <h3 className="text-center font-medium tracking-tight text-lg">Global statistics</h3>
+          {(() => {
+            const metricsSummary = [
+              { label: "Songs swiped", amount: formatCount(metrics.total_swipes) },
+              { label: "Cut rate", amount: formatPercentage(metrics.cut_rate) },
+              { label: "Songs cut", amount: formatCount(metrics.total_cuts) },
+            ];
+            return (
+              <div className="grid grid-cols-3 gap-3">
+                {metricsSummary.map((m) => (
+                  <Metric key={m.label} {...m} tone="muted" />
+                ))}
+              </div>
+            );
+          })()}
+        </div>
+      )}
 
       <Divider />
 

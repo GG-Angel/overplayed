@@ -34,3 +34,14 @@ export function formatCount(n: number): string {
 
   return `${(n / 1_000_000).toFixed(1)}m`;
 }
+
+export function wrapSlice<T>(arr: T[], start: number, end: number): T[] {
+  const len = arr.length;
+  const actualStart = start % len;
+
+  if (actualStart + (end - start) > len) {
+    return [...arr.slice(actualStart), ...arr.slice(0, (actualStart + end - start) % len)];
+  }
+
+  return arr.slice(actualStart, actualStart + (end - start));
+}
