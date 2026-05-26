@@ -8,8 +8,8 @@ import { useRef, useState } from "react";
 import { useSwipeContext } from "../context/SwipeContext";
 import AudioPlayer from "@/features/previews/components/AudioPlayer";
 
-const VISIBLE_CARD_COUNT = 3;
-const STACK_ROTATE_DEGREES = 3;
+export const VISIBLE_CARD_COUNT = 3;
+export const STACK_ROTATE_DEGREES = 3;
 
 const directionToDecision = {
   left: "dislike",
@@ -105,13 +105,7 @@ const SwipeView = () => {
             onClick={() => triggerSwipe("right")}
             disabled={!canSwipe}
           />
-          <IconButton
-            icon={Check}
-            size="sm"
-            variant="blue"
-            onClick={finish}
-            disabled={!canUndo}
-          />
+          <IconButton icon={Check} size="sm" variant="blue" onClick={finish} disabled={!canUndo} />
         </div>
       </div>
 

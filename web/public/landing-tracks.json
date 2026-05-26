@@ -1,0 +1,341 @@
+{
+  "total": 5,
+  "has_more": false,
+  "items": [
+    {
+      "added_at": "2026-05-26T03:12:02Z",
+      "added_by": {
+        "href": "https://api.spotify.com/v1/users/furiouswarrior11",
+        "id": "furiouswarrior11",
+        "uri": "spotify:user:furiouswarrior11"
+      },
+      "is_local": false,
+      "track": {
+        "href": "https://api.spotify.com/v1/tracks/7EdSIOVojEa4oAnQgdMmiL",
+        "id": "7EdSIOVojEa4oAnQgdMmiL",
+        "uri": "spotify:track:7EdSIOVojEa4oAnQgdMmiL",
+        "explicit": true,
+        "album": {
+          "href": "https://api.spotify.com/v1/albums/5LWN9skwXIBMHrC724pUiL",
+          "id": "5LWN9skwXIBMHrC724pUiL",
+          "uri": "spotify:album:5LWN9skwXIBMHrC724pUiL",
+          "album_type": "album",
+          "images": [
+            {
+              "width": 640,
+              "height": 640,
+              "url": "https://i.scdn.co/image/ab67616d0000b27334921fa12d129e443380aced"
+            },
+            {
+              "width": 300,
+              "height": 300,
+              "url": "https://i.scdn.co/image/ab67616d00001e0234921fa12d129e443380aced"
+            },
+            {
+              "width": 64,
+              "height": 64,
+              "url": "https://i.scdn.co/image/ab67616d0000485134921fa12d129e443380aced"
+            }
+          ],
+          "name": "THE COMEUP",
+          "release_date": "2024-05-24",
+          "artists": [
+            {
+              "href": "https://api.spotify.com/v1/artists/3hGJ4nHdF99Vs0gQdXz5Nw",
+              "id": "3hGJ4nHdF99Vs0gQdXz5Nw",
+              "uri": "spotify:artist:3hGJ4nHdF99Vs0gQdXz5Nw",
+              "name": "smokedope2016",
+              "external_urls": {
+                "spotify": "https://open.spotify.com/artist/3hGJ4nHdF99Vs0gQdXz5Nw"
+              }
+            }
+          ],
+          "total_tracks": 13,
+          "external_urls": { "spotify": "https://open.spotify.com/album/5LWN9skwXIBMHrC724pUiL" }
+        },
+        "artists": [
+          {
+            "href": "https://api.spotify.com/v1/artists/3hGJ4nHdF99Vs0gQdXz5Nw",
+            "id": "3hGJ4nHdF99Vs0gQdXz5Nw",
+            "uri": "spotify:artist:3hGJ4nHdF99Vs0gQdXz5Nw",
+            "name": "smokedope2016",
+            "external_urls": { "spotify": "https://open.spotify.com/artist/3hGJ4nHdF99Vs0gQdXz5Nw" }
+          }
+        ],
+        "duration_ms": 201725,
+        "name": "Foamposite Interlude",
+        "is_local": false,
+        "external_urls": { "spotify": "https://open.spotify.com/track/7EdSIOVojEa4oAnQgdMmiL" },
+        "external_ids": { "isrc": "USLD91758980" }
+      }
+    },
+    {
+      "added_at": "2026-05-26T03:12:10Z",
+      "added_by": {
+        "href": "https://api.spotify.com/v1/users/furiouswarrior11",
+        "id": "furiouswarrior11",
+        "uri": "spotify:user:furiouswarrior11"
+      },
+      "is_local": false,
+      "track": {
+        "href": "https://api.spotify.com/v1/tracks/5yEW4cx3x9sgfs3j5kI2qZ",
+        "id": "5yEW4cx3x9sgfs3j5kI2qZ",
+        "uri": "spotify:track:5yEW4cx3x9sgfs3j5kI2qZ",
+        "explicit": true,
+        "album": {
+          "href": "https://api.spotify.com/v1/albums/1Uwd64LlYKeBEVpZ4civSQ",
+          "id": "1Uwd64LlYKeBEVpZ4civSQ",
+          "uri": "spotify:album:1Uwd64LlYKeBEVpZ4civSQ",
+          "album_type": "album",
+          "images": [
+            {
+              "width": 640,
+              "height": 640,
+              "url": "https://i.scdn.co/image/ab67616d0000b2734987b5a78ae7e264e17aa35e"
+            },
+            {
+              "width": 300,
+              "height": 300,
+              "url": "https://i.scdn.co/image/ab67616d00001e024987b5a78ae7e264e17aa35e"
+            },
+            {
+              "width": 64,
+              "height": 64,
+              "url": "https://i.scdn.co/image/ab67616d000048514987b5a78ae7e264e17aa35e"
+            }
+          ],
+          "name": "Terrified .",
+          "release_date": "2026-05-22",
+          "artists": [
+            {
+              "href": "https://api.spotify.com/v1/artists/0qc4BFxcwRFZfevTck4fOi",
+              "id": "0qc4BFxcwRFZfevTck4fOi",
+              "uri": "spotify:artist:0qc4BFxcwRFZfevTck4fOi",
+              "name": "fakemink",
+              "external_urls": {
+                "spotify": "https://open.spotify.com/artist/0qc4BFxcwRFZfevTck4fOi"
+              }
+            }
+          ],
+          "total_tracks": 19,
+          "external_urls": { "spotify": "https://open.spotify.com/album/1Uwd64LlYKeBEVpZ4civSQ" }
+        },
+        "artists": [
+          {
+            "href": "https://api.spotify.com/v1/artists/0qc4BFxcwRFZfevTck4fOi",
+            "id": "0qc4BFxcwRFZfevTck4fOi",
+            "uri": "spotify:artist:0qc4BFxcwRFZfevTck4fOi",
+            "name": "fakemink",
+            "external_urls": { "spotify": "https://open.spotify.com/artist/0qc4BFxcwRFZfevTck4fOi" }
+          }
+        ],
+        "duration_ms": 172870,
+        "name": "Rétard Angel .",
+        "is_local": false,
+        "external_urls": { "spotify": "https://open.spotify.com/track/5yEW4cx3x9sgfs3j5kI2qZ" },
+        "external_ids": { "isrc": "QZZ4J2600126" }
+      }
+    },
+    {
+      "added_at": "2026-05-26T03:12:39Z",
+      "added_by": {
+        "href": "https://api.spotify.com/v1/users/furiouswarrior11",
+        "id": "furiouswarrior11",
+        "uri": "spotify:user:furiouswarrior11"
+      },
+      "is_local": false,
+      "track": {
+        "href": "https://api.spotify.com/v1/tracks/3JZO1MJaqB34F8fvkMjzPo",
+        "id": "3JZO1MJaqB34F8fvkMjzPo",
+        "uri": "spotify:track:3JZO1MJaqB34F8fvkMjzPo",
+        "explicit": true,
+        "album": {
+          "href": "https://api.spotify.com/v1/albums/4M1Gzy271EuRkCAcW5HAFa",
+          "id": "4M1Gzy271EuRkCAcW5HAFa",
+          "uri": "spotify:album:4M1Gzy271EuRkCAcW5HAFa",
+          "album_type": "album",
+          "images": [
+            {
+              "width": 640,
+              "height": 640,
+              "url": "https://i.scdn.co/image/ab67616d0000b27355a9a5494579add8dd303e2e"
+            },
+            {
+              "width": 300,
+              "height": 300,
+              "url": "https://i.scdn.co/image/ab67616d00001e0255a9a5494579add8dd303e2e"
+            },
+            {
+              "width": 64,
+              "height": 64,
+              "url": "https://i.scdn.co/image/ab67616d0000485155a9a5494579add8dd303e2e"
+            }
+          ],
+          "name": "Half Blood",
+          "release_date": "2025-11-05",
+          "artists": [
+            {
+              "href": "https://api.spotify.com/v1/artists/0SL3lfuoRP67mrvkdnwIMA",
+              "id": "0SL3lfuoRP67mrvkdnwIMA",
+              "uri": "spotify:artist:0SL3lfuoRP67mrvkdnwIMA",
+              "name": "slayr",
+              "external_urls": {
+                "spotify": "https://open.spotify.com/artist/0SL3lfuoRP67mrvkdnwIMA"
+              }
+            }
+          ],
+          "total_tracks": 11,
+          "external_urls": { "spotify": "https://open.spotify.com/album/4M1Gzy271EuRkCAcW5HAFa" }
+        },
+        "artists": [
+          {
+            "href": "https://api.spotify.com/v1/artists/0SL3lfuoRP67mrvkdnwIMA",
+            "id": "0SL3lfuoRP67mrvkdnwIMA",
+            "uri": "spotify:artist:0SL3lfuoRP67mrvkdnwIMA",
+            "name": "slayr",
+            "external_urls": { "spotify": "https://open.spotify.com/artist/0SL3lfuoRP67mrvkdnwIMA" }
+          }
+        ],
+        "duration_ms": 146718,
+        "name": "Sloppy Joe",
+        "is_local": false,
+        "external_urls": { "spotify": "https://open.spotify.com/track/3JZO1MJaqB34F8fvkMjzPo" },
+        "external_ids": { "isrc": "USSM12600217" }
+      }
+    },
+    {
+      "added_at": "2026-05-26T03:12:39Z",
+      "added_by": {
+        "href": "https://api.spotify.com/v1/users/furiouswarrior11",
+        "id": "furiouswarrior11",
+        "uri": "spotify:user:furiouswarrior11"
+      },
+      "is_local": false,
+      "track": {
+        "href": "https://api.spotify.com/v1/tracks/49np2f2cTDN9DvN7xtF4Mk",
+        "id": "49np2f2cTDN9DvN7xtF4Mk",
+        "uri": "spotify:track:49np2f2cTDN9DvN7xtF4Mk",
+        "explicit": true,
+        "album": {
+          "href": "https://api.spotify.com/v1/albums/61Eg1aJJdqkk7OtBs5nsZs",
+          "id": "61Eg1aJJdqkk7OtBs5nsZs",
+          "uri": "spotify:album:61Eg1aJJdqkk7OtBs5nsZs",
+          "album_type": "single",
+          "images": [
+            {
+              "width": 640,
+              "height": 640,
+              "url": "https://i.scdn.co/image/ab67616d0000b27369f3fad64158a156633e8874"
+            },
+            {
+              "width": 300,
+              "height": 300,
+              "url": "https://i.scdn.co/image/ab67616d00001e0269f3fad64158a156633e8874"
+            },
+            {
+              "width": 64,
+              "height": 64,
+              "url": "https://i.scdn.co/image/ab67616d0000485169f3fad64158a156633e8874"
+            }
+          ],
+          "name": "Roll The Dice",
+          "release_date": "2024-01-06",
+          "artists": [
+            {
+              "href": "https://api.spotify.com/v1/artists/0G2xkjzM76THRB0rEgx7N8",
+              "id": "0G2xkjzM76THRB0rEgx7N8",
+              "uri": "spotify:artist:0G2xkjzM76THRB0rEgx7N8",
+              "name": "Nokia Angel",
+              "external_urls": {
+                "spotify": "https://open.spotify.com/artist/0G2xkjzM76THRB0rEgx7N8"
+              }
+            }
+          ],
+          "total_tracks": 1,
+          "external_urls": { "spotify": "https://open.spotify.com/album/61Eg1aJJdqkk7OtBs5nsZs" }
+        },
+        "artists": [
+          {
+            "href": "https://api.spotify.com/v1/artists/0G2xkjzM76THRB0rEgx7N8",
+            "id": "0G2xkjzM76THRB0rEgx7N8",
+            "uri": "spotify:artist:0G2xkjzM76THRB0rEgx7N8",
+            "name": "Nokia Angel",
+            "external_urls": { "spotify": "https://open.spotify.com/artist/0G2xkjzM76THRB0rEgx7N8" }
+          }
+        ],
+        "duration_ms": 187541,
+        "name": "Roll The Dice",
+        "is_local": false,
+        "external_urls": { "spotify": "https://open.spotify.com/track/49np2f2cTDN9DvN7xtF4Mk" },
+        "external_ids": { "isrc": "QZFYX2449454" }
+      }
+    },
+    {
+      "added_at": "2026-05-26T03:12:39Z",
+      "added_by": {
+        "href": "https://api.spotify.com/v1/users/furiouswarrior11",
+        "id": "furiouswarrior11",
+        "uri": "spotify:user:furiouswarrior11"
+      },
+      "is_local": false,
+      "track": {
+        "href": "https://api.spotify.com/v1/tracks/0VpYliX9CAlEbZT6isByt5",
+        "id": "0VpYliX9CAlEbZT6isByt5",
+        "uri": "spotify:track:0VpYliX9CAlEbZT6isByt5",
+        "explicit": true,
+        "album": {
+          "href": "https://api.spotify.com/v1/albums/72DTGPbaiFIEJFuoXU3gj2",
+          "id": "72DTGPbaiFIEJFuoXU3gj2",
+          "uri": "spotify:album:72DTGPbaiFIEJFuoXU3gj2",
+          "album_type": "album",
+          "images": [
+            {
+              "width": 640,
+              "height": 640,
+              "url": "https://i.scdn.co/image/ab67616d0000b27379422ba6adfbdb351823c44b"
+            },
+            {
+              "width": 300,
+              "height": 300,
+              "url": "https://i.scdn.co/image/ab67616d00001e0279422ba6adfbdb351823c44b"
+            },
+            {
+              "width": 64,
+              "height": 64,
+              "url": "https://i.scdn.co/image/ab67616d0000485179422ba6adfbdb351823c44b"
+            }
+          ],
+          "name": "In Haze",
+          "release_date": "2025-07-20",
+          "artists": [
+            {
+              "href": "https://api.spotify.com/v1/artists/0G2xkjzM76THRB0rEgx7N8",
+              "id": "0G2xkjzM76THRB0rEgx7N8",
+              "uri": "spotify:artist:0G2xkjzM76THRB0rEgx7N8",
+              "name": "Nokia Angel",
+              "external_urls": {
+                "spotify": "https://open.spotify.com/artist/0G2xkjzM76THRB0rEgx7N8"
+              }
+            }
+          ],
+          "total_tracks": 7,
+          "external_urls": { "spotify": "https://open.spotify.com/album/72DTGPbaiFIEJFuoXU3gj2" }
+        },
+        "artists": [
+          {
+            "href": "https://api.spotify.com/v1/artists/0G2xkjzM76THRB0rEgx7N8",
+            "id": "0G2xkjzM76THRB0rEgx7N8",
+            "uri": "spotify:artist:0G2xkjzM76THRB0rEgx7N8",
+            "name": "Nokia Angel",
+            "external_urls": { "spotify": "https://open.spotify.com/artist/0G2xkjzM76THRB0rEgx7N8" }
+          }
+        ],
+        "duration_ms": 233717,
+        "name": "Stay Cold",
+        "is_local": false,
+        "external_urls": { "spotify": "https://open.spotify.com/track/0VpYliX9CAlEbZT6isByt5" },
+        "external_ids": { "isrc": "QZDA82520426" }
+      }
+    }
+  ]
+}
