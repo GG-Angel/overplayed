@@ -12,12 +12,18 @@ import Divider from "@/components/ui/Divider";
 import SwipeButtons from "@/features/swipe/components/SwipeButtons";
 import useSwipeCarousel from "@/features/swipe/hooks/useSwipeCarousel";
 import SwipeCardStack from "@/features/swipe/components/SwipeCardStack";
+import { playlistItemSchema } from "@/lib/types";
+import playlistItemsJson from "../../../public/landing-playlist-items.json";
 
 const LandingPage = () => {
   const { user, isLoading, redirectToLogin } = useAuth();
   const { data: metrics } = useMetrics();
   const { data: playlists } = usePlaylists();
-  const { activeCardRef, items: mockPlaylistItems, next: nextMockItem } = useSwipeCarousel();
+  const {
+    activeCardRef,
+    items: mockPlaylistItems,
+    next: nextMockItem,
+  } = useSwipeCarousel(playlistItemSchema.array().parse(playlistItemsJson));
 
   const navigate = useNavigate();
   const location = useLocation();
