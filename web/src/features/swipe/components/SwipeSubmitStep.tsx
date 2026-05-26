@@ -2,11 +2,6 @@ import { cn } from "@/lib/utils";
 import { Ellipsis, LoaderCircle, Check, Ban, X } from "lucide-react";
 import type { StepStatus } from "../hooks/useSwipeSubmit";
 
-type SubmitActionProps = {
-  label: string;
-  status: StepStatus;
-};
-
 const StatusStyles = {
   pending: {
     icon: Ellipsis,
@@ -30,7 +25,12 @@ const StatusStyles = {
   },
 };
 
-const SubmitAction = ({ label, status }: SubmitActionProps) => {
+type SwipeSubmitStepProps = {
+  label: string;
+  status: StepStatus;
+};
+
+const SwipeSubmitStep = ({ label, status }: SwipeSubmitStepProps) => {
   const { icon: Icon, iconClassName } = StatusStyles[status];
   return (
     <div className="flex items-center gap-2">
@@ -40,4 +40,4 @@ const SubmitAction = ({ label, status }: SubmitActionProps) => {
   );
 };
 
-export default SubmitAction;
+export default SwipeSubmitStep;
