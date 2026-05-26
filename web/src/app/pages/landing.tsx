@@ -12,11 +12,13 @@ import Divider from "@/components/ui/Divider";
 import mockPlaylistJson from "../../../public/landing-tracks.json";
 import { playlistItemsPageSchema } from "@/lib/types";
 import { AnimatePresence } from "framer-motion";
-import SwipeCard from "@/features/swipe/components/SwipeCard";
+import SwipeCard, { type SwipeCardHandler } from "@/features/swipe/components/SwipeCard";
 import { STACK_ROTATE_DEGREES, VISIBLE_CARD_COUNT } from "@/features/swipe/views/SwipeView";
 import IconButton from "@/components/ui/IconButton";
 import { Check, Heart, Undo, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
+const SWIPE_DURATION = 2000;
 
 const LandingPage = () => {
   const { user, isLoading, redirectToLogin } = useAuth();
@@ -27,10 +29,25 @@ const LandingPage = () => {
   const location = useLocation();
 
   const [index, setIndex] = useState(0);
-  const mockPlaylist = playlistItemsPageSchema.parse(mockPlaylistJson);
-  const visibleMockPlaylistItems = mockPlaylist.items.slice(index, index + VISIBLE_CARD_COUNT);
+  const activeCardRef = useRef<SwipeCardHandler | null>(null);
 
-  
+  const mockPlaylist = playlistItemsPageSchema.parse(mockPlaylistJson);
+  const visiblePlaylistItems = mockPlaylist.items.slice(index, index + VISIBLE_CARD_COUNT);
+
+  useEffect(() => {
+    let swiperId: ReturnType<typeof setTimeout>;
+
+    const swipe = () => {
+      const direction = Math.random() >= 0.6 ? "right" : "left";
+      activeCardRef.current?.swipe(direction);
+
+      swiperId = setTimeout(swipe, SWIPE_DURATION);
+    };
+
+    swiperId = setTimeout(swipe, SWIPE_DURATION);
+
+    return () => clearTimeout(swiperId);
+  }, []);
 
   if (isLoading) return <LoadingState />;
 
@@ -67,13 +84,15 @@ const LandingPage = () => {
       >
         <AnimatePresence>
           <div className="grid place-items-center">
-            {visibleMockPlaylistItems.map((item, i) => {
+            {visiblePlaylistItems.map((item, i) => {
               const isTopCard = i === 0;
               return (
                 <SwipeCard
                   className="col-start-1 row-start-1 w-64 sm:w-72 lg:w-84"
+                  ref={isTopCard ? activeCardRef : undefined}
                   track={item.track}
                   key={item.track.id}
+                  onSwipeEnd={() => setIndex((prev) => (prev + 1) % mockPlaylist.items.length)}
                   isTopCard={isTopCard}
                   zIndex={mockPlaylist.items.length - i}
                   baseRotate={isTopCard ? 0 : (i % 2 === 0 ? 1 : -1) * STACK_ROTATE_DEGREES}
