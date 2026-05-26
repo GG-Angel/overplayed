@@ -1,10 +1,13 @@
+import AppLayout from "@/components/layout/AppLayout";
 import { AppProvider } from "./provider";
 import { AppRouter } from "./router";
 
 function App() {
   return (
     <AppProvider>
-      <AppRouter />
+      <AppLayout>
+        <AppRouter />
+      </AppLayout>
     </AppProvider>
   );
 }

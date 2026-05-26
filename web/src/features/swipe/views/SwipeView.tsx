@@ -49,7 +49,7 @@ const SwipeView = () => {
   if (status === "loading" || status === "error") return null;
 
   return (
-    <div className="flex flex-col items-center gap-4 w-full self-center h-screen py-6 overflow-hidden">
+    <div className="flex flex-col items-center gap-4 w-full self-center h-full py-6 overflow-hidden">
       <SwipeProgress
         className="w-full max-w-3xl"
         likes={likes.length}

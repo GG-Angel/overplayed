@@ -4,6 +4,7 @@ import { useEffect, useEffectEvent } from "react";
 import type { SwipeForm } from "@/features/swipe/hooks/useSwipeForm";
 import useSwipeSubmit from "../hooks/useSwipeSubmit";
 import SwipeSubmitStep from "../components/SwipeSubmitStep";
+import MessageState from "@/components/states/MessageState";
 
 const SUBMISSION_DELAY = 2000;
 
@@ -26,20 +27,20 @@ const SubmitView = ({ form }: SubmitViewProps) => {
   }, []);
 
   return (
-    <div className="flex flex-col h-full justify-center gap-6">
-      <div className="text-center">
-        <p className="text-4xl mb-2 text-primary">{"( ◡̀_◡́)ᕤ"}</p>
-        <p className="text-xl font-medium">Processing Changes</p>
-      </div>
-      <div className="flex flex-col items-start self-center gap-3">
-        <SwipeSubmitStep label="Create new playlist" status={state.creating} />
-        <SwipeSubmitStep label="Back up tracks" status={state.backingUp} />
-        <SwipeSubmitStep
-          label={`Remove ${dislikes.length} ${pluralize("track", dislikes.length)}`}
-          status={state.removing}
-        />
-      </div>
-    </div>
+    <MessageState
+      kaomoji="( ◡̀_◡́)ᕤ"
+      title="Processing Changes"
+      body={
+        <div className="flex flex-col items-start self-center gap-3">
+          <SwipeSubmitStep label="Create new playlist" status={state.creating} />
+          <SwipeSubmitStep label="Back up tracks" status={state.backingUp} />
+          <SwipeSubmitStep
+            label={`Remove ${dislikes.length} ${pluralize("track", dislikes.length)}`}
+            status={state.removing}
+          />
+        </div>
+      }
+    />
   );
 };
 

@@ -1,23 +1,20 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-
-const kaomojis = ["(¬`‸´¬)", "(๑•̀ᗝ•́)૭", 'C(ò_ó")9', "(≖_≖ )", "(ᗜ _ ᗜ)"];
+import { useNavigate } from "react-router-dom";
+import MessageState from "./MessageState";
+import Button from "../ui/Button";
 
 type ErrorStateProps = {
   message?: string;
 };
 
-const ErrorState = ({ message = "Unexpected error" }: ErrorStateProps) => {
-  const [kaomoji] = useState(() => kaomojis[Math.floor(Math.random() * kaomojis.length)]);
+const ErrorState = ({ message = "Unexpected Error" }: ErrorStateProps) => {
+  const navigate = useNavigate();
 
   return (
-    <div className="h-svh flex flex-col gap-2 justify-center text-center text-muted-foreground">
-      <p className="text-4xl font-medium">{kaomoji}</p>
-      <p>{message}</p>
-      <Link to="/" className="mt-4 text-accent underline font-medium">
-        Return Home
-      </Link>
-    </div>
+    <MessageState
+      kaomoji="(๑•̀ᗝ•́)૭"
+      title={message}
+      actions={<Button onClick={() => navigate("/", { replace: true })}>Return Home</Button>}
+    />
   );
 };
 
