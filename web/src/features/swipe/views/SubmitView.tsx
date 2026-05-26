@@ -5,14 +5,17 @@ import type { ReviewForm } from "@/features/swipe/hooks/useReviewForm";
 import useSubmitChanges from "../hooks/useSubmitChanges";
 import SubmitAction from "../components/SubmitAction";
 
+const SUBMISSION_DELAY = 2000;
+
 type SubmitViewProps = {
   form: ReviewForm;
 };
 
 const SubmitView = ({ form }: SubmitViewProps) => {
   const { playlistId, dislikes, succeed, fail } = useSwipeContext();
-  const { state, submit } = useSubmitChanges(playlistId);
+  const { state, submit } = useSubmitChanges(playlistId, succeed, fail, SUBMISSION_DELAY);
 
+  // submit form on mount
   const runSubmit = useEffectEvent(async () => {
     const uris = dislikes.map((item) => item.track.uri);
     await submit(form, uris);
@@ -21,19 +24,6 @@ const SubmitView = ({ form }: SubmitViewProps) => {
   useEffect(() => {
     runSubmit();
   }, []);
-
-  useEffect(() => {
-    if (state.phase !== "done" && state.phase !== "failed") return;
-
-    const timer = setTimeout(() => {
-      if (state.phase === "done") succeed(state.newPlaylist);
-      if (state.phase === "failed") fail();
-    }, 2000);
-
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [state.phase, state.error, state.newPlaylist, succeed, fail]);
 
   return (
     <div className="flex flex-col h-full justify-center gap-6">

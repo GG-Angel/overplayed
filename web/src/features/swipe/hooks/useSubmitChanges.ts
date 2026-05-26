@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import type { ReviewForm } from "./useReviewForm";
 import { createNewPlaylist, updatePlaylistItems } from "@/lib/api";
@@ -27,7 +27,12 @@ const initialState: SubmitState = {
   newPlaylist: null,
 };
 
-const useSubmitChanges = (currentPlaylistId: string) => {
+const useSubmitChanges = (
+  currentPlaylistId: string,
+  onSuccess: (playlist: Playlist | null) => void = () => {},
+  onFail: () => void = () => {},
+  delay: number = 0
+) => {
   const [state, setState] = useState<SubmitState>(initialState);
   const hasSubmitted = useRef(false);
   const queryClient = useQueryClient();
@@ -74,6 +79,20 @@ const useSubmitChanges = (currentPlaylistId: string) => {
       ]);
     }
   };
+
+  // delay call to success/fail for presentation
+  useEffect(() => {
+    if (state.phase !== "done" && state.phase !== "failed") return;
+
+    const submissionTimeout = setTimeout(() => {
+      if (state.phase === "done") onSuccess(state.newPlaylist);
+      if (state.phase === "failed") onFail();
+    }, delay);
+
+    return () => {
+      clearTimeout(submissionTimeout);
+    };
+  }, [onSuccess, onFail, state.newPlaylist, state.phase, delay]);
 
   return { state, submit };
 };
