@@ -2,51 +2,32 @@ import LoadingState from "@/components/states/LoadingState";
 import useAuth from "@/features/user/auth/useAuth";
 import Metric from "@/components/ui/Metric";
 import useMetrics from "@/features/swipe/hooks/useMetrics";
-import { formatCount, formatPercentage, wrapSlice } from "@/lib/utils";
+import { formatCount, formatPercentage } from "@/lib/utils";
 import { usePlaylists } from "@/features/playlist/hooks/usePlaylists";
 import Button from "@/components/ui/Button";
 import SpotifyIcon from "@/assets/spotify.svg?react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Card from "@/components/ui/Card";
 import Divider from "@/components/ui/Divider";
-import mockPlaylistJson from "../../../public/landing-tracks.json";
-import { playlistItemsPageSchema } from "@/lib/types";
 import { AnimatePresence } from "framer-motion";
-import SwipeCard, { type SwipeCardHandler } from "@/features/swipe/components/SwipeCard";
-import { STACK_ROTATE_DEGREES, VISIBLE_CARD_COUNT } from "@/features/swipe/views/SwipeView";
-import { useEffect, useRef, useState } from "react";
+import SwipeCard from "@/features/swipe/components/SwipeCard";
+import { STACK_ROTATE_DEGREES } from "@/features/swipe/views/SwipeView";
 import SwipeButtons from "@/features/swipe/components/SwipeButtons";
-
-const SWIPE_DURATION = 1750;
+import usePlaylistSwipeMock from "@/features/swipe/hooks/usePlaylistSwipeMock";
 
 const LandingPage = () => {
   const { user, isLoading, redirectToLogin } = useAuth();
   const { data: metrics } = useMetrics();
   const { data: playlists } = usePlaylists();
+  const {
+    activeCardRef,
+    items: mockPlaylistItems,
+    total: totalMockPlaylistItems,
+    next: nextMockItem,
+  } = usePlaylistSwipeMock();
 
   const navigate = useNavigate();
   const location = useLocation();
-
-  const [index, setIndex] = useState(0);
-  const activeCardRef = useRef<SwipeCardHandler | null>(null);
-
-  const mockPlaylist = playlistItemsPageSchema.parse(mockPlaylistJson);
-  const visiblePlaylistItems = wrapSlice(mockPlaylist.items, index, index + VISIBLE_CARD_COUNT);
-
-  useEffect(() => {
-    let swiperId: ReturnType<typeof setTimeout>;
-
-    const swipe = () => {
-      const direction = Math.random() >= 0.6 ? "right" : "left";
-      activeCardRef.current?.swipe(direction);
-
-      swiperId = setTimeout(swipe, SWIPE_DURATION);
-    };
-
-    swiperId = setTimeout(swipe, SWIPE_DURATION);
-
-    return () => clearTimeout(swiperId);
-  }, []);
 
   if (isLoading) return <LoadingState />;
 
@@ -83,7 +64,7 @@ const LandingPage = () => {
       >
         <AnimatePresence>
           <div className="grid place-items-center">
-            {visiblePlaylistItems.map((item, i) => {
+            {mockPlaylistItems.map((item, i) => {
               const isTopCard = i === 0;
               return (
                 <SwipeCard
@@ -91,9 +72,9 @@ const LandingPage = () => {
                   ref={isTopCard ? activeCardRef : undefined}
                   track={item.track}
                   key={item.track.id}
-                  onSwipeEnd={() => setIndex((prev) => (prev + 1) % mockPlaylist.items.length)}
+                  onSwipeEnd={nextMockItem}
                   isTopCard={isTopCard}
-                  zIndex={mockPlaylist.items.length - i}
+                  zIndex={totalMockPlaylistItems - i}
                   baseRotate={isTopCard ? 0 : (i % 2 === 0 ? 1 : -1) * STACK_ROTATE_DEGREES}
                 />
               );
