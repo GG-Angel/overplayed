@@ -3,7 +3,7 @@ import SwipeProgress from "@/features/swipe/components/SwipeProgress";
 import { Undo, Check } from "lucide-react";
 import { useRef, useState } from "react";
 import { useSwipeContext } from "../context/SwipeContext";
-import AudioPlayer from "@/features/previews/components/AudioPlayer";
+import PreviewPlayer from "@/features/previews/components/PreviewPlayer";
 import SwipeButtons from "../components/SwipeButtons";
 import SwipeCardStack from "../components/SwipeCardStack";
 
@@ -15,21 +15,23 @@ const directionToDecision = {
 } as const;
 
 const SwipeView = () => {
+  const [isSwiping, setIsSwiping] = useState(false);
+  const activeCardRef = useRef<SwipeCardHandler | null>(null);
+
   const {
     currentIndex,
-    currentAudio,
+    currentAudioUrl,
+    isAudioError,
+    isAudioLoading,
     total,
     items,
     swipe,
     undo,
-    isAudioError,
     status,
     likes,
     dislikes,
     finish,
   } = useSwipeContext();
-  const [isSwiping, setIsSwiping] = useState(false);
-  const activeCardRef = useRef<SwipeCardHandler | null>(null);
 
   const visibleItems = items.slice(currentIndex, currentIndex + VISIBLE_CARD_COUNT);
   const isComplete = total !== undefined && currentIndex >= total;
@@ -56,7 +58,6 @@ const SwipeView = () => {
         dislikes={dislikes.length}
         total={total}
       />
-
       <div className="flex-1 flex flex-col w-full items-center justify-center gap-6 overflow-hidden">
         {!isComplete ? (
           <SwipeCardStack
@@ -85,11 +86,10 @@ const SwipeView = () => {
           canSwipe={canSwipe}
         />
       </div>
-
-      <AudioPlayer
-        audio={currentAudio}
+      <PreviewPlayer
+        url={currentAudioUrl}
         isError={isAudioError}
-        errorMessage="no preview :("
+        isLoading={isAudioLoading}
         className="w-full max-w-3xl"
       />
     </div>

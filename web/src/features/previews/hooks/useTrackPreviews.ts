@@ -1,28 +1,23 @@
-import { useQueries } from "@tanstack/react-query";
-import { getTrackPreviewAudio } from "@/lib/api";
+import { queryOptions, useQueries } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query";
+import api from "@/lib/api-client";
+import { trackPreviewSchema } from "@/lib/types";
 
-const QUEUE_SIZE = 5;
-const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+const getTrackPreview = async (isrc: string) => {
+  const response = await api.get(`/previews/${isrc}`);
+  const { preview_url: previewUrl } = trackPreviewSchema.parse(response);
+  return new Audio(previewUrl);
+};
 
-const useTrackPreviews = (isrcs: string[], index: number) => {
-  const window = isrcs.slice(index, index + QUEUE_SIZE);
-
-  const previews = useQueries({
-    queries: window.map((isrc) => ({
-      queryKey: queryKeys.preview(isrc),
-      queryFn: () => getTrackPreviewAudio(isrc),
-      staleTime: CACHE_TTL,
-      gcTime: CACHE_TTL,
-    })),
+const trackPreviewOptions = (isrc: string) =>
+  queryOptions({
+    queryKey: queryKeys.preview(isrc),
+    queryFn: () => getTrackPreview(isrc),
   });
 
-  const current = previews.at(0);
-
-  return {
-    audio: current?.data,
-    isError: current?.isError ?? true,
-  };
-};
+const useTrackPreviews = (isrcs: string[]) =>
+  useQueries({
+    queries: isrcs.map((isrc) => trackPreviewOptions(isrc)),
+  });
 
 export default useTrackPreviews;

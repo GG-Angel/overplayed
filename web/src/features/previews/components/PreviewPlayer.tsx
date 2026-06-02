@@ -6,43 +6,48 @@ import IconButton from "@/components/ui/IconButton";
 import Waveform, { type WaveformHandler } from "./Waveform";
 import WaveformSkeleton from "./WaveformSkeleton";
 
-type AudioPlayerProps = {
-  audio: HTMLAudioElement | undefined;
+type PreviewPlayerProps = {
+  url?: string | undefined;
+  isLoading?: boolean;
   isError?: boolean;
-  errorMessage?: string;
   className?: string;
 };
 
-const AudioPlayer = ({
-  audio,
-  className,
-  isError,
-  errorMessage = "no audio :(",
-}: AudioPlayerProps) => {
-  const waveformRef = useRef<WaveformHandler>(null);
+const PreviewPlayer = ({
+  url,
+  isLoading = true,
+  isError = true,
+  className = "",
+}: PreviewPlayerProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
+  const waveformRef = useRef<WaveformHandler>(null);
 
   return (
     <Card size="sm" className={cn("flex items-center gap-3", className)}>
       <IconButton
         size="xs"
         variant="green"
-        icon={!isError && isPlaying ? Pause : Play}
-        disabled={isError}
+        icon={isPlaying && url ? Pause : Play}
+        disabled={!url}
         onClick={() => waveformRef.current?.playPause()}
       />
       <div className="relative flex-1 self-stretch">
         <Waveform
+          url={url}
           waveformRef={waveformRef}
-          className={cn("absolute inset-0 min-w-1", isError && "invisible")}
-          audio={audio}
           onPlay={() => setIsPlaying(true)}
           onPause={() => setIsPlaying(false)}
+          className={cn("absolute inset-0 min-w-1", !url && "invisible")}
         />
-        {isError && <WaveformSkeleton className="absolute inset-0" message={errorMessage} />}
+        {!url && (
+          <WaveformSkeleton
+            className="absolute inset-0"
+            message={isError ? "no preview :(" : isLoading ? "loading..." : ""}
+          />
+        )}
       </div>
     </Card>
   );
 };
 
-export default AudioPlayer;
+export default PreviewPlayer;

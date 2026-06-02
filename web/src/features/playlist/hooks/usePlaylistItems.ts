@@ -1,8 +1,8 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { getPlaylistItems } from "@/lib/api";
 import { useEffect } from "react";
 import { queryKeys } from "@/lib/query";
-import type { PlaylistItem } from "@/lib/types";
+import { playlistItemsPageSchema, type PlaylistItem } from "@/lib/types";
+import api from "@/lib/api-client";
 
 const PREFETCH_THRESHOLD = 25;
 
@@ -10,6 +10,15 @@ type PlaylistItemsResult =
   | { status: "loading"; items: []; total: undefined; error: null }
   | { status: "error"; items: []; total: undefined; error: Error }
   | { status: "success"; items: PlaylistItem[]; total: number; error: null };
+
+const getPlaylistItems = async (playlistId: string, page: number) => {
+  const response = await api.get(
+    `/playlists/${playlistId}/items?${new URLSearchParams({
+      page: page.toString(),
+    })}`
+  );
+  return playlistItemsPageSchema.parse(response);
+};
 
 const usePlaylistItems = (playlistId: string, index: number): PlaylistItemsResult => {
   const { data, isLoading, isError, error, hasNextPage, isFetchingNextPage, fetchNextPage } =

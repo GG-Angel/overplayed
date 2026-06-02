@@ -9,16 +9,16 @@ export type WaveformHandler = {
 };
 
 type WaveformProps = {
-  audio: HTMLAudioElement | undefined;
+  url: string | undefined;
   waveformRef?: Ref<WaveformHandler>;
   className?: string;
   onPlay?: () => void;
   onPause?: () => void;
 };
 
-const Waveform = ({ audio, waveformRef, className, onPlay, onPause }: WaveformProps) => {
-  const containerRef = useRef<HTMLDivElement | null>(null);
+const Waveform = ({ url, waveformRef, className, onPlay, onPause }: WaveformProps) => {
   const [wavesurfer, setWavesurfer] = useState<WaveSurfer | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   // expose API to parent via ref
   useImperativeHandle(
@@ -59,12 +59,15 @@ const Waveform = ({ audio, waveformRef, className, onPlay, onPause }: WaveformPr
   // load new tracks
   useEffect(() => {
     if (!wavesurfer) return;
-    if (!audio) {
-      wavesurfer.empty();
+    if (!url) {
+      if (wavesurfer.getDecodedData() !== null) {
+        wavesurfer.empty();
+        wavesurfer.pause();
+      }
       return;
     }
-    wavesurfer.load(audio.src);
-  }, [audio, wavesurfer]);
+    wavesurfer.load(url);
+  }, [url, wavesurfer]);
 
   // handle player events
   useEffect(() => {

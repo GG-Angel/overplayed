@@ -1,9 +1,17 @@
-import { getPlaylists } from "@/lib/api";
+import api from "@/lib/api-client";
 import { queryKeys } from "@/lib/query";
-import { useQuery } from "@tanstack/react-query";
+import { playlistSchema } from "@/lib/types";
+import { queryOptions, useQuery } from "@tanstack/react-query";
+import z from "zod";
 
-export const usePlaylists = () =>
-  useQuery({
-    queryKey: queryKeys.playlists.all,
-    queryFn: getPlaylists,
-  });
+const getPlaylists = async () => {
+  const response = await api.get("/playlists");
+  return z.array(playlistSchema).parse(response);
+};
+
+const playlistsOptions = queryOptions({
+  queryKey: queryKeys.playlists.all,
+  queryFn: getPlaylists,
+});
+
+export const usePlaylists = () => useQuery(playlistsOptions);
