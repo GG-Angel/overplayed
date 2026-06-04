@@ -5,28 +5,27 @@ import { SwipeContext, type SwipeFormOptions } from "./SwipeContext";
 import { Outlet, useParams } from "react-router-dom";
 import ErrorState from "@/components/states/ErrorState";
 import { usePlaylistMetadata } from "@/features/playlist/api/get-playlist-metadata";
-import { useInfinitePlaylistItems } from "@/features/playlist/api/get-playlist-items";
 import LoadingState from "@/components/states/LoadingState";
+import { usePrefetchedPlaylistItems } from "@/features/playlist/api/get-playlist-items";
 
-type SwipeProviderInnerProps = {
-  playlistId: string;
+const initialOptions: SwipeFormOptions = { backupEnabled: true };
+
+const SwipeProvider = () => {
+  const { playlistId } = useParams();
+  if (!playlistId) return <ErrorState message="No playlist provided" />;
+  return <SwipeProviderInner playlistId={playlistId} />;
 };
 
-const SwipeProviderInner = ({ playlistId }: SwipeProviderInnerProps) => {
+const SwipeProviderInner = ({ playlistId }: { playlistId: string }) => {
   const session = useSwipes<Track>();
-  const [options, setOptions] = useState<SwipeFormOptions>({ backupEnabled: true });
+  const [options, setOptions] = useState<SwipeFormOptions>(initialOptions);
 
   const playlist = usePlaylistMetadata(playlistId);
-  const items = useInfinitePlaylistItems(playlistId);
+  const items = usePrefetchedPlaylistItems(playlistId, session.swipes.length);
 
   if (playlist.isError || items.isError) return <ErrorState message="Failed to load playlist" />;
-
-  if (!playlist.isSuccess) return <LoadingState message="Loading playlist..." />;
-  if (!items.isSuccess) return <LoadingState message="Loading tracks..." />;
-
-  // TODO: see later if we need this
-  // if (items.data.pages[0].total === 0 && session.swipes.length === 0)
-  //   return <ErrorState message="Playlist is empty" />;
+  if (!playlist.isSuccess || !items.isSuccess)
+    return <LoadingState message={`Loading ${!playlist.isSuccess ? "playlist" : "tracks"}...`} />;
 
   return (
     <SwipeContext.Provider
@@ -44,12 +43,6 @@ const SwipeProviderInner = ({ playlistId }: SwipeProviderInnerProps) => {
       <Outlet />
     </SwipeContext.Provider>
   );
-};
-
-const SwipeProvider = () => {
-  const { playlistId } = useParams();
-  if (!playlistId) return <ErrorState message="No playlist provided" />;
-  return <SwipeProviderInner playlistId={playlistId} />;
 };
 
 export default SwipeProvider;

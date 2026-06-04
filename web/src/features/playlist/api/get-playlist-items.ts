@@ -3,6 +3,10 @@ import { queryKeys } from "@/lib/query";
 import { playlistItemsPageSchema, type PlaylistItemsPage } from "@/lib/types";
 import { infiniteQueryOptions, useInfiniteQuery } from "@tanstack/react-query";
 import api from "@/lib/api-client";
+import { useEffect } from "react";
+
+const PAGE_SIZE = 100;
+const PREFETCH_THRESHOLD = 20;
 
 const getPlaylistItems = async ({
   playlistId,
@@ -29,8 +33,25 @@ const getInfinitePlaylistItemsQueryOptions = (playlistId: string) => {
   });
 };
 
-export const useInfinitePlaylistItems = (playlistId: string) => {
+const useInfinitePlaylistItems = (playlistId: string) => {
   return useInfiniteQuery({
     ...getInfinitePlaylistItemsQueryOptions(playlistId),
   });
+};
+
+export const usePrefetchedPlaylistItems = (playlistId: string, index: number) => {
+  const items = useInfinitePlaylistItems(playlistId);
+
+  const { isSuccess, hasNextPage, isFetchingNextPage, fetchNextPage, data } = items;
+
+  useEffect(() => {
+    if (!isSuccess || !hasNextPage || isFetchingNextPage) return;
+
+    const totalItemsLoaded = data.pages.length * PAGE_SIZE;
+    if (index >= totalItemsLoaded - PREFETCH_THRESHOLD) {
+      fetchNextPage();
+    }
+  }, [isSuccess, hasNextPage, isFetchingNextPage, fetchNextPage, data, index]);
+
+  return items;
 };

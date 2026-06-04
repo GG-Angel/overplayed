@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { SwipeCardHandler } from "../components/SwipeCard";
+import type { SwipeCardController } from "../components/SwipeCard";
 import { type PlaylistItem } from "@/lib/types";
 import { wrapSlice } from "@/lib/utils";
 import { VISIBLE_CARD_COUNT } from "../views/SwipeView";
@@ -7,7 +7,7 @@ import { VISIBLE_CARD_COUNT } from "../views/SwipeView";
 const SWIPE_DURATION = 1750;
 
 const useSwipeCarousel = (items: PlaylistItem[]) => {
-  const activeCardRef = useRef<SwipeCardHandler | null>(null);
+  const activeCardRef = useRef<SwipeCardController | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const visiblePlaylistItems = wrapSlice(items, currentIndex, currentIndex + VISIBLE_CARD_COUNT);

@@ -1,4 +1,4 @@
-import type { Direction, SwipeCardHandler } from "@/features/swipe/components/SwipeCard";
+import type { SwipeDirection, SwipeCardController } from "@/features/swipe/components/SwipeCard";
 import SwipeProgress from "@/features/swipe/components/SwipeProgress";
 import { Undo, Check } from "lucide-react";
 import { useRef, useState } from "react";
@@ -16,7 +16,7 @@ const directionToDecision = {
 
 const SwipeView = () => {
   const [isSwiping, setIsSwiping] = useState(false);
-  const activeCardRef = useRef<SwipeCardHandler | null>(null);
+  const activeCardRef = useRef<SwipeCardController | null>(null);
 
   const {
     currentIndex,
@@ -38,12 +38,12 @@ const SwipeView = () => {
   const canSwipe = !isSwiping && !isComplete;
   const canUndoOrFinish = !isSwiping && currentIndex > 0;
 
-  const triggerSwipe = (direction: Direction) => {
+  const triggerSwipe = (direction: SwipeDirection) => {
     setIsSwiping(true);
     activeCardRef.current?.swipe(direction);
   };
 
-  const recordSwipe = (direction: Direction) => {
+  const recordSwipe = (direction: SwipeDirection) => {
     swipe(directionToDecision[direction]);
     setIsSwiping(false);
   };

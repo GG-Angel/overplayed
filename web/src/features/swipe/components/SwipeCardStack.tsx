@@ -1,42 +1,42 @@
-import type { PlaylistItem } from "@/lib/types";
+import type { Track } from "@/lib/types";
 import { AnimatePresence } from "framer-motion";
 import { type RefObject } from "react";
-import SwipeCard, { type Direction, type SwipeCardHandler } from "./SwipeCard";
+import SwipeCard, { type SwipeDirection, type SwipeCardController } from "./SwipeCard";
 
 const STACK_ROTATE_DEGREES = 3;
 
 type SwipeCardStackProps = {
-  items: PlaylistItem[];
-  topCardRef?: RefObject<SwipeCardHandler | null>;
-  disabled?: boolean;
+  tracks: Track[];
+  topCardRef?: RefObject<SwipeCardController | null>;
+  canSwipe?: boolean;
   onSwipeStart?: () => void;
-  onSwipeEnd?: (direction: Direction) => void;
+  onSwipeEnd?: (direction: SwipeDirection) => void;
 };
 
 const SwipeCardStack = ({
-  items,
+  tracks,
   topCardRef,
   onSwipeStart,
   onSwipeEnd,
-  disabled = false,
+  canSwipe = true,
 }: SwipeCardStackProps) => {
   return (
     <AnimatePresence>
       <div className="grid place-items-center touch-none">
-        {items.map((item, i) => {
+        {tracks.map((track, i) => {
           const isTopCard = i === 0;
           return (
             <SwipeCard
               className="col-start-1 row-start-1 w-64 sm:w-72 lg:w-84"
               ref={isTopCard ? topCardRef : undefined}
-              key={item.track.uri}
-              track={item.track}
+              key={track.uri}
+              track={track}
               onSwipeStart={onSwipeStart}
               onSwipeEnd={onSwipeEnd}
-              isDragEnabled={isTopCard && !disabled}
+              isDragEnabled={isTopCard && canSwipe}
               isTopCard={isTopCard}
-              zIndex={items.length - i}
               baseRotate={isTopCard ? 0 : (i % 2 === 0 ? 1 : -1) * STACK_ROTATE_DEGREES}
+              zIndex={tracks.length - i}
             />
           );
         })}
