@@ -1,10 +1,10 @@
 import api from "@/lib/api-client";
 import { queryKeys } from "@/lib/query";
-import { playlistSchema, type Playlist } from "@/lib/types";
+import { playlistMetadataSchema, type PlaylistMetadata } from "@/lib/types";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 
-const getPlaylistMetadata = async (playlistId: string): Promise<Playlist> => {
-  return playlistSchema.parse(await api.get(`/playlists/${playlistId}`));
+const getPlaylistMetadata = async (playlistId: string): Promise<PlaylistMetadata> => {
+  return playlistMetadataSchema.parse(await api.get(`/playlists/${playlistId}`));
 };
 
 const getPlaylistMetadataQueryOptions = (playlistId: string) => {

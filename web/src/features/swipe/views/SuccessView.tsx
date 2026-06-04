@@ -1,12 +1,12 @@
 import Button from "@/components/ui/Button";
 import useConfetti from "@/hooks/useConfetti";
-import type { Playlist } from "@/lib/types";
+import type { PlaylistMetadata } from "@/lib/types";
 import { openExternalUrl } from "@/lib/utils";
 import { useSwipeContext } from "../context/SwipeContext";
 import MessageState from "../../../components/states/MessageState";
 
 type SuccessViewProps = {
-  newPlaylist: Playlist | null;
+  newPlaylist: PlaylistMetadata | null;
 };
 
 const SuccessView = ({ newPlaylist }: SuccessViewProps) => {

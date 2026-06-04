@@ -59,7 +59,7 @@ export const playlistTrackCountSchema = z.object({
   total: z.number().int().nonnegative(),
 });
 
-export const playlistSchema = resourceRefSchema.extend({
+export const playlistMetadataSchema = resourceRefSchema.extend({
   name: z.string(),
   description: z.string().nullable(),
   collaborative: z.boolean(),
@@ -112,7 +112,7 @@ export type CurrentUser = z.infer<typeof currentUserSchema>;
 export type Artist = z.infer<typeof artistSchema>;
 export type Album = z.infer<typeof albumSchema>;
 export type Track = z.infer<typeof trackSchema>;
-export type Playlist = z.infer<typeof playlistSchema>;
+export type PlaylistMetadata = z.infer<typeof playlistMetadataSchema>;
 export type PlaylistTrackCount = z.infer<typeof playlistTrackCountSchema>;
 export type PlaylistItem = z.infer<typeof playlistItemSchema>;
 export type PlaylistItemsPage = z.infer<typeof playlistItemsPageSchema>;

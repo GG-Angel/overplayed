@@ -1,9 +1,9 @@
-import type { Playlist } from "@/lib/types";
+import type { PlaylistMetadata } from "@/lib/types";
 import { extractImageUrl } from "@/lib/utils";
 import { ArrowUpRight } from "lucide-react";
 
 type PlaylistCardProps = {
-  playlist: Playlist;
+  playlist: PlaylistMetadata;
   onClick?: (playlistId: string) => void;
 };
 

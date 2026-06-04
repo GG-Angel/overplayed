@@ -1,11 +1,11 @@
 import api from "@/lib/api-client";
 import { queryKeys } from "@/lib/query";
-import { playlistSchema } from "@/lib/types";
+import { playlistMetadataSchema } from "@/lib/types";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 
 const getPlaylist = async (playlistId: string) => {
   const response = await api.get(`/playlists/${playlistId}`);
-  return playlistSchema.parse(response);
+  return playlistMetadataSchema.parse(response);
 };
 
 const playlistOptions = (playlistId: string) =>

@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import type { SwipeForm } from "./useSwipeForm";
 import { createNewPlaylist, updatePlaylistItems } from "@/lib/api";
 import { queryKeys } from "@/lib/query";
-import type { Playlist } from "@/lib/types";
+import type { PlaylistMetadata } from "@/lib/types";
 
 export type StepStatus = "pending" | "active" | "success" | "error" | "skipped";
 type StepName = "creating" | "backingUp" | "removing";
@@ -15,7 +15,7 @@ type SubmitState = {
   backingUp: StepStatus;
   removing: StepStatus;
   error: Error | null;
-  newPlaylist: Playlist | null;
+  newPlaylist: PlaylistMetadata | null;
 };
 
 const initialState: SubmitState = {
@@ -29,7 +29,7 @@ const initialState: SubmitState = {
 
 const useSwipeSubmit = (
   currentPlaylistId: string,
-  onSuccess: (playlist: Playlist | null) => void = () => {},
+  onSuccess: (playlist: PlaylistMetadata | null) => void = () => {},
   onFail: () => void = () => {},
   delay: number = 0
 ) => {

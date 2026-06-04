@@ -1,5 +1,5 @@
 import api from "./api-client";
-import { playlistSchema, type SwipeSessionDetails } from "./types";
+import { playlistMetadataSchema, type SwipeSessionDetails } from "./types";
 
 export const buildURLWithParams = (
   url: string,
@@ -12,7 +12,7 @@ export const buildURLWithParams = (
 
 export const createNewPlaylist = async () => {
   const response = await api.post("/playlists");
-  return playlistSchema.parse(response);
+  return playlistMetadataSchema.parse(response);
 };
 
 export const updatePlaylistItems = async (

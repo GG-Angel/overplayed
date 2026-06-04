@@ -31,7 +31,17 @@ const SwipeProviderInner = ({ playlistId }: SwipeProviderProps) => {
 
   return (
     <SwipeContext.Provider
-      value={{ session, options, setOptions, playlist: playlist.data, items: items.data.pages }}
+      value={{
+        session,
+        options,
+        setOptions,
+        playlist: {
+          metadata: playlist.data,
+          items: {
+            pages: items.data.pages,
+          },
+        },
+      }}
     >
       <Outlet />
     </SwipeContext.Provider>

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { SwipeContext, type PhaseState, type SwipeContextValue } from "./SwipeContext";
 import { useSwipePlaylist } from "../hooks/useSwipePlaylist";
 import type { SwipeForm } from "../hooks/useSwipeForm";
-import type { Playlist } from "@/lib/types";
+import type { PlaylistMetadata } from "@/lib/types";
 import useTimer from "@/hooks/useTimer";
 import { logSwipeSession } from "@/lib/api";
 
@@ -22,7 +22,8 @@ const SwipeProvider = ({ playlistId, children }: SwipeProviderProps) => {
 
   const finish = () => setPhase({ kind: dislikes.length === 0 ? "nothing" : "review" });
   const submit = (form: SwipeForm) => setPhase({ kind: "submit", form });
-  const succeed = (newPlaylist: Playlist | null) => setPhase({ kind: "success", newPlaylist });
+  const succeed = (newPlaylist: PlaylistMetadata | null) =>
+    setPhase({ kind: "success", newPlaylist });
   const fail = () => setPhase({ kind: "error" });
   const back = () => setPhase({ kind: "swipe" });
   const goHome = () => navigate("/", { replace: true });
