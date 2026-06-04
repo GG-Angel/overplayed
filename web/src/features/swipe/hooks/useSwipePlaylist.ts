@@ -1,12 +1,12 @@
 import usePlaylistItems from "@/features/playlist/hooks/usePlaylistItems";
 import useTrackPreviews from "@/features/previews/hooks/useTrackPreviews";
 import type { PlaylistItem } from "@/lib/types";
-import useSwipeManager, { type Decision } from "./useSwipeManager";
+import useSwipes, { type SwipeDecision } from "./useSwipes";
 
 const PREVIEW_PRELOAD_LIMIT = 5;
 
 export const useSwipePlaylist = (playlistId: string) => {
-  const decisions = useSwipeManager<PlaylistItem>();
+  const decisions = useSwipes<PlaylistItem>();
   const currentIndex = decisions.swipes.length;
 
   const playlist = usePlaylistItems(playlistId, currentIndex);
@@ -19,7 +19,7 @@ export const useSwipePlaylist = (playlistId: string) => {
   const currentItem = playlist.items.at(currentIndex);
   const currentPreview = previews.at(0);
 
-  const swipe = (decision: Decision) => {
+  const swipe = (decision: SwipeDecision) => {
     if (!currentItem) return;
     decisions.record(currentItem, decision);
   };
