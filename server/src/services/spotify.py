@@ -56,6 +56,10 @@ class SpotifyService:
         self, playlist_id: str, *, offset: int, limit: int
     ) -> PlaylistItems:
         playlist = await self.get_playlist(playlist_id)
+
+        if playlist.tracks.total <= 0:
+            return PlaylistItems(items=[], total=0, has_more=False)
+
         current_snapshot_id = playlist.snapshot_id
 
         cached = await self.cache.get_playlist_items(

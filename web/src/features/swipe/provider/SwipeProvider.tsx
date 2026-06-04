@@ -8,17 +8,11 @@ import { usePlaylistMetadata } from "@/features/playlist/api/get-playlist-metada
 import { useInfinitePlaylistItems } from "@/features/playlist/api/get-playlist-items";
 import LoadingState from "@/components/states/LoadingState";
 
-type SwipeProviderProps = {
+type SwipeProviderInnerProps = {
   playlistId: string;
 };
 
-const SwipeProvider = () => {
-  const { playlistId } = useParams();
-  if (!playlistId) return <ErrorState message="No playlist provided" />;
-  return <SwipeProviderInner playlistId={playlistId} />;
-};
-
-const SwipeProviderInner = ({ playlistId }: SwipeProviderProps) => {
+const SwipeProviderInner = ({ playlistId }: SwipeProviderInnerProps) => {
   const session = useSwipes<Track>();
   const [options, setOptions] = useState<SwipeFormOptions>({ backupEnabled: true });
 
@@ -26,8 +20,13 @@ const SwipeProviderInner = ({ playlistId }: SwipeProviderProps) => {
   const items = useInfinitePlaylistItems(playlistId);
 
   if (playlist.isError || items.isError) return <ErrorState message="Failed to load playlist" />;
-  if (!playlist.isSuccess || !items.isSuccess)
-    return <LoadingState message="Loading playlist..." />;
+
+  if (!playlist.isSuccess) return <LoadingState message="Loading playlist..." />;
+  if (!items.isSuccess) return <LoadingState message="Loading tracks..." />;
+
+  // TODO: see later if we need this
+  // if (items.data.pages[0].total === 0 && session.swipes.length === 0)
+  //   return <ErrorState message="Playlist is empty" />;
 
   return (
     <SwipeContext.Provider
@@ -37,15 +36,20 @@ const SwipeProviderInner = ({ playlistId }: SwipeProviderProps) => {
         setOptions,
         playlist: {
           metadata: playlist.data,
-          items: {
-            pages: items.data.pages,
-          },
+          tracks: items.data.pages.flatMap((p) => p.items.map((i) => i.track)),
+          totalTracks: items.data.pages[0].total,
         },
       }}
     >
       <Outlet />
     </SwipeContext.Provider>
   );
+};
+
+const SwipeProvider = () => {
+  const { playlistId } = useParams();
+  if (!playlistId) return <ErrorState message="No playlist provided" />;
+  return <SwipeProviderInner playlistId={playlistId} />;
 };
 
 export default SwipeProvider;

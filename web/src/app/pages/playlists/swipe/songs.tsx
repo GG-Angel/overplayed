@@ -5,7 +5,7 @@ const SwipeSongsPage = () => {
 
   return (
     <div>
-      {playlist.metadata.id} {playlist.items.pages.flatMap((p) => p.items).length}
+      {playlist.metadata.id} {playlist.totalTracks}
     </div>
   );
 };
