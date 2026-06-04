@@ -5,19 +5,21 @@ import SwipeProgress from "@/features/swipe/components/SwipeProgress";
 import { useSwipeContext } from "@/features/swipe/provider/SwipeContext";
 import { Check, Undo } from "lucide-react";
 import { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const MAX_CARD_STACK_HEIGHT = 3;
 
 const SwipeSongsPage = () => {
   const { session, playlist } = useSwipeContext();
+  const navigate = useNavigate();
+
   const currentSwipeCardRef = useRef<SwipeCardController | null>(null);
   const [isSwiping, setIsSwiping] = useState(false);
 
   const index = session.swipes.length;
-  const visibleTracks = playlist.tracks.slice(index, index + MAX_CARD_STACK_HEIGHT);
   const hasReachedEnd = index >= playlist.totalTracks;
-  const canSwipe = !isSwiping && !hasReachedEnd;
   const canUndoOrFinish = !isSwiping && index > 0;
+  const canSwipe = !isSwiping && !hasReachedEnd;
 
   const triggerSwipe = (direction: SwipeDirection) => {
     if (!currentSwipeCardRef.current || !canSwipe) return;
@@ -46,7 +48,7 @@ const SwipeSongsPage = () => {
         {!hasReachedEnd ? (
           <SwipeCardStack
             topCardRef={currentSwipeCardRef}
-            tracks={visibleTracks}
+            tracks={playlist.tracks.slice(index, index + MAX_CARD_STACK_HEIGHT)}
             canSwipe={canSwipe}
             onSwipeStart={() => setIsSwiping(true)}
             onSwipeEnd={recordSwipe}
@@ -64,7 +66,7 @@ const SwipeSongsPage = () => {
           onUndo={session.undoSwipe}
           onDislike={() => triggerSwipe("left")}
           onLike={() => triggerSwipe("right")}
-          // onFinish={finish}
+          onFinish={() => navigate("review")}
           canUndo={canUndoOrFinish}
           canFinish={canUndoOrFinish}
           canSwipe={canSwipe}
