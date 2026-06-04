@@ -1,18 +1,13 @@
-import { useParams } from "react-router-dom";
-import ErrorState from "@/components/states/ErrorState";
-import SwipeProvider from "@/features/swipe/context/SwipeProvider";
-import SwipeStateHandler from "@/features/swipe/views/SwipeStateHandler";
+import { useSwipeContext } from "@/features/swipe/provider/SwipeContext";
 
-const SwipePage = () => {
-  const { playlistId } = useParams();
-
-  if (!playlistId) return <ErrorState message="Playlist not found" />;
+const SwipeSongsPage = () => {
+  const { playlist, items } = useSwipeContext();
 
   return (
-    <SwipeProvider playlistId={playlistId}>
-      <SwipeStateHandler />
-    </SwipeProvider>
+    <div>
+      {playlist.id} {items.flatMap((p) => p.items).length}
+    </div>
   );
 };
 
-export default SwipePage;
+export default SwipeSongsPage;

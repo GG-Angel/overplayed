@@ -10,6 +10,7 @@
 - Fix page layout shifting when scrollbar is present.
 - Add search functionality to the playlist selection page.
 - Add tests for counters.
+- Make API refetch full list of user playlists on get single playlist.
 
 ## Nice to Haves
 

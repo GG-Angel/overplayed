@@ -6,7 +6,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useState, type ReactNode } from "react";
 
 type AppProviderProps = {
-  children: ReactNode;
+  children?: ReactNode;
 };
 
 export const AppProvider = ({ children }: AppProviderProps) => {
