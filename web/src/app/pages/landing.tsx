@@ -1,7 +1,6 @@
 import LoadingState from "@/components/states/LoadingState";
 import useAuth from "@/features/user/auth/useAuth";
 import Metric from "@/components/ui/Metric";
-import useMetrics from "@/features/metrics/useMetrics";
 import { formatCount, formatPercentage } from "@/lib/utils";
 import { usePlaylists } from "@/features/playlist/hooks/usePlaylists";
 import Button from "@/components/ui/Button";
@@ -14,11 +13,13 @@ import useSwipeCarousel from "@/features/swipe/hooks/useSwipeCarousel";
 import SwipeCardStack from "@/features/swipe/components/SwipeCardStack";
 import { playlistItemSchema } from "@/lib/types";
 import playlistItemsJson from "@/assets/landing-playlist-items.json";
+import { useMetrics } from "@/features/metrics/api/get-metrics";
 
 const LandingPage = () => {
   const { user, isLoading, redirectToLogin } = useAuth();
   const { data: metrics } = useMetrics();
   const { data: playlists } = usePlaylists();
+
   const {
     activeCardRef,
     items: mockPlaylistItems,

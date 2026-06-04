@@ -1,6 +1,15 @@
 import api from "./api-client";
 import { playlistSchema, type SwipeSessionDetails } from "./types";
 
+export const buildURLWithParams = (
+  url: string,
+  params?: Record<string, string | number>
+): string => {
+  if (!params) return url;
+  const paramsString = new URLSearchParams(params as Record<string, string>).toString();
+  return `${url}?${paramsString}`;
+};
+
 export const createNewPlaylist = async () => {
   const response = await api.post("/playlists");
   return playlistSchema.parse(response);
