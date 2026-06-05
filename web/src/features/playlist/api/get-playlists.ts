@@ -8,7 +8,7 @@ const getUserPlaylists = async () => {
   return z.array(playlistMetadataSchema).parse(await api.get("/playlists"));
 };
 
-const getUserPlaylistsOptions = () => {
+const getUserPlaylistsQueryOptions = () => {
   return queryOptions({
     queryKey: queryKeys.playlists.all,
     queryFn: getUserPlaylists,
@@ -16,5 +16,5 @@ const getUserPlaylistsOptions = () => {
 };
 
 export const useUserPlaylists = () => {
-  return useQuery(getUserPlaylistsOptions());
+  return useQuery(getUserPlaylistsQueryOptions());
 };

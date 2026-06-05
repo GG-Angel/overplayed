@@ -1,5 +1,4 @@
 import usePlaylistItems from "@/features/playlist/hooks/usePlaylistItems";
-import useTrackPreviews from "@/features/previews/hooks/useTrackPreviews";
 import type { PlaylistItem } from "@/lib/types";
 import useSwipes, { type SwipeDecision } from "./useSwipes";
 
