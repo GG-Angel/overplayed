@@ -96,6 +96,8 @@ class Track(Resource):
 
 class TrackPreview(BaseModel):
     preview_url: str
+    expires_at: int
+    expires_in: int
 
 
 class PlaylistItem(BaseModel):
