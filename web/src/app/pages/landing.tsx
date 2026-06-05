@@ -9,27 +9,22 @@ import { useLocation, useNavigate } from "react-router-dom";
 import Card from "@/components/ui/Card";
 import Divider from "@/components/ui/Divider";
 import SwipeButtons from "@/features/swipe/components/SwipeButtons";
-import useSwipeCarousel from "@/features/swipe/hooks/useSwipeCarousel";
 import SwipeCardStack from "@/features/swipe/components/SwipeCardStack";
-import { playlistItemSchema } from "@/lib/types";
-import playlistItemsJson from "@/assets/landing-playlist-items.json";
 import { useMetrics } from "@/features/metrics/api/get-metrics";
+import useSwipeCarousel from "@/features/swipe/hooks/useSwipeCarousel";
+import carouselTracks from "@/assets/carousel-tracks.json";
+import z from "zod";
+import { trackSchema } from "@/lib/types";
 
 const LandingPage = () => {
-  const { user, isLoading, redirectToLogin } = useAuth();
-  const { data: metrics } = useMetrics();
-  const { data: playlists } = usePlaylists();
-
-  const {
-    activeCardRef,
-    items: mockPlaylistItems,
-    next: nextMockItem,
-  } = useSwipeCarousel(playlistItemSchema.array().parse(playlistItemsJson));
-
   const navigate = useNavigate();
   const location = useLocation();
+  const auth = useAuth();
+  const { data: metrics } = useMetrics();
+  const { data: playlists } = usePlaylists();
+  const carousel = useSwipeCarousel(z.array(trackSchema).parse(carouselTracks));
 
-  if (isLoading) return <LoadingState />;
+  if (auth.isLoading) return <LoadingState />;
 
   return (
     <div className="flex flex-col gap-8 w-full max-w-3xl self-center py-8">
@@ -51,21 +46,23 @@ const LandingPage = () => {
         className="self-center"
         size="lg"
         icon={<SpotifyIcon className="size-5" />}
-        onClick={() => (user ? navigate("/playlists") : redirectToLogin(location.pathname))}
+        onClick={() =>
+          auth.user ? navigate("/playlists") : auth.redirectToLogin(location.pathname)
+        }
       >
-        {user ? "View your playlists" : "Log in with Spotify — it's free"}
+        {auth.user ? "View your playlists" : "Log in with Spotify — it's free"}
       </Button>
 
       <Card
-        className="flex flex-col items-center gap-6 pointer-events-none overflow-hidden"
+        className="flex flex-col items-center gap-6 pointer-events-none"
         tone="muted"
         size="lg"
         padding="square"
       >
         <SwipeCardStack
-          topCardRef={activeCardRef}
-          items={mockPlaylistItems}
-          onSwipeEnd={nextMockItem}
+          topCardRef={carousel.topCardRef}
+          tracks={carousel.visibleTracks}
+          onSwipeEnd={carousel.next}
         />
         <SwipeButtons />
       </Card>
@@ -91,14 +88,14 @@ const LandingPage = () => {
           ];
           return (
             <div className="grid grid-cols-3 gap-3">
-              {steps.map((s, i) => (
-                <Card key={s.heading} className="flex flex-col gap-1.5">
+              {steps.map((step, index) => (
+                <Card key={step.heading} className="flex flex-col gap-1.5">
                   <div className="flex items-center justify-center size-6 bg-card-foreground text-card rounded-full text-sm font-semibold">
-                    {i + 1}
+                    {index + 1}
                   </div>
                   <div>
-                    <p className="font-medium text-sm">{s.heading}</p>
-                    <p className="text-sm text-muted-foreground">{s.body}</p>
+                    <p className="font-medium text-sm">{step.heading}</p>
+                    <p className="text-sm text-muted-foreground">{step.body}</p>
                   </div>
                 </Card>
               ))}
