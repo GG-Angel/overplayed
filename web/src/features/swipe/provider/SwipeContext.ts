@@ -2,7 +2,7 @@ import { createContext, useContext, type Dispatch, type SetStateAction } from "r
 import type useSwipes from "../hooks/useSwipes";
 import type { PlaylistMetadata, Track } from "@/lib/types";
 
-type SwipeContextValues = {
+export type SwipeContextValues = {
   session: ReturnType<typeof useSwipes<Track>>;
   options: SwipeFormOptions;
   setOptions: Dispatch<SetStateAction<SwipeFormOptions>>;

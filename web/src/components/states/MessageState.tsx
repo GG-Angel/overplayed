@@ -17,7 +17,11 @@ const MessageState = ({ kaomoji, title, subtitle, body, actions }: MessageStateP
         {subtitle}
       </div>
       {body}
-      {actions && <div className="flex items-center justify-center gap-2">{actions}</div>}
+      {actions && (
+        <div className="grid grid-flow-col auto-cols-fr gap-2 *:w-full w-full max-w-lg self-center">
+          {actions}
+        </div>
+      )}
     </div>
   );
 };
