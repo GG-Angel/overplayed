@@ -1,4 +1,4 @@
-import { queryOptions, useQueries, useQuery } from "@tanstack/react-query";
+import { queryOptions, useQueries } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query";
 import api from "@/lib/api-client";
 import { trackPreviewSchema, type TrackPreview } from "@/lib/types";
@@ -11,11 +11,8 @@ const getTrackPreviewUrlQueryOptions = (isrc: string) => {
   return queryOptions({
     queryKey: queryKeys.preview(isrc),
     queryFn: () => getTrackPreviewUrl(isrc),
+    staleTime: ({ state }) => (state.data?.expires_in ?? 60 * 60) * 1000,
   });
-};
-
-export const useTrackPreviewUrl = (isrc: string) => {
-  return useQuery(getTrackPreviewUrlQueryOptions(isrc));
 };
 
 export const useTrackPreviewUrls = (isrcs: string[]) => {

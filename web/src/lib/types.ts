@@ -86,6 +86,8 @@ export const playlistItemsPageSchema = z.object({
 
 export const trackPreviewSchema = z.object({
   preview_url: z.url(),
+  expires_in: z.number().int().nonnegative(),
+  expires_at: z.number().int().nonnegative(),
 });
 
 export const metricsSchema = z.object({
