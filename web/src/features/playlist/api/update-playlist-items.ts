@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 type PlaylistItemsUpdateAction = "add" | "remove";
 
-const updatePlaylistItems = async (
+export const updatePlaylistItems = async (
   playlistId: string,
   uris: string[],
   action: PlaylistItemsUpdateAction
@@ -25,7 +25,7 @@ export const useUpdatePlaylistItems = (
 ) => {
   const queryClient = useQueryClient();
 
-  const mutation = useMutation({
+  return useMutation({
     mutationFn: () => updatePlaylistItems(playlistId, uris, action),
     onSuccess: async () => {
       await Promise.all([
@@ -34,6 +34,4 @@ export const useUpdatePlaylistItems = (
       ]);
     },
   });
-
-  return mutation;
 };
