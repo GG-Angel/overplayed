@@ -73,7 +73,7 @@ class SpotifyService:
         if cached is not None:
             return cached
 
-        items = await self.spotify.get_playlist_items(playlist_id)
+        items = await self.spotify.get_playlist_items(playlist_id, unique=True)
         await self.cache.set_playlist_items(
             self.user_id,
             playlist_id,

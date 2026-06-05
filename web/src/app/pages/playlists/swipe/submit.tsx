@@ -9,7 +9,7 @@ const SwipeSubmitPage = () => {
       <Button onClick={controller.start}>Start submission</Button>
       <p>Phase: {controller.phase ?? "Setting up..."}</p>
       <p>
-        Success: {String(controller)} Error: {String(controller.isError)}
+        Success: {String(controller.isSuccess)} Error: {String(controller.isError)}
       </p>
     </div>
   );

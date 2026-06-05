@@ -45,7 +45,9 @@ class SpotifyClient:
             self._log(f"Got {len(playlists)} playlists")
             return playlists
 
-    async def get_playlist_items(self, playlist_id: str) -> List[PlaylistItem]:
+    async def get_playlist_items(
+        self, playlist_id: str, unique: bool = False
+    ) -> List[PlaylistItem]:
         """Gets all items from a playlist."""
         async with self._handle_error("get items from playlist"):
             self._log(f"Getting items from playlist: {playlist_id}")
@@ -59,6 +61,16 @@ class SpotifyClient:
                 )
                 if not t.get("is_local") and t.get("track")
             ]
+
+            if unique:
+                seen = set()
+                deduped = []
+                for item in items:
+                    if item.track.uri not in seen:
+                        seen.add(item.track.uri)
+                        deduped.append(item)
+                items = deduped
+
             self._log(f"Got {len(items)} items from playlist: {playlist_id}")
             return items
 

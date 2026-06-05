@@ -11,6 +11,7 @@ type SubmitSwipesPhase = "creating-backup" | "populating-backup" | "removing-tra
 const useSubmitSwipes = () => {
   const queryClient = useQueryClient();
   const { playlist, options, session } = useSwipeContext();
+
   const [phase, setPhase] = useState<SubmitSwipesPhase | null>(null);
   const [backupPlaylist, setBackupPlaylist] = useState<PlaylistMetadata | null>(null);
 
@@ -20,12 +21,12 @@ const useSubmitSwipes = () => {
     mutationFn: async () => {
       if (options.backupEnabled) {
         setPhase("creating-backup");
-        // const newBackupPlaylist = await createPlaylist();
+        const newBackupPlaylist = await createPlaylist();
 
         setPhase("populating-backup");
-        // await updatePlaylistItems(newBackupPlaylist.id, tracksToRemove, "add");
+        await updatePlaylistItems(newBackupPlaylist.id, tracksToRemove, "add");
 
-        // setBackupPlaylist(newBackupPlaylist);
+        setBackupPlaylist(newBackupPlaylist);
       }
 
       setPhase("removing-tracks");
