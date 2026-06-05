@@ -9,7 +9,7 @@ const getPlaylistMetadata = async (playlistId: string): Promise<PlaylistMetadata
 
 const getPlaylistMetadataQueryOptions = (playlistId: string) => {
   return queryOptions({
-    queryKey: queryKeys.playlists.one(playlistId),
+    queryKey: queryKeys.playlists.metadata(playlistId),
     queryFn: () => getPlaylistMetadata(playlistId),
   });
 };

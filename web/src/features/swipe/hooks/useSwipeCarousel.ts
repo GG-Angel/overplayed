@@ -5,6 +5,7 @@ import { wrapSlice } from "@/lib/utils";
 import { VISIBLE_CARD_COUNT } from "../views/SwipeView";
 
 const SWIPE_DURATION = 1750;
+const SWIPE_RIGHT_CHANCE = 0.5;
 
 const useSwipeCarousel = (items: PlaylistItem[]) => {
   const activeCardRef = useRef<SwipeCardController | null>(null);
@@ -20,7 +21,7 @@ const useSwipeCarousel = (items: PlaylistItem[]) => {
     let swiperId: ReturnType<typeof setTimeout>;
 
     const swipe = () => {
-      const direction = Math.random() >= 0.5 ? "right" : "left";
+      const direction = Math.random() >= SWIPE_RIGHT_CHANCE ? "right" : "left";
       activeCardRef.current?.swipe(direction);
 
       swiperId = setTimeout(swipe, SWIPE_DURATION);

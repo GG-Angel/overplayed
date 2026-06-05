@@ -33,14 +33,14 @@ type TrackCardProps = Omit<CardProps, "padding"> &
   };
 
 const TrackCard = ({ track, size, orientation, className, ...props }: TrackCardProps) => {
-  const coverUrl = extractImageUrl(track.album.images, "lg");
+  const coverUrl = extractImageUrl(track.album.images, orientation === "horizontal" ? "sm" : "lg");
+  const cardPadding = orientation === "horizontal" ? "wide" : "square";
   const artistList = track.artists.map((t) => t.name).join(" · ");
-  const padding = orientation === "horizontal" ? "wide" : "square";
 
   return (
     <Card
       size={size}
-      padding={padding}
+      padding={cardPadding}
       className={cn(cardVariants({ orientation }), className)}
       {...props}
     >

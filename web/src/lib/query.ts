@@ -8,12 +8,12 @@ export const queryConfig = {
 } satisfies DefaultOptions;
 
 export const queryKeys = {
-  user: ["user"],
-  metrics: ["metrics"],
-  preview: (isrc: string) => ["preview", isrc],
+  user: ["user"] as const,
+  metrics: ["metrics"] as const,
+  preview: (isrc: string) => ["preview", isrc] as const,
   playlists: {
-    all: ["playlists"],
-    one: (playlistId: string) => [...queryKeys.playlists.all, playlistId],
-    tracks: (playlistId: string) => [...queryKeys.playlists.one(playlistId), "tracks"],
+    all: ["playlists"] as const,
+    metadata: (playlistId: string) => [...queryKeys.playlists.all, playlistId, "metadata"] as const,
+    tracks: (playlistId: string) => [...queryKeys.playlists.all, playlistId, "tracks"] as const,
   },
 } as const;

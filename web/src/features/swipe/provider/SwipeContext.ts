@@ -1,11 +1,11 @@
-import { createContext, useContext } from "react";
+import { createContext, useContext, type Dispatch, type SetStateAction } from "react";
 import type useSwipes from "../hooks/useSwipes";
 import type { PlaylistMetadata, Track } from "@/lib/types";
 
 type SwipeContextValues = {
   session: ReturnType<typeof useSwipes<Track>>;
   options: SwipeFormOptions;
-  setOptions: (options: SwipeFormOptions) => void;
+  setOptions: Dispatch<SetStateAction<SwipeFormOptions>>;
   playlist: {
     metadata: PlaylistMetadata;
     tracks: Track[];

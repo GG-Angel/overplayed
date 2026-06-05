@@ -73,7 +73,7 @@ const useSwipeSubmit = (
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.playlists.all, exact: true }),
         queryClient.invalidateQueries({
-          queryKey: queryKeys.playlists.one(currentPlaylistId),
+          queryKey: queryKeys.playlists.metadata(currentPlaylistId),
           exact: true,
         }),
       ]);

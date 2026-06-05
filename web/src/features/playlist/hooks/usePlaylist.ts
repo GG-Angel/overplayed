@@ -10,7 +10,7 @@ const getPlaylist = async (playlistId: string) => {
 
 const playlistOptions = (playlistId: string) =>
   queryOptions({
-    queryKey: queryKeys.playlists.one(playlistId),
+    queryKey: queryKeys.playlists.metadata(playlistId),
     queryFn: () => getPlaylist(playlistId),
   });
 
