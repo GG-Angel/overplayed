@@ -18,6 +18,10 @@ const SwipeReviewPage = () => {
     [setOptions]
   );
 
+  const navigateHome = () => navigate("/", { replace: true });
+  const navigateToSwipePage = () => navigate("..");
+  const navigateToSwipeSubmit = () => navigate("../submit");
+
   if (session.swipes.length === 0) {
     return (
       <MessageState
@@ -26,11 +30,11 @@ const SwipeReviewPage = () => {
         subtitle={<p>You haven't swiped on any tracks...</p>}
         actions={
           <>
-            <Button variant="secondary" onClick={() => navigate("..")}>
-              Swipe Tracks
-            </Button>
-            <Button variant="primary" onClick={() => navigate("/")}>
+            <Button variant="secondary" onClick={navigateHome}>
               Return Home
+            </Button>
+            <Button variant="primary" onClick={navigateToSwipePage}>
+              Swipe Tracks
             </Button>
           </>
         }
@@ -51,10 +55,10 @@ const SwipeReviewPage = () => {
         }
         actions={
           <>
-            <Button variant="secondary" onClick={() => navigate("..")}>
+            <Button variant="secondary" onClick={navigateToSwipePage}>
               Keep Swiping
             </Button>
-            <Button variant="primary" onClick={() => navigate("/")}>
+            <Button variant="primary" onClick={navigateHome}>
               Return Home
             </Button>
           </>
@@ -104,10 +108,10 @@ const SwipeReviewPage = () => {
         <Checkbox enabled={options.backupEnabled} onEnabledChange={handleBackupToggle} />
       </Card>
       <div className="flex justify-end gap-3">
-        <Button variant="secondary" onClick={() => navigate("..")}>
+        <Button variant="secondary" onClick={navigateToSwipePage}>
           Keep Swiping
         </Button>
-        <Button variant="primary" onClick={() => navigate("../submit")}>
+        <Button variant="primary" onClick={navigateToSwipeSubmit}>
           Confirm Deletion
         </Button>
       </div>

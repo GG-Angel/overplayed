@@ -3,6 +3,7 @@ import Button from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
 import useSubmitSwipes, { swipePhaseDescriptions } from "@/features/swipe/hooks/useSubmitSwipes";
 import { useSwipeContext } from "@/features/swipe/provider/SwipeContext";
+import useConfetti from "@/hooks/useConfetti";
 import { openExternalUrl } from "@/lib/utils";
 import { useEffect, useEffectEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -31,6 +32,9 @@ const SwipeSubmitPage = () => {
     initialSubmit();
   }, []);
 
+  // show confetti on success
+  useConfetti({ enabled: controller.isSuccess });
+
   if (!controller.canSubmit) {
     return (
       <MessageState
@@ -43,7 +47,7 @@ const SwipeSubmitPage = () => {
               Return Home
             </Button>
             <Button variant="primary" onClick={navigateToSwipePage}>
-              Start Swiping
+              Swipe Tracks
             </Button>
           </>
         }
@@ -76,18 +80,34 @@ const SwipeSubmitPage = () => {
     );
   }
 
-  if (controller.isPending) {
+  if (controller.isSuccess) {
     return (
       <MessageState
-        kaomoji="( ◡̀_◡́)ᕤ"
-        title="Processing Changes"
-        body={
-          <div className="flex self-center items-center gap-2">
-            <Spinner size="sm" />
-            <p className="text-muted-foreground">
-              {controller.phase ? swipePhaseDescriptions[controller.phase] : "Starting up..."}
+        kaomoji="ദ്ദി(｡•̀ ,<)~✩‧₊"
+        title="Tracks Removed!"
+        subtitle={
+          <>
+            <p>
+              You just cleaned out <span className="text-primary">{dislikePercentage}%</span> of
+              your playlist.
             </p>
-          </div>
+            <p className="text-sm text-muted-foreground">(now you get to skip less)</p>
+          </>
+        }
+        actions={
+          <>
+            {backupPlaylist && (
+              <Button
+                variant="secondary"
+                onClick={() => openExternalUrl(backupPlaylist.external_urls.spotify)}
+              >
+                Open Backup Playlist
+              </Button>
+            )}
+            <Button variant="primary" onClick={navigateHome}>
+              Return Home
+            </Button>
+          </>
         }
       />
     );
@@ -95,31 +115,15 @@ const SwipeSubmitPage = () => {
 
   return (
     <MessageState
-      kaomoji="ദ്ദി(｡•̀ ,<)~✩‧₊"
-      title="Tracks Removed!"
-      subtitle={
-        <>
-          <p>
-            You just cleaned out <span className="text-primary">{dislikePercentage}%</span> of your
-            playlist.
+      kaomoji="( ◡̀_◡́)ᕤ"
+      title="Processing Changes"
+      body={
+        <div className="flex self-center items-center gap-2">
+          <Spinner size="sm" />
+          <p className="text-muted-foreground">
+            {controller.phase ? swipePhaseDescriptions[controller.phase] : "Starting up..."}
           </p>
-          <p className="text-sm text-muted-foreground">(now you get to skip less)</p>
-        </>
-      }
-      actions={
-        <>
-          {backupPlaylist && (
-            <Button
-              variant="secondary"
-              onClick={() => openExternalUrl(backupPlaylist.external_urls.spotify)}
-            >
-              Open Backup Playlist
-            </Button>
-          )}
-          <Button variant="primary" onClick={navigateHome}>
-            Return Home
-          </Button>
-        </>
+        </div>
       }
     />
   );
