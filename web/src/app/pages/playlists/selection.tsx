@@ -28,6 +28,7 @@ const SelectionPage = () => {
         Select a Playlist
       </h1>
       <div className="grid grid-cols-2 gap-6">
+        {/* TODO: make input a component */}
         <div className="flex items-center gap-2 bg-card border-card-border focus-within:border-muted-foreground border-2 py-2 px-3 rounded-md">
           <Search className="text-muted-foreground" />
           <input
@@ -38,6 +39,7 @@ const SelectionPage = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
+        
       </div>
       {searchedPlaylists.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-6 pb-4">
