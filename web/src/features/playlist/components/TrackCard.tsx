@@ -7,7 +7,7 @@ const cardVariants = cva("flex gap-3 select-none", {
   variants: {
     orientation: {
       vertical: "flex-col",
-      horizontal: "items-center",
+      horizontal: "items-center py-3",
     },
   },
   defaultVariants: {
@@ -27,23 +27,17 @@ const imageVariants = cva("aspect-square object-cover rounded-sm", {
   },
 });
 
-type TrackCardProps = Omit<CardProps, "padding"> &
+type TrackCardProps = CardProps &
   VariantProps<typeof cardVariants> & {
     track: Track;
   };
 
-const TrackCard = ({ track, size, orientation, className, ...props }: TrackCardProps) => {
+const TrackCard = ({ track, orientation, className, ...props }: TrackCardProps) => {
   const coverUrl = extractImageUrl(track.album.images, orientation === "horizontal" ? "sm" : "lg");
-  const cardPadding = orientation === "horizontal" ? "wide" : "square";
   const artistList = track.artists.map((t) => t.name).join(" · ");
 
   return (
-    <Card
-      size={size}
-      padding={cardPadding}
-      className={cn(cardVariants({ orientation }), className)}
-      {...props}
-    >
+    <Card className={cn(cardVariants({ orientation }), className)} {...props}>
       <img
         src={coverUrl}
         className={imageVariants({ orientation })}

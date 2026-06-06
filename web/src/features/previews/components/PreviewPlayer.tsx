@@ -18,7 +18,7 @@ const AudioPlayer = ({ url, className }: PreviewPlayerProps) => {
   const waveformRef = useRef<WaveformHandler>(null);
 
   return (
-    <Card size="sm" className={cn("flex items-center gap-3", className)}>
+    <Card padding="sm" className={cn("flex items-center gap-3 py-2", className)}>
       <IconButton
         size="xs"
         variant="green"

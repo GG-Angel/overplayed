@@ -96,7 +96,7 @@ const SelectionPage = () => {
                 <DropdownMenuItem
                   key={key}
                   onClick={isSelected ? toggleSortOrder : () => setSortKey(key)}
-                  className={cn("", isSelected && "text-primary")}
+                  className={cn(isSelected && "text-primary")}
                 >
                   {sortKeyLabels[key]}
                   {isSelected && <SortIcon className="shrink-0" />}

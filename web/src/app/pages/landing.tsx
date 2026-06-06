@@ -54,10 +54,10 @@ const LandingPage = () => {
       </Button>
 
       <Card
-        className="flex flex-col items-center gap-6 pointer-events-none"
+        className="flex flex-col items-center gap-6 pointer-events-none py-6"
         tone="muted"
-        size="lg"
-        padding="square"
+        radius="lg"
+        padding="lg"
       >
         <SwipeCardStack
           topCardRef={carousel.topCardRef}
@@ -89,7 +89,7 @@ const LandingPage = () => {
           return (
             <div className="grid grid-cols-3 gap-3">
               {steps.map((step, index) => (
-                <Card key={step.heading} className="flex flex-col gap-1.5">
+                <Card key={step.heading} className="flex flex-col gap-1.5 py-3">
                   <div className="flex items-center justify-center size-6 bg-card-foreground text-card rounded-full text-sm font-semibold">
                     {index + 1}
                   </div>

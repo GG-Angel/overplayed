@@ -91,13 +91,12 @@ const SwipeReviewPage = () => {
               key={track.uri}
               track={track}
               orientation="horizontal"
-              size="sm"
               className="snap-start"
             />
           ))}
         </div>
       </div>
-      <Card className="flex justify-between items-center gap-4 pr-6">
+      <Card className="flex justify-between items-center gap-4 pr-6 py-3">
         <div>
           <p>Back up removed tracks?</p>
           {options.backupEnabled ? (
