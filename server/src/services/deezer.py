@@ -1,3 +1,4 @@
+from loguru import logger
 from datetime import datetime, timezone
 from models import TrackPreview
 from urllib.parse import urlparse, parse_qs

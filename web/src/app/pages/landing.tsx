@@ -2,7 +2,6 @@ import LoadingState from "@/components/states/LoadingState";
 import useAuth from "@/features/user/auth/useAuth";
 import Metric from "@/components/ui/Metric";
 import { formatCount, formatPercentage } from "@/lib/utils";
-import { usePlaylists } from "@/features/playlist/hooks/usePlaylists";
 import Button from "@/components/ui/Button";
 import SpotifyIcon from "@/assets/spotify.svg?react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -15,13 +14,14 @@ import useSwipeCarousel from "@/features/swipe/hooks/useSwipeCarousel";
 import carouselTracks from "@/assets/carousel-tracks.json";
 import z from "zod";
 import { trackSchema } from "@/lib/types";
+import { useUserPlaylists } from "@/features/playlist/api/get-playlists";
 
 const LandingPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const auth = useAuth();
   const { data: metrics } = useMetrics();
-  const { data: playlists } = usePlaylists();
+  const { data: playlists } = useUserPlaylists();
   const carousel = useSwipeCarousel(z.array(trackSchema).parse(carouselTracks));
 
   if (auth.isLoading) return <LoadingState />;

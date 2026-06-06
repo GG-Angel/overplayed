@@ -1,10 +1,10 @@
 import { SkipForward } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
-import { usePlaylist } from "@/features/playlist/hooks/usePlaylist";
 import { extractImageUrl } from "@/lib/utils";
+import { usePlaylistMetadata } from "@/features/playlist/api/get-playlist-metadata";
 
 const LogoPlaylistCrumb = ({ playlistId }: { playlistId: string }) => {
-  const { data: playlist } = usePlaylist(playlistId);
+  const { data: playlist } = usePlaylistMetadata(playlistId);
 
   if (!playlist) return null;
 

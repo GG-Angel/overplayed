@@ -1,7 +1,10 @@
+import { useTrackPreviewUrl } from "@/features/previews/api/get-track-preview";
+import AudioPlayer from "@/features/previews/components/PreviewPlayer";
 import SwipeButtons from "@/features/swipe/components/SwipeButtons";
 import type { SwipeCardController, SwipeDirection } from "@/features/swipe/components/SwipeCard";
 import SwipeCardStack from "@/features/swipe/components/SwipeCardStack";
 import SwipeProgress from "@/features/swipe/components/SwipeProgress";
+import useSwipePreviews from "@/features/swipe/hooks/useSwipePreviews";
 import { useSwipeContext } from "@/features/swipe/provider/SwipeContext";
 import { Check, Undo } from "lucide-react";
 import { useRef, useState } from "react";
@@ -12,13 +15,17 @@ const MAX_CARD_STACK_HEIGHT = 3;
 const SwipeSongsPage = () => {
   const { session, playlist } = useSwipeContext();
   const navigate = useNavigate();
+  useSwipePreviews();
 
-  const currentSwipeCardRef = useRef<SwipeCardController | null>(null);
   const [isSwiping, setIsSwiping] = useState(false);
+  const currentSwipeCardRef = useRef<SwipeCardController | null>(null);
 
-  const index = session.swipes.length;
-  const hasReachedEnd = index >= playlist.totalTracks;
-  const canUndoOrFinish = !isSwiping && index > 0;
+  const currentIndex = session.swipes.length;
+  const currentTrack = playlist.tracks.at(currentIndex);
+  const currentPreview = useTrackPreviewUrl(currentTrack?.external_ids.isrc);
+
+  const hasReachedEnd = currentIndex >= playlist.totalTracks;
+  const canUndoOrFinish = !isSwiping && currentIndex > 0;
   const canSwipe = !isSwiping && !hasReachedEnd;
 
   const triggerSwipe = (direction: SwipeDirection) => {
@@ -28,9 +35,9 @@ const SwipeSongsPage = () => {
   };
 
   const recordSwipe = (direction: SwipeDirection) => {
-    if (hasReachedEnd) return;
+    if (!currentTrack || hasReachedEnd) return;
     session.recordSwipe({
-      item: playlist.tracks[index],
+      item: currentTrack,
       decision: direction === "left" ? "dislike" : "like",
     });
     setIsSwiping(false);
@@ -48,7 +55,7 @@ const SwipeSongsPage = () => {
         {!hasReachedEnd ? (
           <SwipeCardStack
             topCardRef={currentSwipeCardRef}
-            tracks={playlist.tracks.slice(index, index + MAX_CARD_STACK_HEIGHT)}
+            tracks={playlist.tracks.slice(currentIndex, currentIndex + MAX_CARD_STACK_HEIGHT)}
             canSwipe={canSwipe}
             onSwipeStart={() => setIsSwiping(true)}
             onSwipeEnd={recordSwipe}
@@ -72,12 +79,7 @@ const SwipeSongsPage = () => {
           canSwipe={canSwipe}
         />
       </div>
-      {/* <PreviewPlayer
-        url={currentAudioUrl}
-        isError={isAudioError}
-        isLoading={isAudioLoading}
-        className="w-full max-w-3xl"
-      /> */}
+      <AudioPlayer url={currentPreview.data?.preview_url} className="w-full max-w-3xl" />
     </div>
   );
 };

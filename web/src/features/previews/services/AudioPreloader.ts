@@ -16,6 +16,15 @@ export class AudioPreloader {
     }
   }
 
+  get(url: string): HTMLAudioElement {
+    let audio = this.cache.get(url);
+    if (!audio) {
+      audio = this.create(url);
+      this.cache.set(url, audio);
+    }
+    return audio;
+  }
+
   destroy() {
     for (const audio of this.cache.values()) {
       this.dispose(audio);

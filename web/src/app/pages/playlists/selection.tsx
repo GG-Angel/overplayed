@@ -1,10 +1,10 @@
 import PlaylistCard from "@/features/playlist/components/PlaylistCard";
 import { useNavigate } from "react-router-dom";
 import LoadingState from "@/components/states/LoadingState";
-import { usePlaylists } from "@/features/playlist/hooks/usePlaylists";
+import { useUserPlaylists } from "@/features/playlist/api/get-playlists";
 
 const SelectionPage = () => {
-  const { data: playlists, isLoading } = usePlaylists();
+  const { data: playlists, isLoading } = useUserPlaylists();
   const navigate = useNavigate();
 
   const navigateToPlaylist = (playlistId: string) => {

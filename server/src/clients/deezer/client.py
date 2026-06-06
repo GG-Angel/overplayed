@@ -1,3 +1,4 @@
+from loguru import logger
 from typing import Optional
 from aiohttp import ClientSession
 from settings import DeezerSettings
@@ -14,4 +15,9 @@ class DeezerClient:
         ) as response:
             response.raise_for_status()
             data = await response.json()
-            return data.get("preview")
+
+            if not isinstance(data, dict):
+                logger.error(f"Bad format for ISRC {isrc}: got {type(data).__name__}")
+                return None
+
+            return data.get("preview") or None

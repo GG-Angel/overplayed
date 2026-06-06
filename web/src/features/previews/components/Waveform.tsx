@@ -10,17 +10,57 @@ export type WaveformHandler = {
 
 type WaveformProps = {
   url: string | undefined;
-  waveformRef?: Ref<WaveformHandler>;
+  waveformRef: Ref<WaveformHandler>;
   className?: string;
   onPlay?: () => void;
   onPause?: () => void;
 };
 
+const WAVESURFER_OPTIONS = {
+  waveColor: "gray",
+  progressColor: "#1ed760",
+  height: "auto",
+  barWidth: 1,
+  barGap: 2,
+  barRadius: 1,
+  normalize: true,
+  dragToSeek: true,
+} as const;
+
 const Waveform = ({ url, waveformRef, className, onPlay, onPause }: WaveformProps) => {
   const [wavesurfer, setWavesurfer] = useState<WaveSurfer | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  // expose API to parent via ref
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const ws = WaveSurfer.create({ ...WAVESURFER_OPTIONS, container: containerRef.current });
+    setWavesurfer(ws);
+    return () => ws.destroy();
+  }, []);
+
+  useEffect(() => {
+    if (!wavesurfer) return;
+    if (!url) {
+      wavesurfer.pause();
+      return;
+    }
+    wavesurfer.load(url);
+  }, [wavesurfer, url]);
+
+  useEffect(() => {
+    if (!wavesurfer) return;
+    const unsubs = [
+      wavesurfer.on("ready", () => wavesurfer.play()),
+      wavesurfer.on("finish", () => {
+        wavesurfer.seekTo(0);
+        wavesurfer.play();
+      }),
+      wavesurfer.on("play", () => onPlay?.()),
+      wavesurfer.on("pause", () => onPause?.()),
+    ];
+    return () => unsubs.forEach((unsub) => unsub());
+  }, [wavesurfer, onPlay, onPause]);
+
   useImperativeHandle(
     waveformRef,
     () => ({
@@ -31,64 +71,6 @@ const Waveform = ({ url, waveformRef, className, onPlay, onPause }: WaveformProp
     }),
     [wavesurfer]
   );
-
-  // create wavesurfer instance
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    const wavesurfer = WaveSurfer.create({
-      container: containerRef.current,
-      waveColor: "gray",
-      progressColor: "#1ed760", // sp-green
-      height: "auto",
-      barWidth: 1,
-      barGap: 2,
-      barRadius: 1,
-      normalize: true,
-      autoplay: true,
-      dragToSeek: true,
-    });
-
-    setWavesurfer(wavesurfer);
-
-    return () => {
-      wavesurfer.destroy();
-    };
-  }, []);
-
-  // load new tracks
-  useEffect(() => {
-    if (!wavesurfer) return;
-    if (!url) {
-      if (wavesurfer.getDecodedData() !== null) {
-        wavesurfer.empty();
-        wavesurfer.pause();
-      }
-      return;
-    }
-    wavesurfer.load(url);
-  }, [url, wavesurfer]);
-
-  // handle player events
-  useEffect(() => {
-    if (!wavesurfer) return;
-
-    const subscriptions = [
-      wavesurfer.on("ready", () => {
-        wavesurfer.play(); // autoplay when new track is loaded
-      }),
-      wavesurfer.on("finish", () => {
-        wavesurfer.seekTo(0);
-        wavesurfer.play(); // loop when end is reached
-      }),
-      wavesurfer.on("play", () => onPlay?.()),
-      wavesurfer.on("pause", () => onPause?.()),
-    ];
-
-    return () => {
-      subscriptions.forEach((unsub) => unsub());
-    };
-  }, [wavesurfer, onPause, onPlay]);
 
   return <div ref={containerRef} className={className} />;
 };

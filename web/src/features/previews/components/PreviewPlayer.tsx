@@ -7,18 +7,13 @@ import Waveform, { type WaveformHandler } from "./Waveform";
 import WaveformSkeleton from "./WaveformSkeleton";
 
 type PreviewPlayerProps = {
-  url?: string | undefined;
+  url: string | undefined;
   isLoading?: boolean;
   isError?: boolean;
   className?: string;
 };
 
-const PreviewPlayer = ({
-  url,
-  isLoading = true,
-  isError = true,
-  className = "",
-}: PreviewPlayerProps) => {
+const AudioPlayer = ({ url, className }: PreviewPlayerProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const waveformRef = useRef<WaveformHandler>(null);
 
@@ -37,17 +32,12 @@ const PreviewPlayer = ({
           waveformRef={waveformRef}
           onPlay={() => setIsPlaying(true)}
           onPause={() => setIsPlaying(false)}
-          className={cn("absolute inset-0 min-w-1", !url && "invisible")}
+          className="absolute inset-0 min-w-1"
         />
-        {!url && (
-          <WaveformSkeleton
-            className="absolute inset-0"
-            message={isError ? "no preview :(" : isLoading ? "loading..." : ""}
-          />
-        )}
+        {!url && !isPlaying && <WaveformSkeleton className="absolute inset-0 z-10" />}
       </div>
     </Card>
   );
 };
 
-export default PreviewPlayer;
+export default AudioPlayer;
