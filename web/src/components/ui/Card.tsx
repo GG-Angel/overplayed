@@ -2,6 +2,9 @@ import { cn } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 import type { ComponentProps } from "react";
 
+// TODO: standardize shadows
+// TODO: just have tone, radius, and padding. allow overrides for padding
+
 const cardVariants = cva(
   "flex bg-card text-card-foreground border-2 border-card-border overflow-hidden",
   {
