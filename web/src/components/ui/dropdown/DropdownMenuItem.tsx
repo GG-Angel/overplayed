@@ -7,7 +7,7 @@ const DropdownMenuItem = ({ className, children, ...props }: DropdownMenuItem) =
   return (
     <button
       className={cn(
-        "cursor-pointer py-2 px-3 text-card-foreground hover:bg-card-border rounded-xs",
+        "flex justify-between items-center cursor-pointer py-2 px-3 text-card-foreground hover:bg-card-border rounded-xs",
         className
       )}
       {...props}

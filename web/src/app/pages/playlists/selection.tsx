@@ -5,10 +5,12 @@ import { useUserPlaylists } from "@/features/playlist/api/get-playlists";
 import { ArrowDown, ArrowUp, List, Search } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import MessageState from "@/components/states/MessageState";
-import Card from "@/components/ui/Card";
 import { cn } from "@/lib/utils";
-import useClickOutside from "@/hooks/useClickOutside";
-import Divider from "@/components/ui/Divider";
+import Dropdown from "@/components/ui/dropdown/Dropdown";
+import DropdownMenu from "@/components/ui/dropdown/DropdownMenu";
+import DropdownMenuItem from "@/components/ui/dropdown/DropdownMenuItem";
+import DropdownMenuDivider from "@/components/ui/dropdown/DropdownMenuDivider";
+import DropdownMenuSection from "@/components/ui/dropdown/DropdownMenuSection";
 
 type PlaylistSortKey = "alphabetical" | "tracks";
 type PlaylistSortOrder = "ascending" | "descending";
@@ -25,12 +27,8 @@ const SelectionPage = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [sortKey, setSortKey] = useState<PlaylistSortKey>("tracks");
   const [sortOrder, setSortOrder] = useState<PlaylistSortOrder>("descending");
-  const [isSortMenuVisible, setIsSortMenuVisible] = useState<boolean>(true);
 
-  const sortContainerRef = useClickOutside<HTMLDivElement>(
-    () => setIsSortMenuVisible(false),
-    isSortMenuVisible
-  );
+  const SortIcon = sortOrder === "ascending" ? ArrowUp : ArrowDown;
 
   const searchedPlaylists = useMemo(() => {
     if (!playlists) return [];
@@ -50,7 +48,6 @@ const SelectionPage = () => {
     });
   }, [searchedPlaylists, sortKey, sortOrder]);
 
-  const toggleSortMenu = useCallback(() => setIsSortMenuVisible((prev) => !prev), []);
   const toggleSortOrder = useCallback(
     () => setSortOrder((prev) => (prev === "ascending" ? "descending" : "ascending")),
     []
@@ -76,53 +73,41 @@ const SelectionPage = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <div className="relative w-fit justify-self-end self-center" ref={sortContainerRef}>
-          <button
-            className="flex items-center gap-3 text-muted-foreground cursor-pointer font-medium hover:scale-105 active:scale-100 hover:text-foreground transition-all duration-150"
-            onClick={toggleSortMenu}
-          >
-            {sortKeyLabels[sortKey]}
-            <List />
-          </button>
-          {/* TODO: Make responsive on mobile */}
-          {/* TODO: use this same menu style for the user menu */}
-          {isSortMenuVisible &&
-            (() => {
-              const SortIcon = sortOrder === "ascending" ? ArrowUp : ArrowDown;
+        {/* TODO: Make responsive on mobile */}
+        {/* TODO: use this same menu style for the user menu */}
+        <Dropdown
+          align="right"
+          className="justify-self-end h-full flex items-center"
+          trigger={({ toggle }) => (
+            <button
+              className="flex items-center gap-3 cursor-pointer font-medium hover:scale-105 active:scale-100 text-muted-foreground hover:text-foreground transition-all"
+              onClick={toggle}
+            >
+              {sortKeyLabels[sortKey]}
+              <List />
+            </button>
+          )}
+        >
+          <DropdownMenu className="w-64">
+            <DropdownMenuSection label="Sort by" />
+            {(Object.keys(sortKeyLabels) as PlaylistSortKey[]).map((key) => {
+              const isSelected = key === sortKey;
               return (
-                <Card
-                  className="flex-col absolute top-4/3 right-0 w-72 z-50 shadow-lg"
-                  size="xs"
-                  padding="square"
+                <DropdownMenuItem
+                  key={key}
+                  onClick={isSelected ? toggleSortOrder : () => setSortKey(key)}
+                  className={cn("", isSelected && "text-primary")}
                 >
-                  <span className="block mx-3 my-2 text-xs font-semibold text-muted-foreground">
-                    Sort by
-                  </span>
-                  {(Object.keys(sortKeyLabels) as PlaylistSortKey[]).map((key) => {
-                    const isSelectedKey = key === sortKey;
-                    return (
-                      <button
-                        className={cn(
-                          "flex justify-between items-center text-left cursor-pointer py-2 px-3 gap-2 hover:bg-card-border rounded-xs",
-                          isSelectedKey ? "text-primary" : "text-foreground"
-                        )}
-                        key={key}
-                        onClick={isSelectedKey ? toggleSortOrder : () => setSortKey(key)}
-                      >
-                        {sortKeyLabels[key]}
-                        {isSelectedKey && <SortIcon className="shrink-0" />}
-                      </button>
-                    );
-                  })}
-                  <Divider className="my-1" />
-                  <span className="block mx-3 my-2 text-xs font-semibold text-muted-foreground">
-                    View as
-                  </span>
-                  {/* TODO: add view options (vertical cards, horizontal cards, <title track_count link_icon highlight_green_on_hover>) */}
-                </Card>
+                  {sortKeyLabels[key]}
+                  {isSelected && <SortIcon className="shrink-0" />}
+                </DropdownMenuItem>
               );
-            })()}
-        </div>
+            })}
+            <DropdownMenuDivider />
+            <DropdownMenuSection label="View as" />
+            {/* TODO: add view options (vertical cards, horizontal cards, <title track_count link_icon highlight_green_on_hover>) */}
+          </DropdownMenu>
+        </Dropdown>
       </div>
       {sortedPlaylists.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-6 pb-4">
