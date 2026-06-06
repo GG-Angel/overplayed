@@ -1,5 +1,10 @@
 # TODO List
 
+## Fun Things
+
+- Add a page to show the user's history and personal stats.
+- Add a leaderboard for users who've deleted the most songs.
+
 ## Needs
 
 - Add liked songs as a playlist option.
