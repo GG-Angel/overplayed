@@ -4,6 +4,7 @@ import LoadingState from "@/components/states/LoadingState";
 import { useUserPlaylists } from "@/features/playlist/api/get-playlists";
 import { Search } from "lucide-react";
 import { useMemo, useState } from "react";
+import MessageState from "@/components/states/MessageState";
 
 const DEFAULT_SEARCH_QUERY = "";
 
@@ -22,29 +23,35 @@ const SelectionPage = () => {
   if (isLoading) return <LoadingState message="Loading playlists..." />;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col h-full gap-6">
       <h1 className="text-3xl sm:text-4xl md:text-5xl tracking-tighter font-bold text-center">
         Select a Playlist
       </h1>
-      <div className="flex items-center gap-2 bg-card border-card-border focus-within:border-muted-foreground border-2 py-2 px-3 rounded-md">
-        <Search className="text-muted-foreground" />
-        <input
-          className="w-full outline-none"
-          placeholder="Search for a playlist"
-          type="search"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-6 pb-4">
-        {searchedPlaylists.map((p) => (
-          <PlaylistCard
-            key={p.id}
-            playlist={p}
-            onClick={(playlistId) => navigate(`${playlistId}/swipe`)}
+      <div className="grid grid-cols-2 gap-6">
+        <div className="flex items-center gap-2 bg-card border-card-border focus-within:border-muted-foreground border-2 py-2 px-3 rounded-md">
+          <Search className="text-muted-foreground" />
+          <input
+            className="w-full outline-none"
+            placeholder="Search for a playlist"
+            type="search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
-        ))}
+        </div>
       </div>
+      {searchedPlaylists.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-6 pb-4">
+          {searchedPlaylists.map((p) => (
+            <PlaylistCard
+              key={p.id}
+              playlist={p}
+              onClick={(playlistId) => navigate(`${playlistId}/swipe`)}
+            />
+          ))}
+        </div>
+      ) : (
+        <MessageState kaomoji="(⁠๑﹏๑)" title="No playlists found" />
+      )}
     </div>
   );
 };

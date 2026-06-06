@@ -28,7 +28,7 @@ const useAuth = () => {
 
   const logout = async () => {
     await api.post("/auth/logout");
-    queryClient.clear();
+    queryClient.clear(); // TODO: make this a mutation
   };
 
   const redirectToLogin = (currentPath: string) => {

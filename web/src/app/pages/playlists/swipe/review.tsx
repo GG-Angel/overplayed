@@ -47,6 +47,7 @@ const SwipeReviewPage = () => {
       <MessageState
         kaomoji="ദ്ദി(｡•̀ ,<)~✩‧₊"
         title="Nothing to Remove!"
+        tone="success"
         subtitle={
           <>
             <p>You kept every track, so your playlist stays as is.</p>

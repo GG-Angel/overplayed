@@ -12,8 +12,13 @@ const ErrorState = ({ message = "Unexpected Error" }: ErrorStateProps) => {
   return (
     <MessageState
       kaomoji="(๑•̀ᗝ•́)૭"
+      tone="danger"
       title={message}
-      actions={<Button onClick={() => navigate("/", { replace: true })}>Return Home</Button>}
+      actions={
+        <Button variant="tertiary" onClick={() => navigate("/", { replace: true })}>
+          Return Home
+        </Button>
+      }
     />
   );
 };

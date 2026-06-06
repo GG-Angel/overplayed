@@ -40,6 +40,7 @@ const SwipeSubmitPage = () => {
       <MessageState
         kaomoji="(ᵕ • ㅁ •)"
         title="Invalid Submission"
+        tone="danger"
         subtitle={<p>You haven't disliked any tracks...</p>}
         actions={
           <>
@@ -60,9 +61,10 @@ const SwipeSubmitPage = () => {
       <MessageState
         kaomoji="(ᵕ ó ᴗ ò)"
         title="Submission Failed"
+        tone="danger"
         subtitle={
           <>
-            <p>One of the submission phases failed.</p>
+            <p>One of the submission steps failed.</p>
             <p className="text-sm text-muted-foreground">We recommend trying again.</p>
           </>
         }
@@ -85,6 +87,7 @@ const SwipeSubmitPage = () => {
       <MessageState
         kaomoji="ദ്ദി(｡•̀ ,<)~✩‧₊"
         title="Tracks Removed!"
+        tone="success"
         subtitle={
           <>
             <p>
