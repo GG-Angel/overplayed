@@ -16,12 +16,29 @@ import z from "zod";
 import { trackSchema } from "@/lib/types";
 import { useUserPlaylists } from "@/features/playlist/api/get-playlists";
 
+const steps = [
+  {
+    heading: "Pick a playlist",
+    body: "Connect Spotify and choose any playlist — even the 2,000-song dumpster fire.",
+  },
+  {
+    heading: "Swipe through it",
+    body: "A 30-second preview plays for each track. Swipe right to keep, left to cut.",
+  },
+  {
+    heading: "Confirm the purge",
+    body: "Review the cuts, back them up if you want, and delete all in just one click.",
+  },
+];
+
 const LandingPage = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
   const auth = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+
   const { data: metrics } = useMetrics();
   const { data: playlists } = useUserPlaylists();
+
   const carousel = useSwipeCarousel(z.array(trackSchema).parse(carouselTracks));
 
   if (auth.isLoading) return <LoadingState />;
@@ -71,37 +88,19 @@ const LandingPage = () => {
         <h3 className="text-center font-medium tracking-tight text-lg">
           Three steps toward a cleaner playlist
         </h3>
-        {(() => {
-          const steps = [
-            {
-              heading: "Pick a playlist",
-              body: "Connect Spotify and choose any playlist — even the 2,000-song dumpster fire.",
-            },
-            {
-              heading: "Swipe through it",
-              body: "A 30-second preview plays for each track. Swipe right to keep, left to cut.",
-            },
-            {
-              heading: "Confirm the purge",
-              body: "Review the cuts, back them up if you want, and delete all in just one click.",
-            },
-          ];
-          return (
-            <div className="grid grid-cols-3 gap-3">
-              {steps.map((step, index) => (
-                <Card key={step.heading} className="flex flex-col gap-1.5 py-3">
-                  <div className="flex items-center justify-center size-6 bg-card-foreground text-card rounded-full text-sm font-semibold">
-                    {index + 1}
-                  </div>
-                  <div>
-                    <p className="font-medium text-sm">{step.heading}</p>
-                    <p className="text-sm text-muted-foreground">{step.body}</p>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          );
-        })()}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {steps.map((step, index) => (
+            <Card key={step.heading} className="flex flex-col gap-1.5 py-3">
+              <div className="flex items-center justify-center size-6 bg-card-foreground text-card rounded-full text-sm font-semibold">
+                {index + 1}
+              </div>
+              <div>
+                <p className="font-medium text-sm">{step.heading}</p>
+                <p className="text-sm text-muted-foreground">{step.body}</p>
+              </div>
+            </Card>
+          ))}
+        </div>
       </div>
 
       {metrics && (
@@ -114,9 +113,14 @@ const LandingPage = () => {
               { label: "Songs cut", amount: formatCount(metrics.total_cuts) },
             ];
             return (
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-3">
                 {metricsSummary.map((m) => (
-                  <Metric key={m.label} {...m} tone="muted" />
+                  <Metric
+                    key={m.label}
+                    className="first:col-span-1 xs:first:col-span-2 sm:first:col-span-1"
+                    {...m}
+                    tone="muted"
+                  />
                 ))}
               </div>
             );

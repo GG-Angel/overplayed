@@ -37,6 +37,8 @@
   --color-ring: var(--color-sp-green);
 
   --font-sans: "Geist Variable", system-ui, sans-serif;
+
+  --breakpoint-xs: 480px;
 }
 
 @layer base {
