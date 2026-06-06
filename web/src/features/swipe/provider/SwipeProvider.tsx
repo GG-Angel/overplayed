@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { Track } from "@/lib/types";
 import useSwipes from "../hooks/useSwipes";
 import { SwipeContext, type SwipeFormOptions } from "./SwipeContext";
@@ -17,29 +17,49 @@ const SwipeProvider = () => {
 };
 
 const SwipeProviderInner = ({ playlistId }: { playlistId: string }) => {
-  const session = useSwipes<Track>();
   const [options, setOptions] = useState<SwipeFormOptions>(initialOptions);
+  const session = useSwipes<Track>();
 
   const playlist = usePlaylistMetadata(playlistId);
-  const items = usePrefetchedPlaylistItems(playlistId, session.swipes.length);
+  const playlistItems = usePrefetchedPlaylistItems(playlistId, session.swipes.length);
+  const playlistTracks = useMemo(
+    () => playlistItems.data?.pages.flatMap((p) => p.items.map((i) => i.track)) ?? [],
+    [playlistItems.data?.pages]
+  );
 
-  if (playlist.isError || items.isError) return <ErrorState message="Failed to load playlist" />;
-  if (!playlist.isSuccess || !items.isSuccess)
+  const contextValue = useMemo(
+    () =>
+      playlist.isSuccess && playlistItems.isSuccess
+        ? {
+            session,
+            options,
+            setOptions,
+            playlist: {
+              metadata: playlist.data,
+              tracks: playlistTracks,
+              totalTracks: playlistItems.data.pages[0].total,
+            },
+          }
+        : null,
+    [
+      session,
+      options,
+      playlist.isSuccess,
+      playlist.data,
+      playlistItems.isSuccess,
+      playlistItems.data,
+      playlistTracks,
+    ]
+  );
+
+  if (playlist.isError || playlistItems.isError)
+    return <ErrorState message="Failed to load playlist" />;
+
+  if (!playlist.isSuccess || !playlistItems.isSuccess)
     return <LoadingState message={`Loading ${!playlist.isSuccess ? "playlist" : "tracks"}...`} />;
 
   return (
-    <SwipeContext.Provider
-      value={{
-        session,
-        options,
-        setOptions,
-        playlist: {
-          metadata: playlist.data,
-          tracks: items.data.pages.flatMap((p) => p.items.map((i) => i.track)),
-          totalTracks: items.data.pages[0].total,
-        },
-      }}
-    >
+    <SwipeContext.Provider value={contextValue}>
       <Outlet />
     </SwipeContext.Provider>
   );

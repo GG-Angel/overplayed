@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 export type SwipeDecision = "like" | "dislike";
 
@@ -19,8 +19,11 @@ const useSwipes = <T>() => {
     return { likes, dislikes };
   }, [swipes]);
 
-  const recordSwipe = (swipe: Swipe<T>) => setSwipes((prev) => [...prev, swipe]);
-  const undoSwipe = () => setSwipes((prev) => prev.slice(0, -1));
+  const recordSwipe = useCallback((swipe: Swipe<T>) => {
+    setSwipes((prev) => [...prev, swipe]);
+  }, []);
+
+  const undoSwipe = useCallback(() => setSwipes((prev) => prev.slice(0, -1)), []);
 
   return { swipes, likes, dislikes, recordSwipe, undoSwipe };
 };
