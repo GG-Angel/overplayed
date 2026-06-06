@@ -91,7 +91,7 @@ const LandingPage = () => {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {steps.map((step, index) => (
             <Card key={step.heading} className="flex flex-col gap-1.5 py-3">
-              <div className="flex items-center justify-center size-6 bg-card-foreground text-card rounded-full text-sm font-semibold">
+              <div className="flex items-center justify-center size-6 bg-card-foreground text-card rounded-full text-sm font-semibold select-none">
                 {index + 1}
               </div>
               <div>

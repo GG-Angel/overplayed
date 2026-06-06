@@ -54,4 +54,18 @@
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-accent;
   }
+
+  ::selection {
+    @apply bg-primary text-primary-foreground;
+  }
+
+  h1 {
+    @apply text-3xl sm:text-4xl md:text-5xl tracking-tighter font-bold;
+  }
+  h2 {
+    @apply text-2xl sm:text-3xl tracking-tight font-semibold;
+  }
+  h3 {
+    @apply text-base sm:text-lg tracking-tight;
+  }
 }

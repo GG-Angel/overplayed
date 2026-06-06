@@ -2,7 +2,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import Card from "./Card";
 
-const metricVariants = cva("flex flex-1 flex-col justify-center items-center select-none", {
+const metricVariants = cva("flex flex-1 flex-col justify-center items-center", {
   variants: {
     tone: {
       neutral: "",
