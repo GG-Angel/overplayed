@@ -76,7 +76,7 @@ const SelectionPage = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <div className="flex flex-col items-end justify-center relative" ref={sortContainerRef}>
+        <div className="relative w-fit justify-self-end self-center" ref={sortContainerRef}>
           <button
             className="flex items-center gap-3 text-muted-foreground cursor-pointer font-medium hover:scale-105 active:scale-100 hover:text-foreground transition-all duration-150"
             onClick={toggleSortMenu}
@@ -91,7 +91,7 @@ const SelectionPage = () => {
               const SortIcon = sortOrder === "ascending" ? ArrowUp : ArrowDown;
               return (
                 <Card
-                  className="flex-col absolute top-4/3 w-full max-w-3xs z-50 shadow-lg"
+                  className="flex-col absolute top-4/3 right-0 w-72 z-50 shadow-lg"
                   size="xs"
                   padding="square"
                 >
