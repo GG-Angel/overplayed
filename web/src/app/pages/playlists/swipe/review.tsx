@@ -5,6 +5,7 @@ import Checkbox from "@/components/ui/Checkbox";
 import Metric from "@/components/ui/Metric";
 import TrackCard from "@/features/playlist/components/TrackCard";
 import { useSwipeContext } from "@/features/swipe/provider/SwipeContext";
+import { kaomojis } from "@/lib/kaomoji";
 import { formatCount, pluralize } from "@/lib/utils";
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
@@ -25,7 +26,7 @@ const SwipeReviewPage = () => {
   if (session.swipes.length === 0) {
     return (
       <MessageState
-        kaomoji="(ᵕ • ㅁ •)"
+        kaomoji={kaomojis.uncertain}
         title="No Tracks Swiped"
         subtitle={<p>You haven't swiped on any tracks...</p>}
         actions={
@@ -45,9 +46,9 @@ const SwipeReviewPage = () => {
   if (session.dislikes.length === 0) {
     return (
       <MessageState
-        kaomoji="ദ്ദി(｡•̀ ,<)~✩‧₊"
+        kaomoji={kaomojis.proud}
         title="Nothing to Remove!"
-        tone="success"
+        tone="positive"
         subtitle={
           <>
             <p>You kept every track, so your playlist stays as is.</p>
@@ -70,8 +71,8 @@ const SwipeReviewPage = () => {
 
   return (
     <div className="flex flex-col gap-6 py-2 w-full max-w-4xl self-center">
-      <p className="text-2xl font-medium">Review Changes</p>
-      <div className="flex gap-3">
+      <h1 className="text-center">Review Swipes</h1>
+      <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
         <Metric
           amount={formatCount(session.dislikes.length)}
           label={pluralize("Dislike", session.dislikes.length)}
@@ -83,8 +84,8 @@ const SwipeReviewPage = () => {
           tone="positive"
         />
       </div>
-      <div>
-        <p className="mb-3">The following tracks will be removed:</p>
+      <div className="flex flex-col gap-3">
+        <h3>The following tracks will be removed:</h3>
         <div className="flex flex-col gap-3 max-h-107 overflow-y-auto snap-y snap-mandatory">
           {session.dislikes.map((track) => (
             <TrackCard
@@ -107,7 +108,7 @@ const SwipeReviewPage = () => {
         </div>
         <Checkbox enabled={options.backupEnabled} onEnabledChange={handleBackupToggle} />
       </Card>
-      <div className="flex justify-end gap-3">
+      <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:w-fit sm:self-end">
         <Button variant="secondary" onClick={navigateToSwipePage}>
           Keep Swiping
         </Button>

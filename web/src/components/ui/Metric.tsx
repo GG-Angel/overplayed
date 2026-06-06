@@ -25,7 +25,9 @@ type MetricProps = VariantProps<typeof metricVariants> & {
 const Metric = ({ amount, label, tone, className }: MetricProps) => (
   <Card className={cn(metricVariants({ tone }), className)}>
     <p className="text-sm font-medium text-current/60">{label}</p>
-    <p className="text-4xl font-semibold tracking-tight">{amount}</p>
+    <data className="text-4xl tracking-tight font-semibold" value={amount}>
+      {amount}
+    </data>
   </Card>
 );
 

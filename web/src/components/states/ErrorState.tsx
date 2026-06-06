@@ -1,18 +1,19 @@
 import { useNavigate } from "react-router-dom";
 import MessageState from "./MessageState";
 import Button from "../ui/Button";
+import { kaomojis } from "@/lib/kaomoji";
 
 type ErrorStateProps = {
   message?: string;
 };
 
-const ErrorState = ({ message = "Unexpected Error" }: ErrorStateProps) => {
+const ErrorState = ({ message = "Unexpected error!" }: ErrorStateProps) => {
   const navigate = useNavigate();
 
   return (
     <MessageState
-      kaomoji="(๑•̀ᗝ•́)૭"
-      tone="danger"
+      kaomoji={kaomojis.stressed}
+      tone="negative"
       title={message}
       actions={
         <Button variant="tertiary" onClick={() => navigate("/", { replace: true })}>

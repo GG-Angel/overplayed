@@ -16,7 +16,7 @@ import z from "zod";
 import { trackSchema } from "@/lib/types";
 import { useUserPlaylists } from "@/features/playlist/api/get-playlists";
 
-const steps = [
+const swipeSteps = [
   {
     heading: "Pick a playlist",
     body: "Connect Spotify and choose any playlist — even the 2,000-song dumpster fire.",
@@ -45,18 +45,18 @@ const LandingPage = () => {
 
   return (
     <div className="flex flex-col gap-8 w-full max-w-3xl self-center py-8">
-      <h1 className="text-3xl sm:text-4xl md:text-5xl tracking-tighter font-bold text-center">
-        <span className="block">Your playlist is bloated.</span>
+      <h1 className="text-center">
+        <span className="block">Your playlist is bloated. </span>
         <span className="block text-muted-foreground">
           <span className="text-primary">Swipe</span> the dead weight away.
         </span>
       </h1>
 
-      <h3 className="text-center text-base sm:text-lg tracking-tight">
-        <span className="block font-medium">
+      <h3 className="text-center">
+        <span className="xs:block">
           Tinder for your playlists. Swipe right to keep, left to cut.
-        </span>
-        <span className="block">Clean up years of saved songs in minutes.</span>
+        </span>{" "}
+        <span className="xs:block">Clean up years of saved songs in minutes.</span>
       </h3>
 
       <Button
@@ -85,11 +85,9 @@ const LandingPage = () => {
       </Card>
 
       <div className="flex flex-col gap-3">
-        <h3 className="text-center font-medium tracking-tight text-lg">
-          Three steps toward a cleaner playlist
-        </h3>
+        <h3 className="text-center">Three steps toward a cleaner playlist</h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {steps.map((step, index) => (
+          {swipeSteps.map((step, index) => (
             <Card key={step.heading} className="flex flex-col gap-1.5 py-3">
               <div className="flex items-center justify-center size-6 bg-card-foreground text-card rounded-full text-sm font-semibold select-none">
                 {index + 1}
@@ -105,7 +103,7 @@ const LandingPage = () => {
 
       {metrics && (
         <div className="flex flex-col gap-3">
-          <h3 className="text-center font-medium tracking-tight text-lg">Global statistics</h3>
+          <h3 className="text-center">Global statistics</h3>
           {(() => {
             const metricsSummary = [
               { label: "Songs swiped", amount: formatCount(metrics.total_swipes) },
@@ -138,8 +136,8 @@ const LandingPage = () => {
           return (
             <>
               <Divider />
-              <p className="text-muted-foreground text-center">
-                Your "{mostTracksPlaylist.name}" playlist has {mostTracksPlaylist.tracks.total}{" "}
+              <p className="text-muted-foreground text-center wrap-break-word">
+                Your playlist "{mostTracksPlaylist.name}" has {mostTracksPlaylist.tracks.total}{" "}
                 tracks. You could cut maybe {estimatedSkips}.
               </p>
             </>

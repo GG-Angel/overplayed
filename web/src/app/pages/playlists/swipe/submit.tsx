@@ -4,6 +4,7 @@ import { Spinner } from "@/components/ui/Spinner";
 import useSubmitSwipes, { swipePhaseDescriptions } from "@/features/swipe/hooks/useSubmitSwipes";
 import { useSwipeContext } from "@/features/swipe/provider/SwipeContext";
 import useConfetti from "@/hooks/useConfetti";
+import { kaomojis } from "@/lib/kaomoji";
 import { openExternalUrl } from "@/lib/utils";
 import { useEffect, useEffectEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -38,9 +39,9 @@ const SwipeSubmitPage = () => {
   if (!controller.canSubmit) {
     return (
       <MessageState
-        kaomoji="(ᵕ • ㅁ •)"
+        kaomoji={kaomojis.uncertain}
         title="Invalid Submission"
-        tone="danger"
+        tone="negative"
         subtitle={<p>You haven't disliked any tracks...</p>}
         actions={
           <>
@@ -59,9 +60,9 @@ const SwipeSubmitPage = () => {
   if (controller.isError) {
     return (
       <MessageState
-        kaomoji="(ᵕ ó ᴗ ò)"
+        kaomoji={kaomojis.stressed}
         title="Submission Failed"
-        tone="danger"
+        tone="negative"
         subtitle={
           <>
             <p>One of the submission steps failed.</p>
@@ -85,9 +86,9 @@ const SwipeSubmitPage = () => {
   if (controller.isSuccess) {
     return (
       <MessageState
-        kaomoji="ദ്ദി(｡•̀ ,<)~✩‧₊"
+        kaomoji={kaomojis.proud}
         title="Tracks Removed!"
-        tone="success"
+        tone="positive"
         subtitle={
           <>
             <p>
@@ -118,10 +119,11 @@ const SwipeSubmitPage = () => {
 
   return (
     <MessageState
-      kaomoji="( ◡̀_◡́)ᕤ"
-      title="Processing Changes"
-      body={
-        <div className="flex self-center items-center gap-2">
+      kaomoji={kaomojis.working}
+      title="Submitting to Spotify"
+      tone="positive"
+      subtitle={
+        <div className="flex justify-center items-center gap-2 mt-2">
           <Spinner size="sm" />
           <p className="text-muted-foreground">
             {controller.phase ? swipePhaseDescriptions[controller.phase] : "Starting up..."}

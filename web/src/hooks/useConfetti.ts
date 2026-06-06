@@ -8,7 +8,7 @@ type ConfettiProps = {
 const useConfetti = ({ enabled = true }: ConfettiProps) => {
   useEffect(() => {
     if (!enabled) return;
-    const common = { particleCount: 20, spread: 55, colors: ["#1ed760"] };
+    const common = { particleCount: 35, spread: 55, colors: ["#1ed760"] };
     const frame = () => {
       confetti({ ...common, angle: 60, origin: { x: 0 } });
       confetti({ ...common, angle: 120, origin: { x: 1 } });

@@ -3,7 +3,7 @@ import type { Track } from "@/lib/types";
 import { cn, extractImageUrl } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 
-const cardVariants = cva("flex gap-3 select-none", {
+const cardVariants = cva("flex gap-3", {
   variants: {
     orientation: {
       vertical: "flex-col",
@@ -15,7 +15,7 @@ const cardVariants = cva("flex gap-3 select-none", {
   },
 });
 
-const imageVariants = cva("aspect-square object-cover rounded-sm", {
+const imageVariants = cva("aspect-square object-cover rounded-sm select-none", {
   variants: {
     orientation: {
       vertical: "w-full",

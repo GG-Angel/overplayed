@@ -11,6 +11,7 @@ import DropdownMenu from "@/components/ui/dropdown/DropdownMenu";
 import DropdownMenuItem from "@/components/ui/dropdown/DropdownMenuItem";
 import DropdownMenuDivider from "@/components/ui/dropdown/DropdownMenuDivider";
 import DropdownMenuSection from "@/components/ui/dropdown/DropdownMenuSection";
+import { kaomojis } from "@/lib/kaomoji";
 
 type PlaylistSortKey = "alphabetical" | "tracks";
 type PlaylistSortOrder = "ascending" | "descending";
@@ -57,9 +58,7 @@ const SelectionPage = () => {
 
   return (
     <div className="flex flex-col h-full gap-6">
-      <h1 className="text-3xl sm:text-4xl md:text-5xl tracking-tighter font-bold text-center">
-        Select a Playlist
-      </h1>
+      <h1 className="text-center">Select a Playlist</h1>
       <div className="grid grid-cols-2 gap-6">
         {/* TODO: make input a component */}
         {/* TODO: Shrink to just icon on mobile. When active, cut off text from sort menu. */}
@@ -120,7 +119,7 @@ const SelectionPage = () => {
           ))}
         </div>
       ) : (
-        <MessageState kaomoji="(⁠๑﹏๑)" title="No playlists found" />
+        <MessageState kaomoji={kaomojis.uncertain} title="No playlists found" />
       )}
     </div>
   );

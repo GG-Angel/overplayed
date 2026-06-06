@@ -3,15 +3,14 @@ import type { ReactNode } from "react";
 
 const messageTones = {
   neutral: "text-muted-foreground",
-  danger: "text-destructive",
-  success: "text-primary",
+  negative: "text-destructive",
+  positive: "text-success",
 } as const;
 
 type MessageStateProps = {
   kaomoji: string;
   title: string;
   subtitle?: ReactNode;
-  body?: ReactNode;
   actions?: ReactNode;
   tone?: keyof typeof messageTones;
 };
@@ -20,20 +19,18 @@ const MessageState = ({
   kaomoji,
   title,
   subtitle,
-  body,
   actions,
   tone = "neutral",
 }: MessageStateProps) => {
   return (
-    <div className="flex flex-col h-full justify-center gap-6">
+    <div className="flex flex-col h-full justify-center gap-4">
       <div className="text-center">
-        <p className={cn("text-4xl", messageTones[tone])}>{kaomoji}</p>
-        <p className="text-xl font-medium mt-2">{title}</p>
+        <p className={cn("text-4xl xs:text-5xl font-bold", messageTones[tone])}>{kaomoji}</p>
+        <p className="heading-3 mt-2">{title}</p>
         {subtitle}
       </div>
-      {body}
       {actions && (
-        <div className="grid grid-flow-col auto-cols-fr gap-2 *:w-full w-full max-w-lg self-center">
+        <div className="grid grid-cols-1 xs:grid-flow-col xs:auto-cols-fr gap-2 *:w-full w-full max-w-lg self-center">
           {actions}
         </div>
       )}
