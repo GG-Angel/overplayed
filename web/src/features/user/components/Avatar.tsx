@@ -7,7 +7,7 @@ type AvatarProps = ComponentProps<"button"> & {
 };
 
 const Avatar = ({ user, className, ...props }: AvatarProps) => {
-  const pictureUrl = extractImageUrl(user.images, "sm");
+  const profilePictureUrl = extractImageUrl(user.images, "sm");
   return (
     <button
       className={cn(
@@ -17,7 +17,7 @@ const Avatar = ({ user, className, ...props }: AvatarProps) => {
       {...props}
     >
       <img
-        src={pictureUrl}
+        src={profilePictureUrl}
         className="size-full object-cover"
         alt={`${user.display_name}'s profile picture`}
       />

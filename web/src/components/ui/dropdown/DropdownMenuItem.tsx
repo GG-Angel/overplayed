@@ -1,19 +1,19 @@
 import { cn } from "@/lib/utils";
 import type { ComponentProps } from "react";
 
-type DropdownMenuItem = ComponentProps<"button">;
+export type DropdownMenuItemProps = ComponentProps<"div">;
 
-const DropdownMenuItem = ({ className, children, ...props }: DropdownMenuItem) => {
+const DropdownMenuItem = ({ className, children, ...props }: DropdownMenuItemProps) => {
   return (
-    <button
+    <div
       className={cn(
-        "flex justify-between items-center cursor-pointer py-1.5 px-3 text-card-foreground hover:bg-card-border rounded-sm",
+        "flex items-center py-1.5 px-3 gap-2 text-card-foreground rounded-sm overflow-hidden",
         className
       )}
       {...props}
     >
       {children}
-    </button>
+    </div>
   );
 };
 

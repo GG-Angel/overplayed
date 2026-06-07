@@ -49,6 +49,7 @@ class User(Resource):
 
 
 class CurrentUser(User):
+    email: str
     images: List[Image]
 
 

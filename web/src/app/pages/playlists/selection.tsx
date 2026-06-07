@@ -7,7 +7,6 @@ import { useCallback, useMemo, useState, type ComponentType } from "react";
 import MessageState from "@/components/states/MessageState";
 import Dropdown from "@/components/ui/dropdown/Dropdown";
 import DropdownMenu from "@/components/ui/dropdown/DropdownMenu";
-import DropdownMenuItem from "@/components/ui/dropdown/DropdownMenuItem";
 import DropdownMenuDivider from "@/components/ui/dropdown/DropdownMenuDivider";
 import DropdownMenuSection from "@/components/ui/dropdown/DropdownMenuSection";
 import { kaomojis } from "@/lib/kaomoji";
@@ -24,6 +23,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import PlaylistCover from "@/features/playlist/components/PlaylistCover";
+import DropdownMenuButton from "@/components/ui/dropdown/DropdownMenuButton";
 
 type PlaylistSortKey = "alphabetical" | "tracks";
 type PlaylistSortOrder = "ascending" | "descending";
@@ -128,14 +128,14 @@ const SelectionPage = () => {
             {(Object.keys(sortConfig) as PlaylistSortKey[]).map((option) => {
               const isSelected = option === sortKey;
               return (
-                <DropdownMenuItem
+                <DropdownMenuButton
                   key={option}
                   onClick={isSelected ? toggleSortOrder : () => setSortKey(option)}
-                  className={cn(isSelected && "text-primary")}
+                  className={cn("justify-between", isSelected && "text-primary")}
                 >
                   {sortConfig[option].label}
                   {isSelected && <SortIcon className="shrink-0" />}
-                </DropdownMenuItem>
+                </DropdownMenuButton>
               );
             })}
             <DropdownMenuDivider />

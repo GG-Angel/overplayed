@@ -26,6 +26,7 @@ export const userSchema = resourceRefSchema.extend({
 });
 
 export const currentUserSchema = userSchema.extend({
+  email: z.email(),
   images: z.array(imageSchema),
 });
 

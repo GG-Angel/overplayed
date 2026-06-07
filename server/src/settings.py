@@ -7,7 +7,7 @@ STATE_KEY = "state"
 class SpotifySettings(BaseModel):
     client_id: str
     client_secret: str
-    scope: str = "playlist-read-private playlist-modify-private playlist-modify-public"
+    scope: str = "playlist-read-private playlist-modify-private playlist-modify-public user-read-email"
 
     # pagination limits
     lim_playlists: int = 50
