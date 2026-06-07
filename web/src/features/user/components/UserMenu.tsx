@@ -11,7 +11,7 @@ import DropdownMenuButton from "@/components/ui/dropdown/DropdownMenuButton";
 import { openExternalUrl } from "@/lib/utils";
 import { ChartLine, ExternalLink, LogOut, User } from "lucide-react";
 
-const AvatarWithDropdown = () => {
+const UserMenu = () => {
   const { user, isLoading, redirectToLogin, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -59,4 +59,4 @@ const AvatarWithDropdown = () => {
   );
 };
 
-export default AvatarWithDropdown;
+export default UserMenu;
