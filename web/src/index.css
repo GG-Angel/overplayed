@@ -59,7 +59,7 @@
   }
 
   ::selection {
-    background: color-mix(in oklch, var(--color-sp-green) 30%, transparent);
+    @apply bg-primary text-primary-foreground;
   }
 
   h1 {

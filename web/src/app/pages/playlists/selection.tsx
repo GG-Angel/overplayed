@@ -1,25 +1,59 @@
+import { cn } from "@/lib/utils";
 import PlaylistCard from "@/features/playlist/components/PlaylistCard";
 import { useNavigate } from "react-router-dom";
 import LoadingState from "@/components/states/LoadingState";
 import { useUserPlaylists } from "@/features/playlist/api/get-playlists";
-import { ArrowDown, ArrowUp, List, Search } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, type ComponentType } from "react";
 import MessageState from "@/components/states/MessageState";
-import { cn } from "@/lib/utils";
 import Dropdown from "@/components/ui/dropdown/Dropdown";
 import DropdownMenu from "@/components/ui/dropdown/DropdownMenu";
 import DropdownMenuItem from "@/components/ui/dropdown/DropdownMenuItem";
 import DropdownMenuDivider from "@/components/ui/dropdown/DropdownMenuDivider";
 import DropdownMenuSection from "@/components/ui/dropdown/DropdownMenuSection";
 import { kaomojis } from "@/lib/kaomoji";
+import PlaylistRow from "@/features/playlist/components/PlaylistRow";
+import type { PlaylistDisplayProps } from "@/features/playlist/components/props";
+import {
+  ArrowDown,
+  ArrowUp,
+  LayoutGrid,
+  List,
+  Menu,
+  Rows,
+  Search,
+  type LucideIcon,
+} from "lucide-react";
+import PlaylistCover from "@/features/playlist/components/PlaylistCover";
 
 type PlaylistSortKey = "alphabetical" | "tracks";
 type PlaylistSortOrder = "ascending" | "descending";
+type PlaylistLayout = "text" | "card" | "cover";
 
-const sortKeyLabels: Record<PlaylistSortKey, string> = {
-  tracks: "Track count",
-  alphabetical: "Alphabetical",
+const sortConfig: Record<PlaylistSortKey, { label: string }> = {
+  tracks: { label: "Track count" },
+  alphabetical: { label: "Alphabetical" },
 } as const;
+
+const layoutConfig: Record<
+  PlaylistLayout,
+  { icon: LucideIcon; component: ComponentType<PlaylistDisplayProps>; containerClassName: string }
+> = {
+  text: {
+    icon: Menu,
+    component: PlaylistRow,
+    containerClassName: "flex flex-col gap-1",
+  },
+  card: {
+    icon: Rows,
+    component: PlaylistCard,
+    containerClassName: "grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-6 pb-4",
+  },
+  cover: {
+    icon: LayoutGrid,
+    component: PlaylistCover,
+    containerClassName: "grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-4",
+  },
+};
 
 const SelectionPage = () => {
   const { data: playlists, isLoading } = useUserPlaylists();
@@ -28,8 +62,10 @@ const SelectionPage = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [sortKey, setSortKey] = useState<PlaylistSortKey>("tracks");
   const [sortOrder, setSortOrder] = useState<PlaylistSortOrder>("descending");
+  const [layout, setLayout] = useState<PlaylistLayout>("card");
 
   const SortIcon = sortOrder === "ascending" ? ArrowUp : ArrowDown;
+  const Playlist = layoutConfig[layout].component;
 
   const searchedPlaylists = useMemo(() => {
     if (!playlists) return [];
@@ -82,36 +118,52 @@ const SelectionPage = () => {
               className="flex items-center gap-3 cursor-pointer font-medium hover:scale-105 active:scale-100 text-muted-foreground hover:text-foreground transition-all"
               onClick={toggle}
             >
-              {sortKeyLabels[sortKey]}
+              {sortConfig[sortKey].label}
               <List />
             </button>
           )}
         >
           <DropdownMenu className="w-64">
             <DropdownMenuSection label="Sort by" />
-            {(Object.keys(sortKeyLabels) as PlaylistSortKey[]).map((key) => {
-              const isSelected = key === sortKey;
+            {(Object.keys(sortConfig) as PlaylistSortKey[]).map((option) => {
+              const isSelected = option === sortKey;
               return (
                 <DropdownMenuItem
-                  key={key}
-                  onClick={isSelected ? toggleSortOrder : () => setSortKey(key)}
+                  key={option}
+                  onClick={isSelected ? toggleSortOrder : () => setSortKey(option)}
                   className={cn(isSelected && "text-primary")}
                 >
-                  {sortKeyLabels[key]}
+                  {sortConfig[option].label}
                   {isSelected && <SortIcon className="shrink-0" />}
                 </DropdownMenuItem>
               );
             })}
             <DropdownMenuDivider />
             <DropdownMenuSection label="View as" />
-            {/* TODO: add view options (vertical cards, horizontal cards, <title track_count link_icon highlight_green_on_hover>) */}
+            <div className="grid auto-cols-fr grid-flow-col bg-background rounded-lg p-1 gap-1">
+              {(Object.keys(layoutConfig) as PlaylistLayout[]).map((option) => {
+                const Icon = layoutConfig[option].icon;
+                const isSelected = option === layout;
+                return (
+                  <button
+                    className={cn(
+                      "flex justify-center text-muted-foreground p-1 rounded-sm cursor-pointer hover:bg-card",
+                      isSelected && "text-accent bg-card"
+                    )}
+                    onClick={() => setLayout(option)}
+                  >
+                    <Icon />
+                  </button>
+                );
+              })}
+            </div>
           </DropdownMenu>
         </Dropdown>
       </div>
       {sortedPlaylists.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-6 pb-4">
+        <div className={layoutConfig[layout].containerClassName}>
           {sortedPlaylists.map((p) => (
-            <PlaylistCard
+            <Playlist
               key={p.id}
               playlist={p}
               onClick={(playlistId) => navigate(`${playlistId}/swipe`)}

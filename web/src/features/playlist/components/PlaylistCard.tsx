@@ -1,20 +1,15 @@
-import type { PlaylistMetadata } from "@/lib/types";
 import { extractImageUrl } from "@/lib/utils";
 import { ArrowUpRight } from "lucide-react";
+import type { PlaylistDisplayProps } from "./props";
 
-type PlaylistCardProps = {
-  playlist: PlaylistMetadata;
-  onClick?: (playlistId: string) => void;
-};
-
-const PlaylistCard = ({ playlist, onClick }: PlaylistCardProps) => {
+const PlaylistCard = ({ playlist, onClick }: PlaylistDisplayProps) => {
   const coverUrl = extractImageUrl(playlist.images ?? [], "lg");
+
   return (
     <button
-      type="button"
-      disabled={playlist.tracks.total <= 0}
       onClick={() => onClick?.(playlist.id)}
-      className="group relative flex h-32 w-full gap-4 overflow-hidden rounded-xl border-2 border-card-border bg-card px-4 py-3 text-left cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
+      disabled={playlist.tracks.total <= 0}
+      className="group relative flex h-32 w-full gap-4 overflow-hidden rounded-xl border-2 border-card-border bg-card px-4 py-3 text-left not-disabled:cursor-pointer disabled:opacity-50"
     >
       {/* Blurred backdrop */}
       <img
@@ -38,7 +33,7 @@ const PlaylistCard = ({ playlist, onClick }: PlaylistCardProps) => {
       <div className="z-10 flex w-full flex-col justify-between overflow-hidden">
         <ArrowUpRight className="origin-top-right self-end transition group-hover:scale-125 group-hover:text-primary" />
         <div>
-          <p className="truncate font-semibold text-text-h">{playlist.name}</p>
+          <p className="truncate font-semibold">{playlist.name}</p>
           <p className="truncate text-muted-foreground">{playlist.tracks.total} tracks</p>
         </div>
       </div>
