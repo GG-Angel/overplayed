@@ -2,9 +2,7 @@ import { cn } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 import type { ComponentProps } from "react";
 
-// TODO: standardize shadows
-
-const cardVariants = cva("flex overflow-hidden border-2 text-card-foreground", {
+const cardVariants = cva("flex overflow-hidden border-2 text-card-foreground shadow-md", {
   variants: {
     tone: { default: "bg-card border-card-border", muted: "bg-card/40 border-card-border/40" },
     radius: {

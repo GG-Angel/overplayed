@@ -104,11 +104,9 @@ const SwipeCard = ({
       initial={{ y: isTopCard ? -MOUNT_OFFSET : 0 }}
       animate={{ y: 0 }}
       onDragEnd={handleDragEnd}
-      className={cn(
-        "relative origin-bottom transition-shadow drop-shadow-lg drop-shadow-black/25",
-        className
-      )}
+      className={cn("relative origin-bottom transition-shadow", className)}
     >
+      <TrackCard track={track} />
       <SwipeCardDecisionOverlay
         icon={Heart}
         opacity={likeOpacity}
@@ -119,7 +117,6 @@ const SwipeCard = ({
         opacity={dislikeOpacity}
         className="text-destructive from-destructive/50"
       />
-      <TrackCard track={track} />
     </motion.div>
   );
 };

@@ -23,7 +23,7 @@ const SwipeCardDecisionOverlay = ({
     <Icon
       fill="currentColor"
       fillOpacity={0.6}
-      className="drop-shadow-black drop-shadow-lg size-1/3"
+      className="drop-shadow-black/50 drop-shadow-lg size-1/3"
     />
   </motion.div>
 );
