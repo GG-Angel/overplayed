@@ -14,8 +14,9 @@ type PreviewPlayerProps = {
 };
 
 const AudioPlayer = ({ url, className }: PreviewPlayerProps) => {
-  const [isPlaying, setIsPlaying] = useState(false);
   const waveformRef = useRef<WaveformHandler>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
   return (
     <Card padding="sm" className={cn("flex items-center gap-3 py-2", className)}>
@@ -30,11 +31,14 @@ const AudioPlayer = ({ url, className }: PreviewPlayerProps) => {
         <Waveform
           url={url}
           waveformRef={waveformRef}
-          onPlay={() => setIsPlaying(true)}
+          onPlay={() => {
+            setIsReady(true);
+            setIsPlaying(true);
+          }}
           onPause={() => setIsPlaying(false)}
-          className="absolute inset-0 min-w-1"
+          className={cn("absolute inset-0 min-w-1", !isReady && "invisible")}
         />
-        {!url && !isPlaying && <WaveformSkeleton className="absolute inset-0 z-10" />}
+        {!isReady && <WaveformSkeleton className="absolute inset-0 z-10" />}
       </div>
     </Card>
   );
