@@ -56,13 +56,12 @@ const layoutConfig: Record<
 };
 
 const SelectionPage = () => {
-  const { data: playlists, isLoading } = useUserPlaylists();
-  const navigate = useNavigate();
-
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [sortKey, setSortKey] = useState<PlaylistSortKey>("tracks");
   const [sortOrder, setSortOrder] = useState<PlaylistSortOrder>("descending");
   const [layout, setLayout] = useState<PlaylistLayout>("card");
+  const { data: playlists, isLoading } = useUserPlaylists();
+  const navigate = useNavigate();
 
   const SortIcon = sortOrder === "ascending" ? ArrowUp : ArrowDown;
   const Playlist = layoutConfig[layout].component;

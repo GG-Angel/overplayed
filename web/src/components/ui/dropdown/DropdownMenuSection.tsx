@@ -1,5 +1,3 @@
-// TODO: complete
-
 type DropdownMenuSectionProps = {
   label: string;
 };
