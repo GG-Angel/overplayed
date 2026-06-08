@@ -1,17 +1,30 @@
 import { cn } from "@/lib/utils";
-import type { ComponentProps } from "react";
+import { useRef, type ComponentProps } from "react";
+import Card from "./Card";
+import type { LucideIcon } from "lucide-react";
 
-const Input = ({ className, ...props }: ComponentProps<"input">) => (
-  <input
-    className={cn(
-      "w-full rounded-md border border-input bg-background px-3 py-2 text-sm",
-      "placeholder:text-muted-foreground",
-      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-      "disabled:cursor-not-allowed disabled:opacity-50",
-      className
-    )}
-    {...props}
-  />
-);
+type InputProps = ComponentProps<"input"> & {
+  className?: string;
+  icon?: LucideIcon;
+};
+
+const Input = ({ icon: Icon, className, ...props }: InputProps) => {
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  return (
+    <Card
+      onClick={() => searchRef.current?.focus()}
+      radius="xs"
+      padding="none"
+      className={cn(
+        "flex items-center gap-2 py-2 px-3 cursor-text focus-within:border-muted-foreground",
+        className
+      )}
+    >
+      {Icon && <Icon className="text-muted-foreground" />}
+      <input ref={searchRef} className={cn("w-full outline-none", className)} {...props} />
+    </Card>
+  );
+};
 
 export default Input;

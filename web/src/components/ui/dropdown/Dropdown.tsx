@@ -10,7 +10,7 @@ type DropdownProps = {
 };
 
 const Dropdown = ({ trigger, children, className, align = "left" }: DropdownProps) => {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const ref = useClickOutside<HTMLDivElement>(() => setOpen(false), open);
 
   return (

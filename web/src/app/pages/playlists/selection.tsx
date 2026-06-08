@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import PlaylistCover from "@/features/playlist/components/PlaylistCover";
 import DropdownMenuButton from "@/components/ui/dropdown/DropdownMenuButton";
+import Input from "@/components/ui/Input";
 
 type PlaylistSortKey = "alphabetical" | "tracks";
 type PlaylistSortOrder = "ascending" | "descending";
@@ -94,21 +95,14 @@ const SelectionPage = () => {
   return (
     <div className="flex flex-col h-full gap-6">
       <h1 className="text-center">Select a Playlist</h1>
-      <div className="grid grid-cols-2 gap-6">
-        {/* TODO: make input a component */}
-        {/* TODO: Shrink to just icon on mobile. When active, cut off text from sort menu. */}
-        <div className="flex items-center gap-2 bg-card border-card-border focus-within:border-muted-foreground border-2 py-2 px-3 rounded-md">
-          <Search className="text-muted-foreground" />
-          <input
-            className="w-full outline-none"
-            placeholder="Search for a playlist"
-            type="search"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-        {/* TODO: Make responsive on mobile */}
-        {/* TODO: use this same menu style for the user menu */}
+      <div className="flex items-center justify-between gap-4 sm:grid sm:grid-cols-2 sm:gap-6">
+        <Input
+          icon={Search}
+          type="search"
+          placeholder="Search for a playlist"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
         <Dropdown
           align="right"
           className="justify-self-end h-full flex items-center"
@@ -117,7 +111,7 @@ const SelectionPage = () => {
               className="flex items-center gap-3 cursor-pointer font-medium hover:scale-105 active:scale-100 text-muted-foreground hover:text-foreground transition-all"
               onClick={toggle}
             >
-              {sortConfig[sortKey].label}
+              <span className="hidden xs:block">{sortConfig[sortKey].label}</span>
               <List />
             </button>
           )}
