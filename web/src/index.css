@@ -7,6 +7,7 @@
   --color-sp-black: oklch(0.1822 0 0);
   --color-sp-gray: oklch(0.25 0 0);
   --color-sp-gray-light: oklch(27.685% 0.00003 271.152);
+  --color-sp-faded: oklch(0.35 0 0);
   --color-sp-muted: oklch(0.65 0 0);
   --color-sp-white: oklch(0.94 0 0);
 
@@ -23,7 +24,7 @@
   --color-secondary: var(--color-sp-gray);
   --color-secondary-foreground: var(--color-sp-white);
 
-  --color-muted: var(--color-sp-gray);
+  --color-faded: var(--color-sp-faded);
   --color-muted-foreground: var(--color-sp-muted);
 
   --color-accent: var(--color-sp-green);

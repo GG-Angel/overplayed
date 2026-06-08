@@ -6,6 +6,7 @@ export type WaveformHandler = {
   pause: () => void;
   playPause: () => void;
   isPlaying: () => boolean;
+  setVolume: (volume: number) => void;
 };
 
 type WaveformProps = {
@@ -73,6 +74,7 @@ const Waveform = ({ url, waveformRef, className, onPlay, onPause }: WaveformProp
       pause: () => ws.current?.pause(),
       playPause: () => ws.current?.playPause(),
       isPlaying: () => ws.current?.isPlaying() ?? false,
+      setVolume: (volume: number) => ws.current?.setVolume(volume),
     }),
     []
   );

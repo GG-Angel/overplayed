@@ -9,7 +9,7 @@ const buttonVariants = cva(
     variants: {
       size: { xs: "p-2.5", sm: "p-4", md: "p-4.5" },
       variant: {
-        neutral: "text-muted-foreground border-muted",
+        neutral: "text-muted-foreground border-faded",
         green: "text-primary border-primary/50",
         red: "text-destructive border-destructive/50",
         yellow: "text-amber-400 border-amber-400/50",
