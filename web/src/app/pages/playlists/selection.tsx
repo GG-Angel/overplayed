@@ -46,7 +46,7 @@ const layoutConfig: Record<
   card: {
     icon: Rows,
     component: PlaylistCard,
-    containerClassName: "grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-6 pb-4",
+    containerClassName: "grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-6",
   },
   cover: {
     icon: LayoutGrid,
@@ -160,7 +160,7 @@ const SelectionPage = () => {
         </Dropdown>
       </div>
       {sortedPlaylists.length > 0 ? (
-        <div className={layoutConfig[layout].containerClassName}>
+        <div className={cn("pb-4", layoutConfig[layout].containerClassName)}>
           {sortedPlaylists.map((p) => (
             <Playlist
               key={p.id}
