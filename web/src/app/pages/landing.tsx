@@ -47,7 +47,7 @@ const LandingPage = () => {
     <div className="flex flex-col gap-8 w-full max-w-3xl self-center py-8">
       <h1 className="text-center">
         <span className="block">Your playlist is bloated. </span>
-        <span className="block text-muted-foreground">
+        <span className="block text-muted">
           <span className="text-primary">Swipe</span> the dead weight away.
         </span>
       </h1>
@@ -94,7 +94,7 @@ const LandingPage = () => {
               </div>
               <div>
                 <p className="font-medium text-sm">{step.heading}</p>
-                <p className="text-sm text-muted-foreground">{step.body}</p>
+                <p className="text-sm text-muted">{step.body}</p>
               </div>
             </Card>
           ))}
@@ -136,7 +136,7 @@ const LandingPage = () => {
           return (
             <>
               <Divider />
-              <p className="text-muted-foreground text-center wrap-break-word">
+              <p className="text-muted text-center wrap-break-word">
                 Your playlist "{mostTracksPlaylist.name}" has {mostTracksPlaylist.tracks.total}{" "}
                 tracks. You could cut maybe {estimatedSkips}.
               </p>

@@ -37,13 +37,13 @@ const UserMenu = () => {
       <DropdownMenu className="w-64">
         <DropdownMenuItem className="flex-col items-start gap-0.5 [&>span]:w-full [&>span]:truncate">
           <span className="font-medium">{user.display_name}</span>
-          <span className="text-xs text-muted-foreground">{user.email}</span>
+          <span className="text-xs text-muted">{user.email}</span>
         </DropdownMenuItem>
         <DropdownMenuDivider />
         <DropdownMenuButton onClick={() => openExternalUrl(user.external_urls.spotify)}>
           <User className="size-4.5" />
           Profile
-          <ExternalLink className="size-4 ml-auto opacity-60" />
+          <ExternalLink className="size-4 ml-auto opacity-50" />
         </DropdownMenuButton>
         <DropdownMenuButton onClick={() => navigate("/statistics")}>
           <ChartLine className="size-4.5" />

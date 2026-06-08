@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
 
 const messageTones = {
-  neutral: "text-muted-foreground",
+  neutral: "text-muted",
   negative: "text-destructive",
   positive: "text-success",
 } as const;

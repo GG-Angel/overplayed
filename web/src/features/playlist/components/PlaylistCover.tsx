@@ -13,7 +13,7 @@ const PlaylistCover = ({ playlist, onClick }: PlaylistDisplayProps) => {
       <img src={coverUrl} className="w-full aspect-square object-cover" />
       <div className="flex flex-col justify-center absolute inset-0 bg-linear-to-t from-background/95 to-background/85 opacity-0 group-hover:opacity-100 transition-opacity px-4 overflow-hidden">
         <h3 className="truncate">{playlist.name}</h3>
-        <p className="text-muted-foreground text-sm truncate">{playlist.tracks.total} tracks</p>
+        <p className="text-muted text-sm truncate">{playlist.tracks.total} tracks</p>
       </div>
     </button>
   );

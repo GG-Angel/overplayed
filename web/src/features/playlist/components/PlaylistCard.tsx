@@ -34,7 +34,7 @@ const PlaylistCard = ({ playlist, onClick }: PlaylistDisplayProps) => {
         <ArrowUpRight className="origin-top-right self-end transition group-hover:scale-125 group-hover:text-primary" />
         <div>
           <p className="truncate font-semibold">{playlist.name}</p>
-          <p className="truncate text-muted-foreground">{playlist.tracks.total} tracks</p>
+          <p className="truncate text-muted">{playlist.tracks.total} tracks</p>
         </div>
       </div>
     </button>

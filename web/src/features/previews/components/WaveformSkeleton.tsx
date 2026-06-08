@@ -5,7 +5,7 @@ type WaveformSkeletonProps = { className?: string; message?: string };
 const WaveformSkeleton = ({ className, message }: WaveformSkeletonProps) => (
   <div
     className={cn(
-      "rounded-md bg-card-border flex justify-center items-center text-muted-foreground",
+      "rounded-md bg-card-border flex justify-center items-center text-muted",
       className
     )}
   >

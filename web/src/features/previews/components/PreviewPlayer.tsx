@@ -13,19 +13,18 @@ type PreviewPlayerProps = {
   className?: string;
 };
 
-type Volume = 0 | 0.5 | 1.0;
-
-const volumeConfig: Record<Volume, { icon: LucideIcon }> = {
-  0: { icon: VolumeOff },
-  0.5: { icon: Volume1 },
-  1.0: { icon: Volume2 },
-};
+const VOLUME_STEPS: { value: number; icon: LucideIcon }[] = [
+  { value: 1.0, icon: Volume2 },
+  { value: 0.5, icon: Volume1 },
+  { value: 0, icon: VolumeOff },
+] as const;
 
 const AudioPlayer = ({ url, className }: PreviewPlayerProps) => {
-  const waveformRef = useRef<WaveformHandler>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isReady, setIsReady] = useState(false);
-  const [volume, setVolume] = useState<Volume>(1.0);
+  const [volumeIndex, setVolumeIndex] = useState(0);
+  const waveformRef = useRef<WaveformHandler>(null);
+
   const showWaveform = isReady && (isPlaying || url);
 
   return (
@@ -50,11 +49,17 @@ const AudioPlayer = ({ url, className }: PreviewPlayerProps) => {
         />
         {!showWaveform && <WaveformSkeleton className="absolute inset-0 z-10" />}
       </div>
-      <IconButton size="xs" icon={volumeConfig[volume].icon} />
+      <IconButton
+        size="xs"
+        icon={VOLUME_STEPS[volumeIndex].icon}
+        onClick={useCallback(() => {
+          const next = (volumeIndex + 1) % VOLUME_STEPS.length;
+          setVolumeIndex(next);
+          waveformRef.current?.setVolume(VOLUME_STEPS[next].value);
+        }, [volumeIndex])}
+      />
     </Card>
   );
 };
-
-// TODO: change all -muted-foreground to -muted
 
 export default AudioPlayer;

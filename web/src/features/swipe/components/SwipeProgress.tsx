@@ -46,7 +46,7 @@ const SwipeProgress = ({ likes, dislikes, total, className }: SwipeProgressProps
         <Heart className="size-4.75 text-primary" />
         <p className="text-primary min-w-12 text-left text-sm">{likes}</p>
       </div>
-      <p className="text-center text-sm text-muted-foreground">{remaining} left</p>
+      <p className="text-center text-sm text-muted">{remaining} left</p>
     </div>
   );
 };

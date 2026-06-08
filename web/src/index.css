@@ -24,9 +24,6 @@
   --color-secondary: var(--color-sp-gray);
   --color-secondary-foreground: var(--color-sp-white);
 
-  --color-faded: var(--color-sp-faded);
-  --color-muted-foreground: var(--color-sp-muted);
-
   --color-accent: var(--color-sp-green);
   --color-accent-foreground: var(--color-sp-black);
 
@@ -35,6 +32,9 @@
 
   --color-destructive: var(--color-sp-red);
   --color-destructive-foreground: var(--color-sp-white);
+
+  --color-faded: var(--color-sp-faded);
+  --color-muted: var(--color-sp-muted);
 
   --color-border: var(--color-sp-gray-light);
   --color-input: var(--color-sp-gray-light);

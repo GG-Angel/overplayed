@@ -108,7 +108,7 @@ const SelectionPage = () => {
           className="justify-self-end h-full flex items-center"
           trigger={({ toggle }) => (
             <button
-              className="flex items-center gap-3 cursor-pointer font-medium hover:scale-105 active:scale-100 text-muted-foreground hover:text-foreground transition-all"
+              className="flex items-center gap-3 cursor-pointer font-medium hover:scale-105 active:scale-100 text-muted hover:text-foreground transition-all"
               onClick={toggle}
             >
               <span className="hidden xs:block">{sortConfig[sortKey].label}</span>
@@ -140,7 +140,7 @@ const SelectionPage = () => {
                 return (
                   <button
                     className={cn(
-                      "flex justify-center text-muted-foreground p-1 rounded-sm cursor-pointer hover:bg-card",
+                      "flex justify-center text-muted p-1 rounded-sm cursor-pointer hover:bg-card",
                       isSelected && "text-accent bg-card"
                     )}
                     onClick={() => setLayout(option)}

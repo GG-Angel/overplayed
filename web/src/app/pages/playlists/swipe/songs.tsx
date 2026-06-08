@@ -63,7 +63,7 @@ const SwipeSongsPage = () => {
         ) : (
           <p className="text-center">
             <span className="block">You've reached the end!</span>
-            <span className="block text-muted-foreground">
+            <span className="block text-muted">
               Press <Undo className="inline-block" /> to rewind or{" "}
               <Check className="inline-block" /> to finish.
             </span>

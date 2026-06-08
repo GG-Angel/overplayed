@@ -11,7 +11,7 @@ const LogoPlaylistCrumb = ({ playlistId }: { playlistId: string }) => {
   const coverUrl = extractImageUrl(playlist.images ?? [], "sm");
 
   return (
-    <span className="inline-flex items-center gap-1.5 text-muted-foreground min-w-0">
+    <span className="inline-flex items-center gap-1.5 text-muted min-w-0">
       <span>/</span>
       <img src={coverUrl} className="size-5 rounded shrink-0" />
       <span className="truncate">{playlist.name}</span>

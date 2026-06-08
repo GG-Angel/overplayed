@@ -53,7 +53,7 @@ const TrackCard = ({ track, orientation, className, ...props }: TrackCardProps) 
         >
           {track.name}
         </a>
-        <p className="text-muted-foreground text-sm truncate">{artistList}</p>
+        <p className="text-muted text-sm truncate">{artistList}</p>
       </div>
     </Card>
   );

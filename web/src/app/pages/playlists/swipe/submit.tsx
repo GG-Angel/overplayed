@@ -66,7 +66,7 @@ const SwipeSubmitPage = () => {
         subtitle={
           <>
             <p>One of the submission steps failed.</p>
-            <p className="text-sm text-muted-foreground">We recommend trying again.</p>
+            <p className="text-sm text-muted">We recommend trying again.</p>
           </>
         }
         actions={
@@ -95,7 +95,7 @@ const SwipeSubmitPage = () => {
               You just cleaned out <span className="text-primary">{dislikePercentage}%</span> of
               your playlist.
             </p>
-            <p className="text-sm text-muted-foreground">(now you get to skip less)</p>
+            <p className="text-sm text-muted">(now you get to skip less)</p>
           </>
         }
         actions={
@@ -125,7 +125,7 @@ const SwipeSubmitPage = () => {
       subtitle={
         <div className="flex justify-center items-center gap-2 mt-2">
           <Spinner size="sm" />
-          <p className="text-muted-foreground">
+          <p className="text-muted">
             {controller.phase ? swipePhaseDescriptions[controller.phase] : "Starting up..."}
           </p>
         </div>

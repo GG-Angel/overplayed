@@ -10,7 +10,7 @@ const PlaylistRow = ({ playlist, onClick }: PlaylistDisplayProps) => {
     >
       <span className="truncate font-semibold">{playlist.name}</span>
       <div className="flex items-center gap-4">
-        <span className="text-muted-foreground">{playlist.tracks.total} tracks</span>
+        <span className="text-muted">{playlist.tracks.total} tracks</span>
         <ArrowUpRight className="transition-colors text-accent" />
       </div>
     </button>

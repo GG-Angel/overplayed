@@ -52,7 +52,7 @@ const SwipeReviewPage = () => {
         subtitle={
           <>
             <p>You kept every track, so your playlist stays as is.</p>
-            <p className="text-sm text-muted-foreground">(your playlist must be really good)</p>
+            <p className="text-sm text-muted">(your playlist must be really good)</p>
           </>
         }
         actions={
@@ -101,7 +101,7 @@ const SwipeReviewPage = () => {
         <div>
           <p>Back up removed tracks?</p>
           {options.backupEnabled ? (
-            <p className="text-sm text-muted-foreground">Saves removed tracks to a new playlist.</p>
+            <p className="text-sm text-muted">Saves removed tracks to a new playlist.</p>
           ) : (
             <p className="text-sm text-destructive">Removed tracks will be lost permanently.</p>
           )}
