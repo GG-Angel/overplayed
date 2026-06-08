@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Pause, Play } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Card from "@/components/ui/Card";
@@ -17,6 +17,7 @@ const AudioPlayer = ({ url, className }: PreviewPlayerProps) => {
   const waveformRef = useRef<WaveformHandler>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const showWaveform = isReady && (isPlaying || url);
 
   return (
     <Card padding="sm" className={cn("flex items-center gap-3 py-2", className)}>
@@ -31,14 +32,14 @@ const AudioPlayer = ({ url, className }: PreviewPlayerProps) => {
         <Waveform
           url={url}
           waveformRef={waveformRef}
-          onPlay={() => {
+          onPlay={useCallback(() => {
             setIsReady(true);
             setIsPlaying(true);
-          }}
-          onPause={() => setIsPlaying(false)}
-          className={cn("absolute inset-0 min-w-1", !isReady && "invisible")}
+          }, [])}
+          onPause={useCallback(() => setIsPlaying(false), [])}
+          className={cn("absolute inset-0 min-w-1", !showWaveform && "invisible")}
         />
-        {!isReady && <WaveformSkeleton className="absolute inset-0 z-10" />}
+        {!showWaveform && <WaveformSkeleton className="absolute inset-0 z-10" />}
       </div>
     </Card>
   );

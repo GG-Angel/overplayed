@@ -1,5 +1,5 @@
 import WaveSurfer from "wavesurfer.js";
-import { useEffect, useImperativeHandle, useRef, useState, type Ref } from "react";
+import { useEffect, useImperativeHandle, useRef, type Ref } from "react";
 
 export type WaveformHandler = {
   play: () => void;
@@ -16,60 +16,65 @@ type WaveformProps = {
   onPause?: () => void;
 };
 
-const WAVESURFER_OPTIONS = {
-  waveColor: "gray",
-  progressColor: "#1ed760",
-  height: "auto",
-  barWidth: 1,
-  barGap: 2,
-  barRadius: 1,
-  normalize: true,
-  dragToSeek: true,
-} as const;
-
 const Waveform = ({ url, waveformRef, className, onPlay, onPause }: WaveformProps) => {
-  const [wavesurfer, setWavesurfer] = useState<WaveSurfer | null>(null);
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const ws = useRef<WaveSurfer>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const callbacks = useRef({ onPlay, onPause });
+
+  useEffect(() => {
+    callbacks.current = { onPlay, onPause };
+  }, [onPlay, onPause]);
 
   useEffect(() => {
     if (!containerRef.current) return;
-    const ws = WaveSurfer.create({ ...WAVESURFER_OPTIONS, container: containerRef.current });
-    setWavesurfer(ws);
-    return () => ws.destroy();
+
+    ws.current = WaveSurfer.create({
+      container: containerRef.current,
+      waveColor: "gray",
+      progressColor: "#1ed760",
+      height: "auto",
+      barWidth: 1,
+      barGap: 2,
+      barRadius: 1,
+      normalize: true,
+      dragToSeek: true,
+    });
+
+    const unsubs = [
+      ws.current.on("ready", () => ws.current?.play()),
+      ws.current.on("finish", () => {
+        ws.current?.seekTo(0);
+        ws.current?.play();
+      }),
+      ws.current.on("play", () => callbacks.current.onPlay?.()),
+      ws.current.on("pause", () => callbacks.current.onPause?.()),
+    ];
+
+    return () => {
+      unsubs.forEach((unsub) => unsub());
+      ws.current?.destroy();
+    };
   }, []);
 
   useEffect(() => {
-    if (!wavesurfer) return;
+    if (!ws.current) return;
+
     if (!url) {
-      wavesurfer.pause();
+      ws.current.pause();
       return;
     }
-    wavesurfer.load(url);
-  }, [wavesurfer, url]);
-
-  useEffect(() => {
-    if (!wavesurfer) return;
-    const unsubs = [
-      wavesurfer.on("ready", () => wavesurfer.play()),
-      wavesurfer.on("finish", () => {
-        wavesurfer.seekTo(0);
-        wavesurfer.play();
-      }),
-      wavesurfer.on("play", () => onPlay?.()),
-      wavesurfer.on("pause", () => onPause?.()),
-    ];
-    return () => unsubs.forEach((unsub) => unsub());
-  }, [wavesurfer, onPlay, onPause]);
+    ws.current.load(url);
+  }, [url]);
 
   useImperativeHandle(
     waveformRef,
     () => ({
-      play: () => wavesurfer?.play(),
-      pause: () => wavesurfer?.pause(),
-      playPause: () => wavesurfer?.playPause(),
-      isPlaying: () => wavesurfer?.isPlaying() ?? false,
+      play: () => ws.current?.play(),
+      pause: () => ws.current?.pause(),
+      playPause: () => ws.current?.playPause(),
+      isPlaying: () => ws.current?.isPlaying() ?? false,
     }),
-    [wavesurfer]
+    []
   );
 
   return <div ref={containerRef} className={className} />;
