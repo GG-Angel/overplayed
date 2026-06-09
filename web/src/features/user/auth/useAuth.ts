@@ -1,11 +1,13 @@
 import api from "@/lib/api-client";
 import { isAxiosError } from "axios";
-import { queryOptions, useQuery, useQueryClient } from "@tanstack/react-query";
+import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { env } from "@/lib/env";
 import { queryKeys } from "@/lib/query";
 import { currentUserSchema } from "@/lib/types";
 
 const getUser = async () => currentUserSchema.parse(await api.get("/users/me"));
+
+const logoutUser = async () => await api.post("/auth/logout");
 
 const userOptions = queryOptions({
   queryKey: queryKeys.user,
@@ -26,10 +28,12 @@ const useAuth = () => {
 
   const isUnauthorized = isAxiosError(error) && error.response?.status === 401;
 
-  const logout = async () => {
-    await api.post("/auth/logout");
-    queryClient.clear(); // TODO: make this a mutation
-  };
+  const logoutMutation = useMutation({
+    mutationFn: logoutUser,
+    onSuccess: () => {
+      queryClient.clear();
+    },
+  });
 
   const redirectToLogin = (currentPath: string) => {
     window.location.href = `${env.API_BASE_URL}/auth/login?${new URLSearchParams({
@@ -43,7 +47,7 @@ const useAuth = () => {
     isError: isError && !isUnauthorized,
     isUnauthorized,
     redirectToLogin,
-    logout,
+    logoutMutation,
   };
 };
 

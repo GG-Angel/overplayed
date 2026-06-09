@@ -101,7 +101,7 @@ export const metricsSchema = z.object({
   avg_session_duration: z.number().nonnegative(),
 });
 
-export const swipeSessionDetailsSchema = z.object({
+export const swipeSessionDataSchema = z.object({
   playlist_id: z.string(),
   total_tracks: z.number().int().nonnegative(),
   tracks_swiped: z.number().int().nonnegative(),
@@ -121,4 +121,4 @@ export type PlaylistItem = z.infer<typeof playlistItemSchema>;
 export type PlaylistItemsPage = z.infer<typeof playlistItemsPageSchema>;
 export type TrackPreview = z.infer<typeof trackPreviewSchema>;
 export type Metrics = z.infer<typeof metricsSchema>;
-export type SwipeSessionDetails = z.infer<typeof swipeSessionDetailsSchema>;
+export type SwipeSessionData = z.infer<typeof swipeSessionDataSchema>;

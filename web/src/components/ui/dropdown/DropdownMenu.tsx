@@ -7,11 +7,9 @@ type DropdownMenuProps = {
   className?: string;
 };
 
-// TODO: add radius sm and padding xs
-
 const DropdownMenu = ({ children, className }: DropdownMenuProps) => {
   return (
-    <Card padding="xs" className={cn("flex-col gap-1", className)}>
+    <Card radius="sm" padding="xs" className={cn("flex-col gap-1", className)}>
       {children}
     </Card>
   );

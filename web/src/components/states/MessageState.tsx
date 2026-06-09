@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
 
-const messageTones = {
+const MESSAGE_TONES = {
   neutral: "text-muted",
   negative: "text-destructive",
   positive: "text-success",
@@ -12,7 +12,7 @@ type MessageStateProps = {
   title: string;
   subtitle?: ReactNode;
   actions?: ReactNode;
-  tone?: keyof typeof messageTones;
+  tone?: keyof typeof MESSAGE_TONES;
 };
 
 const MessageState = ({
@@ -25,7 +25,7 @@ const MessageState = ({
   return (
     <div className="flex flex-col h-full justify-center gap-4">
       <div className="text-center">
-        <p className={cn("text-4xl xs:text-5xl font-bold", messageTones[tone])}>{kaomoji}</p>
+        <p className={cn("text-4xl xs:text-5xl font-bold", MESSAGE_TONES[tone])}>{kaomoji}</p>
         <p className="heading-3 mt-2">{title}</p>
         {subtitle}
       </div>

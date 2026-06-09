@@ -12,17 +12,17 @@ import { openExternalUrl } from "@/lib/utils";
 import { ChartLine, ExternalLink, LogOut, User } from "lucide-react";
 
 const UserMenu = () => {
-  const { user, isLoading, redirectToLogin, logout } = useAuth();
+  const { user, isLoading, redirectToLogin, logoutMutation } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   const handleLogout = async () => {
-    await logout();
+    await logoutMutation.mutateAsync();
     navigate("/");
   };
 
   if (isLoading) {
-    return <Spinner size="sm" />;
+    return <Spinner size="md" />;
   }
 
   if (!user)

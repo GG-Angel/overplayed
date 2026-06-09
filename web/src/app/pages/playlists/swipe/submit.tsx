@@ -1,7 +1,7 @@
 import MessageState from "@/components/states/MessageState";
 import Button from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
-import useSubmitSwipes, { swipePhaseDescriptions } from "@/features/swipe/hooks/useSubmitSwipes";
+import useSubmitSwipes, { SWIPE_PHASE_DESCRIPTIONS } from "@/features/swipe/hooks/useSubmitSwipes";
 import { useSwipeContext } from "@/features/swipe/provider/SwipeContext";
 import useConfetti from "@/hooks/useConfetti";
 import { kaomojis } from "@/lib/kaomoji";
@@ -126,7 +126,7 @@ const SwipeSubmitPage = () => {
         <div className="flex justify-center items-center gap-2 mt-2">
           <Spinner size="sm" />
           <p className="text-muted">
-            {controller.phase ? swipePhaseDescriptions[controller.phase] : "Starting up..."}
+            {controller.phase ? SWIPE_PHASE_DESCRIPTIONS[controller.phase] : "Starting up..."}
           </p>
         </div>
       }

@@ -30,12 +30,12 @@ type PlaylistSortKey = "alphabetical" | "tracks";
 type PlaylistSortOrder = "ascending" | "descending";
 type PlaylistLayout = "text" | "card" | "cover";
 
-const sortConfig: Record<PlaylistSortKey, { label: string }> = {
+const SORT_CONFIG: Record<PlaylistSortKey, { label: string }> = {
   tracks: { label: "Track count" },
   alphabetical: { label: "Alphabetical" },
 } as const;
 
-const layoutConfig: Record<
+const LAYOUT_CONFIG: Record<
   PlaylistLayout,
   { icon: LucideIcon; component: ComponentType<PlaylistDisplayProps>; containerClassName: string }
 > = {
@@ -65,7 +65,7 @@ const SelectionPage = () => {
   const navigate = useNavigate();
 
   const SortIcon = sortOrder === "ascending" ? ArrowUp : ArrowDown;
-  const Playlist = layoutConfig[layout].component;
+  const Playlist = LAYOUT_CONFIG[layout].component;
 
   const searchedPlaylists = useMemo(() => {
     if (!playlists) return [];
@@ -111,14 +111,14 @@ const SelectionPage = () => {
               className="flex items-center gap-3 cursor-pointer font-medium hover:scale-105 active:scale-100 text-muted hover:text-foreground transition-all"
               onClick={toggle}
             >
-              <span className="hidden xs:block">{sortConfig[sortKey].label}</span>
+              <span className="hidden xs:block">{SORT_CONFIG[sortKey].label}</span>
               <List />
             </button>
           )}
         >
           <DropdownMenu className="w-64">
             <DropdownMenuSection label="Sort by" />
-            {(Object.keys(sortConfig) as PlaylistSortKey[]).map((option) => {
+            {(Object.keys(SORT_CONFIG) as PlaylistSortKey[]).map((option) => {
               const isSelected = option === sortKey;
               return (
                 <DropdownMenuButton
@@ -126,7 +126,7 @@ const SelectionPage = () => {
                   onClick={isSelected ? toggleSortOrder : () => setSortKey(option)}
                   className={cn("justify-between", isSelected && "text-primary")}
                 >
-                  {sortConfig[option].label}
+                  {SORT_CONFIG[option].label}
                   {isSelected && <SortIcon className="shrink-0" />}
                 </DropdownMenuButton>
               );
@@ -134,8 +134,8 @@ const SelectionPage = () => {
             <DropdownMenuDivider />
             <DropdownMenuSection label="View as" />
             <div className="grid auto-cols-fr grid-flow-col bg-background rounded-lg p-1 gap-1">
-              {(Object.keys(layoutConfig) as PlaylistLayout[]).map((option) => {
-                const Icon = layoutConfig[option].icon;
+              {(Object.keys(LAYOUT_CONFIG) as PlaylistLayout[]).map((option) => {
+                const Icon = LAYOUT_CONFIG[option].icon;
                 const isSelected = option === layout;
                 return (
                   <button
@@ -154,7 +154,7 @@ const SelectionPage = () => {
         </Dropdown>
       </div>
       {sortedPlaylists.length > 0 ? (
-        <div className={cn("pb-4", layoutConfig[layout].containerClassName)}>
+        <div className={cn("pb-4", LAYOUT_CONFIG[layout].containerClassName)}>
           {sortedPlaylists.map((p) => (
             <Playlist
               key={p.id}
