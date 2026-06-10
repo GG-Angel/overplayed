@@ -28,7 +28,7 @@ class RedisCore:
         logger.debug(f"CACHED: {key} (ttl={ttl}s)")
 
     async def delete(self, *keys: str) -> None:
-        self.redis.delete(*keys)
+        await self.redis.delete(*keys)
         logger.debug(f"DELETED: {keys}")
 
     async def get_secure(self, key: str) -> Optional[str]:

@@ -47,8 +47,8 @@ class SwipeSession(Base):
     )
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    user_id: Mapped[str] = mapped_column(String(22), index=True)
-    playlist_id: Mapped[str] = mapped_column(String(22), index=True)
+    user_id: Mapped[str] = mapped_column(String(255), index=True)
+    playlist_id: Mapped[str] = mapped_column(String(255), index=True)
     total_tracks: Mapped[int]
     tracks_swiped: Mapped[int]
     tracks_cut: Mapped[int]

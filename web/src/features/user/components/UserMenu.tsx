@@ -22,7 +22,7 @@ const UserMenu = () => {
   };
 
   if (isLoading) {
-    return <Spinner size="md" />;
+    return <Spinner size="sm" />;
   }
 
   if (!user)
