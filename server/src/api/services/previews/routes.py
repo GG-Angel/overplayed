@@ -1,11 +1,10 @@
-from core.limiter import limiter
 from core.exceptions import NotFoundException
 from typing import Annotated
-from fastapi import APIRouter, Depends, Path, Request
+from core.limiter import limiter
+from fastapi import APIRouter, Request, Path, Depends
+from .models import IsrcPattern, TrackPreview
 from .service import DeezerService
 from .dependencies import get_deezer_service
-from .models import TrackPreview
-from .models import IsrcPattern
 
 
 router = APIRouter()
