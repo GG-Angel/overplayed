@@ -1,25 +1,28 @@
 import uvicorn
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
-from core.limiter import limiter
 from fastapi.middleware.cors import CORSMiddleware
-from core.config import Settings
 from fastapi import FastAPI, Response, status
+from api.state import State
+from core.limiter import limiter
+from core.config import APP_STATE_KEY
 
 
-async def start(settings: Settings):
+async def start(state: State):
     app = FastAPI()
+
+    app.state[APP_STATE_KEY] = state
+
+    app.state.limiter = limiter
+    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # ty:ignore[invalid-argument-type]
 
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[settings.frontend_url],
+        allow_origins=[state.settings.frontend_url],
         allow_credentials=True,
         allow_methods=["GET", "POST", "DELETE"],
         allow_headers=["*"],
     )
-
-    app.state.limiter = limiter
-    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # ty:ignore[invalid-argument-type]
 
     @app.get("/")
     def handle_healthcheck():

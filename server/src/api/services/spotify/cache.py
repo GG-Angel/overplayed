@@ -3,14 +3,15 @@ from core.config import RedisSettings
 from typing import Optional, List
 from secrets import token_urlsafe
 from loguru import logger
-from .models import CurrentUser, Playlist, PlaylistItem, SessionInfo, PlaylistItems
+from .models import CurrentUser, Playlist, PlaylistItem, PlaylistItems
+from .auth.models import SessionInfo
 
 _SESSION_ID_LEN = 32
 
 
 class SpotifyCache:
-    def __init__(self, client: RedisClient, settings: RedisSettings):
-        self.client = client
+    def __init__(self, redis: RedisClient, settings: RedisSettings):
+        self.redis = redis
         self.settings = settings
 
     async def create_session(self, info: SessionInfo) -> str:
@@ -20,53 +21,53 @@ class SpotifyCache:
         return session_id
 
     async def set_session(self, session_id: str, session: SessionInfo) -> None:
-        await self.client.set_model_secure(
+        await self.redis.set_model_secure(
             session,
             self._session_key(session_id),
             self.settings.ttl_sessions,
         )
 
     async def get_session(self, session_id: str) -> Optional[SessionInfo]:
-        return await self.client.get_model_secure(
+        return await self.redis.get_model_secure(
             SessionInfo, self._session_key(session_id)
         )
 
     async def end_session(self, session_id: str) -> None:
-        await self.client.delete(self._session_key(session_id))
+        await self.redis.delete(self._session_key(session_id))
         logger.info(f"Ended session: {session_id}")
 
     async def get_user(self, user_id: str) -> Optional[CurrentUser]:
-        return await self.client.get_model(CurrentUser, self._user_key(user_id))
+        return await self.redis.get_model(CurrentUser, self._user_key(user_id))
 
     async def set_user(self, user: CurrentUser) -> None:
-        await self.client.set_model(
+        await self.redis.set_model(
             user, self._user_key(user.id), self.settings.ttl_users
         )
 
     async def get_playlist(self, user_id: str, playlist_id: str) -> Optional[Playlist]:
-        return await self.client.hget_model(
+        return await self.redis.hget_model(
             Playlist, self._playlists_key(user_id), playlist_id
         )
 
     async def get_playlists(self, user_id: str) -> Optional[List[Playlist]]:
-        return await self.client.hgetall_models(Playlist, self._playlists_key(user_id))
+        return await self.redis.hgetall_models(Playlist, self._playlists_key(user_id))
 
     async def set_playlists(self, user_id: str, playlists: List[Playlist]) -> None:
-        await self.client.hset_models(
+        await self.redis.hset_models(
             self._playlists_key(user_id),
             {p.id: p for p in playlists},
             self.settings.ttl_playlists,
         )
 
     async def invalidate_playlist(self, user_id: str, playlist_id: str) -> None:
-        await self.client.delete(
+        await self.redis.delete(
             self._playlists_key(user_id),
             self._playlist_items_key(user_id, playlist_id),
             self._playlist_snapshot_key(user_id, playlist_id),
         )
 
     async def invalidate_playlists(self, user_id: str) -> None:
-        await self.client.delete(self._playlists_key(user_id))
+        await self.redis.delete(self._playlists_key(user_id))
 
     async def get_playlist_items(
         self,
@@ -80,7 +81,7 @@ class SpotifyCache:
         snapshot_key = self._playlist_snapshot_key(user_id, playlist_id)
         items_key = self._playlist_items_key(user_id, playlist_id)
 
-        async with self.client.redis.pipeline() as pipe:
+        async with self.redis.redis.pipeline() as pipe:
             pipe.get(snapshot_key)
             pipe.lrange(items_key, start=offset, end=offset + limit - 1)
             pipe.llen(items_key)
@@ -108,7 +109,7 @@ class SpotifyCache:
         snapshot_key = self._playlist_snapshot_key(user_id, playlist_id)
         ttl = self.settings.ttl_playlist_items
 
-        async with self.client.redis.pipeline() as pipe:
+        async with self.redis.redis.pipeline() as pipe:
             pipe.delete(items_key)
             pipe.rpush(items_key, *[t.model_dump_json() for t in items])
             pipe.expire(items_key, ttl)

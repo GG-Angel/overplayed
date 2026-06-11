@@ -2,19 +2,6 @@ from typing import Optional, List
 from pydantic import BaseModel
 
 
-class TokenInfo(BaseModel):
-    access_token: str
-    refresh_token: str
-    token_type: str
-    expires_in: int
-    expires_at: int
-    scope: str
-
-
-class SessionInfo(TokenInfo):
-    user_id: str
-
-
 class ExternalUrls(BaseModel):
     spotify: str
 

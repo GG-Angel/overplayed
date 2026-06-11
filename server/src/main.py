@@ -1,10 +1,11 @@
-from core.config import settings
 import asyncio
 import server
+from core.config import settings
+from api.state import build_state
 
 
 async def main():
-    await server.start(settings=settings)
+    await server.start(build_state(settings))
 
 
 if __name__ == "__main__":
