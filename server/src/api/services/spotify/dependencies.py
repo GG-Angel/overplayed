@@ -1,9 +1,10 @@
+from core.exceptions import UnauthorizedException
 from typing import Optional
 import asyncio
 from spotipy import SpotifyOAuth, Spotify
 from time import time
 from core.config import Settings
-from fastapi import Depends, Cookie, HTTPException
+from fastapi import Depends, Cookie
 from api.cache.client import RedisClient
 from api.dependencies import get_redis, get_settings, get_oauth
 from .auth.models import SessionInfo, TokenInfo
@@ -29,7 +30,7 @@ async def get_spotify_service(
     settings: Settings = Depends(get_settings),
 ) -> SpotifyService:
     if not session_id or not (session := await cache.get_session(session_id)):
-        raise HTTPException(status_code=401, detail="Login required.")
+        raise UnauthorizedException()
 
     if _is_token_expired(session.expires_at):
         new_token = await _refresh_token(oauth, session)

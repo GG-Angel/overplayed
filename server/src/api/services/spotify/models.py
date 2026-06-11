@@ -1,6 +1,11 @@
 from typing import Optional, List
 from pydantic import BaseModel
 
+_SpotifyIdInner = r"[0-9A-Za-z]{22}"
+
+SpotifyIdPattern = rf"^{_SpotifyIdInner}$"
+SpotifyUriPattern = rf"^spotify:track:{_SpotifyIdInner}$"
+
 
 class ExternalUrls(BaseModel):
     spotify: str

@@ -26,17 +26,6 @@ class SpotifyService:
 
         return user
 
-    async def get_playlist(self, playlist_id: str) -> Playlist:
-        if cached := await self.cache.get_playlist(self.user_id, playlist_id):
-            return cached
-
-        playlists = await self.get_user_playlists()
-        playlist = next((p for p in playlists if p.id == playlist_id), None)
-        if playlist is None:
-            raise NotFoundException()
-
-        return playlist
-
     async def get_user_playlists(self) -> List[Playlist]:
         if cached := await self.cache.get_playlists(self.user_id):
             return cached
@@ -47,10 +36,21 @@ class SpotifyService:
 
         return owned_playlists
 
+    async def get_user_playlist(self, playlist_id: str) -> Playlist:
+        if cached := await self.cache.get_playlist(self.user_id, playlist_id):
+            return cached
+
+        playlists = await self.get_user_playlists()
+        playlist = next((p for p in playlists if p.id == playlist_id), None)
+        if playlist is None:
+            raise NotFoundException()
+
+        return playlist
+
     async def get_playlist_items(
         self, playlist_id: str, *, offset: int, limit: int
     ) -> PlaylistItems:
-        playlist = await self.get_playlist(playlist_id)
+        playlist = await self.get_user_playlist(playlist_id)
 
         if cached := await self.cache.get_playlist_items(
             self.user_id,
@@ -80,19 +80,19 @@ class SpotifyService:
         return playlist
 
     async def add_playlist_items(self, playlist_id: str, uris: List[str]) -> None:
-        playlist = await self.get_playlist(playlist_id)  # verifies owner
+        playlist = await self.get_user_playlist(playlist_id)  # verifies owner
         await self.spotify.add_playlist_items(playlist.id, uris)
         await self.cache.invalidate_playlist(self.user_id, playlist.id)
 
     async def delete_playlist_items(
         self, playlist_id: str, item_uris: List[str]
     ) -> None:
-        playlist = await self.get_playlist(playlist_id)
+        playlist = await self.get_user_playlist(playlist_id)
         await self.spotify.remove_playlist_items(playlist.id, item_uris)
         await self.cache.invalidate_playlist(self.user_id, playlist.id)
 
     async def delete_playlist(self, playlist_id: str) -> None:
-        playlist = await self.get_playlist(playlist_id)
+        playlist = await self.get_user_playlist(playlist_id)
         await self.spotify.delete_playlist(playlist.id)
         await self.cache.invalidate_playlist(self.user_id, playlist.id)
 
