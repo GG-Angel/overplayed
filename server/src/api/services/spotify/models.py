@@ -1,5 +1,5 @@
-from typing import Optional, List
-from pydantic import BaseModel
+from typing import Optional, List, Annotated
+from pydantic import BaseModel, Field
 
 _SpotifyIdInner = r"[0-9A-Za-z]{22}"
 
@@ -90,3 +90,16 @@ class PlaylistItems(BaseModel):
     total: int
     has_more: bool
     items: List[PlaylistItem]
+
+
+class SwipesFormOptions(BaseModel):
+    backup_enabled: bool
+
+
+class SwipesForm(BaseModel):
+    options: SwipesFormOptions
+    uris: List[Annotated[str, Field(pattern=SpotifyUriPattern)]] = Field(min_length=1)
+
+
+class SwipesResponse(BaseModel):
+    backup_playlist: Playlist | None = None

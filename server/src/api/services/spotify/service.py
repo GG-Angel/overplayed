@@ -3,7 +3,6 @@ from typing import List
 from .client import SpotifyClient
 from .cache import SpotifyCache
 from .models import CurrentUser, Playlist, PlaylistItems
-from .utils import get_formatted_date
 
 
 class SpotifyService:
@@ -72,29 +71,24 @@ class SpotifyService:
             has_more=offset + limit < len(items),
         )
 
-    async def create_playlist(self) -> Playlist:
-        playlist = await self.spotify.create_playlist(
-            name="Overplayed", description=f"Generated on {get_formatted_date()}"
-        )
+    async def create_playlist(self, name: str, description: str) -> Playlist:
+        new_playlist = await self.spotify.create_playlist(name, description)
         await self.cache.invalidate_playlists(self.user_id)
-        return playlist
+        return new_playlist
 
     async def add_playlist_items(self, playlist_id: str, uris: List[str]) -> None:
-        playlist = await self.get_user_playlist(playlist_id)  # verifies owner
-        await self.spotify.add_playlist_items(playlist.id, uris)
-        await self.cache.invalidate_playlist(self.user_id, playlist.id)
+        await self.spotify.add_playlist_items(playlist_id, uris)
+        await self.cache.invalidate_playlist(self.user_id, playlist_id)
 
     async def delete_playlist_items(
         self, playlist_id: str, item_uris: List[str]
     ) -> None:
-        playlist = await self.get_user_playlist(playlist_id)
-        await self.spotify.remove_playlist_items(playlist.id, item_uris)
-        await self.cache.invalidate_playlist(self.user_id, playlist.id)
+        await self.spotify.remove_playlist_items(playlist_id, item_uris)
+        await self.cache.invalidate_playlist(self.user_id, playlist_id)
 
     async def delete_playlist(self, playlist_id: str) -> None:
-        playlist = await self.get_user_playlist(playlist_id)
-        await self.spotify.delete_playlist(playlist.id)
-        await self.cache.invalidate_playlist(self.user_id, playlist.id)
+        await self.spotify.delete_playlist(playlist_id)
+        await self.cache.invalidate_playlist(self.user_id, playlist_id)
 
     def _is_playlist_owned(self, playlist: Playlist) -> bool:
         return playlist.owner.id == self.user_id or playlist.collaborative
