@@ -1,6 +1,7 @@
 from typing import List, Annotated
-from fastapi import Request, Depends, APIRouter, Path, Query
+from fastapi import Request, Depends, APIRouter, Path, Query, BackgroundTasks
 from core.limiter import limiter
+from api.services.metrics.service import get_metric_service, MetricService, SwipeSession
 from api.services.spotify.dependencies import get_spotify_service
 from api.services.spotify.service import SpotifyService
 from api.services.spotify.utils import get_formatted_date
@@ -19,9 +20,9 @@ router = APIRouter()
 @limiter.limit("30/minute")
 async def handle_get_playlists(
     request: Request,
-    service: SpotifyService = Depends(get_spotify_service),
+    spotify: SpotifyService = Depends(get_spotify_service),
 ) -> List[Playlist]:
-    return await service.get_user_playlists()
+    return await spotify.get_user_playlists()
 
 
 @router.get("/{playlist_id}")
@@ -29,9 +30,9 @@ async def handle_get_playlists(
 async def handle_get_playlist(
     request: Request,
     playlist_id: Annotated[str, Path(pattern=SpotifyIdPattern)],
-    service: SpotifyService = Depends(get_spotify_service),
+    spotify: SpotifyService = Depends(get_spotify_service),
 ) -> Playlist:
-    return await service.get_user_playlist(playlist_id)
+    return await spotify.get_user_playlist(playlist_id)
 
 
 @router.get("/{playlist_id}/items")
@@ -40,9 +41,9 @@ async def handle_get_playlist_items(
     request: Request,
     playlist_id: Annotated[str, Path(pattern=SpotifyIdPattern)],
     page: int = Query(1, ge=1),
-    service: SpotifyService = Depends(get_spotify_service),
+    spotify: SpotifyService = Depends(get_spotify_service),
 ) -> PlaylistItems:
-    return await service.get_playlist_items(
+    return await spotify.get_playlist_items(
         playlist_id,
         offset=(page - 1) * 100,
         limit=100,  # page size
@@ -50,63 +51,38 @@ async def handle_get_playlist_items(
 
 
 @router.post("/{playlist_id}/swipes")
-@limiter.limit("15/minute")
+@limiter.limit("10/minute")
 async def handle_swipes(
     request: Request,
+    background_tasks: BackgroundTasks,
     playlist_id: Annotated[str, Path(pattern=SpotifyIdPattern)],
     form: SwipesForm,
-    service: SpotifyService = Depends(get_spotify_service),
+    spotify: SpotifyService = Depends(get_spotify_service),
+    metrics: MetricService = Depends(get_metric_service),
 ) -> SwipesResponse:
-    source_playlist = await service.get_user_playlist(playlist_id)
+    source_playlist = await spotify.get_user_playlist(playlist_id)
 
     backup_playlist = None
     if form.options.backup_enabled:
-        backup_playlist = await service.create_playlist(
-            f"Overplayed - {source_playlist.name}",
+        backup_playlist = await spotify.create_playlist(
+            f"Overplayed / {source_playlist.name}",
             f"Generated on {get_formatted_date()}",
         )
-        await service.add_playlist_items(backup_playlist.id, form.uris)
+        await spotify.add_playlist_items(backup_playlist.id, form.uris)
 
-    await service.delete_playlist_items(source_playlist.id, form.uris)
+    await spotify.delete_playlist_items(source_playlist.id, form.uris)
+
+    # TODO: use new playlist length to check against tracks cut, may need to wait for it to refresh
+    background_tasks.add_task(
+        metrics.record_swipe_session,
+        SwipeSession(
+            user_id=spotify.user_id,
+            playlist_id=source_playlist.id,
+            snapshot_id=source_playlist.snapshot_id,
+            total_tracks=source_playlist.tracks.total,
+            tracks_swiped=len(form.uris),  # TODO: actually send this metric
+            tracks_cut=len(form.uris),
+        ),
+    )
 
     return SwipesResponse(backup_playlist=backup_playlist)
-
-
-# @router.post("/")
-# @limiter.limit("20/minute")
-# async def handle_create_playlist(
-#     request: Request,
-#     service: SpotifyService = Depends(get_spotify_service),
-# ) -> Playlist:
-#     return await service.create_playlist()
-
-
-# @router.delete("/{playlist_id}")
-# @limiter.limit("20/minute")
-# async def handle_delete_playlist(
-#     request: Request,
-#     playlist_id: Annotated[str, Path(pattern=SpotifyIdPattern)],
-#     service: SpotifyService = Depends(get_spotify_service),
-# ) -> None:
-#     await service.delete_playlist(playlist_id)
-
-
-# @router.post("/{playlist_id}/items")
-# @limiter.limit("30/minute")
-# async def handle_update_playlist_items(
-#     request: Request,
-#     playlist_id: Annotated[str, Path(pattern=SpotifyIdPattern)],
-#     action: PlaylistUpdateAction,
-#     body: PlaylistItemsRequest,
-#     service: SpotifyService = Depends(get_spotify_service),
-# ) -> None:
-#     try:
-#         match action:
-#             case PlaylistUpdateAction.ADD:
-#                 await service.add_playlist_items(playlist_id, body.uris)
-#             case PlaylistUpdateAction.REMOVE:
-#                 await service.delete_playlist_items(playlist_id, body.uris)
-#     except PlaylistNotOwnedError:
-#         raise HTTPException(status_code=403, detail="Forbidden.")
-#     except SpotifyException:
-#         raise HTTPException(status_code=500, detail="Failed to update items.")

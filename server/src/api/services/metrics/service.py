@@ -1,8 +1,9 @@
+from fastapi import Depends
 from pydantic import BaseModel
 from datetime import datetime
 from sqlalchemy import String, DateTime, func, select, distinct
 from sqlalchemy.orm import mapped_column, Mapped
-from core.database import Base
+from core.database import Base, get_db
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -16,7 +17,6 @@ class SwipeSession(Base):
     total_tracks: Mapped[int]
     tracks_swiped: Mapped[int]
     tracks_cut: Mapped[int]
-    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
@@ -30,7 +30,7 @@ class GlobalSwipeMetrics(BaseModel):
     cut_rate: float
 
 
-class MetricsService:
+class MetricService:
     def __init__(self, db: AsyncSession):
         self.db = db
 
@@ -55,3 +55,7 @@ class MetricsService:
             total_cuts=total_cuts,
             cut_rate=round(total_cuts / total_swipes, 2) if total_swipes else 0.0,
         )
+
+
+def get_metric_service(db: AsyncSession = Depends(get_db)) -> MetricService:
+    return MetricService(db=db)

@@ -80,10 +80,8 @@ class SpotifyService:
         await self.spotify.add_playlist_items(playlist_id, uris)
         await self.cache.invalidate_playlist(self.user_id, playlist_id)
 
-    async def delete_playlist_items(
-        self, playlist_id: str, item_uris: List[str]
-    ) -> None:
-        await self.spotify.remove_playlist_items(playlist_id, item_uris)
+    async def delete_playlist_items(self, playlist_id: str, uris: List[str]) -> None:
+        await self.spotify.remove_playlist_items(playlist_id, uris)
         await self.cache.invalidate_playlist(self.user_id, playlist_id)
 
     async def delete_playlist(self, playlist_id: str) -> None:
