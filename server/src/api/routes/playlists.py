@@ -1,17 +1,16 @@
 from typing import List, Annotated
 from fastapi import Request, Depends, APIRouter, Path, Query
 from core.limiter import limiter
-from .utils import get_formatted_date
-from .service import SpotifyService
-from .dependencies import get_spotify_service
-from .models import (
+from api.services.spotify.dependencies import get_spotify_service
+from api.services.spotify.service import SpotifyService
+from api.services.spotify.utils import get_formatted_date
+from api.services.spotify.models import (
     Playlist,
-    SpotifyIdPattern,
     PlaylistItems,
+    SpotifyIdPattern,
     SwipesForm,
     SwipesResponse,
 )
-
 
 router = APIRouter()
 
