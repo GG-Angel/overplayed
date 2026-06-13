@@ -1,4 +1,3 @@
-from contextlib import asynccontextmanager
 from core.config import settings
 from typing import AsyncGenerator
 from redis.asyncio import ConnectionPool, Redis
@@ -11,7 +10,6 @@ pool = ConnectionPool.from_url(
 )
 
 
-@asynccontextmanager
 async def get_redis() -> AsyncGenerator[Redis]:
     async with Redis.from_pool(pool) as session:
         try:

@@ -1,5 +1,5 @@
 from pydantic import Field
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 APP_STATE_KEY = "state"
 
@@ -32,6 +32,12 @@ class Settings(BaseSettings):
     @property
     def redis_url(self) -> str:
         return f"redis://{self.redis_host}:{self.redis_port}"
+
+    model_config = SettingsConfigDict(
+        env_file="../../../.env",
+        case_sensitive=False,
+        extra="ignore",
+    )
 
 
 settings = Settings()

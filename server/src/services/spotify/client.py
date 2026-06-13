@@ -17,7 +17,7 @@ class SpotifyClient:
     async def get_current_user(self) -> CurrentUser:
         """Gets the profile of the current user."""
         user = await self._run(self.spotify.me)
-        return CurrentUser.model_validate(**user)
+        return CurrentUser.model_validate(user)
 
     async def get_playlist(self, playlist_id: str) -> Playlist:
         """Gets playlist metadata."""
