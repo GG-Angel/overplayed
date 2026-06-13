@@ -5,8 +5,8 @@ from spotipy import SpotifyOAuth, Spotify
 from time import time
 from core.config import Settings
 from fastapi import Depends, Cookie
-from api.cache.client import RedisClient
-from api.dependencies import get_redis, get_settings, get_oauth
+from api.cache.client import RedisClient, get_redis_client
+from api.dependencies import get_settings, get_oauth
 from .models import SessionInfo, TokenInfo
 from .cache import SpotifyCache
 from .service import SpotifyService
@@ -17,7 +17,7 @@ TOKEN_EXPIRY_BUFFER = 120
 
 
 def get_spotify_cache(
-    redis: RedisClient = Depends(get_redis),
+    redis: RedisClient = Depends(get_redis_client),
     settings: Settings = Depends(get_settings),
 ) -> SpotifyCache:
     return SpotifyCache(redis=redis, settings=settings.redis)

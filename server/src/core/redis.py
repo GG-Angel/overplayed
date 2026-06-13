@@ -12,7 +12,7 @@ pool = ConnectionPool.from_url(
 
 
 @asynccontextmanager
-async def get_session() -> AsyncGenerator[Redis]:
+async def get_redis() -> AsyncGenerator[Redis]:
     async with Redis.from_pool(pool) as session:
         try:
             yield session

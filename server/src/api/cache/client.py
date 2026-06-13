@@ -1,10 +1,14 @@
+from core.redis import get_redis
+from fastapi import Depends
+from core.config import Settings
 from base64 import b64encode, b64decode
 from os import urandom
 from pydantic import BaseModel
 from loguru import logger
-from typing import Optional, Type, TypeVar, List
+from typing import Optional, Type, TypeVar, List, AsyncIterator
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from redis.asyncio import Redis
+from api.dependencies import get_settings
 
 
 M = TypeVar("M", bound=BaseModel)
@@ -92,3 +96,10 @@ class RedisClient:
     @staticmethod
     def key(*parts: str) -> str:
         return ":".join(parts)
+
+
+async def get_redis_client(
+    settings: Settings = Depends(get_settings),
+) -> AsyncIterator[RedisClient]:
+    async with get_redis() as session:
+        yield RedisClient(redis=session, encryption_key=settings.redis.encryption_key)

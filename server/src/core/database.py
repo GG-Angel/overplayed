@@ -12,7 +12,7 @@ Base = declarative_base()
 
 
 @asynccontextmanager
-async def get_session() -> AsyncGenerator[AsyncSession]:
+async def get_db() -> AsyncGenerator[AsyncSession]:
     async with async_session() as session:
         try:
             yield session
