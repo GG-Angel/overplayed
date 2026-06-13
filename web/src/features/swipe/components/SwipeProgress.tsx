@@ -35,9 +35,9 @@ const SwipeProgress = ({ likes, dislikes, total, className }: SwipeProgressProps
           aria-valuenow={likes + dislikes}
           aria-label="Swipe progress"
         >
-          {segments.map(({ width, style, className }, i) => (
+          {segments.map(({ key, width, style, className }) => (
             <div
-              key={i}
+              key={key}
               className={`h-full rounded transition-all duration-300 ${className}`}
               style={{ width: `${width}%`, ...style }}
             />

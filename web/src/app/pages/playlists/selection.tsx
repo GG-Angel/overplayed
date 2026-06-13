@@ -139,6 +139,7 @@ const SelectionPage = () => {
                 const isSelected = option === layout;
                 return (
                   <button
+                    key={option}
                     className={cn(
                       "flex justify-center text-muted p-1 rounded-sm cursor-pointer hover:bg-card",
                       isSelected && "text-accent bg-card"
