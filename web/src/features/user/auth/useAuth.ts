@@ -4,6 +4,7 @@ import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/r
 import { env } from "@/lib/env";
 import { queryKeys } from "@/lib/query";
 import { currentUserSchema } from "@/lib/types";
+import { buildURLWithParams } from "@/lib/api";
 
 const getUser = async () => currentUserSchema.parse(await api.get("/users/me"));
 
@@ -36,9 +37,9 @@ const useAuth = () => {
   });
 
   const redirectToLogin = (currentPath: string) => {
-    window.location.href = `${env.API_BASE_URL}/auth/login?${new URLSearchParams({
-      redirect_to: currentPath,
-    })}`;
+    window.location.href = buildURLWithParams(`${env.API_BASE_URL}/auth/login`, {
+      redirectTo: currentPath,
+    });
   };
 
   return {

@@ -9,7 +9,7 @@ import Card from "@/components/ui/Card";
 import Divider from "@/components/ui/Divider";
 import SwipeButtons from "@/features/swipe/components/SwipeButtons";
 import SwipeCardStack from "@/features/swipe/components/SwipeCardStack";
-import { useMetrics } from "@/features/metrics/api/get-metrics";
+import { useGlobalSwipeMetrics } from "@/features/metrics/api/get-swipe-metrics";
 import useSwipeCarousel from "@/features/swipe/hooks/useSwipeCarousel";
 import carouselTracks from "@/assets/carousel-tracks.json";
 import z from "zod";
@@ -36,7 +36,7 @@ const LandingPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { data: metrics } = useMetrics();
+  const { data: metrics } = useGlobalSwipeMetrics();
   const { data: playlists } = useUserPlaylists();
 
   const carousel = useSwipeCarousel(z.array(trackSchema).parse(carouselTracks));

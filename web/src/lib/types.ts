@@ -79,34 +79,43 @@ export const playlistItemSchema = z.object({
   track: trackSchema,
 });
 
-export const playlistItemsPageSchema = z.object({
-  total: z.number().int().nonnegative(),
+export const playlistPageMetadataSchema = z.object({
+  total_items: z.number().int().nonnegative(),
   has_more: z.boolean(),
+  next_offset: z.number().int().nonnegative().nullable(),
+});
+
+export const playlistPageSchema = z.object({
+  metadata: playlistPageMetadataSchema,
   items: z.array(playlistItemSchema),
 });
 
 export const trackPreviewSchema = z.object({
-  preview_url: z.url(),
+  isrc: z.string(),
+  url: z.url(),
   expires_in: z.number().int().nonnegative(),
   expires_at: z.number().int().nonnegative(),
 });
 
-export const metricsSchema = z.object({
+export const globalSwipeMetricsSchema = z.object({
   total_sessions: z.number().int().nonnegative(),
   total_users: z.number().int().nonnegative(),
   total_swipes: z.number().int().nonnegative(),
   total_cuts: z.number().int().nonnegative(),
   cut_rate: z.number().nonnegative(),
-  avg_swipe_duration: z.number().nonnegative(),
-  avg_session_duration: z.number().nonnegative(),
 });
 
-export const swipeSessionDataSchema = z.object({
-  playlist_id: z.string(),
-  total_tracks: z.number().int().nonnegative(),
-  tracks_swiped: z.number().int().nonnegative(),
-  tracks_cut: z.number().int().nonnegative(),
-  started_at: z.iso.datetime(),
+export const swipesFormOptionsSchema = z.object({
+  backup_enabled: z.boolean(),
+});
+
+export const swipesFormSchema = z.object({
+  uris: z.array(z.string()),
+  options: swipesFormOptionsSchema,
+});
+
+export const swipesResponseSchema = z.object({
+  backup_playlist: playlistMetadataSchema.nullable(),
 });
 
 export type Image = z.infer<typeof imageSchema>;
@@ -118,7 +127,10 @@ export type Track = z.infer<typeof trackSchema>;
 export type PlaylistMetadata = z.infer<typeof playlistMetadataSchema>;
 export type PlaylistTrackCount = z.infer<typeof playlistTrackCountSchema>;
 export type PlaylistItem = z.infer<typeof playlistItemSchema>;
-export type PlaylistItemsPage = z.infer<typeof playlistItemsPageSchema>;
+export type PlaylistPageMetadata = z.infer<typeof playlistPageMetadataSchema>;
+export type PlaylistPage = z.infer<typeof playlistPageSchema>;
 export type TrackPreview = z.infer<typeof trackPreviewSchema>;
-export type Metrics = z.infer<typeof metricsSchema>;
-export type SwipeSessionData = z.infer<typeof swipeSessionDataSchema>;
+export type GlobalSwipeMetrics = z.infer<typeof globalSwipeMetricsSchema>;
+export type SwipesFormOptions = z.infer<typeof swipesFormOptionsSchema>;
+export type SwipesForm = z.infer<typeof swipesFormSchema>;
+export type SwipesResponse = z.infer<typeof swipesResponseSchema>;

@@ -15,7 +15,7 @@ const SwipeReviewPage = () => {
   const navigate = useNavigate();
 
   const handleBackupToggle = useCallback(
-    () => setOptions((prev) => ({ ...prev, backupEnabled: !prev.backupEnabled })),
+    () => setOptions((prev) => ({ ...prev, backup_enabled: !prev.backup_enabled })),
     [setOptions]
   );
 
@@ -100,13 +100,13 @@ const SwipeReviewPage = () => {
       <Card className="flex justify-between items-center gap-4 pr-6 py-3">
         <div>
           <p>Back up removed tracks?</p>
-          {options.backupEnabled ? (
+          {options.backup_enabled ? (
             <p className="text-sm text-muted">Saves removed tracks to a new playlist.</p>
           ) : (
             <p className="text-sm text-destructive">Removed tracks will be lost permanently.</p>
           )}
         </div>
-        <Checkbox enabled={options.backupEnabled} onEnabledChange={handleBackupToggle} />
+        <Checkbox enabled={options.backup_enabled} onEnabledChange={handleBackupToggle} />
       </Card>
       <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:w-fit sm:self-end">
         <Button variant="secondary" onClick={navigateToSwipePage}>
