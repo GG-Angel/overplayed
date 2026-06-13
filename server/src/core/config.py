@@ -1,7 +1,10 @@
+from pathlib import Path
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 APP_STATE_KEY = "state"
+
+ENV_FILE = Path(__file__).resolve().parents[3] / ".env"
 
 
 class Settings(BaseSettings):
@@ -34,7 +37,7 @@ class Settings(BaseSettings):
         return f"redis://{self.redis_host}:{self.redis_port}"
 
     model_config = SettingsConfigDict(
-        env_file="../../../.env",
+        env_file=ENV_FILE,
         case_sensitive=False,
         extra="ignore",
     )

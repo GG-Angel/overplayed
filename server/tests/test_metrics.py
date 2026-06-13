@@ -1,7 +1,7 @@
 from core.config import settings
+from fastapi.testclient import TestClient
 from state import build_state
 from server import build_app
-from fastapi.testclient import TestClient
 
 app = build_app(build_state(settings))
 
