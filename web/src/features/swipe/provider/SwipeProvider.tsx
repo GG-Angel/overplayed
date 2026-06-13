@@ -10,7 +10,7 @@ import { usePrefetchedPlaylistItems } from "@/features/playlist/api/get-playlist
 
 const SwipeProvider = () => {
   const { playlistId } = useParams();
-  if (!playlistId) return <ErrorState message="No playlist provided" />;
+  if (!playlistId) return <ErrorState message="No Playlist Provided" />;
   return <SwipeProviderInner playlistId={playlistId} />;
 };
 
@@ -50,7 +50,7 @@ const SwipeProviderInner = ({ playlistId }: { playlistId: string }) => {
   ]);
 
   if (playlist.isError || playlistItems.isError)
-    return <ErrorState message="Failed to load playlist" />;
+    return <ErrorState message="Failed to Load Playlist" />;
 
   if (!playlist.isSuccess || !playlistItems.isSuccess)
     return <LoadingState message={`Loading ${!playlist.isSuccess ? "playlist" : "tracks"}...`} />;

@@ -18,9 +18,8 @@ class SpotifyCache:
     def __init__(self, redis: RedisClient, ttl_sessions: int):
         self.redis = redis
         self.ttl_sessions = ttl_sessions
-
         self.ttl_users: int = 60 * 60 * 2
-        self.ttl_playlists: int = 60 * 2
+        self.ttl_playlists: int = 90
         self.ttl_playlist_items: int = 60 * 60 * 24 * 7
 
     async def create_session(self, info: SessionInfo) -> str:
@@ -117,6 +116,9 @@ class SpotifyCache:
         snapshot_id: str,
         items: List[PlaylistItem],
     ) -> None:
+        if not items:
+            return
+
         items_key = self._playlist_items_key(user_id, playlist_id)
         snapshot_key = self._playlist_snapshot_key(user_id, playlist_id)
         ttl = self.ttl_playlist_items

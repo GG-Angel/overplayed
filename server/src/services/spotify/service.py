@@ -56,6 +56,16 @@ class SpotifyService:
     ) -> PlaylistPage:
         playlist = await self.get_playlist(playlist_id)
 
+        if playlist.tracks.total == 0:
+            return PlaylistPage(
+                items=[],
+                metadata=PlaylistPageMetadata(
+                    total_items=0,
+                    has_more=False,
+                    next_offset=None,
+                ),
+            )
+
         if cached := await self.cache.get_playlist_items(
             self.user_id,
             playlist_id,

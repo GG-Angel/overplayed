@@ -1,3 +1,4 @@
+import ErrorState from "@/components/states/ErrorState";
 import { useTrackPreviewUrl } from "@/features/previews/api/get-track-preview";
 import AudioPlayer from "@/features/previews/components/PreviewPlayer";
 import SwipeButtons from "@/features/swipe/components/SwipeButtons";
@@ -42,6 +43,10 @@ const SwipeSongsPage = () => {
     });
     setIsSwiping(false);
   };
+
+  if (playlist.tracks.length <= 0) {
+    return <ErrorState message="This Playlist is Empty" />;
+  }
 
   return (
     <div className="flex flex-col items-center gap-4 w-full self-center h-full py-6 overflow-hidden">
