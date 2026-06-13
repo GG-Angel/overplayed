@@ -1,7 +1,7 @@
-import asyncio
-import server
 from core.config import settings
 from state import build_state
+import asyncio
+import server
 
 
 async def main():

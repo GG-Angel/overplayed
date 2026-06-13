@@ -1,14 +1,15 @@
 import uvicorn
+from state import State
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Response, status
-from state import State
 from core.limiter import limiter
 from core.config import APP_STATE_KEY
+from routes import auth, users, playlists, previews, metrics
 
 
-async def start(state: State):
+def build_app(state: State) -> FastAPI:
     app = FastAPI()
 
     app.state[APP_STATE_KEY] = state
@@ -32,6 +33,16 @@ async def start(state: State):
     def handle_favicon():
         return Response(status_code=status.HTTP_204_NO_CONTENT)
 
+    app.include_router(auth.router, prefix="/auth", tags=["auth"])
+    app.include_router(users.router, prefix="/users", tags=["users"])
+    app.include_router(playlists.router, prefix="/playlists", tags=["playlists"])
+    app.include_router(previews.router, prefix="/previews", tags=["previews"])
+    app.include_router(metrics.router, prefix="/metrics", tags=["metrics"])
+
+    return app
+
+
+async def start(state: State):
+    app = build_app(state)
     config = uvicorn.Config(app, host="0.0.0.0", port=8080)
-    server = uvicorn.Server(config)
-    await server.serve()
+    await uvicorn.Server(config).serve()
