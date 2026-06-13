@@ -98,9 +98,14 @@ class PlaylistItem(BaseModel):
     track: Track
 
 
-class PlaylistItems(BaseModel):
-    total: int
+class PlaylistPageMetadata(BaseModel):
+    total_items: int
     has_more: bool
+    next_offset: int | None
+
+
+class PlaylistPage(BaseModel):
+    metadata: PlaylistPageMetadata
     items: List[PlaylistItem]
 
 

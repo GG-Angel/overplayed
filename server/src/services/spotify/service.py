@@ -2,7 +2,12 @@ from core.exceptions import NotFoundException
 from typing import List
 from services.spotify.client import SpotifyClient
 from services.spotify.cache import SpotifyCache
-from services.spotify.models import CurrentUser, Playlist, PlaylistItems
+from services.spotify.models import (
+    CurrentUser,
+    Playlist,
+    PlaylistPage,
+    PlaylistPageMetadata,
+)
 
 
 class SpotifyService:
@@ -47,8 +52,8 @@ class SpotifyService:
         return playlist
 
     async def get_playlist_items(
-        self, playlist_id: str, *, offset: int, limit: int
-    ) -> PlaylistItems:
+        self, playlist_id: str, *, offset: int = 0, limit: int = 100
+    ) -> PlaylistPage:
         playlist = await self.get_playlist(playlist_id)
 
         if cached := await self.cache.get_playlist_items(
@@ -65,10 +70,16 @@ class SpotifyService:
             self.user_id, playlist_id, playlist.id, items
         )
 
-        return PlaylistItems(
-            items=items[offset : offset + limit],
-            total=len(items),
-            has_more=offset + limit < len(items),
+        page = items[offset : offset + limit]
+        has_more = offset + len(page) < len(items)
+
+        return PlaylistPage(
+            items=page,
+            metadata=PlaylistPageMetadata(
+                total_items=len(items),
+                has_more=has_more,
+                next_offset=offset + len(page) if has_more else None,
+            ),
         )
 
     async def create_playlist(self, name: str, description: str) -> Playlist:

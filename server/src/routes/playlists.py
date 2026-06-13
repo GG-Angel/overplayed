@@ -7,7 +7,7 @@ from services.spotify.service import SpotifyService
 from services.spotify.utils import get_formatted_date
 from services.spotify.models import (
     Playlist,
-    PlaylistItems,
+    PlaylistPage,
     SpotifyIdPattern,
     SwipesForm,
     SwipesResponse,
@@ -40,14 +40,10 @@ async def handle_get_user_playlist(
 async def handle_get_playlist_items(
     request: Request,
     playlist_id: Annotated[str, Path(pattern=SpotifyIdPattern)],
-    page: int = Query(1, ge=1),
+    offset: int = Query(0, ge=0),
     spotify: SpotifyService = Depends(get_spotify_service),
-) -> PlaylistItems:
-    return await spotify.get_playlist_items(
-        playlist_id,
-        offset=(page - 1) * 100,
-        limit=100,  # page size
-    )
+) -> PlaylistPage:
+    return await spotify.get_playlist_items(playlist_id, offset=offset)
 
 
 @router.post("/{playlist_id}/swipes")

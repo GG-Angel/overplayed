@@ -6,8 +6,9 @@ from services.spotify.models import (
     CurrentUser,
     Playlist,
     PlaylistItem,
-    PlaylistItems,
+    PlaylistPage,
     SessionInfo,
+    PlaylistPageMetadata,
 )
 
 _SESSION_ID_LEN = 32
@@ -81,7 +82,7 @@ class SpotifyCache:
         *,
         offset: int = 0,
         limit: int = 100,
-    ) -> Optional[PlaylistItems]:
+    ) -> Optional[PlaylistPage]:
         snapshot_key = self._playlist_snapshot_key(user_id, playlist_id)
         items_key = self._playlist_items_key(user_id, playlist_id)
 
@@ -89,17 +90,24 @@ class SpotifyCache:
             pipe.get(snapshot_key)
             pipe.lrange(items_key, start=offset, end=offset + limit - 1)
             pipe.llen(items_key)
-            cached_snapshot_id, page, total = await pipe.execute()
+            cached_snapshot_id, items, total_items = await pipe.execute()
 
         if snapshot_id != cached_snapshot_id:
             logger.debug(f"MISS: {items_key}")
             return None
 
         logger.debug(f"HIT: {items_key}")
-        return PlaylistItems(
-            items=[PlaylistItem.model_validate_json(item) for item in page],
-            total=total,  # TODO: do we need total?
-            has_more=offset + limit < total,
+
+        page = [PlaylistItem.model_validate_json(item) for item in items]
+        has_more = offset + len(page) < total_items
+
+        return PlaylistPage(
+            items=page,
+            metadata=PlaylistPageMetadata(
+                total_items=total_items,
+                has_more=has_more,
+                next_offset=offset + len(page) if has_more else None,
+            ),
         )
 
     async def set_playlist_items(
