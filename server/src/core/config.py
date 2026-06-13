@@ -60,6 +60,7 @@ class Settings(BaseSettings):
     callback_url: str = "http://127.0.0.1:8080/auth/callback"
 
     model_config = SettingsConfigDict(
+        env_file=".env",
         env_nested_delimiter="__",
         case_sensitive=False,
         extra="ignore",
