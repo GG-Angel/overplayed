@@ -1,4 +1,4 @@
-from tests.conftest import TEST_PLAYLIST_NAME
+from tests.conftest import TEST_PLAYLIST_NAME, TEST_PLAYLIST_MIN_TRACKS
 import pytest
 from fastapi import status
 from aiohttp import ClientSession
@@ -56,13 +56,13 @@ async def test_get_playlist_items(session: ClientSession, first_playlist_id: str
 async def test_submit_swipes(session: ClientSession, testing_playlist_id: str):
     items = await get_playlist_items(session, testing_playlist_id)
 
-    track_uris = [item["track"]["uri"] for item in items]
-    if len(track_uris) < 3:
-        pytest.skip("Test playlist must have at least 3 tracks")
+    track_uris = [item["track"]["uri"] for item in items][:TEST_PLAYLIST_MIN_TRACKS]
+    if len(track_uris) < TEST_PLAYLIST_MIN_TRACKS:
+        pytest.skip(f"Test playlist needs at least {TEST_PLAYLIST_MIN_TRACKS} tracks")
 
     async with session.post(
         f"/playlists/{testing_playlist_id}/swipes",
-        json={"options": {"backup_enabled": True}, "uris": track_uris[:3]},
+        json={"options": {"backup_enabled": True}, "uris": track_uris},
     ) as response:
         assert response.status == status.HTTP_200_OK
         result = await response.json()
