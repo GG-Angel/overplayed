@@ -16,9 +16,7 @@ class State:
         self.oauth = oauth
 
 
-def build_state(settings: Settings) -> State:
-    session = ClientSession()
-
+def build_state(settings: Settings, session: ClientSession) -> State:
     oauth = SpotifyOAuth(
         client_id=settings.spotify_client_id,
         client_secret=settings.spotify_client_secret,

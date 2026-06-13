@@ -1,25 +1,31 @@
 import uvicorn
-from state import State
+from contextlib import asynccontextmanager
+from aiohttp import ClientSession
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Response, status
 from core.limiter import limiter
-from core.config import APP_STATE_KEY
+from core.config import Settings, APP_STATE_KEY
+from state import build_state
 from routes import auth, users, playlists, previews, metrics
 
 
-def build_app(state: State) -> FastAPI:
-    app = FastAPI()
+def build_app(settings: Settings) -> FastAPI:
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        async with ClientSession() as session:
+            app.state[APP_STATE_KEY] = build_state(settings, session)
+            yield
 
-    app.state[APP_STATE_KEY] = state
+    app = FastAPI(lifespan=lifespan)
 
     app.state.limiter = limiter
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # ty:ignore[invalid-argument-type]
 
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[state.settings.frontend_url],
+        allow_origins=[settings.frontend_url],
         allow_credentials=True,
         allow_methods=["GET", "POST", "DELETE"],
         allow_headers=["*"],
@@ -42,7 +48,6 @@ def build_app(state: State) -> FastAPI:
     return app
 
 
-async def start(state: State):
-    app = build_app(state)
+async def start(app: FastAPI):
     config = uvicorn.Config(app, host="0.0.0.0", port=8080)
     await uvicorn.Server(config).serve()
