@@ -1,8 +1,17 @@
+"""
+API Integration Tests :3
+- Requires all services to be running using Docker Compose.
+- Requires a SESSION_ID cookie from a logged-in Spotify session.
+- To run destructive tests, create a test playlist on your Spotify account.
+- Run `SESSION_ID="your_session_id" uv run pytest -v`
+"""
+
 import os
 from aiohttp import ClientSession, ClientTimeout
 import pytest
 
 BASE_URL = "http://127.0.0.1:8080"
+TEST_PLAYLIST_NAME = "Overplayed Testing"
 
 
 @pytest.fixture()
