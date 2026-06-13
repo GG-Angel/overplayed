@@ -35,7 +35,7 @@ class SpotifyService:
 
         return owned_playlists
 
-    async def get_user_playlist(self, playlist_id: str) -> Playlist:
+    async def get_playlist(self, playlist_id: str) -> Playlist:
         if cached := await self.cache.get_playlist(self.user_id, playlist_id):
             return cached
 
@@ -49,7 +49,7 @@ class SpotifyService:
     async def get_playlist_items(
         self, playlist_id: str, *, offset: int, limit: int
     ) -> PlaylistItems:
-        playlist = await self.get_user_playlist(playlist_id)
+        playlist = await self.get_playlist(playlist_id)
 
         if cached := await self.cache.get_playlist_items(
             self.user_id,

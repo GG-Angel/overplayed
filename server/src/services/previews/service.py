@@ -16,6 +16,7 @@ class DeezerService:
 
     async def get_track_preview(self, isrc: str) -> Optional[TrackPreview]:
         url = await self._get_track_preview_url(isrc)
+
         if url is None:
             return None
 

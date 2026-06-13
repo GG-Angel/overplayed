@@ -18,7 +18,7 @@ router = APIRouter()
 
 @router.get("/")
 @limiter.limit("30/minute")
-async def handle_get_playlists(
+async def handle_get_user_playlists(
     request: Request,
     spotify: SpotifyService = Depends(get_spotify_service),
 ) -> List[Playlist]:
@@ -27,12 +27,12 @@ async def handle_get_playlists(
 
 @router.get("/{playlist_id}")
 @limiter.limit("60/minute")
-async def handle_get_playlist(
+async def handle_get_user_playlist(
     request: Request,
     playlist_id: Annotated[str, Path(pattern=SpotifyIdPattern)],
     spotify: SpotifyService = Depends(get_spotify_service),
 ) -> Playlist:
-    return await spotify.get_user_playlist(playlist_id)
+    return await spotify.get_playlist(playlist_id)
 
 
 @router.get("/{playlist_id}/items")
@@ -60,7 +60,7 @@ async def handle_swipes(
     spotify: SpotifyService = Depends(get_spotify_service),
     metrics: MetricService = Depends(get_metric_service),
 ) -> SwipesResponse:
-    source_playlist = await spotify.get_user_playlist(playlist_id)
+    source_playlist = await spotify.get_playlist(playlist_id)
 
     backup_playlist = None
     if form.options.backup_enabled:
