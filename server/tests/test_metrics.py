@@ -1,11 +1,8 @@
-from core.config import settings
-from server import build_app
-from fastapi.testclient import TestClient
-
-app = build_app(settings)
+from aiohttp import ClientSession
+from fastapi import status
 
 
-def test_get_global_swipe_metrics():
-    with TestClient(app) as client:
-        response = client.get("/metrics")
-        assert response.status_code == 200
+async def test_get_global_swipe_metrics(session: ClientSession):
+    async with session.get("/metrics") as response:
+        assert response.status == status.HTTP_200_OK
+        assert isinstance(await response.json(), dict)
