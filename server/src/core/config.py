@@ -1,70 +1,37 @@
-from pydantic import BaseModel, Field
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import Field
+from pydantic_settings import BaseSettings
 
 APP_STATE_KEY = "state"
 
 
-class SpotifySettings(BaseModel):
-    client_id: str
-    client_secret: str
-    scope: str = "playlist-read-private playlist-modify-private playlist-modify-public user-read-email"
-
-    # pagination limits
-    playlist_limit: int = 50
-    playlist_items_limit: int = 100
-
-
-class DeezerSettings(BaseModel):
-    base_url: str = "https://api.deezer.com"
-
-
-class PostgresSettings(BaseModel):
-    user: str
-    password: str
-    host: str = "postgres"
-    port: int = 5432
-    db: str
-
-    @property
-    def url(self) -> str:
-        return f"postgresql+asyncpg://{self.user}:{self.password}@{self.host}:{self.port}/{self.db}"
-
-
-class RedisSettings(BaseModel):
-    host: str = "redis"
-    port: int = 6379
-    password: str
-    encryption_key: bytes = Field(..., min_length=32, max_length=32)
-
-    # cache ttls
-    ttl_sessions: int = 60 * 60 * 24 * 30  # sessions, 30 days
-    ttl_users: int = 60 * 60 * 2  # spotify profiles, 2 hr
-    ttl_playlists: int = 60 * 2  # playlists, 2 min (check snapshots frequently)
-    ttl_playlist_items: int = 60 * 60 * 24 * 7  # playlist items, 7 days
-    ttl_previews_hit: int = 60 * 10  # track previews (hit), 10 min (url expires in 15)
-    ttl_previews_miss: int = 60 * 60 * 2  # track previews (miss), 2 hours
-
-    @property
-    def url(self) -> str:
-        return f"redis://{self.host}:{self.port}"
-
-
 class Settings(BaseSettings):
-    spotify: SpotifySettings = Field(default_factory=SpotifySettings)
-    deezer: DeezerSettings = Field(default_factory=DeezerSettings)
-    redis: RedisSettings = Field(default_factory=RedisSettings)
-    postgres: PostgresSettings = Field(default_factory=PostgresSettings)
-
     debug: bool = False
     frontend_url: str = "http://127.0.0.1:5173"
     callback_url: str = "http://127.0.0.1:8080/auth/callback"
+    session_lifespan: int = 60 * 60 * 24 * 14  # 14 days
 
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_nested_delimiter="__",
-        case_sensitive=False,
-        extra="ignore",
-    )
+    spotify_client_id: str = Field(...)
+    spotify_client_secret: str = Field(...)
+    spotify_scope: str = "playlist-read-private playlist-modify-private playlist-modify-public user-read-email"
+
+    postgres_host: str = "postgres"
+    postgres_port: int = 5432
+    postgres_user: str = Field(...)
+    postgres_password: str = Field(...)
+    postgres_db: str = Field(...)
+
+    redis_host: str = "redis"
+    redis_port: int = 6379
+    redis_password: str = Field(...)
+    redis_key: bytes = Field(..., min_length=32, max_length=32)
+
+    @property
+    def db_url(self) -> str:
+        return f"postgresql+asyncpg://{self.postgres_user}:{self.postgres_password}@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
+
+    @property
+    def redis_url(self) -> str:
+        return f"redis://{self.redis_host}:{self.redis_port}"
 
 
 settings = Settings()

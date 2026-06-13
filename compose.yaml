@@ -7,13 +7,13 @@ services:
       - 8080:8080
     environment:
       - DEBUG
-      - SPOTIFY__CLIENT_ID=${SPOTIFY_CLIENT_ID}
-      - SPOTIFY__CLIENT_SECRET=${SPOTIFY_CLIENT_SECRET}
-      - REDIS__PASSWORD=${REDIS_PASSWORD}
-      - REDIS__ENCRYPTION_KEY=${REDIS_ENCRYPTION_KEY}
-      - POSTGRES__PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES__USER=${POSTGRES_USER}
-      - POSTGRES__DB=${POSTGRES_DB}
+      - SPOTIFY_CLIENT_ID
+      - SPOTIFY_CLIENT_SECRET
+      - REDIS_PASSWORD
+      - REDIS_KEY
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
     restart: unless-stopped
     develop:
       watch:
@@ -55,9 +55,9 @@ services:
     ports:
       - 127.0.0.1:5432:5432
     environment:
+      - POSTGRES_USER
       - POSTGRES_PASSWORD
       - POSTGRES_DB
-      - POSTGRES_USER
     healthcheck:
       test: ["CMD-SHELL", 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
       interval: 5s

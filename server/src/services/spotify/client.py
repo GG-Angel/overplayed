@@ -1,5 +1,4 @@
 import asyncio
-from core.config import SpotifySettings
 from typing import List, Callable, AsyncGenerator
 from loguru import logger
 from spotipy import Spotify
@@ -8,10 +7,12 @@ from services.spotify.models import CurrentUser, Playlist, PlaylistItem
 
 
 class SpotifyClient:
-    def __init__(self, spotify: Spotify, settings: SpotifySettings, user_id: str):
+    def __init__(self, spotify: Spotify, user_id: str):
         self.spotify = spotify
-        self.settings = settings
         self.user_id = user_id
+
+        self.playlist_limit = 50
+        self.playlist_items_limit = 100
 
     async def get_current_user(self) -> CurrentUser:
         """Gets the profile of the current user."""
@@ -34,7 +35,7 @@ class SpotifyClient:
         playlists = []
         async for p in self._paginate(
             self.spotify.current_user_playlists,
-            limit=self.settings.playlist_limit,
+            limit=self.playlist_limit,
         ):
             playlists.append(Playlist.model_validate(p))
         self._log(f"Got {len(playlists)} playlists")
@@ -47,7 +48,7 @@ class SpotifyClient:
         items = []
         async for item in self._paginate(
             self.spotify.playlist_items,
-            limit=self.settings.playlist_items_limit,
+            limit=self.playlist_items_limit,
             playlist_id=playlist_id,
             fields=spotify_fields(PlaylistItem, is_nested=True),
         ):
@@ -73,23 +74,23 @@ class SpotifyClient:
 
     async def remove_playlist_items(self, playlist_id: str, uris: List[str]) -> None:
         """Removes all occurrences of items from a playlist."""
-        for offset in range(0, len(uris), self.settings.playlist_items_limit):
+        for offset in range(0, len(uris), self.playlist_items_limit):
             self._log(f"Removing items from playlist {playlist_id} (offset={offset})")
             await self._run(
                 self.spotify.playlist_remove_all_occurrences_of_items,
                 playlist_id=playlist_id,
-                items=uris[offset : offset + self.settings.playlist_items_limit],
+                items=uris[offset : offset + self.playlist_items_limit],
             )
         self._log(f"Removed {len(uris)} items from playlist {playlist_id}")
 
     async def add_playlist_items(self, playlist_id: str, uris: List[str]) -> None:
         """Appends items to an existing playlist."""
-        for offset in range(0, len(uris), self.settings.playlist_items_limit):
+        for offset in range(0, len(uris), self.playlist_items_limit):
             self._log(f"Adding items to playlist {playlist_id} (offset={offset})")
             await self._run(
                 self.spotify.playlist_add_items,
                 playlist_id,
-                uris[offset : offset + self.settings.playlist_items_limit],
+                uris[offset : offset + self.playlist_items_limit],
             )
         self._log(f"Added {len(uris)} items to playlist {playlist_id}")
 

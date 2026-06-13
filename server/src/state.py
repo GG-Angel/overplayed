@@ -20,10 +20,10 @@ def build_state(settings: Settings) -> State:
     session = ClientSession()
 
     oauth = SpotifyOAuth(
-        client_id=settings.spotify.client_id,
-        client_secret=settings.spotify.client_secret,
+        client_id=settings.spotify_client_id,
+        client_secret=settings.spotify_client_secret,
         redirect_uri=settings.callback_url,
-        scope=settings.spotify.scope,
+        scope=settings.spotify_scope,
     )
 
     return State(settings=settings, session=session, oauth=oauth)

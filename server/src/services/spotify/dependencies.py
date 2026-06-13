@@ -1,12 +1,12 @@
+from core.config import Settings
 from core.exceptions import UnauthorizedException
 from typing import Optional
 import asyncio
 from spotipy import SpotifyOAuth, Spotify
 from time import time
-from core.config import Settings
 from fastapi import Depends, Cookie
 from cache.client import RedisClient, get_redis_client
-from state import get_settings, get_oauth
+from state import get_oauth, get_settings
 from services.spotify.models import SessionInfo, TokenInfo
 from services.spotify.cache import SpotifyCache
 from services.spotify.service import SpotifyService
@@ -20,14 +20,13 @@ def get_spotify_cache(
     redis: RedisClient = Depends(get_redis_client),
     settings: Settings = Depends(get_settings),
 ) -> SpotifyCache:
-    return SpotifyCache(redis=redis, settings=settings.redis)
+    return SpotifyCache(redis=redis, ttl_sessions=settings.session_lifespan)
 
 
 async def get_spotify_service(
     session_id: Optional[str] = Cookie(default=None),
     oauth: SpotifyOAuth = Depends(get_oauth),
     cache: SpotifyCache = Depends(get_spotify_cache),
-    settings: Settings = Depends(get_settings),
 ) -> SpotifyService:
     if not session_id or not (session := await cache.get_session(session_id)):
         raise UnauthorizedException()
@@ -40,7 +39,6 @@ async def get_spotify_service(
     return SpotifyService(
         spotify=SpotifyClient(
             spotify=Spotify(auth=session.access_token),
-            settings=settings.spotify,
             user_id=session.user_id,
         ),
         cache=cache,

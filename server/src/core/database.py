@@ -3,7 +3,7 @@ from typing import AsyncGenerator
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 
-engine = create_async_engine(settings.postgres.url, echo=False, future=True)
+engine = create_async_engine(settings.db_url, echo=False, future=True)
 
 async_session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 

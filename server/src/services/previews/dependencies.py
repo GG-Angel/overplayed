@@ -14,6 +14,6 @@ def get_deezer_service(
     redis: RedisClient = Depends(get_redis_client),
 ) -> DeezerService:
     return DeezerService(
-        deezer=DeezerClient(session=session, settings=settings.deezer),
-        cache=DeezerCache(redis=redis, settings=settings.redis),
+        deezer=DeezerClient(session=session),
+        cache=DeezerCache(redis=redis),
     )

@@ -4,8 +4,8 @@ from typing import AsyncGenerator
 from redis.asyncio import ConnectionPool, Redis
 
 pool = ConnectionPool.from_url(
-    settings.redis.url,
-    password=settings.redis.password,
+    settings.redis_url,
+    password=settings.redis_password,
     decode_responses=True,
     max_connections=20,
 )

@@ -68,7 +68,7 @@ async def handle_callback(
         value=session_id,
         httponly=True,
         samesite="lax",
-        max_age=settings.redis.ttl_sessions,
+        max_age=settings.session_lifespan,
         secure=not settings.debug,
     )
 

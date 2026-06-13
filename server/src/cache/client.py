@@ -102,4 +102,4 @@ def get_redis_client(
     redis: Redis = Depends(get_redis),
     settings: Settings = Depends(get_settings),
 ) -> RedisClient:
-    return RedisClient(redis=redis, encryption_key=settings.redis.encryption_key)
+    return RedisClient(redis=redis, encryption_key=settings.redis_key)
