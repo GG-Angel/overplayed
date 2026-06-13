@@ -1,8 +1,8 @@
+from core.config import settings
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from .config import settings
 
 engine = create_async_engine(settings.postgres.url, echo=False, future=True)
 

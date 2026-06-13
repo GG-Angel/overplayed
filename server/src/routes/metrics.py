@@ -1,6 +1,6 @@
 from core.limiter import limiter
 from fastapi import APIRouter, Request, Depends
-from api.services.metrics.service import (
+from services.metrics.service import (
     get_metric_service,
     MetricService,
     GlobalSwipeMetrics,

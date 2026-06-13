@@ -1,8 +1,8 @@
 from core.exceptions import NotFoundException
 from typing import List
-from .client import SpotifyClient
-from .cache import SpotifyCache
-from .models import CurrentUser, Playlist, PlaylistItems
+from services.spotify.client import SpotifyClient
+from services.spotify.cache import SpotifyCache
+from services.spotify.models import CurrentUser, Playlist, PlaylistItems
 
 
 class SpotifyService:

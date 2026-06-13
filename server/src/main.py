@@ -1,7 +1,7 @@
 import asyncio
 import server
 from core.config import settings
-from api.state import build_state
+from state import build_state
 
 
 async def main():

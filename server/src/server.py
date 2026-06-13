@@ -3,7 +3,7 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Response, status
-from api.state import State
+from state import State
 from core.limiter import limiter
 from core.config import APP_STATE_KEY
 

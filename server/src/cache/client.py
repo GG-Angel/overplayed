@@ -1,3 +1,4 @@
+from state import get_settings
 from core.redis import get_redis
 from fastapi import Depends
 from core.config import Settings
@@ -8,7 +9,6 @@ from loguru import logger
 from typing import Optional, Type, TypeVar, List, AsyncIterator
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from redis.asyncio import Redis
-from api.state import get_settings
 
 
 M = TypeVar("M", bound=BaseModel)

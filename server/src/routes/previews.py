@@ -2,9 +2,9 @@ from core.exceptions import NotFoundException
 from typing import Annotated
 from fastapi import APIRouter, Request, Path, Depends
 from core.limiter import limiter
-from api.services.previews.service import DeezerService
-from api.services.previews.dependencies import get_deezer_service
-from api.services.previews.models import IsrcPattern, TrackPreview
+from services.previews.service import DeezerService
+from services.previews.dependencies import get_deezer_service
+from services.previews.models import IsrcPattern, TrackPreview
 
 
 router = APIRouter()

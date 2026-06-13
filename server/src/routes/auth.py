@@ -1,3 +1,4 @@
+from services.spotify.models import TokenInfo, CurrentUser, SessionInfo
 from core.config import Settings
 from core.limiter import limiter
 import asyncio
@@ -8,10 +9,9 @@ from spotipy import SpotifyOAuth, Spotify
 from typing import Optional
 from fastapi import APIRouter, Depends, Cookie, HTTPException, Request
 from fastapi.responses import JSONResponse, RedirectResponse
-from api.state import get_oauth, get_settings
-from api.services.spotify.cache import SpotifyCache
-from api.services.spotify.dependencies import get_spotify_cache
-from api.services.spotify.models import TokenInfo, CurrentUser, SessionInfo
+from state import get_oauth, get_settings
+from services.spotify.cache import SpotifyCache
+from services.spotify.dependencies import get_spotify_cache
 
 
 router = APIRouter()

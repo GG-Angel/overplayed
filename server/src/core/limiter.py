@@ -1,6 +1,6 @@
+from core.config import settings
 from slowapi.util import get_remote_address
 from slowapi import Limiter
-from .config import settings
 
 
 limiter = Limiter(

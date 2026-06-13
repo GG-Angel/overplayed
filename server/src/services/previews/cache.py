@@ -1,6 +1,6 @@
 from typing import Optional
 from core.config import RedisSettings
-from api.cache.client import RedisClient
+from cache.client import RedisClient
 
 
 NO_PREVIEW = "__NO_PREVIEW__"

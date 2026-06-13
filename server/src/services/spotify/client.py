@@ -3,8 +3,8 @@ from core.config import SpotifySettings
 from typing import List, Callable, AsyncGenerator
 from loguru import logger
 from spotipy import Spotify
-from .utils import spotify_fields
-from .models import CurrentUser, Playlist, PlaylistItem
+from services.spotify.utils import spotify_fields
+from services.spotify.models import CurrentUser, Playlist, PlaylistItem
 
 
 class SpotifyClient:

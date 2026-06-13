@@ -1,11 +1,11 @@
+from services.previews.cache import DeezerCache
+from services.previews.client import DeezerClient
+from services.previews.service import DeezerService
 from core.config import Settings
 from fastapi import Depends
 from aiohttp import ClientSession
-from .cache import DeezerCache
-from .service import DeezerService
-from .client import DeezerClient
-from api.cache.client import RedisClient, get_redis_client
-from api.state import get_session, get_settings
+from cache.client import RedisClient, get_redis_client
+from state import get_session, get_settings
 
 
 def get_deezer_service(

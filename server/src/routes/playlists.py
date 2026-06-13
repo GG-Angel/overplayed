@@ -1,11 +1,11 @@
 from typing import List, Annotated
 from fastapi import Request, Depends, APIRouter, Path, Query, BackgroundTasks
 from core.limiter import limiter
-from api.services.metrics.service import get_metric_service, MetricService, SwipeSession
-from api.services.spotify.dependencies import get_spotify_service
-from api.services.spotify.service import SpotifyService
-from api.services.spotify.utils import get_formatted_date
-from api.services.spotify.models import (
+from services.metrics.service import get_metric_service, MetricService, SwipeSession
+from services.spotify.dependencies import get_spotify_service
+from services.spotify.service import SpotifyService
+from services.spotify.utils import get_formatted_date
+from services.spotify.models import (
     Playlist,
     PlaylistItems,
     SpotifyIdPattern,

@@ -5,12 +5,12 @@ from spotipy import SpotifyOAuth, Spotify
 from time import time
 from core.config import Settings
 from fastapi import Depends, Cookie
-from api.cache.client import RedisClient, get_redis_client
-from api.state import get_settings, get_oauth
-from .models import SessionInfo, TokenInfo
-from .cache import SpotifyCache
-from .service import SpotifyService
-from .client import SpotifyClient
+from cache.client import RedisClient, get_redis_client
+from state import get_settings, get_oauth
+from services.spotify.models import SessionInfo, TokenInfo
+from services.spotify.cache import SpotifyCache
+from services.spotify.service import SpotifyService
+from services.spotify.client import SpotifyClient
 
 
 TOKEN_EXPIRY_BUFFER = 120

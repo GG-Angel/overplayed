@@ -1,9 +1,15 @@
-from api.cache.client import RedisClient
+from cache.client import RedisClient
 from core.config import RedisSettings
 from typing import Optional, List
 from secrets import token_urlsafe
 from loguru import logger
-from .models import CurrentUser, Playlist, PlaylistItem, PlaylistItems, SessionInfo
+from services.spotify.models import (
+    CurrentUser,
+    Playlist,
+    PlaylistItem,
+    PlaylistItems,
+    SessionInfo,
+)
 
 _SESSION_ID_LEN = 32
 
