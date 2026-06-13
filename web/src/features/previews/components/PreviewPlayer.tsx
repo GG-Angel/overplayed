@@ -7,7 +7,7 @@ import Waveform, { type WaveformHandler } from "./Waveform";
 import WaveformSkeleton from "./WaveformSkeleton";
 
 type PreviewPlayerProps = {
-  url: string | undefined;
+  url: string | null | undefined;
   isLoading?: boolean;
   isError?: boolean;
   className?: string;

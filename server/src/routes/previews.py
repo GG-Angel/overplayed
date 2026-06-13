@@ -1,4 +1,3 @@
-from core.exceptions import NotFoundException
 from typing import Annotated
 from fastapi import APIRouter, Request, Path, Depends
 from core.limiter import limiter
@@ -17,7 +16,4 @@ async def handle_get_track_preview(
     isrc: Annotated[str, Path(pattern=IsrcPattern)],
     service: DeezerService = Depends(get_deezer_service),
 ) -> TrackPreview:
-    preview = await service.get_track_preview(isrc)
-    if preview is None:
-        raise NotFoundException()
-    return preview
+    return await service.get_track_preview(isrc)

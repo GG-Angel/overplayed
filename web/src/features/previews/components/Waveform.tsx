@@ -10,7 +10,7 @@ export type WaveformHandler = {
 };
 
 type WaveformProps = {
-  url: string | undefined;
+  url: string | null | undefined;
   waveformRef: Ref<WaveformHandler>;
   className?: string;
   onPlay?: () => void;

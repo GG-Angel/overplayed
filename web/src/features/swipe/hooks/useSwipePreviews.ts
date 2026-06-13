@@ -13,7 +13,7 @@ const useSwipePreviews = () => {
     .map((track) => track.external_ids.isrc);
 
   const previewQueries = useTrackPreviewUrls(preloadIsrcs);
-  const previewUrls = previewQueries.filter((q) => q.isSuccess).map((q) => q.data.url);
+  const previewUrls = previewQueries.map((q) => q.data?.url).filter((url) => url != null);
 
   return useAudioPreloader(previewUrls);
 };

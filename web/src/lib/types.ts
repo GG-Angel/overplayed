@@ -92,9 +92,9 @@ export const playlistPageSchema = z.object({
 
 export const trackPreviewSchema = z.object({
   isrc: z.string(),
-  url: z.url(),
-  expires_in: z.number().int().nonnegative(),
-  expires_at: z.number().int().nonnegative(),
+  url: z.url().nullable(),
+  expires_in: z.number().int().nonnegative().nullable(),
+  expires_at: z.number().int().nonnegative().nullable(),
 });
 
 export const globalSwipeMetricsSchema = z.object({

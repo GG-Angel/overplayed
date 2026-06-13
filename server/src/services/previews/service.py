@@ -14,11 +14,10 @@ class DeezerService:
         self.deezer = deezer
         self.cache = cache
 
-    async def get_track_preview(self, isrc: str) -> Optional[TrackPreview]:
+    async def get_track_preview(self, isrc: str) -> TrackPreview:
         url = await self._get_track_preview_url(isrc)
-
         if url is None:
-            return None
+            return TrackPreview(isrc=isrc)
 
         return TrackPreview(
             isrc=isrc,
