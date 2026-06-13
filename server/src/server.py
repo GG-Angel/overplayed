@@ -1,3 +1,4 @@
+from core.oauth import build_spotify_oauth
 import uvicorn
 from contextlib import asynccontextmanager
 from aiohttp import ClientSession
@@ -7,16 +8,35 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Response, status
 from core.limiter import limiter
 from core.config import Settings, APP_STATE_KEY
-from state import build_state
+from core.database import build_engine, build_sessionmaker, init_db
+from core.redis import build_redis_pool
+from state import State
 from routes import auth, users, playlists, previews, metrics
 
 
 def build_app(settings: Settings) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI):
+        db_engine = build_engine(settings)
+        db_sessionmaker = build_sessionmaker(db_engine)
+        redis_pool = build_redis_pool(settings)
+        oauth = build_spotify_oauth()
+
+        await init_db(db_engine)
+
         async with ClientSession() as session:
-            app.state[APP_STATE_KEY] = build_state(settings, session)
+            app.state[APP_STATE_KEY] = State(
+                settings=settings,
+                session=session,
+                db_engine=db_engine,
+                db_sessionmaker=db_sessionmaker,
+                redis_pool=redis_pool,
+                oauth=oauth,
+            )
             yield
+
+        await db_engine.dispose()
+        await redis_pool.disconnect()
 
     app = FastAPI(lifespan=lifespan)
 

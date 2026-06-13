@@ -1,6 +1,8 @@
 from fastapi import Request, Depends
 from aiohttp import ClientSession
 from spotipy import SpotifyOAuth
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
+from redis.asyncio import ConnectionPool
 from core.config import Settings, APP_STATE_KEY
 
 
@@ -10,21 +12,16 @@ class State:
         settings: Settings,
         session: ClientSession,
         oauth: SpotifyOAuth,
+        db_engine: AsyncEngine,
+        db_sessionmaker: async_sessionmaker[AsyncSession],
+        redis_pool: ConnectionPool,
     ):
         self.settings = settings
         self.session = session
         self.oauth = oauth
-
-
-def build_state(settings: Settings, session: ClientSession) -> State:
-    oauth = SpotifyOAuth(
-        client_id=settings.spotify_client_id,
-        client_secret=settings.spotify_client_secret,
-        redirect_uri=settings.callback_url,
-        scope=settings.spotify_scope,
-    )
-
-    return State(settings=settings, session=session, oauth=oauth)
+        self.db_engine = db_engine
+        self.db_sessionmaker = db_sessionmaker
+        self.redis_pool = redis_pool
 
 
 def get_app_state(request: Request) -> State:
