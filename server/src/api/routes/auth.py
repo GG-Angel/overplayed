@@ -8,7 +8,7 @@ from spotipy import SpotifyOAuth, Spotify
 from typing import Optional
 from fastapi import APIRouter, Depends, Cookie, HTTPException, Request
 from fastapi.responses import JSONResponse, RedirectResponse
-from api.dependencies import get_oauth, get_settings
+from api.state import get_oauth, get_settings
 from api.services.spotify.cache import SpotifyCache
 from api.services.spotify.dependencies import get_spotify_cache
 from api.services.spotify.models import TokenInfo, CurrentUser, SessionInfo

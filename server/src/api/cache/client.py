@@ -8,7 +8,7 @@ from loguru import logger
 from typing import Optional, Type, TypeVar, List, AsyncIterator
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from redis.asyncio import Redis
-from api.dependencies import get_settings
+from api.state import get_settings
 
 
 M = TypeVar("M", bound=BaseModel)

@@ -6,7 +6,7 @@ from time import time
 from core.config import Settings
 from fastapi import Depends, Cookie
 from api.cache.client import RedisClient, get_redis_client
-from api.dependencies import get_settings, get_oauth
+from api.state import get_settings, get_oauth
 from .models import SessionInfo, TokenInfo
 from .cache import SpotifyCache
 from .service import SpotifyService

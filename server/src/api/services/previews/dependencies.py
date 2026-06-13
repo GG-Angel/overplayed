@@ -5,7 +5,7 @@ from .cache import DeezerCache
 from .service import DeezerService
 from .client import DeezerClient
 from api.cache.client import RedisClient, get_redis_client
-from api.dependencies import get_session, get_settings
+from api.state import get_session, get_settings
 
 
 def get_deezer_service(
