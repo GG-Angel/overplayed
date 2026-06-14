@@ -9,6 +9,6 @@ RUN uv sync --frozen --no-cache
 
 COPY . .
 
-EXPOSE 8080
+EXPOSE 8000
 
 CMD ["uv", "run", "python", "app/main.py"]

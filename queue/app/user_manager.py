@@ -1,3 +1,4 @@
+from loguru import logger
 import asyncio
 from datetime import datetime
 from pydantic import BaseModel
@@ -34,17 +35,20 @@ class UserManager:
         ) as response:
             return GetUsersResponse.model_validate(await response.json()).users
 
-    async def add_user(self, user: NewUser) -> User:
+    async def add_user(self, new_user: NewUser) -> User:
         async with self._session.post(
             f"/api/ws4d/warp/clients/{self._client_id}/users",
-            json=user.model_dump(),
+            json=new_user.model_dump(),
         ) as response:
-            return User.model_validate(await response.json())
+            user = User.model_validate(await response.json())
+            logger.info(f"Added user: {user.name}")
+            return user
 
-    async def remove_user(self, user_id: str):
+    async def remove_user(self, user: User):
         await self._session.delete(
-            f"/api/ws4d/warp/clients/{self._client_id}/users/id/{user_id}"
+            f"/api/ws4d/warp/clients/{self._client_id}/users/id/{user.id}"
         )
+        logger.info(f"Removed user: {user.name}")
 
 
 # TODO: find workaround to token expiry

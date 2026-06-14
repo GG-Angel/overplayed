@@ -8,7 +8,7 @@ from queue_manager import QueueManager
 
 
 MAX_ACTIVE_USERS = 5
-POLL_INTERVAL = 10
+POLL_INTERVAL = 120
 ACCESS_DURATION = timedelta(hours=3)
 
 
@@ -33,7 +33,7 @@ class QueueController:
         active = 0
         for user in users:
             if now >= user.createdAt + ACCESS_DURATION:
-                await self._user_manager.remove_user(user.id)
+                await self._user_manager.remove_user(user)
             else:
                 active += 1
 
@@ -44,5 +44,8 @@ class QueueController:
         new_users = await self._queue_manager.dequeue(count=open_slots)
         for new_user in new_users:
             await self._user_manager.add_user(new_user)
+
         if new_users:
-            logger.info(f"Granted access to {len(new_users)} new users")
+            logger.info(
+                f"Granted access to {len(new_users)} users. Active: {len(new_users) + active}/{MAX_ACTIVE_USERS}"
+            )

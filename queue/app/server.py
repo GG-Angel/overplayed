@@ -56,5 +56,5 @@ async def start():
     app = FastAPI(lifespan=lifespan)
     app.include_router(queue.router)
 
-    config = uvicorn.Config(app, host="0.0.0.0", port=8080)
+    config = uvicorn.Config(app, host="0.0.0.0", port=8000)
     await uvicorn.Server(config).serve()

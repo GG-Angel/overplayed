@@ -37,6 +37,8 @@ services:
     build:
       context: queue
       dockerfile: Dockerfile
+    ports:
+      - 8000:8000
     environment:
       - SPOTIFY_CLIENT_ID
       - SPOTIFY_BEARER_TOKEN
