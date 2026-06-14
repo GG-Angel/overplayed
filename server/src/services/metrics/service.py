@@ -1,8 +1,9 @@
+from sqlalchemy.exc import IntegrityError
 from loguru import logger
 from fastapi import Depends
 from pydantic import BaseModel
 from datetime import datetime
-from sqlalchemy import String, DateTime, func, select, distinct, exists
+from sqlalchemy import String, DateTime, func, select, distinct
 from sqlalchemy.orm import mapped_column, Mapped
 from core.database import Base, get_db
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -34,9 +35,12 @@ class MetricService:
         self.db = db
 
     async def record_swipe_session(self, session: SwipeSession) -> None:
-        self.db.add(session)
-        await self.db.commit()
-        logger.info(f"Recorded swipe session for user {session.user_id} with {session.tracks_swiped} swipes")  # fmt: skip
+        try:
+            self.db.add(session)
+            await self.db.commit()
+            logger.info(f"Recorded swipe session for user {session.user_id} with {session.tracks_swiped} swipes")  # fmt: skip
+        except IntegrityError:
+            logger.warning(f"Ignoring swipe session record for user {session.user_id} due to integrity error")  # fmt: skip
 
     async def get_global_swipe_metrics(self) -> GlobalSwipeMetrics:
         result = await self.db.execute(
