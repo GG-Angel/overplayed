@@ -1,3 +1,4 @@
+from core.exceptions import BadRequestException
 from typing import List, Annotated
 from fastapi import Request, Depends, APIRouter, Path, Query, BackgroundTasks
 from core.limiter import limiter
@@ -56,29 +57,31 @@ async def handle_swipes(
     spotify: SpotifyService = Depends(get_spotify_service),
     metrics: MetricService = Depends(get_metric_service),
 ) -> SwipesResponse:
-    source_playlist = await spotify.get_playlist(playlist_id)
+    source = await spotify.get_playlist(playlist_id)
 
-    backup_playlist = None
+    if not (len(form.uris) <= form.tracks_swiped <= source.tracks.total):
+        raise BadRequestException()
+
+    backup = None
     if form.options.backup_enabled:
-        backup_playlist = await spotify.create_playlist(
-            f"Overplayed / {source_playlist.name}",
+        backup = await spotify.create_playlist(
+            f"Overplayed / {source.name}",
             f"Generated on {get_formatted_date()}",
         )
-        await spotify.add_playlist_items(backup_playlist.id, form.uris)
+        await spotify.add_playlist_items(backup.id, form.uris)
+    await spotify.delete_playlist_items(source.id, form.uris)
 
-    await spotify.delete_playlist_items(source_playlist.id, form.uris)
-
-    # TODO: use new playlist length to check against tracks cut, may need to wait for it to refresh
+    # record session for metrics
     background_tasks.add_task(
         metrics.record_swipe_session,
         SwipeSession(
             user_id=spotify.user_id,
-            playlist_id=source_playlist.id,
-            snapshot_id=source_playlist.snapshot_id,
-            total_tracks=source_playlist.tracks.total,
-            tracks_swiped=len(form.uris),  # TODO: actually send this metric
+            playlist_id=source.id,
+            snapshot_id=source.snapshot_id,
+            total_tracks=source.tracks.total,
+            tracks_swiped=form.tracks_swiped,
             tracks_cut=len(form.uris),
         ),
     )
 
-    return SwipesResponse(backup_playlist=backup_playlist)
+    return SwipesResponse(backup_playlist=backup)

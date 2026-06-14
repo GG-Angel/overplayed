@@ -111,6 +111,7 @@ export const swipesFormOptionsSchema = z.object({
 
 export const swipesFormSchema = z.object({
   uris: z.array(z.string()),
+  tracks_swiped: z.number().int().nonnegative(),
   options: swipesFormOptionsSchema,
 });
 

@@ -1,7 +1,8 @@
+from loguru import logger
 from fastapi import Depends
 from pydantic import BaseModel
 from datetime import datetime
-from sqlalchemy import String, DateTime, func, select, distinct
+from sqlalchemy import String, DateTime, func, select, distinct, exists
 from sqlalchemy.orm import mapped_column, Mapped
 from core.database import Base, get_db
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -17,9 +18,7 @@ class SwipeSession(Base):
     total_tracks: Mapped[int]
     tracks_swiped: Mapped[int]
     tracks_cut: Mapped[int]
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())  # fmt: skip
 
 
 class GlobalSwipeMetrics(BaseModel):
@@ -37,6 +36,7 @@ class MetricService:
     async def record_swipe_session(self, session: SwipeSession) -> None:
         self.db.add(session)
         await self.db.commit()
+        logger.info(f"Recorded swipe session for user {session.user_id} with {session.tracks_swiped} swipes")  # fmt: skip
 
     async def get_global_swipe_metrics(self) -> GlobalSwipeMetrics:
         result = await self.db.execute(

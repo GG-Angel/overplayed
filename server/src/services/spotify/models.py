@@ -1,5 +1,5 @@
 from typing import Optional, List, Annotated
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, PositiveInt
 
 _SpotifyIdInner = r"[0-9A-Za-z]{22}"
 SpotifyIdPattern = rf"^{_SpotifyIdInner}$"
@@ -116,6 +116,7 @@ class SwipesFormOptions(BaseModel):
 class SwipesForm(BaseModel):
     options: SwipesFormOptions
     uris: List[Annotated[str, Field(pattern=SpotifyUriPattern)]] = Field(min_length=1)
+    tracks_swiped: PositiveInt
 
 
 class SwipesResponse(BaseModel):

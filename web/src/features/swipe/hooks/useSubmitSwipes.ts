@@ -12,7 +12,12 @@ const useSubmitSwipes = () => {
   const canSubmit = tracksToRemove.length > 0;
 
   const submitMutation = useMutation({
-    mutationFn: () => submitSwipes(playlist.metadata.id, { options, uris: tracksToRemove }),
+    mutationFn: () =>
+      submitSwipes(playlist.metadata.id, {
+        options,
+        uris: tracksToRemove,
+        tracks_swiped: session.swipes.length,
+      }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.playlists.all });
     },
