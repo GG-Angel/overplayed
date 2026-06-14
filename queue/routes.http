@@ -10,7 +10,7 @@ POST {{baseUrl}}/queue
 Content-Type: application/json
 
 {
-  "name": "Ben Lee",
-  "email": "ben@example.com"
+  "name": "Manny Lee",
+  "email": "manny@example.com"
 }
 
