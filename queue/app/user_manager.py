@@ -1,9 +1,9 @@
+import json
+from redis.asyncio import Redis
 from loguru import logger
-import asyncio
 from datetime import datetime
 from pydantic import BaseModel
 from aiohttp import ClientSession
-from core.settings import settings
 
 
 class NewUser(BaseModel):
@@ -25,19 +25,26 @@ class GetUsersResponse(BaseModel):
 
 
 class UserManager:
-    def __init__(self, session: ClientSession, client_id: str):
-        self._session = session
-        self._client_id = client_id
+    def __init__(self, session: ClientSession, redis: Redis, client_id: str):
+        self.session = session
+        self.redis = redis
+        self.client_id = client_id
+        self.cache_key = "queue:users"
 
     async def get_users(self) -> list[User]:
-        async with self._session.get(
-            f"/api/s4d/warp/clients/{self._client_id}/users"
+        if cached := await self.redis.get(self.cache_key):
+            return GetUsersResponse.model_validate_json(cached).users
+
+        async with self.session.get(
+            f"/api/s4d/warp/clients/{self.client_id}/users"
         ) as response:
-            return GetUsersResponse.model_validate(await response.json()).users
+            result = await response.json()
+            await self.redis.set(self.cache_key, json.dumps(result), ex=300)
+            return GetUsersResponse.model_validate(result).users
 
     async def add_user(self, new_user: NewUser) -> User:
-        async with self._session.post(
-            f"/api/ws4d/warp/clients/{self._client_id}/users",
+        async with self.session.post(
+            f"/api/ws4d/warp/clients/{self.client_id}/users",
             json=new_user.model_dump(),
         ) as response:
             user = User.model_validate(await response.json())
@@ -45,28 +52,7 @@ class UserManager:
             return user
 
     async def remove_user(self, user: User):
-        await self._session.delete(
-            f"/api/ws4d/warp/clients/{self._client_id}/users/id/{user.id}"
+        await self.session.delete(
+            f"/api/ws4d/warp/clients/{self.client_id}/users/id/{user.id}"
         )
         logger.info(f"Removed user: {user.name}")
-
-
-# TODO: find workaround to token expiry
-async def main():
-    async with ClientSession(
-        base_url="https://developer.spotify.com",
-        headers={"Authorization": f"Bearer {settings.spotify_bearer_token}"},
-        raise_for_status=True,
-    ) as session:
-        manager = UserManager(client_id=settings.spotify_client_id, session=session)
-
-        # print("adding user")
-        # new_user = NewUser(name="Joe Mama", email="idontexist@gmail.com")
-        # print(await manager.add_user(new_user))
-
-        print("getting users")
-        print(await manager.get_users())
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
