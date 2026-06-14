@@ -11,9 +11,7 @@ services:
       - SPOTIFY_CLIENT_SECRET
       - REDIS_PASSWORD
       - REDIS_KEY
-      - POSTGRES_USER
       - POSTGRES_PASSWORD
-      - POSTGRES_DB
     restart: unless-stopped
     develop:
       watch:

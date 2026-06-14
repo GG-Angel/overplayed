@@ -1,10 +1,7 @@
-from pathlib import Path
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 APP_STATE_KEY = "state"
-
-ENV_FILE = Path(__file__).resolve().parents[3] / ".env"
 
 
 class Settings(BaseSettings):
@@ -19,9 +16,9 @@ class Settings(BaseSettings):
 
     postgres_host: str = "postgres"
     postgres_port: int = 5432
-    postgres_user: str = Field(...)
+    postgres_user: str = "postgres"
     postgres_password: str = Field(...)
-    postgres_db: str = Field(...)
+    postgres_db: str = "postgres"
 
     redis_host: str = "redis"
     redis_port: int = 6379
@@ -36,11 +33,7 @@ class Settings(BaseSettings):
     def redis_url(self) -> str:
         return f"redis://{self.redis_host}:{self.redis_port}"
 
-    model_config = SettingsConfigDict(
-        env_file=ENV_FILE,
-        case_sensitive=False,
-        extra="ignore",
-    )
+    model_config = SettingsConfigDict(case_sensitive=False, extra="ignore")
 
 
 settings = Settings()
