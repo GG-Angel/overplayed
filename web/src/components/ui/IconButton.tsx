@@ -48,7 +48,7 @@ const IconButton = ({
   ...props
 }: IconButtonProps) => {
   return (
-    <button className={cn(buttonVariants({ size, variant }), className)} {...props}>
+    <button type="button" className={cn(buttonVariants({ size, variant }), className)} {...props}>
       <Icon className={iconVariants({ size })} fill={filled ? "currentColor" : "none"} />
     </button>
   );

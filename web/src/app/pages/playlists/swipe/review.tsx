@@ -15,7 +15,7 @@ const SwipeReviewPage = () => {
   const navigate = useNavigate();
 
   const handleBackupToggle = useCallback(
-    () => setOptions((prev) => ({ ...prev, backupEnabled: !prev.backupEnabled })),
+    () => setOptions((prev) => ({ ...prev, backup_enabled: !prev.backup_enabled })),
     [setOptions]
   );
 
@@ -70,7 +70,7 @@ const SwipeReviewPage = () => {
   }
 
   return (
-    <div className="flex flex-col gap-6 py-2 w-full max-w-4xl self-center">
+    <main className="flex flex-col gap-6 py-2 w-full max-w-4xl self-center">
       <h1 className="text-center">Review Swipes</h1>
       <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
         <Metric
@@ -85,7 +85,7 @@ const SwipeReviewPage = () => {
         />
       </div>
       <div className="flex flex-col gap-3">
-        <h3>The following tracks will be removed:</h3>
+        <h2>The following tracks will be removed:</h2>
         <div className="flex flex-col gap-3 max-h-107 overflow-y-auto snap-y snap-mandatory">
           {session.dislikes.map((track) => (
             <TrackCard
@@ -100,13 +100,13 @@ const SwipeReviewPage = () => {
       <Card className="flex justify-between items-center gap-4 pr-6 py-3">
         <div>
           <p>Back up removed tracks?</p>
-          {options.backupEnabled ? (
+          {options.backup_enabled ? (
             <p className="text-sm text-muted">Saves removed tracks to a new playlist.</p>
           ) : (
             <p className="text-sm text-destructive">Removed tracks will be lost permanently.</p>
           )}
         </div>
-        <Checkbox enabled={options.backupEnabled} onEnabledChange={handleBackupToggle} />
+        <Checkbox enabled={options.backup_enabled} onEnabledChange={handleBackupToggle} />
       </Card>
       <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:w-fit sm:self-end">
         <Button variant="secondary" onClick={navigateToSwipePage}>
@@ -116,7 +116,7 @@ const SwipeReviewPage = () => {
           Confirm Deletion
         </Button>
       </div>
-    </div>
+    </main>
   );
 };
 

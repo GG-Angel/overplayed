@@ -41,7 +41,7 @@ const TrackCard = ({ track, orientation, className, ...props }: TrackCardProps) 
       <img
         src={coverUrl}
         className={imageVariants({ orientation })}
-        alt={`${track.name} cover`}
+        alt={`${track.name} by ${artistList} - Album Cover for ${track.album.name}`}
         draggable={false}
       />
       <div className="text-left whitespace-nowrap truncate">

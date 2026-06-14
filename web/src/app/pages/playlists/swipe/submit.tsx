@@ -1,7 +1,7 @@
 import MessageState from "@/components/states/MessageState";
 import Button from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
-import useSubmitSwipes, { SWIPE_PHASE_DESCRIPTIONS } from "@/features/swipe/hooks/useSubmitSwipes";
+import useSubmitSwipes from "@/features/swipe/hooks/useSubmitSwipes";
 import { useSwipeContext } from "@/features/swipe/provider/SwipeContext";
 import useConfetti from "@/hooks/useConfetti";
 import { kaomojis } from "@/lib/kaomoji";
@@ -13,17 +13,11 @@ const SwipeSubmitPage = () => {
   const { playlist, session } = useSwipeContext();
   const controller = useSubmitSwipes();
   const navigate = useNavigate();
-
-  const { backupPlaylist } = controller;
-
-  // snapshot the count before the query is invalidated for the dislike percentage
-  const [totalTracksAtSubmit] = useState(() => playlist.totalTracks);
-
-  const dislikePercentage =
-    totalTracksAtSubmit > 0 ? Math.round((session.dislikes.length / totalTracksAtSubmit) * 100) : 0;
-
-  const navigateHome = () => navigate("/", { replace: true });
-  const navigateToSwipePage = () => navigate("..");
+  const [dislikePercentage] = useState(() =>
+    playlist.pagination.total_items > 0
+      ? Math.round((session.dislikes.length / playlist.pagination.total_items) * 100)
+      : 0
+  );
 
   const initialSubmit = useEffectEvent(() => {
     controller.start(); // submit on page load
@@ -34,7 +28,10 @@ const SwipeSubmitPage = () => {
   }, []);
 
   // show confetti on success
-  useConfetti({ enabled: controller.isSuccess });
+  useConfetti({ enabled: controller.mutation.isSuccess });
+
+  const navigateHome = () => navigate("/", { replace: true });
+  const navigateToSwipePage = () => navigate("..");
 
   if (!controller.canSubmit) {
     return (
@@ -57,7 +54,7 @@ const SwipeSubmitPage = () => {
     );
   }
 
-  if (controller.isError) {
+  if (controller.mutation.isError) {
     return (
       <MessageState
         kaomoji={kaomojis.stressed}
@@ -83,7 +80,8 @@ const SwipeSubmitPage = () => {
     );
   }
 
-  if (controller.isSuccess) {
+  if (controller.mutation.isSuccess) {
+    const backupPlaylist = controller.mutation.data.backup_playlist;
     return (
       <MessageState
         kaomoji={kaomojis.proud}
@@ -125,9 +123,7 @@ const SwipeSubmitPage = () => {
       subtitle={
         <div className="flex justify-center items-center gap-2 mt-2">
           <Spinner size="sm" />
-          <p className="text-muted">
-            {controller.phase ? SWIPE_PHASE_DESCRIPTIONS[controller.phase] : "Starting up..."}
-          </p>
+          <p className="text-muted">Processing changes...</p>
         </div>
       }
     />

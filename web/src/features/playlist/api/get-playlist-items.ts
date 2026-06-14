@@ -1,34 +1,27 @@
 import { buildURLWithParams } from "@/lib/api";
 import { queryKeys } from "@/lib/query";
-import { playlistItemsPageSchema, type PlaylistItemsPage } from "@/lib/types";
+import { playlistPageSchema, type PlaylistPage } from "@/lib/types";
 import { infiniteQueryOptions, useInfiniteQuery } from "@tanstack/react-query";
 import api from "@/lib/api-client";
 import { useEffect } from "react";
 
-const PAGE_SIZE = 100;
-const PREFETCH_THRESHOLD = 20;
-
 const getPlaylistItems = async ({
   playlistId,
-  page = 1,
+  offset = 0,
 }: {
   playlistId: string;
-  page?: number;
-}): Promise<PlaylistItemsPage> => {
-  return playlistItemsPageSchema.parse(
-    await api.get(buildURLWithParams(`/playlists/${playlistId}/items`, { page }))
+  offset?: number;
+}): Promise<PlaylistPage> => {
+  return playlistPageSchema.parse(
+    await api.get(buildURLWithParams(`/playlists/${playlistId}/items`, { offset }))
   );
 };
 
 const getInfinitePlaylistItemsQueryOptions = (playlistId: string) => {
   return infiniteQueryOptions({
     queryKey: queryKeys.playlists.tracks(playlistId),
-    queryFn: ({ pageParam }) => getPlaylistItems({ playlistId, page: pageParam }),
-    getNextPageParam: (lastPage, allPages) => {
-      if (!lastPage.has_more) return undefined;
-      const nextPage = allPages.length;
-      return nextPage;
-    },
+    queryFn: ({ pageParam }) => getPlaylistItems({ playlistId, offset: pageParam }),
+    getNextPageParam: (lastPage) => lastPage.metadata.next_offset,
     initialPageParam: 0,
   });
 };
@@ -39,19 +32,21 @@ const useInfinitePlaylistItems = (playlistId: string) => {
   });
 };
 
+const PREFETCH_THRESHOLD = 20;
+
 export const usePrefetchedPlaylistItems = (playlistId: string, index: number) => {
   const items = useInfinitePlaylistItems(playlistId);
-
   const { isSuccess, hasNextPage, isFetchingNextPage, fetchNextPage, data } = items;
+
+  const loadedCount = data?.pages.reduce((acc, curr) => acc + curr.items.length, 0) ?? 0;
 
   useEffect(() => {
     if (!isSuccess || !hasNextPage || isFetchingNextPage) return;
 
-    const totalItemsLoaded = data.pages.length * PAGE_SIZE;
-    if (index >= totalItemsLoaded - PREFETCH_THRESHOLD) {
+    if (index >= loadedCount - PREFETCH_THRESHOLD) {
       fetchNextPage();
     }
-  }, [isSuccess, hasNextPage, isFetchingNextPage, fetchNextPage, data, index]);
+  }, [isSuccess, hasNextPage, isFetchingNextPage, fetchNextPage, index, loadedCount]);
 
   return items;
 };

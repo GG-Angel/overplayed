@@ -14,7 +14,7 @@ import SwipeProvider from "@/features/swipe/provider/SwipeProvider";
 import SwipeReviewPage from "./pages/playlists/swipe/review";
 import SwipeSubmitPage from "./pages/playlists/swipe/submit";
 
-const NotFound = <Route path="*" element={<ErrorState message="Page not found" />} />;
+const NotFound = <Route path="*" element={<ErrorState message="Page Not Found" />} />;
 
 const router = createBrowserRouter(
   createRoutesFromElements(

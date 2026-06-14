@@ -1,15 +1,14 @@
-import LoadingState from "@/components/states/LoadingState";
 import useAuth from "@/features/user/auth/useAuth";
 import Metric from "@/components/ui/Metric";
 import { formatCount, formatPercentage } from "@/lib/utils";
 import Button from "@/components/ui/Button";
 import SpotifyIcon from "@/assets/spotify.svg?react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import Card from "@/components/ui/Card";
 import Divider from "@/components/ui/Divider";
 import SwipeButtons from "@/features/swipe/components/SwipeButtons";
 import SwipeCardStack from "@/features/swipe/components/SwipeCardStack";
-import { useMetrics } from "@/features/metrics/api/get-metrics";
+import { useGlobalSwipeMetrics } from "@/features/metrics/api/get-swipe-metrics";
 import useSwipeCarousel from "@/features/swipe/hooks/useSwipeCarousel";
 import carouselTracks from "@/assets/carousel-tracks.json";
 import z from "zod";
@@ -36,15 +35,13 @@ const LandingPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { data: metrics } = useMetrics();
-  const { data: playlists } = useUserPlaylists();
+  const { data: metrics } = useGlobalSwipeMetrics();
+  const { data: playlists } = useUserPlaylists({ enabled: !!auth.user });
 
   const carousel = useSwipeCarousel(z.array(trackSchema).parse(carouselTracks));
 
-  if (auth.isLoading) return <LoadingState />;
-
   return (
-    <div className="flex flex-col gap-8 w-full max-w-3xl self-center py-8">
+    <main className="flex flex-col gap-8 w-full max-w-3xl self-center py-8">
       <h1 className="text-center">
         <span className="block">Your playlist is bloated. </span>
         <span className="block text-muted">
@@ -52,12 +49,12 @@ const LandingPage = () => {
         </span>
       </h1>
 
-      <h3 className="text-center">
+      <h2 className="text-center">
         <span className="xs:block">
           Tinder for your playlists. Swipe right to keep, left to cut.
         </span>{" "}
         <span className="xs:block">Clean up years of saved songs in minutes.</span>
-      </h3>
+      </h2>
 
       <Button
         className="self-center"
@@ -85,7 +82,7 @@ const LandingPage = () => {
       </Card>
 
       <div className="flex flex-col gap-3">
-        <h3 className="text-center">Three steps toward a cleaner playlist</h3>
+        <h2 className="text-center">Three steps toward a cleaner playlist</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {swipeSteps.map((step, index) => (
             <Card key={step.heading} className="flex flex-col gap-1.5 py-3">
@@ -103,7 +100,7 @@ const LandingPage = () => {
 
       {metrics && (
         <div className="flex flex-col gap-3">
-          <h3 className="text-center">Global statistics</h3>
+          <h2 className="text-center">Global statistics</h2>
           {(() => {
             const metricsSummary = [
               { label: "Songs swiped", amount: formatCount(metrics.total_swipes) },
@@ -137,13 +134,19 @@ const LandingPage = () => {
             <>
               <Divider />
               <p className="text-muted text-center wrap-break-word">
-                Your playlist "{mostTracksPlaylist.name}" has {mostTracksPlaylist.tracks.total}{" "}
-                tracks. You could cut maybe {estimatedSkips}.
+                Your playlist{" "}
+                <Link
+                  to={`/playlists/${mostTracksPlaylist.id}/swipe`}
+                  className="text-accent underline"
+                >
+                  {mostTracksPlaylist.name}
+                </Link>{" "}
+                has {mostTracksPlaylist.tracks.total} tracks. You could cut maybe {estimatedSkips}.
               </p>
             </>
           );
         })()}
-    </div>
+    </main>
   );
 };
 

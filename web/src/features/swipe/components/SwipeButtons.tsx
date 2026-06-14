@@ -22,10 +22,36 @@ const SwipeButtons = ({
 }: SwipeButtonsProps) => {
   return (
     <div className="flex items-end gap-2">
-      <IconButton icon={Undo} size="sm" variant="yellow" onClick={onUndo} disabled={!canUndo} />
-      <IconButton icon={X} variant="red" onClick={onDislike} disabled={!canSwipe} />
-      <IconButton icon={Heart} variant="green" onClick={onLike} disabled={!canSwipe} />
-      <IconButton icon={Check} size="sm" variant="blue" onClick={onFinish} disabled={!canFinish} />
+      <IconButton
+        aria-label="Undo"
+        icon={Undo}
+        size="sm"
+        variant="yellow"
+        onClick={onUndo}
+        disabled={!canUndo}
+      />
+      <IconButton
+        aria-label="Dislike"
+        icon={X}
+        variant="red"
+        onClick={onDislike}
+        disabled={!canSwipe}
+      />
+      <IconButton
+        aria-label="Like"
+        icon={Heart}
+        variant="green"
+        onClick={onLike}
+        disabled={!canSwipe}
+      />
+      <IconButton
+        aria-label="Finish"
+        icon={Check}
+        size="sm"
+        variant="blue"
+        onClick={onFinish}
+        disabled={!canFinish}
+      />
     </div>
   );
 };

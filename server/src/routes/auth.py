@@ -1,16 +1,18 @@
+from services.spotify.models import TokenInfo, CurrentUser, SessionInfo
+from core.config import Settings
+from core.limiter import limiter
 import asyncio
 from loguru import logger
 from urllib.parse import urlencode, urlparse
-from settings import Settings
 from redis.asyncio import RedisError
-from spotipy import SpotifyOauthError, SpotifyOAuth, Spotify, SpotifyException
-from dependencies import get_oauth, get_settings, get_spotify_cache
-from models import TokenInfo, SessionInfo, CurrentUser
+from spotipy import SpotifyOAuth, Spotify
 from typing import Optional
 from fastapi import APIRouter, Depends, Cookie, HTTPException, Request
 from fastapi.responses import JSONResponse, RedirectResponse
-from cache import SpotifyCache
-from limiter import limiter
+from state import get_oauth, get_settings
+from services.spotify.cache import SpotifyCache
+from services.spotify.dependencies import get_spotify_cache
+
 
 router = APIRouter()
 
@@ -56,7 +58,7 @@ async def handle_callback(
 
         session_info = SessionInfo(user_id=user.id, **token_info.model_dump())
         session_id = await cache.create_session(session_info)
-    except (SpotifyOauthError, SpotifyException, RedisError):
+    except Exception:
         return redirect_error()
 
     redirect_to = state or "/"
@@ -66,7 +68,7 @@ async def handle_callback(
         value=session_id,
         httponly=True,
         samesite="lax",
-        max_age=settings.redis.ttl_sessions,
+        max_age=settings.session_lifespan,
         secure=not settings.debug,
     )
 

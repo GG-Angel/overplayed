@@ -15,6 +15,6 @@ const getUserPlaylistsQueryOptions = () => {
   });
 };
 
-export const useUserPlaylists = () => {
-  return useQuery(getUserPlaylistsQueryOptions());
+export const useUserPlaylists = (options?: { enabled?: boolean }) => {
+  return useQuery({ ...getUserPlaylistsQueryOptions(), enabled: options?.enabled });
 };

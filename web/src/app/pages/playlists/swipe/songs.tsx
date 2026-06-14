@@ -1,3 +1,4 @@
+import ErrorState from "@/components/states/ErrorState";
 import { useTrackPreviewUrl } from "@/features/previews/api/get-track-preview";
 import AudioPlayer from "@/features/previews/components/PreviewPlayer";
 import SwipeButtons from "@/features/swipe/components/SwipeButtons";
@@ -24,7 +25,7 @@ const SwipeSongsPage = () => {
   const currentTrack = playlist.tracks.at(currentIndex);
   const currentPreview = useTrackPreviewUrl(currentTrack?.external_ids.isrc);
 
-  const hasReachedEnd = currentIndex >= playlist.totalTracks;
+  const hasReachedEnd = currentIndex >= playlist.pagination.total_items;
   const canUndoOrFinish = !isSwiping && currentIndex > 0;
   const canSwipe = !isSwiping && !hasReachedEnd;
 
@@ -43,13 +44,17 @@ const SwipeSongsPage = () => {
     setIsSwiping(false);
   };
 
+  if (playlist.tracks.length <= 0) {
+    return <ErrorState message="This Playlist is Empty" />;
+  }
+
   return (
-    <div className="flex flex-col items-center gap-4 w-full self-center h-full py-6 overflow-hidden">
+    <main className="flex flex-col items-center gap-4 w-full self-center h-full py-6 overflow-hidden">
       <SwipeProgress
         className="w-full max-w-3xl"
         likes={session.likes.length}
         dislikes={session.dislikes.length}
-        total={playlist.totalTracks}
+        total={playlist.pagination.total_items}
       />
       <div className="flex-1 flex flex-col w-full items-center justify-center gap-6 overflow-hidden">
         {!hasReachedEnd ? (
@@ -79,8 +84,8 @@ const SwipeSongsPage = () => {
           canSwipe={canSwipe}
         />
       </div>
-      <AudioPlayer url={currentPreview.data?.preview_url} className="w-full max-w-3xl" />
-    </div>
+      <AudioPlayer url={currentPreview.data?.url} className="w-full max-w-3xl" />
+    </main>
   );
 };
 
