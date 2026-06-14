@@ -1,8 +1,9 @@
 import asyncio
+import server
 
 
 async def main():
-    print("Hello from queue!")
+    await server.start()
 
 
 if __name__ == "__main__":

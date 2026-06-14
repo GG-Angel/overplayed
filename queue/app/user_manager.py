@@ -47,6 +47,7 @@ class UserManager:
         )
 
 
+# TODO: find workaround to token expiry
 async def main():
     async with ClientSession(
         base_url="https://developer.spotify.com",
@@ -55,9 +56,9 @@ async def main():
     ) as session:
         manager = UserManager(client_id=settings.spotify_client_id, session=session)
 
-        print("adding user")
-        new_user = NewUser(name="Joe Mama", email="idontexist@gmail.com")
-        print(await manager.add_user(new_user))
+        # print("adding user")
+        # new_user = NewUser(name="Joe Mama", email="idontexist@gmail.com")
+        # print(await manager.add_user(new_user))
 
         print("getting users")
         print(await manager.get_users())
