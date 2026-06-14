@@ -10,5 +10,9 @@ RUN uv sync --locked
 
 COPY . .
 
+# Run as an unprivileged user
+RUN useradd --system --no-create-home appuser && chown -R appuser /app
+USER appuser
+
 EXPOSE 8080
 CMD ["uv", "run", "python", "src/main.py"]

@@ -12,6 +12,8 @@ services:
       - REDIS_PASSWORD
       - REDIS_KEY
       - POSTGRES_PASSWORD
+      - FRONTEND_URL
+      - CALLBACK_URL
     restart: unless-stopped
     develop:
       watch:

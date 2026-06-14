@@ -9,6 +9,10 @@ RUN uv sync --frozen --no-cache
 
 COPY . .
 
+# Run as an unprivileged user
+RUN useradd --system --no-create-home appuser && chown -R appuser /app
+USER appuser
+
 EXPOSE 8000
 
 CMD ["uv", "run", "python", "app/main.py"]

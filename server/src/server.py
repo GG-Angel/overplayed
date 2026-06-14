@@ -69,5 +69,11 @@ def build_app(settings: Settings) -> FastAPI:
 
 
 async def start(app: FastAPI):
-    config = uvicorn.Config(app, host="0.0.0.0", port=8080)
+    config = uvicorn.Config(
+        app,
+        host="0.0.0.0",
+        port=8080,
+        proxy_headers=True,
+        forwarded_allow_ips="*",
+    )
     await uvicorn.Server(config).serve()

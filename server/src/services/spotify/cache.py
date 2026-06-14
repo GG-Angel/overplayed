@@ -25,7 +25,7 @@ class SpotifyCache:
     async def create_session(self, info: SessionInfo) -> str:
         session_id = token_urlsafe(_SESSION_ID_LEN)
         await self.set_session(session_id, info)
-        logger.info(f"Created session: {session_id}")
+        logger.info(f"Created session for user: {info.user_id}")
         return session_id
 
     async def set_session(self, session_id: str, session: SessionInfo) -> None:
@@ -40,7 +40,7 @@ class SpotifyCache:
 
     async def end_session(self, session_id: str) -> None:
         await self.redis.delete(self._session_key(session_id))
-        logger.info(f"Ended session: {session_id}")
+        logger.info("Ended session")
 
     async def get_user(self, user_id: str) -> Optional[CurrentUser]:
         return await self.redis.get_model(CurrentUser, self._user_key(user_id))
