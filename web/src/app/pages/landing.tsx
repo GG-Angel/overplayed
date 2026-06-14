@@ -36,7 +36,7 @@ const LandingPage = () => {
   const navigate = useNavigate();
 
   const { data: metrics } = useGlobalSwipeMetrics();
-  const { data: playlists } = useUserPlaylists();
+  const { data: playlists } = useUserPlaylists({ enabled: !!auth.user });
 
   const carousel = useSwipeCarousel(z.array(trackSchema).parse(carouselTracks));
 
