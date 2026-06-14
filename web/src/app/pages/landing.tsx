@@ -3,7 +3,7 @@ import Metric from "@/components/ui/Metric";
 import { formatCount, formatPercentage } from "@/lib/utils";
 import Button from "@/components/ui/Button";
 import SpotifyIcon from "@/assets/spotify.svg?react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import Card from "@/components/ui/Card";
 import Divider from "@/components/ui/Divider";
 import SwipeButtons from "@/features/swipe/components/SwipeButtons";
@@ -134,8 +134,14 @@ const LandingPage = () => {
             <>
               <Divider />
               <p className="text-muted text-center wrap-break-word">
-                Your playlist "{mostTracksPlaylist.name}" has {mostTracksPlaylist.tracks.total}{" "}
-                tracks. You could cut maybe {estimatedSkips}.
+                Your playlist{" "}
+                <Link
+                  to={`/playlists/${mostTracksPlaylist.id}/swipe`}
+                  className="text-accent underline"
+                >
+                  {mostTracksPlaylist.name}
+                </Link>{" "}
+                has {mostTracksPlaylist.tracks.total} tracks. You could cut maybe {estimatedSkips}.
               </p>
             </>
           );
