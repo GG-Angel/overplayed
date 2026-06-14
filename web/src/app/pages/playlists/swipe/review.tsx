@@ -70,7 +70,7 @@ const SwipeReviewPage = () => {
   }
 
   return (
-    <div className="flex flex-col gap-6 py-2 w-full max-w-4xl self-center">
+    <main className="flex flex-col gap-6 py-2 w-full max-w-4xl self-center">
       <h1 className="text-center">Review Swipes</h1>
       <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
         <Metric
@@ -85,7 +85,7 @@ const SwipeReviewPage = () => {
         />
       </div>
       <div className="flex flex-col gap-3">
-        <h3>The following tracks will be removed:</h3>
+        <h2>The following tracks will be removed:</h2>
         <div className="flex flex-col gap-3 max-h-107 overflow-y-auto snap-y snap-mandatory">
           {session.dislikes.map((track) => (
             <TrackCard
@@ -116,7 +116,7 @@ const SwipeReviewPage = () => {
           Confirm Deletion
         </Button>
       </div>
-    </div>
+    </main>
   );
 };
 

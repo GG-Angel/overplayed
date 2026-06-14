@@ -49,7 +49,7 @@ const SwipeSongsPage = () => {
   }
 
   return (
-    <div className="flex flex-col items-center gap-4 w-full self-center h-full py-6 overflow-hidden">
+    <main className="flex flex-col items-center gap-4 w-full self-center h-full py-6 overflow-hidden">
       <SwipeProgress
         className="w-full max-w-3xl"
         likes={session.likes.length}
@@ -85,7 +85,7 @@ const SwipeSongsPage = () => {
         />
       </div>
       <AudioPlayer url={currentPreview.data?.url} className="w-full max-w-3xl" />
-    </div>
+    </main>
   );
 };
 
