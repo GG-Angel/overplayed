@@ -5,7 +5,7 @@ from user_manager import UserManager, USER_LIMIT
 from queue_manager import QueueManager
 
 # spotify only allows 5 new users every 24 hours
-POLL_INTERVAL = 3600
+POLL_INTERVAL = 300
 ACCESS_DURATION = timedelta(hours=24)
 
 
