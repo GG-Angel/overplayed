@@ -48,6 +48,7 @@ class UserManager:
             json=new_user.model_dump(),
         ) as response:
             user = User.model_validate(await response.json())
+            await self.redis.delete(self.cache_key)
             logger.info(f"Added user: {user.name}")
             return user
 
@@ -55,4 +56,5 @@ class UserManager:
         await self.session.delete(
             f"/api/ws4d/warp/clients/{self.client_id}/users/id/{user.id}"
         )
+        await self.redis.delete(self.cache_key)
         logger.info(f"Removed user: {user.name}")
