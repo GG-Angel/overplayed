@@ -90,8 +90,6 @@ const SelectionPage = () => {
     []
   );
 
-  if (isLoading) return <LoadingState message="Loading playlists..." />;
-
   return (
     <main className="flex flex-col h-full gap-6">
       <h1 className="text-center">Select a Playlist</h1>
@@ -154,7 +152,11 @@ const SelectionPage = () => {
           </DropdownMenu>
         </Dropdown>
       </div>
-      {sortedPlaylists.length > 0 ? (
+      {isLoading ? (
+        <LoadingState message="Loading playlists..." />
+      ) : sortedPlaylists.length <= 0 ? (
+        <MessageState kaomoji={kaomojis.uncertain} title="No playlists found" />
+      ) : (
         <div className={cn("pb-4", LAYOUT_CONFIG[layout].containerClassName)}>
           {sortedPlaylists.map((p) => (
             <Playlist
@@ -164,8 +166,6 @@ const SelectionPage = () => {
             />
           ))}
         </div>
-      ) : (
-        <MessageState kaomoji={kaomojis.uncertain} title="No playlists found" />
       )}
     </main>
   );
