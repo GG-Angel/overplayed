@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /$
+Disallow: /playlists
+
+Sitemap: https://overplayed.gaelangel.com/sitemap.xml
