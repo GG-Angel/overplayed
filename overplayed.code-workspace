@@ -9,6 +9,10 @@
       "path": "server"
     },
     {
+      "name": "queue",
+      "path": "queue"
+    },
+    {
       "name": "web",
       "path": "web"
     }
@@ -17,7 +21,8 @@
     "typescript.tsdk": "web/node_modules/typescript/lib",
     "files.exclude": {
       "web": true,
-      "server": true
+      "server": true,
+      "queue": true
     }
   }
 }
