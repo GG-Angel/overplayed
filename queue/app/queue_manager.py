@@ -1,13 +1,12 @@
 from redis.asyncio import Redis
-from user_manager import UserManager, NewUser
+from user_manager import NewUser
 
 
 QUEUE_KEY = "queue"
 
 
 class QueueManager:
-    def __init__(self, user_manager: UserManager, redis: Redis):
-        self._user_manager = user_manager
+    def __init__(self, redis: Redis):
         self._redis = redis
 
     async def enqueue(self, user: NewUser) -> None:
