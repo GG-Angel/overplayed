@@ -3,6 +3,10 @@ from core.config import settings
 from core.database import Base
 from logging.config import fileConfig
 
+# Import modules that define ORM models so they register on Base.metadata
+# for autogenerate. Add new model modules here as they are introduced.
+import services.metrics.service  # noqa: F401
+
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config

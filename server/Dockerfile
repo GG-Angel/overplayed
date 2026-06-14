@@ -6,13 +6,12 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 WORKDIR /app
 
 COPY pyproject.toml uv.lock ./
-RUN uv sync --locked
+RUN uv sync --locked --no-cache
 
 COPY . .
 
-# Run as an unprivileged user
-RUN useradd --system --no-create-home appuser && chown -R appuser /app
+RUN useradd --system --no-create-home appuser
 USER appuser
 
 EXPOSE 8080
-CMD ["uv", "run", "python", "src/main.py"]
+CMD [".venv/bin/python", "src/main.py"]
