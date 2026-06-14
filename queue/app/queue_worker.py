@@ -4,8 +4,9 @@ from datetime import datetime, timezone, timedelta
 from user_manager import UserManager, USER_LIMIT
 from queue_manager import QueueManager
 
-POLL_INTERVAL = 6000
-ACCESS_DURATION = timedelta(hours=3)
+# spotify only allows 5 new users every 24 hours
+POLL_INTERVAL = 3600
+ACCESS_DURATION = timedelta(hours=24)
 
 
 class QueueWorker:
