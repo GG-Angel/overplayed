@@ -8,9 +8,10 @@ class QueueManager:
         self.redis = redis
         self.cache_key = "queue:waiting"
 
-    async def enqueue(self, user: NewUser) -> None:
-        await self.redis.rpush(self.cache_key, user.model_dump_json())
-        logger.info(f"Queued user: {user.name}")
+    async def enqueue(self, user: NewUser) -> int:
+        pos = await self.redis.rpush(self.cache_key, user.model_dump_json())
+        logger.info(f"Queued user: {user.name} (pos: {pos})")
+        return pos
 
     async def dequeue(self, count: int) -> list[NewUser]:
         result = await self.redis.lpop(self.cache_key, count=count)

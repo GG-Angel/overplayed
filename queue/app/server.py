@@ -47,7 +47,6 @@ async def lifespan(app: FastAPI):
 
 async def start():
     app = FastAPI(lifespan=lifespan)
-
     app.include_router(routes.router)
 
     config = uvicorn.Config(app, host="0.0.0.0", port=8000)

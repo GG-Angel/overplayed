@@ -10,6 +10,10 @@ class QueueDetails(BaseModel):
     queue_size: int
 
 
+class QueuePosition(BaseModel):
+    position: int
+
+
 router = APIRouter()
 
 
@@ -32,5 +36,5 @@ async def enqueue_user(
     request: Request,
     user: NewUser,
     state: State = Depends(get_state),
-):
-    pass
+) -> QueuePosition:
+    return QueuePosition(position=await state.queue.enqueue(user))
