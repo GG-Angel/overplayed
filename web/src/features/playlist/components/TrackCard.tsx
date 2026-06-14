@@ -33,7 +33,7 @@ type TrackCardProps = CardProps &
   };
 
 const TrackCard = ({ track, orientation, className, ...props }: TrackCardProps) => {
-  const coverUrl = extractImageUrl(track.album.images, orientation === "horizontal" ? "sm" : "lg");
+  const coverUrl = extractImageUrl(track.album.images, "sm");
   const artistList = track.artists.map((t) => t.name).join(" · ");
 
   return (
