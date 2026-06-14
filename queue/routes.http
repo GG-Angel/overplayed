@@ -1,23 +1,16 @@
-POST http://127.0.0.1:8000/queue
+@baseUrl = http://127.0.0.1:8000
+
+### Get Queue Details
+GET {{baseUrl}}/queue
+Content-Type: application/json
+
+
+### Queue a User
+POST {{baseUrl}}/queue
 Content-Type: application/json
 
 {
-  "name": "Jane Doe",
-  "email": "jane@example.com"
+  "name": "Ben Lee",
+  "email": "ben@example.com"
 }
 
-POST http://127.0.0.1:8000/queue
-Content-Type: application/json
-
-{
-  "name": "John Doe",
-  "email": "john@example.com"
-}
-
-POST http://127.0.0.1:8000/queue
-Content-Type: application/json
-
-{
-  "name": "Sam Lee",
-  "email": "sam@example.com"
-}

@@ -1,3 +1,4 @@
+from asyncio import Task
 from fastapi import Request
 from queue_manager import QueueManager
 from user_manager import UserManager
@@ -8,6 +9,7 @@ class State:
     def __init__(self, users: UserManager, queue: QueueManager):
         self.users = users
         self.queue = queue
+        self.tasks: set[Task] = set()
 
 
 def get_state(request: Request) -> QueueManager:

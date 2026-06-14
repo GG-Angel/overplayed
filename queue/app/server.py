@@ -36,8 +36,9 @@ async def lifespan(app: FastAPI):
     )
 
     worker = QueueWorker(users=state.users, queue=state.queue)
-    worker_task = asyncio.create_task(worker.start())
-    app.state.tasks = set([worker_task])
+    state.tasks.add(asyncio.create_task(worker.start()))
+
+    app.state[settings.app_state_key] = state
 
     yield
 

@@ -15,7 +15,6 @@ class QueueWorker:
 
     async def start(self) -> None:
         logger.info("Started queue worker.")
-
         while True:
             now = datetime.now(timezone.utc)
 
