@@ -1,4 +1,3 @@
-import LoadingState from "@/components/states/LoadingState";
 import useAuth from "@/features/user/auth/useAuth";
 import Metric from "@/components/ui/Metric";
 import { formatCount, formatPercentage } from "@/lib/utils";
@@ -40,8 +39,6 @@ const LandingPage = () => {
   const { data: playlists } = useUserPlaylists();
 
   const carousel = useSwipeCarousel(z.array(trackSchema).parse(carouselTracks));
-
-  if (auth.isLoading) return <LoadingState />;
 
   return (
     <div className="flex flex-col gap-8 w-full max-w-3xl self-center py-8">
