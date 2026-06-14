@@ -33,6 +33,19 @@ services:
       postgres:
         condition: service_healthy
 
+  queue:
+    build:
+      context: queue
+      dockerfile: Dockerfile
+    environment:
+      - SPOTIFY_CLIENT_ID
+      - SPOTIFY_BEARER_TOKEN
+      - REDIS_PASSWORD
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+
   redis:
     image: redis:alpine
     volumes:

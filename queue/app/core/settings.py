@@ -4,7 +4,6 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     spotify_client_id: str = Field(...)
-    spotify_client_secret: str = Field(...)
     spotify_bearer_token: str = Field(...)
 
     redis_host: str = "redis"
@@ -21,7 +20,7 @@ class Settings(BaseSettings):
 
     @property
     def redis_url(self) -> str:
-        return f"redis://{self.redis_host}:{self.redis_port}"
+        return f"redis://:{self.redis_password}@{self.redis_host}:{self.redis_port}"
 
 
 settings = Settings()

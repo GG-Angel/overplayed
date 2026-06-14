@@ -1,13 +1,15 @@
-from redis.asyncio import Redis
+import asyncio
+from contextlib import asynccontextmanager, suppress
+
 import uvicorn
-import redis.asyncio as redis
 from aiohttp import ClientSession
-from contextlib import asynccontextmanager
 from fastapi import FastAPI
-from user_manager import UserManager
+from redis.asyncio import Redis
+
 from core.settings import settings
 from state import AppState
 from routes import queue
+from user_manager import UserManager
 from queue_manager import QueueManager
 from queue_controller import QueueController
 
@@ -20,34 +22,34 @@ async def lifespan(app: FastAPI):
             headers={"Authorization": f"Bearer {settings.spotify_bearer_token}"},
             raise_for_status=True,
         ) as session,
+        Redis.from_url(
+            settings.redis_url,
+            decode_responses=True,
+            max_connections=5,
+        ) as redis,
     ):
         user_manager = UserManager(
             client_id=settings.spotify_client_id,
             session=session,
         )
-
-        redis_pool = redis.ConnectionPool.from_url(
-            url=settings.redis_url,
-            decode_responses=True,
-            max_connections=5,
-        )
-
+        queue_manager = QueueManager(user_manager=user_manager, redis=redis)
         queue_controller = QueueController(
             user_manager=user_manager,
-            queue_manager=QueueManager(
-                user_manager=user_manager,
-                redis=Redis.from_pool(redis_pool),
-            ),
+            queue_manager=queue_manager,
         )
 
-        app_state = AppState(
+        app.state[settings.app_state_key] = AppState(
             user_manager=user_manager,
-            queue_controller=queue_controller,
-            redis_pool=redis_pool,
+            queue_manager=queue_manager,
         )
-        app.state[settings.app_state_key] = app_state
 
-        yield
+        worker_task = asyncio.create_task(queue_controller.run())
+        try:
+            yield
+        finally:
+            worker_task.cancel()
+            with suppress(asyncio.CancelledError):
+                await worker_task
 
 
 async def start():
