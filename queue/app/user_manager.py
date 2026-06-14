@@ -5,6 +5,8 @@ from datetime import datetime
 from pydantic import BaseModel
 from aiohttp import ClientSession
 
+USER_LIMIT = 5
+
 
 class NewUser(BaseModel):
     name: str

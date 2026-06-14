@@ -1,7 +1,7 @@
 import asyncio
 import uvicorn
+import routes
 import redis.asyncio as aioredis
-from routes import queue
 from contextlib import asynccontextmanager
 from aiohttp import ClientSession
 from fastapi import FastAPI
@@ -9,41 +9,46 @@ from core.settings import settings
 from user_manager import UserManager
 from queue_manager import QueueManager
 from queue_worker import QueueWorker
+from state import State
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    app.state.session = ClientSession(
+    session = ClientSession(
         base_url="https://developer.spotify.com",
         headers={"Authorization": f"Bearer {settings.spotify_bearer_token}"},
         raise_for_status=True,
     )
-
-    app.state.redis_pool = aioredis.ConnectionPool.from_url(
+    redis_pool = aioredis.ConnectionPool.from_url(
         settings.redis_url,
         decode_responses=True,
-        max_connections=5,
+        max_connections=10,
+    )
+    redis = aioredis.Redis(connection_pool=redis_pool)
+
+    state = State(
+        users=UserManager(
+            session=session,
+            redis=redis,
+            client_id=settings.spotify_client_id,
+        ),
+        queue=QueueManager(redis=redis),
     )
 
-    app.state.redis = aioredis.Redis(connection_pool=app.state.redis_pool)
-
-    app.state.users = UserManager(session=app.state.session, redis=app.state.redis, client_id=settings.spotify_client_id)  # fmt: skip
-    app.state.queue = QueueManager(redis=app.state.redis)
-
-    worker = QueueWorker(users=app.state.users, queue=app.state.queue)
+    worker = QueueWorker(users=state.users, queue=state.queue)
     worker_task = asyncio.create_task(worker.start())
-    app.state.tasks = set(worker_task)
+    app.state.tasks = set([worker_task])
 
     yield
 
-    await app.state.session.close()
-    await app.state.redis_pool.disconnect()
+    await session.close()
+    await redis_pool.disconnect()
 
 
 async def start():
     app = FastAPI(lifespan=lifespan)
 
-    app.include_router(queue.router)
+    app.include_router(routes.router)
 
     config = uvicorn.Config(app, host="0.0.0.0", port=8000)
     await uvicorn.Server(config).serve()

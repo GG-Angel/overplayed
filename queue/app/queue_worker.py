@@ -1,11 +1,10 @@
 from loguru import logger
 from datetime import datetime, timezone, timedelta
 import asyncio
-from user_manager import UserManager
+from user_manager import UserManager, USER_LIMIT
 from queue_manager import QueueManager
 
 POLL_INTERVAL = 6000
-USER_LIMIT = 5
 USER_ACCESS_DURATION = timedelta(hours=3)
 
 
@@ -30,7 +29,6 @@ class QueueWorker:
                     logger.warning(f"Failed to remove expired user {user.name}. They may have already been removed. Ignoring...")  # fmt: skip
 
             # 2. fill in empty slots
-            # TODO: guarantee dequeue'd users are added so timeslots stay true
             new_users = await self.queue.dequeue(count=max(0, USER_LIMIT - num_active))
             for user in new_users:
                 try:
