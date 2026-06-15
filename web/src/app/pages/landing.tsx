@@ -257,41 +257,47 @@ const LandingPage = () => {
       )}
 
       {leaderboard && leaderboard.length > 0 && (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col overflow-hidden">
           <h2 className="text-center">Top users</h2>
-          <table className="text-sm text-center whitespace-nowrap border-separate border-spacing-x-0 border-spacing-y-1.5">
+          <table className="text-sm w-full border-separate border-spacing-x-0 border-spacing-y-1.5">
             <thead>
-              <tr className="*:px-3">
-                <th />
-                <th />
-                <th>Swipes</th>
-                <th>Cuts</th>
-                <th className="hidden sm:block">Rate</th>
+              <tr>
+                <th className="py-1 px-4 text-sm text-left">No.</th>
+                <th className="py-1 px-4 text-sm text-left">User</th>
+                <th className="py-1 px-4 text-sm text-left">Swipes</th>
+                <th className="py-1 px-4 text-sm text-left">Cuts</th>
+                <th className="py-1 px-4 text-sm text-left">Rate</th>
               </tr>
             </thead>
             <tbody>
               {leaderboard.slice(0, 5).map(({ user, metrics }, index) => (
-                <tr className="*:bg-card/40 *:border-card-border/40 *:py-1 *:px-3 *:border-y-2 *:first:border-l-2 *:first:rounded-l-lg max-w-xs sm:max-w-3xl">
-                  <td>#{index + 1}</td>
-                  <td className="flex items-center gap-3 overflow-hidden">
-                    <img
-                      className="size-8 rounded-full object-cover shrink-0"
-                      src={fallbackImageUrl(user.picture_url)}
-                    />
-                    <a
-                      href={user.spotify_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-medium hover:underline truncate"
-                    >
-                      {user.display_name}
-                    </a>
+                <tr key={user.id} className="overflow-hidden">
+                  <td className="py-1 px-4 bg-card border-card-border rounded-l-lg border-y-2 border-l-2">
+                    #{index + 1}
                   </td>
-                  <td className="text-center">{metrics.total_swipes}</td>
-                  <td className="text-center border-r-2 rounded-r-lg sm:border-r-0 sm:rounded-r-none">
-                    {metrics.total_cuts}
+                  <td className="py-1 px-4 bg-card border-card-border border-y-2 max-w-0 w-full">
+                    <div className="flex items-center gap-2.5">
+                      <img
+                        src={fallbackImageUrl(user.picture_url)}
+                        className="size-8 aspect-square object-cover rounded-full"
+                      />
+                      <a
+                        href={user.spotify_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-medium hover:underline truncate min-w-0"
+                      >
+                        {user.display_name}
+                      </a>
+                    </div>
                   </td>
-                  <td className="text-center hidden sm:table-cell sm:border-r-2 sm:rounded-r-lg">
+                  <td className="py-1 px-4 bg-card border-card-border border-y-2">
+                    {formatCount(metrics.total_swipes)}
+                  </td>
+                  <td className="py-1 px-4 bg-card border-card-border border-y-2">
+                    {formatCount(metrics.total_cuts)}
+                  </td>
+                  <td className="py-1 px-4 bg-card border-card-border rounded-r-lg border-y-2 border-r-2">
                     {formatPercentage(metrics.cut_rate)}
                   </td>
                 </tr>
