@@ -1,6 +1,6 @@
 import useAuth from "@/features/user/auth/useAuth";
 import Metric from "@/components/ui/Metric";
-import { fallbackImageUrl, formatCount, formatPercentage } from "@/lib/utils";
+import { cn, fallbackImageUrl, formatCount, formatPercentage, openExternalUrl } from "@/lib/utils";
 import Button from "@/components/ui/Button";
 import SpotifyIcon from "@/assets/spotify.svg?react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -55,7 +55,7 @@ const LandingPage = () => {
     {
       user: {
         id: "wuihadiuwaiud",
-        display_name: "My name is suuuuper long awdawdawdawdawdawdawdawdawdwadwad",
+        display_name: null,
         spotify_url: "myurl",
         picture_url: null,
       },
@@ -265,36 +265,40 @@ const LandingPage = () => {
                 <th>No.</th>
                 <th>User</th>
                 <th>Swipes</th>
-                <th>Cuts</th>
-                <th>Rate</th>
+                <th className="hidden xs:table-cell">Cuts</th>
+                <th className="hidden sm:table-cell">Rate</th>
               </tr>
             </thead>
             <tbody>
-              {leaderboard.slice(0, 5).map(({ user, metrics }, index) => (
+              {leaderboard.slice(0, 10).map(({ user, metrics }, index) => (
                 <tr
                   key={user.id}
-                  className="[&_td]:bg-card/40 [&_td]:border-card-border/40 [&_td]:py-1 [&_td]:px-4 [&_td]:border-y-2"
+                  className="group cursor-pointer [&_td]:group-hover:bg-card [&_td]:group-hover:border-card-border [&_td]:bg-card/40 [&_td]:border-card-border/40 [&_td]:py-1 [&_td]:px-4 [&_td]:border-y-2"
+                  onClick={() => openExternalUrl(user.spotify_url)}
                 >
-                  <td className="rounded-l-lg border-l-2">#{index + 1}</td>
+                  <td className={cn("rounded-l-lg border-l-2", index < 3 && "text-accent")}>
+                    #{index + 1}
+                  </td>
                   <td className="max-w-0 w-full">
                     <div className="flex items-center gap-2.5">
                       <img
                         src={fallbackImageUrl(user.picture_url)}
-                        className="size-8 aspect-square object-cover rounded-full"
+                        className="hidden xs:block size-8 aspect-square object-cover rounded-full"
                       />
-                      <a
-                        href={user.spotify_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="font-medium hover:underline truncate min-w-0"
-                      >
-                        {user.display_name}
-                      </a>
+                      <span className="font-medium hover:underline truncate min-w-0">
+                        {user.display_name ?? "Unknown"}
+                      </span>
                     </div>
                   </td>
-                  <td>{formatCount(metrics.total_swipes)}</td>
-                  <td>{formatCount(metrics.total_cuts)}</td>
-                  <td className="rounded-r-lg border-r-2">{formatPercentage(metrics.cut_rate)}</td>
+                  <td className="rounded-r-lg border-r-2 xs:rounded-r-none xs:border-r-0">
+                    {formatCount(metrics.total_swipes)}
+                  </td>
+                  <td className="hidden xs:table-cell rounded-r-lg border-r-2 sm:rounded-r-none sm:border-r-0">
+                    {formatCount(metrics.total_cuts)}
+                  </td>
+                  <td className="hidden sm:table-cell rounded-r-lg border-r-2">
+                    {formatPercentage(metrics.cut_rate)}
+                  </td>
                 </tr>
               ))}
             </tbody>
