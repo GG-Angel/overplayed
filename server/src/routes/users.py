@@ -1,3 +1,4 @@
+from database.service import DatabaseService, get_database_service, SwipeLeaderboardRow
 from services.spotify.models import CurrentUser
 from services.spotify.dependencies import get_spotify_service
 from services.spotify.service import SpotifyService
@@ -15,3 +16,12 @@ async def handle_get_current_user(
     spotify: SpotifyService = Depends(get_spotify_service),
 ) -> CurrentUser:
     return await spotify.get_current_user()
+
+
+@router.get("/leaderboard")
+@limiter.limit("30/minute")
+async def handle_get_swipe_leaderboard(
+    request: Request,
+    db: DatabaseService = Depends(get_database_service),
+) -> list[SwipeLeaderboardRow]:
+    return await db.get_swipe_leaderboard()
