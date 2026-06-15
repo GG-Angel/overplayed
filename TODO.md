@@ -7,6 +7,7 @@
 - Add a modal warning when leaving the swipe page with unsaved changes.
 - Add tests for new endpoints.
 - Test website on mobile devices.
+- Playlist items not being cached.
 
 ## Nice to Haves
 
