@@ -126,6 +126,7 @@ const LandingPage = () => {
       {leaderboard && leaderboard.length > 0 && (
         <div className="flex flex-col overflow-auto">
           <h2 className="text-center">Top users</h2>
+          <p className="text-xs text-center text-muted">Based on tracks cut, last 30 days</p>
           <table className="text-sm w-full border-separate border-spacing-x-0 border-spacing-y-1.5">
             <thead>
               <tr className="[&_th]:py-1 [&_th]:px-4">

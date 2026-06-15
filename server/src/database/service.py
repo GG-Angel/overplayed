@@ -1,3 +1,4 @@
+from datetime import datetime, timezone, timedelta
 from typing import List
 from core.database import get_db
 from sqlalchemy import func, select, distinct
@@ -70,9 +71,7 @@ class DatabaseService:
         )
 
     async def get_swipe_leaderboard(
-        self,
-        offset: int = 0,
-        limit: int = 25,
+        self, offset: int = 0, limit: int = 25, since: timedelta = timedelta(days=30)
     ) -> List[SwipeLeaderboardRow]:
         total_swipes = func.coalesce(func.sum(SwipeSession.tracks_swiped), 0)
         total_cuts = func.coalesce(func.sum(SwipeSession.tracks_cut), 0)
@@ -80,8 +79,9 @@ class DatabaseService:
         result = await self.db.execute(
             select(User, total_swipes, total_cuts)
             .join(SwipeSession, User.id == SwipeSession.user_id)
+            .where(SwipeSession.created_at >= datetime.now(timezone.utc) - since)
             .group_by(User.id)
-            .order_by(total_swipes.desc())
+            .order_by(total_cuts.desc())
             .offset(offset)
             .limit(limit)
         )
