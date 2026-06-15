@@ -79,7 +79,7 @@ async def handle_swipes(
         User(
             id=user.id,
             display_name=user.display_name,
-            email=user.email,
+            spotify_url=user.external_urls.spotify,
             picture_url=user.images[0].url if user.images else None,
         ),
     )

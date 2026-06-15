@@ -9,7 +9,7 @@ class User(Base):
 
     id: Mapped[str] = mapped_column(String(255), primary_key=True)
     display_name: Mapped[str] = mapped_column(String(255), nullable=True)
-    email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    spotify_url: Mapped[str] = mapped_column(String(255), nullable=False)
     picture_url: Mapped[str] = mapped_column(String(255), nullable=True)
 
 

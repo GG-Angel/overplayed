@@ -1,3 +1,4 @@
+from typing import List
 from core.database import get_db
 from sqlalchemy import func, select, distinct
 from database.schemas import SwipeSession, User
@@ -8,12 +9,20 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-class GlobalSwipeMetrics(BaseModel):
-    total_sessions: int
-    total_users: int
+class SwipeMetrics(BaseModel):
     total_swipes: int
     total_cuts: int
     cut_rate: float
+
+
+class GlobalSwipeMetrics(SwipeMetrics):
+    total_sessions: int
+    total_users: int
+
+
+class SwipeLeaderboardRow(BaseModel):
+    user: User
+    metrics: SwipeMetrics
 
 
 class DatabaseService:
@@ -50,6 +59,9 @@ class DatabaseService:
             total_cuts=total_cuts,
             cut_rate=round(total_cuts / total_swipes, 2) if total_swipes else 0.0,
         )
+
+    async def get_swipe_leaderboard(self) -> List[SwipeLeaderboardRow]:
+        return []  # TODO:
 
 
 def get_database_service(db: AsyncSession = Depends(get_db)) -> DatabaseService:
