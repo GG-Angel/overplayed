@@ -5,11 +5,13 @@ from database.schemas import SwipeSession, User
 from sqlalchemy.exc import IntegrityError
 from loguru import logger
 from fastapi import Depends
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class UserResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     display_name: str | None
     spotify_url: str
