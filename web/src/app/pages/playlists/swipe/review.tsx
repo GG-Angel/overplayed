@@ -5,6 +5,7 @@ import Checkbox from "@/components/ui/Checkbox";
 import Metric from "@/components/ui/Metric";
 import TrackCard from "@/features/playlist/components/TrackCard";
 import { useSwipeContext } from "@/features/swipe/provider/SwipeContext";
+import useConfetti from "@/hooks/useConfetti";
 import { kaomojis } from "@/lib/kaomoji";
 import { formatCount, pluralize } from "@/lib/utils";
 import { useCallback } from "react";
@@ -22,6 +23,8 @@ const SwipeReviewPage = () => {
   const navigateHome = () => navigate("/", { replace: true });
   const navigateToSwipePage = () => navigate("..");
   const navigateToSwipeSubmit = () => navigate("../submit");
+
+  useConfetti({ enabled: session.swipes.length > 0 && session.dislikes.length === 0 });
 
   if (session.swipes.length === 0) {
     return (
