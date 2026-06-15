@@ -9,6 +9,13 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
+class UserResponse(BaseModel):
+    id: str
+    display_name: str | None
+    spotify_url: str
+    picture_url: str | None
+
+
 class SwipeMetrics(BaseModel):
     total_swipes: int
     total_cuts: int
@@ -21,7 +28,7 @@ class GlobalSwipeMetrics(SwipeMetrics):
 
 
 class SwipeLeaderboardRow(BaseModel):
-    user: User
+    user: UserResponse
     metrics: SwipeMetrics
 
 
@@ -60,8 +67,34 @@ class DatabaseService:
             cut_rate=round(total_cuts / total_swipes, 2) if total_swipes else 0.0,
         )
 
-    async def get_swipe_leaderboard(self) -> List[SwipeLeaderboardRow]:
-        return []  # TODO:
+    async def get_swipe_leaderboard(
+        self,
+        offset: int = 0,
+        limit: int = 25,
+    ) -> List[SwipeLeaderboardRow]:
+        total_swipes = func.coalesce(func.sum(SwipeSession.tracks_swiped), 0)
+        total_cuts = func.coalesce(func.sum(SwipeSession.tracks_cut), 0)
+
+        result = await self.db.execute(
+            select(User, total_swipes, total_cuts)
+            .join(SwipeSession, User.id == SwipeSession.user_id)
+            .group_by(User.id)
+            .order_by(total_swipes.desc())
+            .offset(offset)
+            .limit(limit)
+        )
+
+        return [
+            SwipeLeaderboardRow(
+                user=UserResponse.model_validate(user),
+                metrics=SwipeMetrics(
+                    total_swipes=swipes,
+                    total_cuts=cuts,
+                    cut_rate=round(cuts / swipes, 2) if swipes else 0.0,
+                ),
+            )
+            for user, swipes, cuts in result.all()
+        ]
 
 
 def get_database_service(db: AsyncSession = Depends(get_db)) -> DatabaseService:
