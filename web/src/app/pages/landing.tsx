@@ -210,7 +210,8 @@ const LandingPage = () => {
                 >
                   {mostTracksPlaylist.name}
                 </Link>{" "}
-                has {mostTracksPlaylist.tracks.total} tracks. You could cut about {estimatedSkips}.
+                has {formatCount(mostTracksPlaylist.tracks.total)} tracks. You could cut about{" "}
+                {formatCount(estimatedSkips)}.
               </p>
             </>
           );
