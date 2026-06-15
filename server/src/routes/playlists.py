@@ -1,8 +1,9 @@
+from database.schemas import SwipeSession, User
+from database.service import DatabaseService, get_database_service
 from core.exceptions import BadRequestException
 from typing import List, Annotated
 from fastapi import Request, Depends, APIRouter, Path, Query, BackgroundTasks
 from core.limiter import limiter
-from services.metrics.service import get_metric_service, MetricService, SwipeSession
 from services.spotify.dependencies import get_spotify_service
 from services.spotify.service import SpotifyService
 from services.spotify.utils import get_formatted_date
@@ -55,8 +56,9 @@ async def handle_swipes(
     playlist_id: Annotated[str, Path(pattern=SpotifyIdPattern)],
     form: SwipesForm,
     spotify: SpotifyService = Depends(get_spotify_service),
-    metrics: MetricService = Depends(get_metric_service),
+    db: DatabaseService = Depends(get_database_service),
 ) -> SwipesResponse:
+    user = await spotify.get_current_user()
     source = await spotify.get_playlist(playlist_id)
 
     if not (len(form.uris) <= form.tracks_swiped <= source.tracks.total):
@@ -71,9 +73,18 @@ async def handle_swipes(
         await spotify.add_playlist_items(backup.id, form.uris)
     await spotify.delete_playlist_items(source.id, form.uris)
 
-    # record session for metrics
+    # record user and session
     background_tasks.add_task(
-        metrics.record_swipe_session,
+        db.upsert_user,
+        User(
+            id=user.id,
+            display_name=user.display_name,
+            spotify_url=user.external_urls.spotify,
+            picture_url=user.images[-1].url if user.images else None,
+        ),
+    )
+    background_tasks.add_task(
+        db.record_swipe_session,
         SwipeSession(
             user_id=spotify.user_id,
             playlist_id=source.id,

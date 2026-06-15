@@ -77,7 +77,7 @@ class SpotifyService:
 
         items = await self.spotify.get_unique_playlist_items(playlist_id)
         await self.cache.set_playlist_items(
-            self.user_id, playlist_id, playlist.id, items
+            self.user_id, playlist.id, playlist.snapshot_id, items
         )
 
         page = items[offset : offset + limit]

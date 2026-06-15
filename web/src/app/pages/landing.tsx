@@ -1,6 +1,6 @@
 import useAuth from "@/features/user/auth/useAuth";
 import Metric from "@/components/ui/Metric";
-import { formatCount, formatPercentage } from "@/lib/utils";
+import { cn, fallbackImageUrl, formatCount, formatPercentage, openExternalUrl } from "@/lib/utils";
 import Button from "@/components/ui/Button";
 import SpotifyIcon from "@/assets/spotify.svg?react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -14,21 +14,8 @@ import carouselTracks from "@/assets/carousel-tracks.json";
 import z from "zod";
 import { trackSchema } from "@/lib/types";
 import { useUserPlaylists } from "@/features/playlist/api/get-playlists";
-
-const swipeSteps = [
-  {
-    heading: "Pick a playlist",
-    body: "Connect Spotify and choose any playlist — even the 2,000-song dumpster fire.",
-  },
-  {
-    heading: "Swipe through it",
-    body: "A 30-second preview plays for each track. Swipe right to keep, left to cut.",
-  },
-  {
-    heading: "Confirm the purge",
-    body: "Review the cuts, back them up if you want, and delete all in just one click.",
-  },
-];
+import { useSwipeLeaderboard } from "@/features/metrics/api/get-swipe-leaderboad";
+import { Scissors } from "lucide-react";
 
 const LandingPage = () => {
   const auth = useAuth();
@@ -36,6 +23,7 @@ const LandingPage = () => {
   const navigate = useNavigate();
 
   const { data: metrics } = useGlobalSwipeMetrics();
+  const { data: leaderboard } = useSwipeLeaderboard();
   const { data: playlists } = useUserPlaylists({ enabled: !!auth.user });
 
   const carousel = useSwipeCarousel(z.array(trackSchema).parse(carouselTracks));
@@ -84,7 +72,20 @@ const LandingPage = () => {
       <div className="flex flex-col gap-3">
         <h2 className="text-center">Three steps toward a cleaner playlist</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {swipeSteps.map((step, index) => (
+          {[
+            {
+              heading: "Pick a playlist",
+              body: "Connect Spotify and choose any playlist — even the 2,000-song dumpster fire.",
+            },
+            {
+              heading: "Swipe through it",
+              body: "A 30-second preview plays for each track. Swipe right to keep, left to cut.",
+            },
+            {
+              heading: "Confirm the purge",
+              body: "Review the cuts, back them up if you want, and delete all in just one click.",
+            },
+          ].map((step, index) => (
             <Card key={step.heading} className="flex flex-col gap-1.5 py-3">
               <div className="flex items-center justify-center size-6 bg-card-foreground text-card rounded-full text-sm font-semibold select-none">
                 {index + 1}
@@ -123,6 +124,74 @@ const LandingPage = () => {
         </div>
       )}
 
+      {leaderboard && (
+        <div className="flex flex-col overflow-auto">
+          <h2 className="text-center">Top users</h2>
+
+          {leaderboard.length > 0 ? (
+            <>
+              <p className="text-xs text-center text-muted">Based on tracks cut, last 30 days</p>
+              <table className="text-sm w-full border-separate border-spacing-x-0 border-spacing-y-1.5">
+                <thead>
+                  <tr className="[&_th]:py-1 [&_th]:px-4">
+                    <th className="text-left">No.</th>
+                    <th className="text-left">User</th>
+                    <th className="text-center">Swipes</th>
+                    <th className="hidden xs:table-cell text-center">Cuts</th>
+                    <th className="hidden sm:table-cell text-center">Rate</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {leaderboard.slice(0, 5).map(({ user, metrics }, index) => (
+                    <tr
+                      key={user.id}
+                      className="group cursor-pointer [&_td]:group-hover:bg-card [&_td]:group-hover:border-card-border [&_td]:bg-card/40 [&_td]:border-card-border/40 [&_td]:py-1 [&_td]:px-4 [&_td]:border-y-2"
+                      onClick={() => openExternalUrl(user.spotify_url)}
+                    >
+                      <td className={cn("rounded-l-lg border-l-2", index === 0 && "text-accent")}>
+                        #{index + 1}
+                      </td>
+                      <td className="max-w-0 w-full">
+                        <div className="flex items-center gap-2.5">
+                          <img
+                            src={fallbackImageUrl(user.picture_url)}
+                            className="hidden xs:block size-8 aspect-square object-cover rounded-full"
+                          />
+                          <span className="font-medium hover:underline truncate min-w-0">
+                            {user.display_name ?? "Unknown"}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="rounded-r-lg border-r-2 xs:rounded-r-none xs:border-r-0 text-center">
+                        {formatCount(metrics.total_swipes)}
+                      </td>
+                      <td className="hidden xs:table-cell rounded-r-lg border-r-2 sm:rounded-r-none sm:border-r-0 text-center">
+                        {formatCount(metrics.total_cuts)}
+                      </td>
+                      <td className="hidden sm:table-cell rounded-r-lg border-r-2 text-center">
+                        {formatPercentage(metrics.cut_rate)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </>
+          ) : (
+            <Card
+              tone="muted"
+              padding="lg"
+              className="flex flex-col items-center gap-1 text-sm text-center mt-3 py-6"
+            >
+              <Scissors className="size-6 text-muted" />
+              <p className="font-medium">The board's wide open</p>
+              <p className="text-xs text-muted">
+                No cuts in the last 30 days — start swiping to claim the top spot.
+              </p>
+            </Card>
+          )}
+        </div>
+      )}
+
       {playlists &&
         metrics &&
         (() => {
@@ -141,7 +210,8 @@ const LandingPage = () => {
                 >
                   {mostTracksPlaylist.name}
                 </Link>{" "}
-                has {mostTracksPlaylist.tracks.total} tracks. You could cut maybe {estimatedSkips}.
+                has {formatCount(mostTracksPlaylist.tracks.total)} tracks. You could cut about{" "}
+                {formatCount(estimatedSkips)}.
               </p>
             </>
           );

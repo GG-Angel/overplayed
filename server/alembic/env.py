@@ -9,7 +9,7 @@ from alembic import context
 
 from core.config import settings  # noqa: F401
 from core.database import Base
-import services.metrics.service  # noqa: F401
+import database.schemas  # noqa: F401
 
 settings.database_host = "localhost"
 
