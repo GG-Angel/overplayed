@@ -26,8 +26,6 @@ class Settings(BaseSettings):
     redis_password: str = Field(...)
     redis_key: bytes = Field(..., min_length=32, max_length=32)
 
-    
-
     @property
     def db_url(self) -> str:
         return f"postgresql+asyncpg://{self.database_user}:{self.database_password}@{self.database_host}:{self.database_port}/{self.database_db}"
@@ -36,7 +34,11 @@ class Settings(BaseSettings):
     def redis_url(self) -> str:
         return f"redis://{self.redis_user}:{self.redis_password}@{self.redis_host}:{self.redis_port}"
 
-    model_config = SettingsConfigDict(case_sensitive=False, extra="ignore")
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        case_sensitive=False,
+        extra="ignore",
+    )
 
 
 settings = Settings()
