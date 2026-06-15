@@ -80,7 +80,7 @@ async def handle_swipes(
             id=user.id,
             display_name=user.display_name,
             spotify_url=user.external_urls.spotify,
-            picture_url=user.images[0].url if user.images else None,
+            picture_url=user.images[-1].url if user.images else None,
         ),
     )
     background_tasks.add_task(

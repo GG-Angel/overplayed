@@ -18,20 +18,20 @@ class UserResponse(BaseModel):
     picture_url: str | None
 
 
-class SwipeMetrics(BaseModel):
+class UserSwipeMetrics(BaseModel):
     total_swipes: int
     total_cuts: int
     cut_rate: float
 
 
-class GlobalSwipeMetrics(SwipeMetrics):
+class GlobalSwipeMetrics(UserSwipeMetrics):
     total_sessions: int
     total_users: int
 
 
 class SwipeLeaderboardRow(BaseModel):
     user: UserResponse
-    metrics: SwipeMetrics
+    metrics: UserSwipeMetrics
 
 
 class DatabaseService:
@@ -89,7 +89,7 @@ class DatabaseService:
         return [
             SwipeLeaderboardRow(
                 user=UserResponse.model_validate(user),
-                metrics=SwipeMetrics(
+                metrics=UserSwipeMetrics(
                     total_swipes=swipes,
                     total_cuts=cuts,
                     cut_rate=round(cuts / swipes, 2) if swipes else 0.0,

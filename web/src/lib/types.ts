@@ -97,12 +97,27 @@ export const trackPreviewSchema = z.object({
   expires_at: z.number().int().nonnegative().nullable(),
 });
 
-export const globalSwipeMetricsSchema = z.object({
-  total_sessions: z.number().int().nonnegative(),
-  total_users: z.number().int().nonnegative(),
+const swipeMetricsSchema = z.object({
   total_swipes: z.number().int().nonnegative(),
   total_cuts: z.number().int().nonnegative(),
   cut_rate: z.number().nonnegative(),
+});
+
+const userResponseSchema = z.object({
+  id: z.string(),
+  display_name: z.string().nullable(),
+  spotify_url: z.string(),
+  picture_url: z.string().nullable(),
+});
+
+export const globalSwipeMetricsSchema = swipeMetricsSchema.extend({
+  total_sessions: z.number().int().nonnegative(),
+  total_users: z.number().int().nonnegative(),
+});
+
+export const swipeLeaderboardSchema = z.object({
+  user: userResponseSchema,
+  metrics: swipeMetricsSchema,
 });
 
 export const swipesFormOptionsSchema = z.object({
@@ -135,3 +150,4 @@ export type GlobalSwipeMetrics = z.infer<typeof globalSwipeMetricsSchema>;
 export type SwipesFormOptions = z.infer<typeof swipesFormOptionsSchema>;
 export type SwipesForm = z.infer<typeof swipesFormSchema>;
 export type SwipesResponse = z.infer<typeof swipesResponseSchema>;
+export type SwipeLeaderboardSchema = z.infer<typeof swipeLeaderboardSchema>;
