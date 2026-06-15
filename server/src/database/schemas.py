@@ -17,7 +17,9 @@ class SwipeSession(Base):
     __tablename__ = "swipe_sessions"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    user_id: Mapped[str] = mapped_column(String(255), ForeignKey(User.id), index=True, nullable=False)  # fmt: skip
+    user_id: Mapped[str] = mapped_column(
+        String(255), ForeignKey(User.id, ondelete="CASCADE"), index=True, nullable=False
+    )
     playlist_id: Mapped[str] = mapped_column(String(255), nullable=False)
     snapshot_id: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
     total_tracks: Mapped[int] = mapped_column(nullable=False)
