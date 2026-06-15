@@ -1,11 +1,18 @@
 from core.database import get_db
 from sqlalchemy import func, select, distinct
-from database.schemas import SwipeSession
+from database.schemas import SwipeSession, User
 from sqlalchemy.exc import IntegrityError
 from loguru import logger
 from fastapi import Depends
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
+
+
+class UserUpsert(BaseModel):
+    id: str
+    display_name: str | None
+    email: str
+    picture_url: str
 
 
 class GlobalSwipeMetrics(BaseModel):
@@ -19,6 +26,11 @@ class GlobalSwipeMetrics(BaseModel):
 class DatabaseService:
     def __init__(self, db: AsyncSession):
         self.db = db
+
+    async def upsert_user(self, user: User) -> None:
+        await self.db.merge(user)
+        await self.db.commit()
+        logger.info(f"Upserted user {user.id}")
 
     async def record_swipe_session(self, session: SwipeSession) -> None:
         try:
