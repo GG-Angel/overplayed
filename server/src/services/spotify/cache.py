@@ -92,7 +92,9 @@ class SpotifyCache:
             cached_snapshot_id, items, total_items = await pipe.execute()
 
         if snapshot_id != cached_snapshot_id:
-            logger.debug(f"MISS: {items_key}")
+            logger.debug(
+                f"MISS: {items_key}, snapshot IDs did not match: expected={snapshot_id}, got={cached_snapshot_id}"
+            )
             return None
 
         logger.debug(f"HIT: {items_key}")
@@ -130,7 +132,9 @@ class SpotifyCache:
             pipe.set(snapshot_key, snapshot_id, ex=ttl)
             await pipe.execute()
 
-        logger.debug(f"CACHED: {len(items)} items (key={items_key}, ttl={ttl}s)")
+        logger.debug(
+            f"CACHED: {len(items)} items (key={items_key}, snapshot={snapshot_id}, ttl={ttl}s)"
+        )
 
     @staticmethod
     def _session_key(session_id: str) -> str:
