@@ -1,25 +1,11 @@
+from core.database import get_db
+from sqlalchemy import func, select, distinct
+from database.schemas import SwipeSession
 from sqlalchemy.exc import IntegrityError
 from loguru import logger
 from fastapi import Depends
 from pydantic import BaseModel
-from datetime import datetime
-from sqlalchemy import String, DateTime, func, select, distinct
-from sqlalchemy.orm import mapped_column, Mapped
-from core.database import Base, get_db
 from sqlalchemy.ext.asyncio import AsyncSession
-
-
-class SwipeSession(Base):
-    __tablename__ = "swipe_sessions"
-
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    user_id: Mapped[str] = mapped_column(String(255), index=True)
-    playlist_id: Mapped[str] = mapped_column(String(255))
-    snapshot_id: Mapped[str] = mapped_column(String(255), unique=True)
-    total_tracks: Mapped[int]
-    tracks_swiped: Mapped[int]
-    tracks_cut: Mapped[int]
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())  # fmt: skip
 
 
 class GlobalSwipeMetrics(BaseModel):
@@ -30,7 +16,7 @@ class GlobalSwipeMetrics(BaseModel):
     cut_rate: float
 
 
-class MetricService:
+class DatabaseService:
     def __init__(self, db: AsyncSession):
         self.db = db
 
@@ -61,5 +47,5 @@ class MetricService:
         )
 
 
-def get_metric_service(db: AsyncSession = Depends(get_db)) -> MetricService:
-    return MetricService(db=db)
+def get_database_service(db: AsyncSession = Depends(get_db)) -> DatabaseService:
+    return DatabaseService(db=db)
