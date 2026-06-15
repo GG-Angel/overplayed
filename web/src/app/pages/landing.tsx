@@ -257,25 +257,26 @@ const LandingPage = () => {
       )}
 
       {leaderboard && leaderboard.length > 0 && (
-        <div className="flex flex-col overflow-hidden">
+        <div className="flex flex-col overflow-auto">
           <h2 className="text-center">Top users</h2>
           <table className="text-sm w-full border-separate border-spacing-x-0 border-spacing-y-1.5">
             <thead>
-              <tr>
-                <th className="py-1 px-4 text-sm text-left">No.</th>
-                <th className="py-1 px-4 text-sm text-left">User</th>
-                <th className="py-1 px-4 text-sm text-left">Swipes</th>
-                <th className="py-1 px-4 text-sm text-left">Cuts</th>
-                <th className="py-1 px-4 text-sm text-left">Rate</th>
+              <tr className="[&_th]:py-1 [&_th]:px-4 [&_th]:text-sm [&_th]:text-left">
+                <th>No.</th>
+                <th>User</th>
+                <th>Swipes</th>
+                <th>Cuts</th>
+                <th>Rate</th>
               </tr>
             </thead>
             <tbody>
               {leaderboard.slice(0, 5).map(({ user, metrics }, index) => (
-                <tr key={user.id} className="overflow-hidden">
-                  <td className="py-1 px-4 bg-card border-card-border rounded-l-lg border-y-2 border-l-2">
-                    #{index + 1}
-                  </td>
-                  <td className="py-1 px-4 bg-card border-card-border border-y-2 max-w-0 w-full">
+                <tr
+                  key={user.id}
+                  className="[&_td]:bg-card/40 [&_td]:border-card-border/40 [&_td]:py-1 [&_td]:px-4 [&_td]:border-y-2"
+                >
+                  <td className="rounded-l-lg border-l-2">#{index + 1}</td>
+                  <td className="max-w-0 w-full">
                     <div className="flex items-center gap-2.5">
                       <img
                         src={fallbackImageUrl(user.picture_url)}
@@ -291,15 +292,9 @@ const LandingPage = () => {
                       </a>
                     </div>
                   </td>
-                  <td className="py-1 px-4 bg-card border-card-border border-y-2">
-                    {formatCount(metrics.total_swipes)}
-                  </td>
-                  <td className="py-1 px-4 bg-card border-card-border border-y-2">
-                    {formatCount(metrics.total_cuts)}
-                  </td>
-                  <td className="py-1 px-4 bg-card border-card-border rounded-r-lg border-y-2 border-r-2">
-                    {formatPercentage(metrics.cut_rate)}
-                  </td>
+                  <td>{formatCount(metrics.total_swipes)}</td>
+                  <td>{formatCount(metrics.total_cuts)}</td>
+                  <td className="rounded-r-lg border-r-2">{formatPercentage(metrics.cut_rate)}</td>
                 </tr>
               ))}
             </tbody>
