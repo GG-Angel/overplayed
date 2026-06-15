@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Response, status
 from core.limiter import limiter
 from core.config import Settings, APP_STATE_KEY
-from core.database import build_engine, build_sessionmaker, init_db
+from core.database import build_engine, build_sessionmaker
 from core.redis import build_redis_pool
 from state import State
 from routes import auth, users, playlists, previews, metrics
@@ -21,8 +21,6 @@ def build_app(settings: Settings) -> FastAPI:
         db_sessionmaker = build_sessionmaker(db_engine)
         redis_pool = build_redis_pool(settings)
         oauth = build_spotify_oauth()
-
-        await init_db(db_engine)
 
         async with ClientSession() as session:
             app.state[APP_STATE_KEY] = State(

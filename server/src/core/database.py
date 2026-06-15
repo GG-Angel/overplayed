@@ -21,11 +21,6 @@ def build_sessionmaker(engine: AsyncEngine) -> async_sessionmaker[AsyncSession]:
     return async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
-async def init_db(engine: AsyncEngine) -> None:
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-
-
 async def get_db(state: State = Depends(get_app_state)) -> AsyncGenerator[AsyncSession]:
     async with state.db_sessionmaker() as session:
         try:

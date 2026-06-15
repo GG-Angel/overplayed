@@ -5,16 +5,16 @@
       "path": "."
     },
     {
-      "name": "server",
-      "path": "server"
+      "name": "web",
+      "path": "web"
     },
     {
       "name": "queue",
       "path": "queue"
     },
     {
-      "name": "web",
-      "path": "web"
+      "name": "server",
+      "path": "server"
     }
   ],
   "settings": {

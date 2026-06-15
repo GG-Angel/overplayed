@@ -7,10 +7,7 @@ from state import get_app_state, State
 
 def build_redis_pool(settings: Settings) -> ConnectionPool:
     return ConnectionPool.from_url(
-        settings.redis_url,
-        password=settings.redis_password,
-        decode_responses=True,
-        max_connections=20,
+        settings.redis_url, decode_responses=True, max_connections=20
     )
 
 

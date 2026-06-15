@@ -1,19 +1,11 @@
 services:
   server:
+    ports:
+      - 8080:8080
     build:
       context: server
       dockerfile: Dockerfile
-    ports:
-      - 8080:8080
-    environment:
-      - DEBUG
-      - SPOTIFY_CLIENT_ID
-      - SPOTIFY_CLIENT_SECRET
-      - REDIS_PASSWORD
-      - REDIS_KEY
-      - POSTGRES_PASSWORD
-      - FRONTEND_URL
-      - CALLBACK_URL
+    env_file: server/.env
     restart: unless-stopped
     develop:
       watch:
