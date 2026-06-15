@@ -10,9 +10,13 @@ export function openExternalUrl(url: string): void {
   window.open(url, "_blank", "noopener,noreferrer");
 }
 
+export function fallbackImageUrl(url: string | null | undefined): string {
+  return url ?? "/placeholder.webp";
+}
+
 export function extractImageUrl(images: Image[], size: "sm" | "lg"): string {
   const index = size === "sm" ? -1 : 0;
-  return images.at(index)?.url ?? "/placeholder.webp";
+  return fallbackImageUrl(images.at(index)?.url);
 }
 
 export function pluralize(label: string, amount: number): string {

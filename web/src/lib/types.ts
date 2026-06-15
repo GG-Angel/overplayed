@@ -115,10 +115,12 @@ export const globalSwipeMetricsSchema = swipeMetricsSchema.extend({
   total_users: z.number().int().nonnegative(),
 });
 
-export const swipeLeaderboardSchema = z.object({
-  user: userResponseSchema,
-  metrics: swipeMetricsSchema,
-});
+export const swipeLeaderboardSchema = z.array(
+  z.object({
+    user: userResponseSchema,
+    metrics: swipeMetricsSchema,
+  })
+);
 
 export const swipesFormOptionsSchema = z.object({
   backup_enabled: z.boolean(),
@@ -150,4 +152,4 @@ export type GlobalSwipeMetrics = z.infer<typeof globalSwipeMetricsSchema>;
 export type SwipesFormOptions = z.infer<typeof swipesFormOptionsSchema>;
 export type SwipesForm = z.infer<typeof swipesFormSchema>;
 export type SwipesResponse = z.infer<typeof swipesResponseSchema>;
-export type SwipeLeaderboardSchema = z.infer<typeof swipeLeaderboardSchema>;
+export type SwipeLeaderboard= z.infer<typeof swipeLeaderboardSchema>;
