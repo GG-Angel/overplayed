@@ -8,13 +8,6 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-class UserUpsert(BaseModel):
-    id: str
-    display_name: str | None
-    email: str
-    picture_url: str
-
-
 class GlobalSwipeMetrics(BaseModel):
     total_sessions: int
     total_users: int
