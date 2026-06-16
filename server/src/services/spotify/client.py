@@ -1,5 +1,6 @@
+import platform
 import asyncio
-from typing import List, Callable, AsyncGenerator
+from typing import List, Callable, AsyncGenerator, AsyncIterator
 from loguru import logger
 from spotipy import Spotify
 from services.spotify.utils import spotify_fields
@@ -63,10 +64,9 @@ class SpotifyClient:
         self._log(f"Got {len(items)} liked songs for user {self.user_id}")
         return items
 
-    async def get_playlist_items(self, playlist_id: str) -> List[PlaylistItem]:
-        """Gets all items from a playlist."""
+    async def get_playlist_items(self, playlist_id: str) -> AsyncIterator[PlaylistItem]:
+        """Yields items from a playlist as they're received."""
         self._log(f"Getting items from playlist {playlist_id}")
-        items = []
         async for item in self._paginate(
             self.spotify.playlist_items,
             limit=self.playlist_items_limit,
@@ -74,13 +74,17 @@ class SpotifyClient:
             fields=spotify_fields(PlaylistItem, is_nested=True),
         ):
             if item.get("track") and not item.get("is_local"):
-                items.append(PlaylistItem.model_validate(item))
+                yield PlaylistItem.model_validate(item)
 
-        self._log(f"Got {len(items)} items from playlist {playlist_id}")
-        return items
-
-    async def get_unique_playlist_items(self, playlist_id: str) -> List[PlaylistItem]:
-        return self._dedupe_playlist_items(await self.get_playlist_items(playlist_id))
+    async def get_unique_playlist_items(
+        self, playlist_id: str
+    ) -> AsyncIterator[PlaylistItem]:
+        """Yields unique items from a playlist as they're received."""
+        seen = set()
+        async for item in self.get_playlist_items(playlist_id):
+            if item.track.id not in seen:
+                seen.add(item.track.id)
+                yield item
 
     async def remove_playlist_items(self, playlist_id: str, uris: List[str]) -> None:
         """Removes all occurrences of items from a playlist."""
@@ -121,15 +125,6 @@ class SpotifyClient:
         """Deletes a playlist."""
         await self._run(self.spotify.current_user_unfollow_playlist, playlist_id)
         self._log(f"Deleted playlist {playlist_id}")
-
-    def _dedupe_playlist_items(self, items: List[PlaylistItem]) -> List[PlaylistItem]:
-        seen = set()
-        deduped = []
-        for item in items:
-            if item.track.uri not in seen:
-                seen.add(item.track.uri)
-                deduped.append(item)
-        return deduped
 
     async def _paginate(
         self, method: Callable, limit: int, **kwargs
