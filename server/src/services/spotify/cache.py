@@ -1,3 +1,5 @@
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+from cache.codec import Codec
 from cache.client import RedisClient
 from typing import Optional, List
 from secrets import token_urlsafe
@@ -15,12 +17,13 @@ _SESSION_ID_LEN = 32
 
 
 class SpotifyCache:
-    def __init__(self, redis: RedisClient, ttl_sessions: int):
-        self.client = redis
-        self.ttl_sessions = ttl_sessions
-        self.ttl_users: int = 60 * 60 * 2
-        self.ttl_playlists: int = 90
-        self.ttl_playlist_items: int = 60 * 60
+    def __init__(self, redis: RedisClient, ttl_sessions: int, encryption_key: bytes):
+        self._client = redis
+        self._codec = Codec(AESGCM(encryption_key))
+        self._ttl_sessions = ttl_sessions
+        self._ttl_users: int = 60 * 60 * 2
+        self._ttl_playlists: int = 90
+        self._ttl_playlist_items: int = 60 * 60
 
     async def create_session(self, info: SessionInfo) -> str:
         session_id = token_urlsafe(_SESSION_ID_LEN)
@@ -29,42 +32,50 @@ class SpotifyCache:
         return session_id
 
     async def set_session(self, session_id: str, session: SessionInfo) -> None:
-        await self.client.set_model_secure(
-            session, self._session_key(session_id), self.ttl_sessions
+        await self._client.set(
+            self._session_key(session_id),
+            self._codec.model(SessionInfo).encrypt(session),
+            self._ttl_sessions,
         )
 
     async def get_session(self, session_id: str) -> Optional[SessionInfo]:
-        return await self.client.get_model_secure(
-            SessionInfo, self._session_key(session_id)
-        )
+        session = await self._client.get(self._session_key(session_id))
+        return self._codec.model(SessionInfo).decrypt(session) if session else None
 
     async def end_session(self, session_id: str) -> None:
-        await self.client.delete(self._session_key(session_id))
+        await self._client.delete(self._session_key(session_id))
         logger.info(f"Ended session: {session_id}")
 
     async def get_user(self, user_id: str) -> Optional[CurrentUser]:
-        return await self.client.get_model(CurrentUser, self._user_key(user_id))
+        user = await self._client.get(self._user_key(user_id))
+        return CurrentUser.model_validate_json(user) if user else None
 
     async def set_user(self, user: CurrentUser) -> None:
-        await self.client.set_model(user, self._user_key(user.id), self.ttl_users)
-
-    async def get_playlist(self, user_id: str, playlist_id: str) -> Optional[Playlist]:
-        return await self.client.hget_model(
-            Playlist, self._playlists_key(user_id), playlist_id
+        await self._client.set(
+            self._user_key(user.id),
+            user.model_dump_json(),
+            self._ttl_users,
         )
 
+    async def get_playlist(self, user_id: str, playlist_id: str) -> Optional[Playlist]:
+        playlist = await self._client.hget(self._playlists_key(user_id), playlist_id)
+        return Playlist.model_validate_json(playlist) if playlist else None
+
     async def get_playlists(self, user_id: str) -> Optional[List[Playlist]]:
-        return await self.client.hgetall_models(Playlist, self._playlists_key(user_id))
+        playlists = await self._client.hgetall(self._playlists_key(user_id))
+        if playlists is None:
+            return None
+        return [Playlist.model_validate_json(p) for p in playlists]
 
     async def set_playlists(self, user_id: str, playlists: List[Playlist]) -> None:
-        await self.client.hset_models(
+        await self._client.hsetall(
             self._playlists_key(user_id),
-            {p.id: p for p in playlists},
-            self.ttl_playlists,
+            {playlist.id: playlist.model_dump_json() for playlist in playlists},
+            self._ttl_playlists,
         )
 
     async def invalidate_playlists(self, user_id: str) -> None:
-        await self.client.delete(self._playlists_key(user_id))
+        await self._client.delete(self._playlists_key(user_id))
 
     async def get_playlist_items(
         self,
@@ -79,17 +90,16 @@ class SpotifyCache:
             raise ValueError("Offset and limit must be positive.")
 
         key = self._playlist_items_key(user_id, playlist_id, snapshot_id)
-        async with self.client.redis.pipeline() as pipe:
+        async with self._client.redis.pipeline() as pipe:
             pipe.exists(key)
             pipe.lrange(key, start=offset, end=offset + limit - 1)
             pipe.llen(key)
-            pipe.expire(key, self.ttl_playlist_items)
+            pipe.expire(key, self._ttl_playlist_items)
             is_cached, items_raw, total, _ = await pipe.execute()
 
         if not is_cached:
             logger.debug(f"MISS: {key}")
             return None
-
         logger.debug(f"HIT: {key}")
 
         items = [PlaylistItem.model_validate_json(item) for item in items_raw]
@@ -116,8 +126,8 @@ class SpotifyCache:
             raise ValueError("Caching an empty list of playlist items is prohibited.")
 
         key = self._playlist_items_key(user_id, playlist_id, snapshot_id)
-        ttl = self.ttl_playlist_items
-        async with self.client.redis.pipeline() as pipe:
+        ttl = self._ttl_playlist_items
+        async with self._client.redis.pipeline() as pipe:
             pipe.delete(key)
             pipe.rpush(key, *[item.model_dump_json() for item in items])
             pipe.expire(key, ttl)

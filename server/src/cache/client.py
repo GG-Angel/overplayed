@@ -34,8 +34,11 @@ class RedisClient:
         return data
 
     async def hgetall(self, key: str) -> Optional[dict[str, str]]:
-        mapping = await self.redis.hgetall(key)  # ty:ignore[invalid-await]
-        if not mapping:
+        async with self.redis.pipeline() as pipe:
+            pipe.exists(key)
+            pipe.hgetall(key)
+            exists, mapping = await pipe.execute()
+        if not exists:
             logger.debug(f"MISS: {key}")
             return None
         logger.debug(f"HIT: {key} (n={len(mapping)})")
