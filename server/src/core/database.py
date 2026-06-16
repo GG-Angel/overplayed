@@ -1,4 +1,4 @@
-from core.config import Settings
+from settings import Settings
 from typing import AsyncGenerator
 from fastapi import Depends
 from sqlalchemy.orm import declarative_base

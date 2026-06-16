@@ -34,7 +34,7 @@ const SwipeProviderInner = ({ playlistId }: { playlistId: string }) => {
       options,
       setOptions,
       playlist: {
-        pagination: playlistItems.data.pages[0].metadata,
+        pagination: playlistItems.data.pages[playlistItems.data.pages.length - 1].metadata,
         metadata: playlist.data,
         tracks: playlistTracks,
       },

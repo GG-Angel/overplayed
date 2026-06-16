@@ -1,4 +1,4 @@
-from core.config import settings
+from settings import settings
 from spotipy import SpotifyOAuth
 
 

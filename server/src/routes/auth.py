@@ -1,5 +1,5 @@
 from services.spotify.models import TokenInfo, CurrentUser, SessionInfo
-from core.config import Settings
+from settings import Settings
 from core.limiter import limiter
 import asyncio
 from loguru import logger
@@ -68,7 +68,7 @@ async def handle_callback(
         value=session_id,
         httponly=True,
         samesite="lax",
-        max_age=settings.session_lifespan,
+        max_age=settings.ttl_sessions,
         secure=not settings.debug,
     )
 

@@ -1,7 +1,10 @@
-from tests.conftest import TEST_PLAYLIST_NAME, TEST_PLAYLIST_MIN_TRACKS
 import pytest
 from fastapi import status
 from aiohttp import ClientSession
+from tests.conftest import BASE_URL, TEST_PLAYLIST_NAME, TEST_PLAYLIST_MIN_TRACKS
+
+FAKE_URI = "spotify:track:4iV5W9uYEdYUVa79Axb7Rh"
+FAKE_URI_2 = "spotify:track:1301WleyT98MSxVHPZCA6M"
 
 
 @pytest.fixture()
@@ -62,9 +65,130 @@ async def test_submit_swipes(session: ClientSession, testing_playlist_id: str):
 
     async with session.post(
         f"/playlists/{testing_playlist_id}/swipes",
-        json={"options": {"backup_enabled": True}, "uris": track_uris},
+        json={
+            "options": {"backup_enabled": True},
+            "uris": track_uris,
+            "tracks_swiped": len(track_uris),
+        },
     ) as response:
         assert response.status == status.HTTP_200_OK
         result = await response.json()
         assert isinstance(result, dict)
         assert result["backup_playlist"] is not None
+
+
+async def test_get_playlist_invalid_id(session: ClientSession):
+    async with session.get("/playlists/not-a-valid-spotify-id") as response:
+        assert response.status == status.HTTP_422_UNPROCESSABLE_CONTENT
+
+
+async def test_get_playlist_not_found(session: ClientSession):
+    async with session.get(f"/playlists/{'0' * 22}") as response:
+        assert response.status == status.HTTP_404_NOT_FOUND
+
+
+async def test_get_playlist_items_invalid_id(session: ClientSession):
+    async with session.get("/playlists/not-a-valid-id/items") as response:
+        assert response.status == status.HTTP_422_UNPROCESSABLE_CONTENT
+
+
+async def test_get_playlist_items_negative_offset(
+    session: ClientSession, first_playlist_id: str
+):
+    async with session.get(
+        f"/playlists/{first_playlist_id}/items", params={"offset": -1}
+    ) as response:
+        assert response.status == status.HTTP_422_UNPROCESSABLE_CONTENT
+
+
+async def test_submit_swipes_invalid_playlist_id(session: ClientSession):
+    async with session.post(
+        "/playlists/not-a-valid-id/swipes",
+        json={
+            "options": {"backup_enabled": False},
+            "uris": [FAKE_URI],
+            "tracks_swiped": 1,
+        },
+    ) as response:
+        assert response.status == status.HTTP_422_UNPROCESSABLE_CONTENT
+
+
+async def test_submit_swipes_empty_uris(session: ClientSession, first_playlist_id: str):
+    async with session.post(
+        f"/playlists/{first_playlist_id}/swipes",
+        json={
+            "options": {"backup_enabled": False},
+            "uris": [],
+            "tracks_swiped": 1,
+        },
+    ) as response:
+        assert response.status == status.HTTP_422_UNPROCESSABLE_CONTENT
+
+
+async def test_submit_swipes_malformed_uri(
+    session: ClientSession, first_playlist_id: str
+):
+    async with session.post(
+        f"/playlists/{first_playlist_id}/swipes",
+        json={
+            "options": {"backup_enabled": False},
+            "uris": ["spotify:track:tooshort"],
+            "tracks_swiped": 1,
+        },
+    ) as response:
+        assert response.status == status.HTTP_422_UNPROCESSABLE_CONTENT
+
+
+async def test_submit_swipes_non_positive_tracks_swiped(
+    session: ClientSession, first_playlist_id: str
+):
+    async with session.post(
+        f"/playlists/{first_playlist_id}/swipes",
+        json={
+            "options": {"backup_enabled": False},
+            "uris": [FAKE_URI],
+            "tracks_swiped": 0,
+        },
+    ) as response:
+        assert response.status == status.HTTP_422_UNPROCESSABLE_CONTENT
+
+
+async def test_submit_swipes_more_uris_than_swiped(
+    session: ClientSession, first_playlist_id: str
+):
+    async with session.post(
+        f"/playlists/{first_playlist_id}/swipes",
+        json={
+            "options": {"backup_enabled": False},
+            "uris": [FAKE_URI, FAKE_URI_2],
+            "tracks_swiped": 1,
+        },
+    ) as response:
+        assert response.status == status.HTTP_400_BAD_REQUEST
+
+
+async def test_submit_swipes_exceeds_playlist_total(
+    session: ClientSession, first_playlist_id: str
+):
+    async with session.post(
+        f"/playlists/{first_playlist_id}/swipes",
+        json={
+            "options": {"backup_enabled": False},
+            "uris": [FAKE_URI],
+            "tracks_swiped": 1_000_000_000,
+        },
+    ) as response:
+        assert response.status == status.HTTP_400_BAD_REQUEST
+
+
+async def test_submit_swipes_unauthorized(first_playlist_id: str):
+    async with ClientSession(base_url=BASE_URL) as anon:
+        async with anon.post(
+            f"/playlists/{first_playlist_id}/swipes",
+            json={
+                "options": {"backup_enabled": False},
+                "uris": [FAKE_URI],
+                "tracks_swiped": 1,
+            },
+        ) as response:
+            assert response.status == status.HTTP_401_UNAUTHORIZED
