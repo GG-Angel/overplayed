@@ -94,20 +94,23 @@ class SpotifyService:
 
     async def create_playlist(self, name: str, description: str) -> Playlist:
         new_playlist = await self.spotify.create_playlist(name, description)
-        await self.cache.invalidate_playlists(self.user_id)
+        await self._invalidate_playlists()
         return new_playlist
 
     async def add_playlist_items(self, playlist_id: str, uris: List[str]) -> None:
         await self.spotify.add_playlist_items(playlist_id, uris)
-        await self.cache.invalidate_playlist(self.user_id, playlist_id)
+        await self._invalidate_playlists()
 
     async def delete_playlist_items(self, playlist_id: str, uris: List[str]) -> None:
         await self.spotify.remove_playlist_items(playlist_id, uris)
-        await self.cache.invalidate_playlist(self.user_id, playlist_id)
+        await self._invalidate_playlists()
 
     async def delete_playlist(self, playlist_id: str) -> None:
         await self.spotify.delete_playlist(playlist_id)
-        await self.cache.invalidate_playlist(self.user_id, playlist_id)
+        await self._invalidate_playlists()
+
+    async def _invalidate_playlists(self) -> None:
+        await self.cache.invalidate_playlists(self.user_id)
 
     def _is_playlist_owned(self, playlist: Playlist) -> bool:
         return playlist.owner.id == self.user_id or playlist.collaborative
