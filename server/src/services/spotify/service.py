@@ -1,5 +1,5 @@
 import asyncio
-from asyncio import Task
+from asyncio import Task, Future
 from core.exceptions import NotFoundException
 from typing import List
 from services.spotify.client import SpotifyClient
@@ -61,10 +61,7 @@ class SpotifyService:
     ) -> PlaylistPage:
         playlist = await self.get_playlist(playlist_id)
         if playlist.tracks.total == 0:
-            return PlaylistPage(
-                items=[],
-                metadata=PlaylistPageMetadata(has_more=False, next_offset=None),
-            )
+            self._build_playlist_page([], offset, limit)
 
         cached = await self.cache.get_playlist_items(
             self.user_id,
@@ -74,63 +71,70 @@ class SpotifyService:
             limit=limit,
         )
         if cached is not None:
-            next_offset = offset + len(cached)
-            has_more = len(cached) == limit
-            return PlaylistPage(
-                items=cached,
-                metadata=PlaylistPageMetadata(
-                    has_more=has_more,
-                    next_offset=next_offset if has_more else None,
-                ),
-            )
+            return self._build_playlist_page(cached, offset, limit)
 
         # cache miss: return the requested page as soon as it's ready, preload the rest in the background
         page: List[PlaylistItem] = []
         page_ready = asyncio.Future()
 
-        async def fetch_page_and_cache_rest() -> None:
-            batch: List[PlaylistItem] = []
-            fetch_offset = 0
-            async for item in self.spotify.get_unique_playlist_items(playlist_id):
-                batch.append(item)
-                if offset <= fetch_offset < offset + limit:
-                    page.append(item)
-                fetch_offset += 1
-
-                # wait until we've fetched two pages ahead before releasing
-                if (
-                    len(page) == limit
-                    and fetch_offset >= offset + limit * 2
-                    and not page_ready.done()
-                ):
-                    page_ready.set_result(None)
-
-                #
-                if len(batch) >= self.spotify.playlist_items_limit:
-                    await self.cache.append_playlist_items(
-                        self.user_id, playlist_id, playlist.snapshot_id, batch
-                    )
-                    batch = []
-            if batch:
-                await self.cache.append_playlist_items(
-                    self.user_id, playlist_id, playlist.snapshot_id, batch
-                )
-            if not page_ready.done():
-                page_ready.set_result(None)
-
-        task = asyncio.create_task(fetch_page_and_cache_rest())
+        task = asyncio.create_task(
+            self._fetch_playlist_page_and_preload_rest(
+                playlist, offset, limit, page, page_ready
+            )
+        )
         self.background_tasks.add(task)
         task.add_done_callback(self.background_tasks.discard)
 
         await page_ready
+        return self._build_playlist_page(page, offset, limit)
 
-        next_offset = offset + len(page)
-        has_more = len(page) == limit
+    async def _fetch_playlist_page_and_preload_rest(
+        self,
+        playlist: Playlist,
+        offset: int,
+        limit: int,
+        page: List[PlaylistItem],
+        page_ready: Future[None],
+    ) -> None:
+        batch: List[PlaylistItem] = []
+        fetch_offset = 0
+        async for item in self.spotify.get_unique_playlist_items(playlist.id):
+            batch.append(item)
+            if offset <= fetch_offset < offset + limit:
+                page.append(item)
+            fetch_offset += 1
+
+            # release once the page is full and we've fetched two pages ahead,
+            # so the next page request is likely to hit a warm cache
+            if (
+                len(page) == limit
+                and fetch_offset >= offset + limit * 2
+                and not page_ready.done()
+            ):
+                page_ready.set_result(None)
+
+            if len(batch) >= self.spotify.playlist_items_limit:
+                await self.cache.append_playlist_items(
+                    self.user_id, playlist.id, playlist.snapshot_id, batch
+                )
+                batch = []
+
+        if batch:
+            await self.cache.append_playlist_items(
+                self.user_id, playlist.id, playlist.snapshot_id, batch
+            )
+        if not page_ready.done():
+            page_ready.set_result(None)
+
+    def _build_playlist_page(
+        self, items: List[PlaylistItem], offset: int, limit: int
+    ) -> PlaylistPage:
+        has_more = len(items) == limit
         return PlaylistPage(
-            items=page,
+            items=items,
             metadata=PlaylistPageMetadata(
                 has_more=has_more,
-                next_offset=next_offset if has_more else None,
+                next_offset=offset + len(items) if has_more else None,
             ),
         )
 
