@@ -13,6 +13,8 @@ class Settings(BaseSettings):
     ttl_users: int = 60 * 60 * 2
     ttl_playlists: int = 90
     ttl_playlist_items: int = 60 * 60
+    ttl_previews_hit: int = 60 * 10
+    ttl_previews_miss: int = 60 * 60 * 2
 
     spotify_client_id: str = Field(...)
     spotify_client_secret: str = Field(...)
