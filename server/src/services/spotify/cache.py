@@ -21,6 +21,7 @@ class SpotifyCache:
         self,
         redis: RedisClient,
         redis_key: bytes,
+        *,
         ttl_sessions: int,
         ttl_users: int,
         ttl_playlists: int,
