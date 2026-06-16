@@ -4,14 +4,7 @@ from cache.client import RedisClient
 from typing import Optional, List
 from secrets import token_urlsafe
 from loguru import logger
-from services.spotify.models import (
-    CurrentUser,
-    Playlist,
-    PlaylistItem,
-    PlaylistPage,
-    SessionInfo,
-    PlaylistPageMetadata,
-)
+from services.spotify.models import CurrentUser, Playlist, PlaylistItem, SessionInfo
 
 _SESSION_ID_LEN = 32
 
@@ -94,7 +87,7 @@ class SpotifyCache:
         *,
         offset: int = 0,
         limit: int = 100,
-    ) -> Optional[PlaylistPage]:
+    ) -> Optional[List[PlaylistItem]]:
         if offset < 0 or limit < 0:
             raise ValueError("Offset and limit must be positive.")
 
@@ -109,40 +102,24 @@ class SpotifyCache:
         if not is_cached:
             logger.debug(f"MISS: {key}")
             return None
+
         logger.debug(f"HIT: {key}")
+        return [PlaylistItem.model_validate_json(item) for item in items_raw]
 
-        items = [PlaylistItem.model_validate_json(item) for item in items_raw]
-        next_offset = offset + len(items)
-        has_more = next_offset < total
-
-        return PlaylistPage(
-            items=items,
-            metadata=PlaylistPageMetadata(
-                total_items=total,
-                has_more=has_more,
-                next_offset=next_offset if has_more else None,
-            ),
-        )
-
-    async def set_playlist_items(
+    async def append_playlist_items(
         self,
         user_id: str,
         playlist_id: str,
         snapshot_id: str,
         items: List[PlaylistItem],
     ) -> None:
-        if not items:
-            raise ValueError("Caching an empty list of playlist items is prohibited.")
-
         key = self._playlist_items_key(user_id, playlist_id, snapshot_id)
         ttl = self._ttl_playlist_items
         async with self._client.redis.pipeline() as pipe:
-            pipe.delete(key)
             pipe.rpush(key, *[item.model_dump_json() for item in items])
             pipe.expire(key, ttl)
             await pipe.execute()
-
-        logger.debug(f"CACHED: {len(items)} playlist items (key={key}, snapshot={snapshot_id}, ttl={ttl})")  # fmt: skip
+        logger.debug(f"CACHED: Appended {len(items)} playlist items (key={key}, snapshot={snapshot_id}, ttl={ttl})")  # fmt: skip
 
     @staticmethod
     def _session_key(session_id: str) -> str:

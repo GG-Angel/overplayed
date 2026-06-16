@@ -99,7 +99,6 @@ class PlaylistItem(BaseModel):
 
 
 class PlaylistPageMetadata(BaseModel):
-    total_items: int
     has_more: bool
     next_offset: int | None
 
