@@ -52,13 +52,17 @@ class RedisClient:
     async def set_model_secure(self, instance: BaseModel, key: str, ttl: int) -> None:
         await self.set_secure(key, instance.model_dump_json(), ttl)
 
-    async def hget_model(self, model: Type[M], key: str, field: str) -> Optional[M]:
+    async def hget(self, key: str, field: str) -> Optional[str]:
         data = await self.redis.hget(key, field)  # ty:ignore[invalid-await]
         if data is None:
             logger.debug(f"MISS: {key} (field={field})")
             return None
         logger.debug(f"HIT: {key} (field={field})")
-        return model.model_validate_json(data)
+        return data
+
+    async def hget_model(self, model: Type[M], key: str, field: str) -> Optional[M]:
+        data = await self.hget(key, field)
+        return model.model_validate_json(data) if data is not None else None
 
     async def hgetall_models(self, model: Type[M], key: str) -> Optional[List[M]]:
         mapping = await self.redis.hgetall(key)  # ty:ignore[invalid-await]
