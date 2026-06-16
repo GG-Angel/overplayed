@@ -24,4 +24,4 @@ class DeezerCache:
     async def set_track_preview_url(self, isrc: str, url: Optional[str]) -> None:
         value = url if url is not None else NO_PREVIEW
         ttl = self._ttl_previews_hit if url is not None else self._ttl_previews_miss
-        await self._client.redis.hsetex(self._track_preview_key, isrc, value, ex=ttl)  # fmt:skip  # ty:ignore[invalid-await]
+        await self._client.hset(self._track_preview_key, isrc, value, ttl)

@@ -44,9 +44,9 @@ class RedisClient:
         logger.debug(f"HIT: {key} (n={len(mapping)})")
         return mapping
 
-    async def hset(self, key: str, mapping: dict[str, str], ttl: int) -> None:
-        await self.redis.hsetex(key, mapping=mapping, ex=ttl)  # ty:ignore[invalid-await]
-        logger.debug(f"CACHED: {len(mapping)} entries (key={key}, ttl={ttl}s)")
+    async def hset(self, key: str, field: str, value: str, ttl: int) -> None:
+        await self.redis.hsetex(key, field, value, ex=ttl)  # ty:ignore[invalid-await]
+        logger.debug(f"CACHED: {key} (key={key}, ttl={ttl}s)")
 
     async def hsetall(self, key: str, mapping: dict[str, str], ttl: int) -> None:
         async with self.redis.pipeline() as pipe:
