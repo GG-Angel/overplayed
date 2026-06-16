@@ -73,7 +73,7 @@ class SpotifyCache:
         playlists = await self._client.hgetall(self._playlists_key(user_id))
         if playlists is None:
             return None
-        return [Playlist.model_validate_json(p) for p in playlists]
+        return [Playlist.model_validate_json(p) for p in playlists.values()]
 
     async def set_playlists(self, user_id: str, playlists: List[Playlist]) -> None:
         await self._client.hsetall(
