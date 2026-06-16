@@ -19,13 +19,12 @@ class SpotifyService:
         spotify: SpotifyClient,
         cache: SpotifyCache,
         user_id: str,
+        background_tasks: set[Task],
     ):
         self.spotify = spotify
         self.cache = cache
         self.user_id = user_id
-
-        # TODO: hold background tasks in state
-        self._background_tasks: set[Task] = set()
+        self.background_tasks = background_tasks
 
     async def get_current_user(self) -> CurrentUser:
         if cached := await self.cache.get_user(self.user_id):
@@ -92,7 +91,7 @@ class SpotifyService:
                 ),
             )
 
-        # cache miss
+        # cache miss: return the requested page as soon as it's ready, preload the rest in the background
         page: List[PlaylistItem] = []
         page_ready = asyncio.Future()
 
@@ -121,10 +120,9 @@ class SpotifyService:
                 page_ready.set_result(None)
 
         task = asyncio.create_task(fetch_page_and_cache_rest())
-        self._background_tasks.add(task)
-        task.add_done_callback(self._background_tasks.discard)
+        self.background_tasks.add(task)
+        task.add_done_callback(self.background_tasks.discard)
 
-        # wait for the page we want
         await page_ready
 
         next_offset = offset + len(page)

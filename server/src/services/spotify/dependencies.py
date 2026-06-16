@@ -6,7 +6,7 @@ from spotipy import SpotifyOAuth, Spotify
 from time import time
 from fastapi import Depends, Cookie
 from cache.client import RedisClient, get_redis_client
-from state import get_oauth, get_settings
+from state import get_oauth, get_settings, State, get_state
 from services.spotify.models import SessionInfo, TokenInfo
 from services.spotify.cache import SpotifyCache
 from services.spotify.service import SpotifyService
@@ -32,6 +32,7 @@ def get_spotify_cache(
 
 async def get_spotify_service(
     session_id: Optional[str] = Cookie(default=None),
+    state: State = Depends(get_state),
     oauth: SpotifyOAuth = Depends(get_oauth),
     cache: SpotifyCache = Depends(get_spotify_cache),
     settings: Settings = Depends(get_settings),
@@ -54,6 +55,7 @@ async def get_spotify_service(
         ),
         cache=cache,
         user_id=session.user_id,
+        background_tasks=state.background_tasks,
     )
 
 
