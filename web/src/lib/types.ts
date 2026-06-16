@@ -80,7 +80,6 @@ export const playlistItemSchema = z.object({
 });
 
 export const playlistPageMetadataSchema = z.object({
-  total_items: z.number().int().nonnegative(),
   has_more: z.boolean(),
   next_offset: z.number().int().nonnegative().nullable(),
 });
@@ -152,4 +151,4 @@ export type GlobalSwipeMetrics = z.infer<typeof globalSwipeMetricsSchema>;
 export type SwipesFormOptions = z.infer<typeof swipesFormOptionsSchema>;
 export type SwipesForm = z.infer<typeof swipesFormSchema>;
 export type SwipesResponse = z.infer<typeof swipesResponseSchema>;
-export type SwipeLeaderboard= z.infer<typeof swipeLeaderboardSchema>;
+export type SwipeLeaderboard = z.infer<typeof swipeLeaderboardSchema>;

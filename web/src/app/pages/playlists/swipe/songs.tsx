@@ -25,7 +25,7 @@ const SwipeSongsPage = () => {
   const currentTrack = playlist.tracks.at(currentIndex);
   const currentPreview = useTrackPreviewUrl(currentTrack?.external_ids.isrc);
 
-  const hasReachedEnd = currentIndex >= playlist.pagination.total_items;
+  const hasReachedEnd = currentIndex >= playlist.metadata.tracks.total;
   const canUndoOrFinish = !isSwiping && currentIndex > 0;
   const canSwipe = !isSwiping && !hasReachedEnd;
 
@@ -54,7 +54,7 @@ const SwipeSongsPage = () => {
         className="w-full max-w-3xl"
         likes={session.likes.length}
         dislikes={session.dislikes.length}
-        total={playlist.pagination.total_items}
+        total={playlist.metadata.tracks.total}
       />
       <div className="flex-1 flex flex-col w-full items-center justify-center gap-6 overflow-hidden">
         {!hasReachedEnd ? (

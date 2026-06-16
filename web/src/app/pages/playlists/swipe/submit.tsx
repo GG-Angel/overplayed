@@ -14,8 +14,8 @@ const SwipeSubmitPage = () => {
   const controller = useSubmitSwipes();
   const navigate = useNavigate();
   const [dislikePercentage] = useState(() =>
-    playlist.pagination.total_items > 0
-      ? Math.round((session.dislikes.length / playlist.pagination.total_items) * 100)
+    playlist.metadata.tracks.total > 0
+      ? Math.round((session.dislikes.length / playlist.metadata.tracks.total) * 100)
       : 0
   );
 
