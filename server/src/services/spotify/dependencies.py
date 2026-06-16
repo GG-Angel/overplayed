@@ -34,6 +34,7 @@ async def get_spotify_service(
     session_id: Optional[str] = Cookie(default=None),
     oauth: SpotifyOAuth = Depends(get_oauth),
     cache: SpotifyCache = Depends(get_spotify_cache),
+    settings: Settings = Depends(get_settings),
 ) -> SpotifyService:
     if not session_id or not (session := await cache.get_session(session_id)):
         raise UnauthorizedException()
@@ -47,6 +48,8 @@ async def get_spotify_service(
         spotify=SpotifyClient(
             spotify=Spotify(auth=session.access_token),
             user_id=session.user_id,
+            playlist_limit=settings.playlist_limit,
+            playlist_items_limit=settings.playlist_items_limit,
         ),
         cache=cache,
         user_id=session.user_id,

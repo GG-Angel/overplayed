@@ -2,12 +2,11 @@
 
 ## Needs
 
-- Cache leaderboard response.
 - Add liked songs as a playlist option.
+- Use available-media option for getting playlist items to avoid manual track filtering.
+- Cache leaderboard response.
 - Add a modal warning when leaving the swipe page with unsaved changes.
-- Add tests for new endpoints.
 - Test website on mobile devices.
-- Playlist items not being cached.
 
 ## Nice to Haves
 

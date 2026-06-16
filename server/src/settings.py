@@ -32,6 +32,10 @@ class Settings(BaseSettings):
     ttl_previews_hit: int = 60 * 10
     ttl_previews_miss: int = 60 * 60 * 2
 
+    playlist_limit: int = 50
+    playlist_items_limit: int = 100
+    liked_songs_limit: int = 50
+
     @property
     def db_url(self) -> str:
         return f"postgresql+asyncpg://{self.database_user}:{self.database_password}@{self.database_host}:{self.database_port}/{self.database_db}"
