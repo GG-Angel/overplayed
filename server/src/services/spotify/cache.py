@@ -17,13 +17,21 @@ _SESSION_ID_LEN = 32
 
 
 class SpotifyCache:
-    def __init__(self, redis: RedisClient, ttl_sessions: int, encryption_key: bytes):
+    def __init__(
+        self,
+        redis: RedisClient,
+        redis_key: bytes,
+        ttl_sessions: int,
+        ttl_users: int,
+        ttl_playlists: int,
+        ttl_playlist_items: int,
+    ):
         self._client = redis
-        self._codec = Codec(AESGCM(encryption_key))
+        self._codec = Codec(AESGCM(redis_key))
         self._ttl_sessions = ttl_sessions
-        self._ttl_users: int = 60 * 60 * 2
-        self._ttl_playlists: int = 90
-        self._ttl_playlist_items: int = 60 * 60
+        self._ttl_users = ttl_users
+        self._ttl_playlists = ttl_playlists
+        self._ttl_playlist_items = ttl_playlist_items
 
     async def create_session(self, info: SessionInfo) -> str:
         session_id = token_urlsafe(_SESSION_ID_LEN)

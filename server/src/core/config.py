@@ -8,7 +8,11 @@ class Settings(BaseSettings):
     debug: bool = False
     frontend_url: str = "http://127.0.0.1:5173"
     callback_url: str = "http://127.0.0.1:8080/auth/callback"
-    session_lifespan: int = 60 * 60 * 24 * 14  # 14 days
+
+    ttl_sessions: int = 60 * 60 * 24 * 14
+    ttl_users: int = 60 * 60 * 2
+    ttl_playlists: int = 90
+    ttl_playlist_items: int = 60 * 60
 
     spotify_client_id: str = Field(...)
     spotify_client_secret: str = Field(...)

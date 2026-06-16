@@ -20,7 +20,14 @@ def get_spotify_cache(
     redis: RedisClient = Depends(get_redis_client),
     settings: Settings = Depends(get_settings),
 ) -> SpotifyCache:
-    return SpotifyCache(redis=redis, ttl_sessions=settings.session_lifespan)
+    return SpotifyCache(
+        redis=redis,
+        redis_key=settings.redis_key,
+        ttl_sessions=settings.ttl_sessions,
+        ttl_users=settings.ttl_users,
+        ttl_playlists=settings.ttl_playlists,
+        ttl_playlist_items=settings.ttl_playlist_items,
+    )
 
 
 async def get_spotify_service(
