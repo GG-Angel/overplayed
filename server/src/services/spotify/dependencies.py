@@ -1,4 +1,4 @@
-from core.config import Settings
+from settings import Settings
 from core.exceptions import UnauthorizedException
 from typing import Optional
 import asyncio

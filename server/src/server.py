@@ -7,7 +7,7 @@ from slowapi.errors import RateLimitExceeded
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Response, status
 from core.limiter import limiter
-from core.config import Settings, APP_STATE_KEY
+from settings import Settings, APP_STATE_KEY
 from core.database import build_engine, build_sessionmaker
 from core.redis import build_redis_pool
 from state import State

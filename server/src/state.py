@@ -3,7 +3,7 @@ from aiohttp import ClientSession
 from spotipy import SpotifyOAuth
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 from redis.asyncio import ConnectionPool
-from core.config import Settings, APP_STATE_KEY
+from settings import Settings, APP_STATE_KEY
 
 
 class State:

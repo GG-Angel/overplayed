@@ -1,5 +1,5 @@
 from services.spotify.models import TokenInfo, CurrentUser, SessionInfo
-from core.config import Settings
+from settings import Settings
 from core.limiter import limiter
 import asyncio
 from loguru import logger
