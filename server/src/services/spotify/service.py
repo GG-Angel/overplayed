@@ -1,3 +1,5 @@
+import asyncio
+from asyncio import Task
 from core.exceptions import NotFoundException
 from typing import List
 from services.spotify.client import SpotifyClient
@@ -7,6 +9,7 @@ from services.spotify.models import (
     Playlist,
     PlaylistPage,
     PlaylistPageMetadata,
+    PlaylistItem,
 )
 
 
@@ -20,6 +23,9 @@ class SpotifyService:
         self.spotify = spotify
         self.cache = cache
         self.user_id = user_id
+
+        # TODO: hold background tasks in state
+        self._background_tasks: set[Task] = set()
 
     async def get_current_user(self) -> CurrentUser:
         if cached := await self.cache.get_user(self.user_id):
@@ -55,40 +61,79 @@ class SpotifyService:
         self, playlist_id: str, *, offset: int = 0, limit: int = 100
     ) -> PlaylistPage:
         playlist = await self.get_playlist(playlist_id)
-
         if playlist.tracks.total == 0:
             return PlaylistPage(
                 items=[],
-                metadata=PlaylistPageMetadata(
-                    total_items=0,
-                    has_more=False,
-                    next_offset=None,
-                ),
+                metadata=PlaylistPageMetadata(has_more=False, next_offset=None),
             )
 
-        if cached := await self.cache.get_playlist_items(
+        # TODO: raise exception when offset exceeds playlist size?
+
+        # TODO: raise not ready exception when another request tries to get items from the same playlist
+        # create a status object in the cache that stores the current amount fetched and loading|complete status
+        # if loading and offset > amount_fetched: raise NOT READY
+        # cache get playlist items should return both pieces of data atomically to avoid TOCTOU
+
+        cached = await self.cache.get_playlist_items(
             self.user_id,
             playlist_id,
             playlist.snapshot_id,
             offset=offset,
             limit=limit,
-        ):
-            return cached
-
-        items = await self.spotify.get_unique_playlist_items(playlist_id)
-        await self.cache.set_playlist_items(
-            self.user_id, playlist.id, playlist.snapshot_id, items
         )
+        if cached is not None:
+            next_offset = offset + len(cached)
+            has_more = next_offset < playlist.tracks.total
+            return PlaylistPage(
+                items=cached,
+                metadata=PlaylistPageMetadata(
+                    has_more=has_more,
+                    next_offset=next_offset if has_more else None,
+                ),
+            )
 
-        page = items[offset : offset + limit]
-        has_more = offset + len(page) < len(items)
+        # cache miss
+        page: List[PlaylistItem] = []
+        page_ready = asyncio.Future()
 
+        async def fetch_page_and_cache_rest() -> None:
+            batch: List[PlaylistItem] = []
+            fetch_offset = 0
+            async for item in self.spotify.get_unique_playlist_items(playlist_id):
+                batch.append(item)
+                if offset <= fetch_offset < offset + limit:
+                    page.append(item)
+                fetch_offset += 1
+
+                if len(page) == limit and not page_ready.done():
+                    page_ready.set_result(None)
+
+                if len(batch) >= self.spotify.playlist_items_limit:
+                    await self.cache.append_playlist_items(
+                        self.user_id, playlist_id, playlist.snapshot_id, batch
+                    )
+                    batch = []
+            if batch:
+                await self.cache.append_playlist_items(
+                    self.user_id, playlist_id, playlist.snapshot_id, batch
+                )
+            if not page_ready.done():
+                page_ready.set_result(None)
+
+        task = asyncio.create_task(fetch_page_and_cache_rest())
+        self._background_tasks.add(task)
+        task.add_done_callback(self._background_tasks.discard)
+
+        # wait for the page we want
+        await page_ready
+
+        next_offset = offset + len(page)
+        has_more = next_offset < playlist.tracks.total
         return PlaylistPage(
             items=page,
             metadata=PlaylistPageMetadata(
-                total_items=len(items),
                 has_more=has_more,
-                next_offset=offset + len(page) if has_more else None,
+                next_offset=next_offset if has_more else None,
             ),
         )
 
