@@ -95,9 +95,8 @@ class SpotifyCache:
         async with self._client.redis.pipeline() as pipe:
             pipe.exists(key)
             pipe.lrange(key, start=offset, end=offset + limit - 1)
-            pipe.llen(key)
             pipe.expire(key, self._ttl_playlist_items)
-            is_cached, items_raw, total, _ = await pipe.execute()
+            is_cached, items_raw, _ = await pipe.execute()
 
         if not is_cached:
             logger.debug(f"MISS: {key}")
