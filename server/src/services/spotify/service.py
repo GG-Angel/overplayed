@@ -66,13 +66,6 @@ class SpotifyService:
                 metadata=PlaylistPageMetadata(has_more=False, next_offset=None),
             )
 
-        # TODO: raise exception when offset exceeds playlist size?
-
-        # TODO: raise not ready exception when another request tries to get items from the same playlist
-        # create a status object in the cache that stores the current amount fetched and loading|complete status
-        # if loading and offset > amount_fetched: raise NOT READY
-        # cache get playlist items should return both pieces of data atomically to avoid TOCTOU
-
         cached = await self.cache.get_playlist_items(
             self.user_id,
             playlist_id,
@@ -82,7 +75,7 @@ class SpotifyService:
         )
         if cached is not None:
             next_offset = offset + len(cached)
-            has_more = next_offset < playlist.tracks.total
+            has_more = len(cached) == limit
             return PlaylistPage(
                 items=cached,
                 metadata=PlaylistPageMetadata(
@@ -104,9 +97,15 @@ class SpotifyService:
                     page.append(item)
                 fetch_offset += 1
 
-                if len(page) == limit and not page_ready.done():
+                # wait until we've fetched two pages ahead before releasing
+                if (
+                    len(page) == limit
+                    and fetch_offset >= offset + limit * 2
+                    and not page_ready.done()
+                ):
                     page_ready.set_result(None)
 
+                #
                 if len(batch) >= self.spotify.playlist_items_limit:
                     await self.cache.append_playlist_items(
                         self.user_id, playlist_id, playlist.snapshot_id, batch
@@ -126,7 +125,7 @@ class SpotifyService:
         await page_ready
 
         next_offset = offset + len(page)
-        has_more = next_offset < playlist.tracks.total
+        has_more = len(page) == limit
         return PlaylistPage(
             items=page,
             metadata=PlaylistPageMetadata(
