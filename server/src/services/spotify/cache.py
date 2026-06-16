@@ -16,11 +16,11 @@ _SESSION_ID_LEN = 32
 
 class SpotifyCache:
     def __init__(self, redis: RedisClient, ttl_sessions: int):
-        self.redis = redis
+        self.client = redis
         self.ttl_sessions = ttl_sessions
         self.ttl_users: int = 60 * 60 * 2
         self.ttl_playlists: int = 90
-        self.ttl_playlist_items: int = 60 * 60 * 24 * 7
+        self.ttl_playlist_items: int = 60 * 60
 
     async def create_session(self, info: SessionInfo) -> str:
         session_id = token_urlsafe(_SESSION_ID_LEN)
@@ -29,49 +29,42 @@ class SpotifyCache:
         return session_id
 
     async def set_session(self, session_id: str, session: SessionInfo) -> None:
-        await self.redis.set_model_secure(
+        await self.client.set_model_secure(
             session, self._session_key(session_id), self.ttl_sessions
         )
 
     async def get_session(self, session_id: str) -> Optional[SessionInfo]:
-        return await self.redis.get_model_secure(
+        return await self.client.get_model_secure(
             SessionInfo, self._session_key(session_id)
         )
 
     async def end_session(self, session_id: str) -> None:
-        await self.redis.delete(self._session_key(session_id))
-        logger.info("Ended session")
+        await self.client.delete(self._session_key(session_id))
+        logger.info(f"Ended session: {session_id}")
 
     async def get_user(self, user_id: str) -> Optional[CurrentUser]:
-        return await self.redis.get_model(CurrentUser, self._user_key(user_id))
+        return await self.client.get_model(CurrentUser, self._user_key(user_id))
 
     async def set_user(self, user: CurrentUser) -> None:
-        await self.redis.set_model(user, self._user_key(user.id), self.ttl_users)
+        await self.client.set_model(user, self._user_key(user.id), self.ttl_users)
 
     async def get_playlist(self, user_id: str, playlist_id: str) -> Optional[Playlist]:
-        return await self.redis.hget_model(
+        return await self.client.hget_model(
             Playlist, self._playlists_key(user_id), playlist_id
         )
 
     async def get_playlists(self, user_id: str) -> Optional[List[Playlist]]:
-        return await self.redis.hgetall_models(Playlist, self._playlists_key(user_id))
+        return await self.client.hgetall_models(Playlist, self._playlists_key(user_id))
 
     async def set_playlists(self, user_id: str, playlists: List[Playlist]) -> None:
-        await self.redis.hset_models(
+        await self.client.hset_models(
             self._playlists_key(user_id),
             {p.id: p for p in playlists},
             self.ttl_playlists,
         )
 
-    async def invalidate_playlist(self, user_id: str, playlist_id: str) -> None:
-        await self.redis.delete(
-            self._playlists_key(user_id),
-            self._playlist_items_key(user_id, playlist_id),
-            self._playlist_snapshot_key(user_id, playlist_id),
-        )
-
     async def invalidate_playlists(self, user_id: str) -> None:
-        await self.redis.delete(self._playlists_key(user_id))
+        await self.client.delete(self._playlists_key(user_id))
 
     async def get_playlist_items(
         self,
@@ -82,32 +75,33 @@ class SpotifyCache:
         offset: int = 0,
         limit: int = 100,
     ) -> Optional[PlaylistPage]:
-        snapshot_key = self._playlist_snapshot_key(user_id, playlist_id)
-        items_key = self._playlist_items_key(user_id, playlist_id)
+        if offset < 0 or limit < 0:
+            raise ValueError("Offset and limit must be positive.")
 
-        async with self.redis.redis.pipeline() as pipe:
-            pipe.get(snapshot_key)
-            pipe.lrange(items_key, start=offset, end=offset + limit - 1)
-            pipe.llen(items_key)
-            cached_snapshot_id, items, total_items = await pipe.execute()
+        key = self._playlist_items_key(user_id, playlist_id, snapshot_id)
+        async with self.client.redis.pipeline() as pipe:
+            pipe.exists(key)
+            pipe.lrange(key, start=offset, end=offset + limit - 1)
+            pipe.llen(key)
+            pipe.expire(key, self.ttl_playlist_items)
+            is_cached, items_raw, total, _ = await pipe.execute()
 
-        if snapshot_id != cached_snapshot_id:
-            logger.debug(
-                f"MISS: {items_key}, snapshot IDs did not match: expected={snapshot_id}, got={cached_snapshot_id}"
-            )
+        if not is_cached:
+            logger.debug(f"MISS: {key}")
             return None
 
-        logger.debug(f"HIT: {items_key}")
+        logger.debug(f"HIT: {key}")
 
-        page = [PlaylistItem.model_validate_json(item) for item in items]
-        has_more = offset + len(page) < total_items
+        items = [PlaylistItem.model_validate_json(item) for item in items_raw]
+        next_offset = offset + len(items)
+        has_more = next_offset < total
 
         return PlaylistPage(
-            items=page,
+            items=items,
             metadata=PlaylistPageMetadata(
-                total_items=total_items,
+                total_items=total,
                 has_more=has_more,
-                next_offset=offset + len(page) if has_more else None,
+                next_offset=next_offset if has_more else None,
             ),
         )
 
@@ -119,22 +113,17 @@ class SpotifyCache:
         items: List[PlaylistItem],
     ) -> None:
         if not items:
-            return
+            raise ValueError("Caching an empty list of playlist items is prohibited.")
 
-        items_key = self._playlist_items_key(user_id, playlist_id)
-        snapshot_key = self._playlist_snapshot_key(user_id, playlist_id)
+        key = self._playlist_items_key(user_id, playlist_id, snapshot_id)
         ttl = self.ttl_playlist_items
-
-        async with self.redis.redis.pipeline() as pipe:
-            pipe.delete(items_key)
-            pipe.rpush(items_key, *[t.model_dump_json() for t in items])
-            pipe.expire(items_key, ttl)
-            pipe.set(snapshot_key, snapshot_id, ex=ttl)
+        async with self.client.redis.pipeline() as pipe:
+            pipe.delete(key)
+            pipe.rpush(key, *[item.model_dump_json() for item in items])
+            pipe.expire(key, ttl)
             await pipe.execute()
 
-        logger.debug(
-            f"CACHED: {len(items)} items (key={items_key}, snapshot={snapshot_id}, ttl={ttl}s)"
-        )
+        logger.debug(f"CACHED: {len(items)} playlist items (key={key}, snapshot={snapshot_id}, ttl={ttl})")  # fmt: skip
 
     @staticmethod
     def _session_key(session_id: str) -> str:
@@ -152,15 +141,8 @@ class SpotifyCache:
         return RedisClient.key(SpotifyCache._user_key(user_id), "playlists")
 
     @staticmethod
-    def _playlist_items_key(user_id: str, playlist_id: str) -> str:
-        """users:{user_id}:playlists:{playlist_id}:items"""
+    def _playlist_items_key(user_id: str, playlist_id: str, snapshot_id: str) -> str:
+        """users:{user_id}:playlists:{playlist_id}:items:{snapshot_id}"""
         return RedisClient.key(
-            SpotifyCache._playlists_key(user_id), playlist_id, "items"
-        )
-
-    @staticmethod
-    def _playlist_snapshot_key(user_id: str, playlist_id: str) -> str:
-        """users:{user_id}:playlists:{playlist_id}:snapshot"""
-        return RedisClient.key(
-            SpotifyCache._playlists_key(user_id), playlist_id, "snapshot"
+            SpotifyCache._playlists_key(user_id), playlist_id, "items", snapshot_id
         )
