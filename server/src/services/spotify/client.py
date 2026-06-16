@@ -14,11 +14,13 @@ class SpotifyClient:
         *,
         playlist_limit: int,
         playlist_items_limit: int,
+        liked_songs_limit: int,
     ):
         self.spotify = spotify
         self.user_id = user_id
         self.playlist_limit = playlist_limit
         self.playlist_items_limit = playlist_items_limit
+        self.liked_songs_limit = liked_songs_limit
 
     async def get_current_user(self) -> CurrentUser:
         """Gets the profile of the current user."""
