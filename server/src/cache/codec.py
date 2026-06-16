@@ -4,6 +4,8 @@ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from base64 import b64encode, b64decode
 from os import urandom
 
+M = TypeVar("M", bound=BaseModel)
+
 
 class Codec:
     def __init__(self, aesgcm: AESGCM):
@@ -19,8 +21,8 @@ class Codec:
         nonce, ciphertext = raw[:12], raw[12:]
         return self._aesgcm.decrypt(nonce, ciphertext, None).decode()
 
-
-M = TypeVar("M", bound=BaseModel)
+    def model(self, m: Type[M]) -> "ModelCodec[M]":
+        return ModelCodec(m, self)
 
 
 class ModelCodec(Generic[M]):
