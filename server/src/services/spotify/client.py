@@ -49,10 +49,23 @@ class SpotifyClient:
         self._log(f"Got {len(playlists)} playlists")
         return playlists
 
+    async def get_liked_songs(self) -> List[PlaylistItem]:
+        """Gets all liked songs from a user."""
+        self._log(f"Getting liked songs for user {self.user_id}")
+        items = []
+        async for item in self._paginate(
+            self.spotify.current_user_saved_tracks,
+            limit=self.liked_songs_limit,
+        ):
+            if item.get("track") and not item.get("is_local"):
+                items.append(PlaylistItem.model_validate(item))
+
+        self._log(f"Got {len(items)} liked songs for user {self.user_id}")
+        return items
+
     async def get_playlist_items(self, playlist_id: str) -> List[PlaylistItem]:
         """Gets all items from a playlist."""
         self._log(f"Getting items from playlist {playlist_id}")
-
         items = []
         async for item in self._paginate(
             self.spotify.playlist_items,
@@ -67,18 +80,7 @@ class SpotifyClient:
         return items
 
     async def get_unique_playlist_items(self, playlist_id: str) -> List[PlaylistItem]:
-        items = await self.get_playlist_items(playlist_id)
-        seen = set()
-        deduped = []
-
-        self._log(f"Deduping {len(items)} from playlist {playlist_id}")
-        for item in items:
-            if item.track.uri not in seen:
-                seen.add(item.track.uri)
-                deduped.append(item)
-
-        self._log(f"Got {len(deduped)} unique items from playlist {playlist_id}")
-        return deduped
+        return self._dedupe_playlist_items(await self.get_playlist_items(playlist_id))
 
     async def remove_playlist_items(self, playlist_id: str, uris: List[str]) -> None:
         """Removes all occurrences of items from a playlist."""
@@ -119,6 +121,15 @@ class SpotifyClient:
         """Deletes a playlist."""
         await self._run(self.spotify.current_user_unfollow_playlist, playlist_id)
         self._log(f"Deleted playlist {playlist_id}")
+
+    def _dedupe_playlist_items(self, items: List[PlaylistItem]) -> List[PlaylistItem]:
+        seen = set()
+        deduped = []
+        for item in items:
+            if item.track.uri not in seen:
+                seen.add(item.track.uri)
+                deduped.append(item)
+        return deduped
 
     async def _paginate(
         self, method: Callable, limit: int, **kwargs
