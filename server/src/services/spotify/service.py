@@ -141,26 +141,32 @@ class SpotifyService:
         page: List[PlaylistItem],
         page_ready: Future[None],
     ) -> None:
-        batch: List[PlaylistItem] = []
-        fetch_offset = 0
-        async for item in self._get_playlist_items_source(playlist.id):
-            batch.append(item)
-            if offset <= fetch_offset < offset + limit:
-                page.append(item)
-            fetch_offset += 1
+        try:
+            batch: List[PlaylistItem] = []
+            fetch_offset = 0
+            async for item in self._get_playlist_items_source(playlist.id):
+                batch.append(item)
+                if offset <= fetch_offset < offset + limit:
+                    page.append(item)
+                fetch_offset += 1
 
-            if len(page) == limit and not page_ready.done():
-                page_ready.set_result(None)
+                if len(page) == limit and not page_ready.done():
+                    page_ready.set_result(None)
 
-            if len(batch) >= self.spotify.playlist_items_limit:
+                if len(batch) >= self.spotify.playlist_items_limit:
+                    await self.cache.append_playlist_items(
+                        self.user_id, playlist.id, playlist.snapshot_id, batch
+                    )
+                    batch = []
+
+            if batch:
                 await self.cache.append_playlist_items(
                     self.user_id, playlist.id, playlist.snapshot_id, batch
                 )
-                batch = []
-
-        if batch:
-            await self.cache.append_playlist_items(
-                self.user_id, playlist.id, playlist.snapshot_id, batch
-            )
-        if not page_ready.done():
-            page_ready.set_result(None)
+            if not page_ready.done():
+                page_ready.set_result(None)
+        except Exception as e:
+            if not page_ready.done():
+                page_ready.set_exception(e)
+            else:
+                raise

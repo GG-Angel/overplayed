@@ -73,8 +73,6 @@ export const playlistMetadataSchema = resourceRefSchema.extend({
 
 export const playlistItemSchema = z.object({
   added_at: z.iso.datetime(),
-  added_by: resourceRefSchema,
-  is_local: z.boolean(),
   track: trackSchema,
 });
 

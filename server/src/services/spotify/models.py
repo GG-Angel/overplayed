@@ -94,8 +94,6 @@ class Track(Resource):
 
 class PlaylistItem(BaseModel):
     added_at: str
-    added_by: Resource
-    is_local: bool
     track: Track
 
 
