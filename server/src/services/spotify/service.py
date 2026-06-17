@@ -1,3 +1,4 @@
+from services.spotify.utils import build_liked_songs_playlist
 import asyncio
 from asyncio import Task, Future
 from core.exceptions import NotFoundException
@@ -39,10 +40,18 @@ class SpotifyService:
         if cached := await self.cache.get_playlists(self.user_id):
             return cached
 
+        # get playlists owned
         saved_playlists = await self.spotify.get_user_playlists()
         owned_playlists = [p for p in saved_playlists if self._is_playlist_owned(p)]
-        await self.cache.set_playlists(self.user_id, owned_playlists)
 
+        # get liked songs playlist
+        liked_songs_playlist = build_liked_songs_playlist(
+            user=await self.get_current_user(),
+            total=await self.spotify.get_liked_songs_total(),
+        )
+        owned_playlists.append(liked_songs_playlist)
+
+        await self.cache.set_playlists(self.user_id, owned_playlists)
         return owned_playlists
 
     async def get_playlist(self, playlist_id: str) -> Playlist:
@@ -78,7 +87,7 @@ class SpotifyService:
         page_ready = asyncio.Future()
 
         task = asyncio.create_task(
-            self._fetch_playlist_page_and_preload_rest(
+            self._fetch_and_cache_playlist_items(
                 playlist, offset, limit, page, page_ready
             )
         )
@@ -88,7 +97,7 @@ class SpotifyService:
         await page_ready
         return self._build_playlist_page(page, offset, limit)
 
-    async def _fetch_playlist_page_and_preload_rest(
+    async def _fetch_and_cache_playlist_items(
         self,
         playlist: Playlist,
         offset: int,
