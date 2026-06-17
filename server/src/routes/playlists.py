@@ -10,9 +10,9 @@ from services.spotify.utils import get_formatted_date
 from services.spotify.models import (
     Playlist,
     PlaylistPage,
-    SpotifyIdRegex,
     SwipesForm,
     SwipesResponse,
+    PlaylistIdRegex,
 )
 
 router = APIRouter()
@@ -31,7 +31,7 @@ async def handle_get_user_playlists(
 @limiter.limit("60/minute")
 async def handle_get_user_playlist(
     request: Request,
-    playlist_id: Annotated[str, Path(pattern=SpotifyIdRegex)],
+    playlist_id: Annotated[str, Path(pattern=PlaylistIdRegex)],
     spotify: SpotifyService = Depends(get_spotify_service),
 ) -> Playlist:
     return await spotify.get_playlist(playlist_id)
@@ -41,7 +41,7 @@ async def handle_get_user_playlist(
 @limiter.limit("30/minute")
 async def handle_get_playlist_items(
     request: Request,
-    playlist_id: Annotated[str, Path(pattern=SpotifyIdRegex)],
+    playlist_id: Annotated[str, Path(pattern=PlaylistIdRegex)],
     offset: int = Query(0, ge=0),
     spotify: SpotifyService = Depends(get_spotify_service),
 ) -> PlaylistPage:
@@ -53,7 +53,7 @@ async def handle_get_playlist_items(
 async def handle_swipes(
     request: Request,
     background_tasks: BackgroundTasks,
-    playlist_id: Annotated[str, Path(pattern=SpotifyIdRegex)],
+    playlist_id: Annotated[str, Path(pattern=PlaylistIdRegex)],
     form: SwipesForm,
     spotify: SpotifyService = Depends(get_spotify_service),
     db: DatabaseService = Depends(get_database_service),
