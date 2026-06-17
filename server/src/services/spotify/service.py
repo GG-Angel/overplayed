@@ -55,11 +55,10 @@ class SpotifyService:
         if cached := await self.cache.get_playlist(self.user_id, playlist_id):
             return cached
 
-        playlists = await self.get_user_playlists()
-        playlist = next((p for p in playlists if p.id == playlist_id), None)
+        user_playlists = await self.get_user_playlists()
+        playlist = next((p for p in user_playlists if p.id == playlist_id), None)
         if playlist is None:
             raise NotFoundException()
-
         return playlist
 
     async def get_playlist_items(
@@ -150,13 +149,7 @@ class SpotifyService:
                 page.append(item)
             fetch_offset += 1
 
-            # release once the page is full and we've fetched two pages ahead,
-            # so the next page request is likely to hit a warm cache
-            if (
-                len(page) == limit
-                and fetch_offset >= offset + limit
-                and not page_ready.done()
-            ):
+            if len(page) == limit and not page_ready.done():
                 page_ready.set_result(None)
 
             if len(batch) >= self.spotify.playlist_items_limit:
