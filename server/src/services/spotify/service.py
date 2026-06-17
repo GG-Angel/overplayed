@@ -108,7 +108,7 @@ class SpotifyService:
             # so the next page request is likely to hit a warm cache
             if (
                 len(page) == limit
-                and fetch_offset >= offset + limit * 2
+                and fetch_offset >= offset + limit
                 and not page_ready.done()
             ):
                 page_ready.set_result(None)
