@@ -1,3 +1,4 @@
+from loguru import logger
 from services.spotify.utils import build_liked_songs_playlist
 import asyncio
 from asyncio import Task, Future
@@ -50,6 +51,7 @@ class SpotifyService:
             total=await self.spotify.get_liked_songs_total(),
         )
         owned_playlists.append(liked_songs_playlist)
+        logger.info(owned_playlists)
 
         await self.cache.set_playlists(self.user_id, owned_playlists)
         return owned_playlists

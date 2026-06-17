@@ -9,7 +9,6 @@ export const externalIdsSchema = z.object({
 });
 
 export const resourceRefSchema = z.object({
-  href: z.url(),
   id: z.string(),
   uri: z.string(),
 });
