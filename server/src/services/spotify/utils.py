@@ -40,7 +40,7 @@ def build_liked_songs_playlist(user: CurrentUser, total: int) -> Playlist:
     return Playlist(
         id=LIKED_SONGS_ID,
         uri=LIKED_SONGS_ID,
-        snapshot_id=f"{LIKED_SONGS_ID}-{total}",
+        snapshot_id=f"liked-{total}",
         collaborative=False,
         public=False,
         images=None,

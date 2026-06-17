@@ -1,3 +1,4 @@
+from services.spotify.models import LIKED_SONGS_ID
 import pytest
 from fastapi import status
 from aiohttp import ClientSession
@@ -46,14 +47,22 @@ async def test_get_playlists(session: ClientSession):
         assert isinstance(await response.json(), list)
 
 
-async def test_get_playlist(session: ClientSession, first_playlist_id: str):
-    async with session.get(f"/playlists/{first_playlist_id}") as response:
+@pytest.mark.parametrize("playlist_id", ["first_playlist_id", LIKED_SONGS_ID])
+async def test_get_playlist(session: ClientSession, request, playlist_id: str):
+    if playlist_id == "first_playlist_id":
+        playlist_id = request.getfixturevalue("first_playlist_id")
+    async with session.get(f"/playlists/{playlist_id}") as response:
         assert response.status == status.HTTP_200_OK
-        assert isinstance(await response.json(), dict)
+        playlist = await response.json()
+        assert isinstance(playlist, dict)
+        assert playlist["id"] == playlist_id
 
 
-async def test_get_playlist_items(session: ClientSession, first_playlist_id: str):
-    await get_playlist_items(session, first_playlist_id)
+@pytest.mark.parametrize("playlist_id", ["first_playlist_id", LIKED_SONGS_ID])
+async def test_get_playlist_items(session: ClientSession, request, playlist_id: str):
+    if playlist_id == "first_playlist_id":
+        playlist_id = request.getfixturevalue("first_playlist_id")
+    await get_playlist_items(session, playlist_id)
 
 
 async def test_submit_swipes(session: ClientSession, testing_playlist_id: str):
