@@ -1,9 +1,11 @@
 from typing import Optional, List, Annotated
 from pydantic import BaseModel, Field, PositiveInt
 
-_SpotifyIdInner = r"[0-9A-Za-z]{22}"
-SpotifyIdPattern = rf"^{_SpotifyIdInner}$"
-SpotifyUriPattern = rf"^spotify:track:{_SpotifyIdInner}$"
+LIKED_SONGS_ID = "liked-songs"
+SpotifyIdPattern = r"[0-9A-Za-z]{22}"
+SpotifyIdRegex = rf"^{SpotifyIdPattern}$"
+TrackUriRegex = rf"^spotify:track:{SpotifyIdPattern}$"
+PlaylistIdRegex = rf"^({LIKED_SONGS_ID}|{SpotifyIdPattern})$"
 
 
 class TokenInfo(BaseModel):
@@ -28,7 +30,6 @@ class ExternalIds(BaseModel):
 
 
 class Resource(BaseModel):
-    href: str
     id: str
     uri: str
 
@@ -114,7 +115,7 @@ class SwipesFormOptions(BaseModel):
 
 class SwipesForm(BaseModel):
     options: SwipesFormOptions
-    uris: List[Annotated[str, Field(pattern=SpotifyUriPattern)]] = Field(min_length=1)
+    uris: List[Annotated[str, Field(pattern=TrackUriRegex)]] = Field(min_length=1)
     tracks_swiped: PositiveInt
 
 

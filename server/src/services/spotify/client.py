@@ -1,4 +1,3 @@
-import platform
 import asyncio
 from typing import List, Callable, AsyncGenerator, AsyncIterator
 from loguru import logger
