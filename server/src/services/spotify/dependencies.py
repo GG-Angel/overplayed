@@ -51,7 +51,7 @@ async def get_spotify_service(
             user_id=session.user_id,
             playlist_limit=settings.playlist_limit,
             playlist_items_limit=settings.playlist_items_limit,
-            liked_songs_limit=settings.liked_songs_limit,
+            saved_tracks_limit=settings.saved_tracks_limit,
         ),
         cache=cache,
         user_id=session.user_id,

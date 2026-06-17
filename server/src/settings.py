@@ -34,7 +34,7 @@ class Settings(BaseSettings):
 
     playlist_limit: int = 50
     playlist_items_limit: int = 100
-    liked_songs_limit: int = 50
+    saved_tracks_limit: int = 50
 
     @property
     def db_url(self) -> str:

@@ -14,13 +14,13 @@ class SpotifyClient:
         *,
         playlist_limit: int,
         playlist_items_limit: int,
-        liked_songs_limit: int,
+        saved_tracks_limit: int,
     ):
         self.spotify = spotify
         self.user_id = user_id
         self.playlist_limit = playlist_limit
         self.playlist_items_limit = playlist_items_limit
-        self.liked_songs_limit = liked_songs_limit
+        self.saved_tracks_limit = saved_tracks_limit
 
     async def get_current_user(self) -> CurrentUser:
         """Gets the profile of the current user."""
@@ -58,7 +58,7 @@ class SpotifyClient:
         self._log(f"Getting liked songs for user {self.user_id}")
         async for item in self._paginate(
             self.spotify.current_user_saved_tracks,
-            limit=self.liked_songs_limit,
+            limit=self.saved_tracks_limit,
         ):
             if item.get("track") and not item.get("is_local"):
                 yield PlaylistItem.model_validate(item)
@@ -98,11 +98,11 @@ class SpotifyClient:
 
     async def remove_saved_tracks(self, uris: List[str]) -> None:
         """Removes all occurrences of items from a playlist."""
-        for offset in range(0, len(uris), self.liked_songs_limit):
+        for offset in range(0, len(uris), self.saved_tracks_limit):
             self._log(f"Removing saved tracks (offset={offset})")
             await self._run(
                 self.spotify.current_user_saved_tracks_delete,
-                tracks=uris[offset : offset + self.liked_songs_limit],
+                tracks=uris[offset : offset + self.saved_tracks_limit],
             )
         self._log(f"Removed {len(uris)} saved tracks")
 
