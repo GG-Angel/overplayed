@@ -45,7 +45,7 @@ class SpotifyService:
         owned_playlists.append(
             build_liked_songs_playlist(
                 user=await self.get_current_user(),
-                total=await self.spotify.get_liked_songs_total(),
+                total=await self.spotify.get_user_saved_tracks_total(),
             )
         )
 
