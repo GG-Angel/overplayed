@@ -49,19 +49,19 @@ class SpotifyClient:
         self._log(f"Got {len(playlists)} playlists")
         return playlists
 
-    async def get_liked_songs(self) -> List[PlaylistItem]:
-        """Gets all liked songs from a user."""
+    async def get_liked_songs(self) -> AsyncIterator[PlaylistItem]:
+        """Yields a user's liked songs as they're received."""
         self._log(f"Getting liked songs for user {self.user_id}")
-        items = []
         async for item in self._paginate(
             self.spotify.current_user_saved_tracks,
             limit=self.liked_songs_limit,
         ):
             if item.get("track") and not item.get("is_local"):
-                items.append(PlaylistItem.model_validate(item))
+                yield PlaylistItem.model_validate(item)
 
-        self._log(f"Got {len(items)} liked songs for user {self.user_id}")
-        return items
+    async def get_liked_songs_total(self) -> int:
+        response = await self._run(self.spotify.current_user_saved_tracks, limit=1)
+        return response["total"]
 
     async def get_playlist_items(self, playlist_id: str) -> AsyncIterator[PlaylistItem]:
         """Yields items from a playlist as they're received."""
