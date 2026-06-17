@@ -1,6 +1,5 @@
-from loguru import logger
-from services.spotify.utils import build_liked_songs_playlist
 import asyncio
+from services.spotify.utils import build_liked_songs_playlist
 from asyncio import Task, Future
 from core.exceptions import NotFoundException
 from typing import List
@@ -41,16 +40,14 @@ class SpotifyService:
         if cached := await self.cache.get_playlists(self.user_id):
             return cached
 
-        # get playlists owned
         saved_playlists = await self.spotify.get_user_playlists()
         owned_playlists = [p for p in saved_playlists if self._is_playlist_owned(p)]
-
-        # get liked songs playlist
-        liked_songs_playlist = build_liked_songs_playlist(
-            user=await self.get_current_user(),
-            total=await self.spotify.get_liked_songs_total(),
+        owned_playlists.append(
+            build_liked_songs_playlist(
+                user=await self.get_current_user(),
+                total=await self.spotify.get_liked_songs_total(),
+            )
         )
-        owned_playlists.append(liked_songs_playlist)
 
         await self.cache.set_playlists(self.user_id, owned_playlists)
         return owned_playlists
@@ -71,7 +68,7 @@ class SpotifyService:
     ) -> PlaylistPage:
         playlist = await self.get_playlist(playlist_id)
         if playlist.tracks.total == 0:
-            self._build_playlist_page([], offset, limit)
+            return self._build_playlist_page([], offset, limit)
 
         cached = await self.cache.get_playlist_items(
             self.user_id,
