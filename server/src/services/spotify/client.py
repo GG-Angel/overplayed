@@ -96,6 +96,16 @@ class SpotifyClient:
             )
         self._log(f"Removed {len(uris)} items from playlist {playlist_id}")
 
+    async def remove_saved_tracks(self, uris: List[str]) -> None:
+        """Removes all occurrences of items from a playlist."""
+        for offset in range(0, len(uris), self.liked_songs_limit):
+            self._log(f"Removing saved tracks (offset={offset})")
+            await self._run(
+                self.spotify.current_user_saved_tracks_delete,
+                tracks=uris[offset : offset + self.liked_songs_limit],
+            )
+        self._log(f"Removed {len(uris)} saved tracks")
+
     async def add_playlist_items(self, playlist_id: str, uris: List[str]) -> None:
         """Appends items to an existing playlist."""
         for offset in range(0, len(uris), self.playlist_items_limit):
