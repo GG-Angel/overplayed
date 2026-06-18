@@ -20,3 +20,4 @@
   - POST https://spclient.wg.spotify.com/signup/public/v2/account/validate
   - Get "signupServiceAppKey":"a1e486e2729f46d6bb368d6b2bcda326" from page source of signup page.
   - If we get "invalid_argument" back, refresh the app key.
+  - If user does not exist after user sends request 3 times, ban IP for like 1 week to annoy them.
