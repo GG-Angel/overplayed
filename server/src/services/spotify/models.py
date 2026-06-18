@@ -50,7 +50,8 @@ class CurrentUser(User):
     images: List[Image]
 
 
-class PlaylistItemCount(BaseModel):
+# TODO: flatten into Playlist
+class PlaylistSize(BaseModel):
     total: int
 
 
@@ -62,7 +63,7 @@ class Playlist(Resource):
     owner: User
     public: bool
     snapshot_id: str
-    tracks: PlaylistItemCount
+    tracks: PlaylistSize
     external_urls: ExternalUrls
 
 
@@ -92,19 +93,10 @@ class Track(Resource):
     external_ids: ExternalIds
 
 
-class PlaylistItem(BaseModel):
-    added_at: str
-    track: Track
-
-
-class PlaylistPageMetadata(BaseModel):
+class PlaylistPage(BaseModel):
     has_more: bool
     next_offset: int | None
-
-
-class PlaylistPage(BaseModel):
-    metadata: PlaylistPageMetadata
-    items: List[PlaylistItem]
+    tracks: List[Track]
 
 
 class SwipesFormOptions(BaseModel):

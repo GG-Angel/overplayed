@@ -3,7 +3,7 @@ from typing import List, Callable, AsyncGenerator, AsyncIterator
 from loguru import logger
 from spotipy import Spotify
 from services.spotify.utils import spotify_fields
-from services.spotify.models import CurrentUser, Playlist, PlaylistItem
+from services.spotify.models import CurrentUser, Playlist, Track
 
 
 class SpotifyClient:
@@ -13,14 +13,14 @@ class SpotifyClient:
         user_id: str,
         *,
         playlist_limit: int,
-        playlist_items_limit: int,
+        playlist_tracks_limit: int,
         get_saved_tracks_limit: int,
         edit_saved_tracks_limit: int,
     ):
         self.spotify = spotify
         self.user_id = user_id
         self.playlist_limit = playlist_limit
-        self.playlist_items_limit = playlist_items_limit
+        self.playlist_tracks_limit = playlist_tracks_limit
         self.get_saved_tracks_limit = get_saved_tracks_limit
         self.edit_saved_tracks_limit = edit_saved_tracks_limit
 
@@ -44,62 +44,51 @@ class SpotifyClient:
         self._log("Getting user playlists")
         playlists = []
         async for p in self._paginate(
-            self.spotify.current_user_playlists,
-            limit=self.playlist_limit,
+            self.spotify.current_user_playlists, limit=self.playlist_limit
         ):
             playlists.append(Playlist.model_validate(p))
         self._log(f"Got {len(playlists)} playlists")
         return playlists
 
-    async def get_user_saved_tracks_total(self) -> int:
+    async def get_saved_tracks_total(self) -> int:
         response = await self._run(self.spotify.current_user_saved_tracks, limit=1)
         return response["total"]
 
-    async def get_saved_tracks(self) -> AsyncIterator[PlaylistItem]:
-        """Yields a user's saved songs as they're received."""
-        self._log(f"Getting liked songs for user {self.user_id}")
-        async for item in self._paginate(
+    async def get_saved_tracks(self) -> AsyncIterator[Track]:
+        """Yields a user's saved tracks as they're received."""
+        self._log(f"Getting saved tracks for user {self.user_id}")
+        async for track in self._get_paginated_tracks(
             self.spotify.current_user_saved_tracks,
             limit=self.get_saved_tracks_limit,
         ):
-            if item.get("track") and not item.get("is_local"):
-                yield PlaylistItem.model_validate(item)
+            yield track
 
-    async def get_playlist_items(self, playlist_id: str) -> AsyncIterator[PlaylistItem]:
-        """Yields items from a playlist as they're received."""
-        self._log(f"Getting items from playlist {playlist_id}")
-        async for item in self._paginate(
-            self.spotify.playlist_items,
-            limit=self.playlist_items_limit,
-            playlist_id=playlist_id,
-            fields=spotify_fields(PlaylistItem, is_nested=True),
-        ):
-            if item.get("track") and not item.get("is_local"):
-                yield PlaylistItem.model_validate(item)
-
-    async def get_unique_playlist_items(
-        self, playlist_id: str
-    ) -> AsyncIterator[PlaylistItem]:
-        """Yields unique items from a playlist as they're received."""
+    async def get_playlist_tracks(self, playlist_id: str) -> AsyncIterator[Track]:
+        """Yields unique tracks from a playlist as they're received."""
+        self._log(f"Getting tracks from playlist {playlist_id}")
         seen = set()
-        async for item in self.get_playlist_items(playlist_id):
-            if item.track.id not in seen:
-                seen.add(item.track.id)
-                yield item
+        async for track in self._get_paginated_tracks(
+            self.spotify.playlist_items,
+            limit=self.playlist_tracks_limit,
+            playlist_id=playlist_id,
+        ):
+            if track.id not in seen:
+                seen.add(track.id)
+                yield track
 
-    async def remove_playlist_items(self, playlist_id: str, uris: List[str]) -> None:
-        """Removes all occurrences of items from a playlist."""
-        for offset in range(0, len(uris), self.playlist_items_limit):
-            self._log(f"Removing items from playlist {playlist_id} (offset={offset})")
+    async def remove_playlist_tracks(self, playlist_id: str, uris: List[str]) -> None:
+        """Removes all occurrences of tracks from a playlist."""
+        for offset in range(0, len(uris), self.playlist_tracks_limit):
+            self._log(f"Removing tracks from playlist {playlist_id} (offset={offset})")
             await self._run(
                 self.spotify.playlist_remove_all_occurrences_of_items,
                 playlist_id=playlist_id,
-                items=uris[offset : offset + self.playlist_items_limit],
+                items=uris[offset : offset + self.playlist_tracks_limit],
             )
-        self._log(f"Removed {len(uris)} items from playlist {playlist_id}")
+        self._log(f"Removed {len(uris)} tracks from playlist {playlist_id}")
 
     async def remove_saved_tracks(self, uris: List[str]) -> None:
-        """Removes all occurrences of items from a playlist."""
+        """Removes all occurrences of tracks from a playlist."""
         for offset in range(0, len(uris), self.edit_saved_tracks_limit):
             self._log(f"Removing saved tracks (offset={offset})")
             await self._run(
@@ -108,14 +97,14 @@ class SpotifyClient:
             )
         self._log(f"Removed {len(uris)} saved tracks")
 
-    async def add_playlist_items(self, playlist_id: str, uris: List[str]) -> None:
+    async def add_playlist_tracks(self, playlist_id: str, uris: List[str]) -> None:
         """Appends items to an existing playlist."""
-        for offset in range(0, len(uris), self.playlist_items_limit):
+        for offset in range(0, len(uris), self.playlist_tracks_limit):
             self._log(f"Adding items to playlist {playlist_id} (offset={offset})")
             await self._run(
                 self.spotify.playlist_add_items,
                 playlist_id,
-                uris[offset : offset + self.playlist_items_limit],
+                uris[offset : offset + self.playlist_tracks_limit],
             )
         self._log(f"Added {len(uris)} items to playlist {playlist_id}")
 
@@ -132,22 +121,29 @@ class SpotifyClient:
         self._log(f"Created playlist {playlist.id}")
         return playlist
 
-    async def delete_playlist(self, playlist_id: str) -> None:
-        """Deletes a playlist."""
-        await self._run(self.spotify.current_user_unfollow_playlist, playlist_id)
-        self._log(f"Deleted playlist {playlist_id}")
+    async def _get_paginated_tracks(
+        self, fn: Callable, limit: int, **kwargs
+    ) -> AsyncGenerator[Track]:
+        """Paginate a Spotify endpoint."""
+        async for item in self._paginate(fn, limit=limit, **kwargs):
+            if (
+                isinstance(item, dict)
+                and "track" in item
+                and not item.get("is_local", False)
+            ):
+                yield Track.model_validate(item["track"])
 
     async def _paginate(
-        self, method: Callable, limit: int, **kwargs
+        self, fn: Callable, limit: int, **kwargs
     ) -> AsyncGenerator[dict]:
         """Paginate a Spotify endpoint."""
-        method_name = getattr(method, "__name__", repr(method))
+        fn_name = getattr(fn, "__name__", repr(fn))
         offset = 0
 
         # TODO: add limit?
         while True:
-            self._log(f"Paginating {method_name} (offset={offset})")
-            response = await self._run(method, offset=offset, limit=limit, **kwargs)
+            self._log(f"Paginating {fn_name} (offset={offset})")
+            response = await self._run(fn, offset=offset, limit=limit, **kwargs)
 
             items = response["items"]
             for item in items:
@@ -157,10 +153,8 @@ class SpotifyClient:
                 break
             offset += limit
 
-    async def _run(self, func: Callable, *args, **kwargs):
-        """Runs a blocking Spotipy call in a thread."""
-        return await asyncio.to_thread(func, *args, **kwargs)
+    async def _run(self, fn: Callable, *args, **kwargs):
+        return await asyncio.to_thread(fn, *args, **kwargs)
 
     def _log(self, message: str) -> None:
-        """Log a message traced to the current user's ID."""
         logger.debug(f"[{self.user_id}] {message}")

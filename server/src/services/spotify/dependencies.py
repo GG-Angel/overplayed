@@ -26,7 +26,7 @@ def get_spotify_cache(
         ttl_sessions=settings.ttl_sessions,
         ttl_users=settings.ttl_users,
         ttl_playlists=settings.ttl_playlists,
-        ttl_playlist_items=settings.ttl_playlist_items,
+        ttl_playlist_tracks=settings.ttl_playlist_tracks,
     )
 
 
@@ -50,7 +50,7 @@ async def get_spotify_service(
             spotify=Spotify(auth=session.access_token),
             user_id=session.user_id,
             playlist_limit=settings.playlist_limit,
-            playlist_items_limit=settings.playlist_items_limit,
+            playlist_tracks_limit=settings.playlist_tracks_limit,
             get_saved_tracks_limit=settings.get_saved_tracks_limit,
             edit_saved_tracks_limit=settings.edit_saved_tracks_limit,
         ),

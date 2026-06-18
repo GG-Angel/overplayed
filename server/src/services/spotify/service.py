@@ -9,9 +9,8 @@ from services.spotify.models import (
     CurrentUser,
     Playlist,
     PlaylistPage,
-    PlaylistPageMetadata,
-    PlaylistItem,
     LIKED_SONGS_ID,
+    Track,
 )
 
 
@@ -45,7 +44,7 @@ class SpotifyService:
         owned_playlists.append(
             build_liked_songs_playlist(
                 user=await self.get_current_user(),
-                total=await self.spotify.get_user_saved_tracks_total(),
+                total=await self.spotify.get_saved_tracks_total(),
             )
         )
         await self.cache.set_playlists(self.user_id, owned_playlists)
@@ -61,27 +60,23 @@ class SpotifyService:
             raise NotFoundException()
         return playlist
 
-    async def get_playlist_items(
+    async def get_playlist_tracks(
         self, playlist_id: str, *, offset: int = 0, limit: int = 100
     ) -> PlaylistPage:
         playlist = await self.get_playlist(playlist_id)
         if playlist.tracks.total == 0:
             return self._build_playlist_page([], offset, limit)
 
-        cached = await self.cache.get_playlist_items(
-            self.user_id,
-            playlist_id,
-            playlist.snapshot_id,
-            offset=offset,
-            limit=limit,
+        cached = await self.cache.get_playlist_tracks(
+            self.user_id, playlist_id, playlist.snapshot_id, offset, limit
         )
         if cached is not None:
             return self._build_playlist_page(cached, offset, limit)
 
-        page: List[PlaylistItem] = []
+        page: List[Track] = []
         page_ready = asyncio.Future()
         task = asyncio.create_task(
-            self._fetch_and_cache_playlist_items(
+            self._fetch_and_cache_playlist_tracks(
                 playlist, offset, limit, page, page_ready
             )
         )
@@ -96,16 +91,12 @@ class SpotifyService:
         await self._invalidate_playlists()
         return new_playlist
 
-    async def add_playlist_items(self, playlist_id: str, uris: List[str]) -> None:
-        await self.spotify.add_playlist_items(playlist_id, uris)
+    async def add_playlist_tracks(self, playlist_id: str, uris: List[str]) -> None:
+        await self.spotify.add_playlist_tracks(playlist_id, uris)
         await self._invalidate_playlists()
 
-    async def delete_playlist_items(self, playlist_id: str, uris: List[str]) -> None:
-        await self.spotify.remove_playlist_items(playlist_id, uris)
-        await self._invalidate_playlists()
-
-    async def delete_playlist(self, playlist_id: str) -> None:
-        await self.spotify.delete_playlist(playlist_id)
+    async def delete_playlist_tracks(self, playlist_id: str, uris: List[str]) -> None:
+        await self.spotify.remove_playlist_tracks(playlist_id, uris)
         await self._invalidate_playlists()
 
     async def _invalidate_playlists(self) -> None:
@@ -115,36 +106,32 @@ class SpotifyService:
         return playlist.owner.id == self.user_id or playlist.collaborative
 
     def _build_playlist_page(
-        self, items: List[PlaylistItem], offset: int, limit: int
+        self, tracks: List[Track], offset: int, limit: int
     ) -> PlaylistPage:
-        has_more = len(items) == limit
+        has_more = len(tracks) == limit
         return PlaylistPage(
-            items=items,
-            metadata=PlaylistPageMetadata(
-                has_more=has_more,
-                next_offset=offset + len(items) if has_more else None,
-            ),
+            tracks=tracks,
+            has_more=has_more,
+            next_offset=offset + len(tracks) if has_more else None,
         )
 
-    def _get_playlist_items_source(
-        self, playlist_id: str
-    ) -> AsyncIterator[PlaylistItem]:
+    def _get_playlist_tracks_source(self, playlist_id: str) -> AsyncIterator[Track]:
         if playlist_id == LIKED_SONGS_ID:
             return self.spotify.get_saved_tracks()
-        return self.spotify.get_unique_playlist_items(playlist_id)
+        return self.spotify.get_playlist_tracks(playlist_id)
 
-    async def _fetch_and_cache_playlist_items(
+    async def _fetch_and_cache_playlist_tracks(
         self,
         playlist: Playlist,
         offset: int,
         limit: int,
-        page: List[PlaylistItem],
+        page: List[Track],
         page_ready: Future[None],
     ) -> None:
         try:
-            batch: List[PlaylistItem] = []
+            batch: List[Track] = []
             fetch_offset = 0
-            async for item in self._get_playlist_items_source(playlist.id):
+            async for item in self._get_playlist_tracks_source(playlist.id):
                 batch.append(item)
                 if offset <= fetch_offset < offset + limit:
                     page.append(item)
@@ -153,14 +140,14 @@ class SpotifyService:
                 if len(page) == limit and not page_ready.done():
                     page_ready.set_result(None)
 
-                if len(batch) >= self.spotify.playlist_items_limit:
-                    await self.cache.append_playlist_items(
+                if len(batch) >= self.spotify.playlist_tracks_limit:
+                    await self.cache.push_playlist_tracks(
                         self.user_id, playlist.id, playlist.snapshot_id, batch
                     )
                     batch = []
 
             if batch:
-                await self.cache.append_playlist_items(
+                await self.cache.push_playlist_tracks(
                     self.user_id, playlist.id, playlist.snapshot_id, batch
                 )
             if not page_ready.done():

@@ -6,7 +6,7 @@ from services.spotify.models import (
     Playlist,
     LIKED_SONGS_ID,
     User,
-    PlaylistItemCount,
+    PlaylistSize,
     ExternalUrls,
 )
 
@@ -47,7 +47,7 @@ def build_liked_songs_playlist(user: CurrentUser, total: int) -> Playlist:
         name="Liked Songs",
         description=None,
         owner=User.model_validate(user.model_dump()),
-        tracks=PlaylistItemCount(total=total),
+        tracks=PlaylistSize(total=total),
         external_urls=ExternalUrls(
             spotify="https://open.spotify.com/collection/tracks"
         ),

@@ -37,15 +37,15 @@ async def handle_get_user_playlist(
     return await spotify.get_playlist(playlist_id)
 
 
-@router.get("/{playlist_id}/items")
+@router.get("/{playlist_id}/tracks")
 @limiter.limit("30/minute")
-async def handle_get_playlist_items(
+async def handle_get_playlist_tracks(
     request: Request,
     playlist_id: Annotated[str, Path(pattern=PlaylistIdRegex)],
     offset: int = Query(0, ge=0),
     spotify: SpotifyService = Depends(get_spotify_service),
 ) -> PlaylistPage:
-    return await spotify.get_playlist_items(playlist_id, offset=offset)
+    return await spotify.get_playlist_tracks(playlist_id, offset=offset)
 
 
 @router.post("/{playlist_id}/swipes")
@@ -70,8 +70,8 @@ async def handle_swipes(
             f"Overplayed / {source.name}",
             f"Generated on {get_formatted_date()}",
         )
-        await spotify.add_playlist_items(backup.id, form.uris)
-    await spotify.delete_playlist_items(source.id, form.uris)
+        await spotify.add_playlist_tracks(backup.id, form.uris)
+    await spotify.delete_playlist_tracks(source.id, form.uris)
 
     # record user and session
     background_tasks.add_task(
