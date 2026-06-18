@@ -58,9 +58,7 @@ async def handle_swipes(
     spotify: SpotifyService = Depends(get_spotify_service),
     db: DatabaseService = Depends(get_database_service),
 ) -> SwipesResponse:
-    user = await spotify.get_current_user()
     source = await spotify.get_playlist(playlist_id)
-
     if not (len(form.uris) <= form.tracks_swiped <= source.tracks.total):
         raise BadRequestException()
 
@@ -73,26 +71,32 @@ async def handle_swipes(
         await spotify.add_playlist_tracks(backup.id, form.uris)
     await spotify.remove_playlist_tracks(source.id, form.uris)
 
-    # record user and session
-    background_tasks.add_task(
-        db.upsert_user,
+    background_tasks.add_task(record_swipes, spotify, db, source, form)
+    return SwipesResponse(backup_playlist=backup)
+
+
+async def record_swipes(
+    spotify: SpotifyService,
+    db: DatabaseService,
+    source_playlist: Playlist,
+    form: SwipesForm,
+) -> None:
+    user = await spotify.get_current_user()
+    await db.upsert_user(
         User(
             id=user.id,
             display_name=user.display_name,
             spotify_url=user.external_urls.spotify,
             picture_url=user.images[-1].url if user.images else None,
-        ),
+        )
     )
-    background_tasks.add_task(
-        db.record_swipe_session,
+    await db.record_swipe_session(
         SwipeSession(
             user_id=spotify.user_id,
-            playlist_id=source.id,
-            snapshot_id=source.snapshot_id,
-            total_tracks=source.tracks.total,
+            playlist_id=source_playlist.id,
+            snapshot_id=source_playlist.snapshot_id,
+            total_tracks=source_playlist.tracks.total,
             tracks_swiped=form.tracks_swiped,
             tracks_cut=len(form.uris),
-        ),
+        )
     )
-
-    return SwipesResponse(backup_playlist=backup)
