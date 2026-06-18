@@ -1,9 +1,9 @@
-from services.spotify.models import LIKED_SONGS_ID
 import pytest
 from fastapi import status
 from aiohttp import ClientSession
 from tests.conftest import BASE_URL, TEST_PLAYLIST_NAME, TEST_PLAYLIST_MIN_TRACKS
 
+LIKED_SONGS_ID = "liked-songs"
 FAKE_URI = "spotify:track:4iV5W9uYEdYUVa79Axb7Rh"
 FAKE_URI_2 = "spotify:track:1301WleyT98MSxVHPZCA6M"
 
@@ -24,6 +24,13 @@ def first_playlist_id(playlists: list) -> str:
     return playlists[0]["id"]
 
 
+@pytest.fixture(params=["first_playlist_id", LIKED_SONGS_ID])
+async def playlist_id(request, first_playlist_id):
+    if request.param == "first_playlist_id":
+        return first_playlist_id
+    return request.param
+
+
 @pytest.fixture()
 def testing_playlist_id(playlists: list) -> str:
     playlist = next((p for p in playlists if p["name"] == TEST_PLAYLIST_NAME), None)
@@ -32,13 +39,13 @@ def testing_playlist_id(playlists: list) -> str:
     return playlist["id"]
 
 
-async def get_playlist_items(session: ClientSession, playlist_id: str) -> list:
-    async with session.get(f"/playlists/{playlist_id}/items") as response:
+async def get_playlist_tracks(session: ClientSession, playlist_id: str) -> list:
+    async with session.get(f"/playlists/{playlist_id}/tracks") as response:
         assert response.status == status.HTTP_200_OK
         page = await response.json()
         assert isinstance(page, dict)
-        assert isinstance(page.get("items"), list)
-    return page["items"]
+        assert isinstance(page.get("tracks"), list)
+    return page["tracks"]
 
 
 async def test_get_playlists(session: ClientSession):
@@ -47,10 +54,7 @@ async def test_get_playlists(session: ClientSession):
         assert isinstance(await response.json(), list)
 
 
-@pytest.mark.parametrize("playlist_id", ["first_playlist_id", LIKED_SONGS_ID])
-async def test_get_playlist(session: ClientSession, request, playlist_id: str):
-    if playlist_id == "first_playlist_id":
-        playlist_id = request.getfixturevalue("first_playlist_id")
+async def test_get_playlist(session: ClientSession, playlist_id: str):
     async with session.get(f"/playlists/{playlist_id}") as response:
         assert response.status == status.HTTP_200_OK
         playlist = await response.json()
@@ -58,17 +62,13 @@ async def test_get_playlist(session: ClientSession, request, playlist_id: str):
         assert playlist["id"] == playlist_id
 
 
-@pytest.mark.parametrize("playlist_id", ["first_playlist_id", LIKED_SONGS_ID])
-async def test_get_playlist_items(session: ClientSession, request, playlist_id: str):
-    if playlist_id == "first_playlist_id":
-        playlist_id = request.getfixturevalue("first_playlist_id")
-    await get_playlist_items(session, playlist_id)
+async def test_get_playlist_tracks(session: ClientSession, playlist_id: str):
+    await get_playlist_tracks(session, playlist_id)
 
 
 async def test_submit_swipes(session: ClientSession, testing_playlist_id: str):
-    items = await get_playlist_items(session, testing_playlist_id)
-
-    track_uris = [item["track"]["uri"] for item in items][:TEST_PLAYLIST_MIN_TRACKS]
+    tracks = await get_playlist_tracks(session, testing_playlist_id)
+    track_uris = [track["uri"] for track in tracks][:TEST_PLAYLIST_MIN_TRACKS]
     if len(track_uris) < TEST_PLAYLIST_MIN_TRACKS:
         pytest.skip(f"Test playlist needs at least {TEST_PLAYLIST_MIN_TRACKS} tracks")
 
@@ -96,16 +96,16 @@ async def test_get_playlist_not_found(session: ClientSession):
         assert response.status == status.HTTP_404_NOT_FOUND
 
 
-async def test_get_playlist_items_invalid_id(session: ClientSession):
-    async with session.get("/playlists/not-a-valid-id/items") as response:
+async def test_get_playlist_tracks_invalid_id(session: ClientSession):
+    async with session.get("/playlists/not-a-valid-id/tracks") as response:
         assert response.status == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
-async def test_get_playlist_items_negative_offset(
+async def test_get_playlist_tracks_negative_offset(
     session: ClientSession, first_playlist_id: str
 ):
     async with session.get(
-        f"/playlists/{first_playlist_id}/items", params={"offset": -1}
+        f"/playlists/{first_playlist_id}/tracks", params={"offset": -1}
     ) as response:
         assert response.status == status.HTTP_422_UNPROCESSABLE_CONTENT
 
