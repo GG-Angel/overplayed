@@ -2,7 +2,7 @@ import asyncio
 from services.spotify.utils import build_liked_songs_playlist
 from asyncio import Task, Future
 from core.exceptions import NotFoundException
-from typing import List, AsyncIterator
+from typing import List
 from services.spotify.client import SpotifyClient
 from services.spotify.cache import SpotifyCache
 from services.spotify.models import (
@@ -67,19 +67,53 @@ class SpotifyService:
         if playlist.tracks.total == 0:
             return self._build_playlist_page([], offset, limit)
 
-        cached = await self.cache.get_playlist_tracks(
-            self.user_id, playlist_id, playlist.snapshot_id, offset, limit
-        )
-        if cached is not None:
+        if (
+            cached := await self.cache.get_playlist_tracks(
+                self.user_id, playlist_id, playlist.snapshot_id, offset, limit
+            )
+        ) is not None:
             return self._build_playlist_page(cached, offset, limit)
 
         page: List[Track] = []
-        page_ready = asyncio.Future()
-        task = asyncio.create_task(
-            self._get_and_cache_playlist_tracks(
-                playlist, offset, limit, page, page_ready
-            )
-        )
+        page_ready: Future[None] = asyncio.Future()
+
+        async def fetch_and_cache() -> None:
+            if playlist.id == LIKED_SONGS_ID:
+                tracks = self.spotify.get_saved_tracks()
+            else:
+                tracks = self.spotify.get_playlist_tracks(playlist.id)
+
+            try:
+                batch: List[Track] = []
+                current_offset = 0
+                async for track in tracks:
+                    batch.append(track)
+                    if offset <= current_offset < offset + limit:
+                        page.append(track)
+                    current_offset += 1
+
+                    if len(page) == limit and not page_ready.done():
+                        page_ready.set_result(None)
+
+                    if len(batch) >= self.spotify.playlist_tracks_limit:
+                        await self.cache.push_playlist_tracks(
+                            self.user_id, playlist.id, playlist.snapshot_id, batch
+                        )
+                        batch = []
+
+                if batch:
+                    await self.cache.push_playlist_tracks(
+                        self.user_id, playlist.id, playlist.snapshot_id, batch
+                    )
+                if not page_ready.done():
+                    page_ready.set_result(None)
+            except Exception as e:
+                if not page_ready.done():
+                    page_ready.set_exception(e)
+                else:
+                    raise
+
+        task = asyncio.create_task(fetch_and_cache())
         self.background_tasks.add(task)
         task.add_done_callback(self.background_tasks.discard)
 
@@ -117,46 +151,3 @@ class SpotifyService:
             has_more=has_more,
             next_offset=offset + len(tracks) if has_more else None,
         )
-
-    async def _get_and_cache_playlist_tracks(
-        self,
-        playlist: Playlist,
-        offset: int,
-        limit: int,
-        page: List[Track],
-        page_ready: Future[None],
-    ) -> None:
-        def get_tracks(playlist_id: str) -> AsyncIterator[Track]:
-            if playlist_id == LIKED_SONGS_ID:
-                return self.spotify.get_saved_tracks()
-            return self.spotify.get_playlist_tracks(playlist_id)
-
-        try:
-            batch: List[Track] = []
-            fetch_offset = 0
-            async for item in get_tracks(playlist.id):
-                batch.append(item)
-                if offset <= fetch_offset < offset + limit:
-                    page.append(item)
-                fetch_offset += 1
-
-                if len(page) == limit and not page_ready.done():
-                    page_ready.set_result(None)
-
-                if len(batch) >= self.spotify.playlist_tracks_limit:
-                    await self.cache.push_playlist_tracks(
-                        self.user_id, playlist.id, playlist.snapshot_id, batch
-                    )
-                    batch = []
-
-            if batch:
-                await self.cache.push_playlist_tracks(
-                    self.user_id, playlist.id, playlist.snapshot_id, batch
-                )
-            if not page_ready.done():
-                page_ready.set_result(None)
-        except Exception as e:
-            if not page_ready.done():
-                page_ready.set_exception(e)
-            else:
-                raise
