@@ -43,7 +43,7 @@ class SpotifyClient:
         """Gets all playlists saved by a user."""
         self._log("Getting user playlists")
         playlists = []
-        async for playlist in self._get_paginated_playlists():
+        async for playlist in self._get_paginated_user_playlists():
             playlists.append(playlist)
         self._log(f"Got {len(playlists)} playlists")
         return playlists
@@ -120,7 +120,7 @@ class SpotifyClient:
         self._log(f"Created playlist {playlist.id}")
         return playlist
 
-    async def _get_paginated_playlists(self) -> AsyncGenerator[Playlist]:
+    async def _get_paginated_user_playlists(self) -> AsyncGenerator[Playlist]:
         async for playlist in self._paginate(
             self.spotify.current_user_playlists,
             limit=self.playlist_limit,
