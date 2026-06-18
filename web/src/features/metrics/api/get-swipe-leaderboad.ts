@@ -1,10 +1,10 @@
 import api from "@/lib/api-client";
 import { queryKeys } from "@/lib/query";
-import { swipeLeaderboardSchema } from "@/lib/types";
+import { leaderboardSchema } from "@/lib/types";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 
 const getSwipeLeaderboard = async () => {
-  return swipeLeaderboardSchema.parse(await api.get("/users/leaderboard"));
+  return leaderboardSchema.parse(await api.get("/users/leaderboard"));
 };
 
 const getSwipeLeaderboardQueryOptions = () => {

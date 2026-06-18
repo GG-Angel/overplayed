@@ -76,28 +76,26 @@ export const trackPreviewSchema = z.object({
   expires_at: z.number().int().nonnegative().nullable(),
 });
 
-const swipeMetricsSchema = z.object({
+const metricsSchema = z.object({
   total_swipes: z.number().int().nonnegative(),
   total_cuts: z.number().int().nonnegative(),
   cut_rate: z.number().nonnegative(),
 });
 
-const userResponseSchema = z.object({
-  id: z.string(),
-  display_name: z.string().nullable(),
-  spotify_url: z.string(),
-  picture_url: z.string().nullable(),
-});
-
-export const globalSwipeMetricsSchema = swipeMetricsSchema.extend({
+export const globalMetricsSchema = metricsSchema.extend({
   total_sessions: z.number().int().nonnegative(),
   total_users: z.number().int().nonnegative(),
 });
 
-export const swipeLeaderboardSchema = z.array(
+export const leaderboardSchema = z.array(
   z.object({
-    user: userResponseSchema,
-    metrics: swipeMetricsSchema,
+    user: z.object({
+      id: z.string(),
+      display_name: z.string().nullable(),
+      spotify_url: z.string(),
+      picture_url: z.string().nullable(),
+    }),
+    metrics: metricsSchema,
   })
 );
 
@@ -105,13 +103,13 @@ export const swipesFormOptionsSchema = z.object({
   backup_enabled: z.boolean(),
 });
 
-export const swipesFormSchema = z.object({
+export const swipeSubmissionFormSchema = z.object({
   uris: z.array(z.string()),
   tracks_swiped: z.number().int().nonnegative(),
   options: swipesFormOptionsSchema,
 });
 
-export const swipesResponseSchema = z.object({
+export const swipeSubmissionResponseSchema = z.object({
   backup_playlist: playlistSchema.nullable(),
 });
 
@@ -121,11 +119,10 @@ export type CurrentUser = z.infer<typeof currentUserSchema>;
 export type Artist = z.infer<typeof artistSchema>;
 export type Album = z.infer<typeof albumSchema>;
 export type Track = z.infer<typeof trackSchema>;
+export type TrackPreview = z.infer<typeof trackPreviewSchema>;
 export type Playlist = z.infer<typeof playlistSchema>;
 export type PlaylistPage = z.infer<typeof playlistPageSchema>;
-export type TrackPreview = z.infer<typeof trackPreviewSchema>;
-export type GlobalSwipeMetrics = z.infer<typeof globalSwipeMetricsSchema>;
-export type SwipesFormOptions = z.infer<typeof swipesFormOptionsSchema>;
-export type SwipesForm = z.infer<typeof swipesFormSchema>;
-export type SwipesResponse = z.infer<typeof swipesResponseSchema>;
-export type SwipeLeaderboard = z.infer<typeof swipeLeaderboardSchema>;
+export type SwipeSubmissionForm = z.infer<typeof swipeSubmissionFormSchema>;
+export type SwipeSubmissionResponse = z.infer<typeof swipeSubmissionResponseSchema>;
+export type Metrics = z.infer<typeof globalMetricsSchema>;
+export type Leaderboard = z.infer<typeof leaderboardSchema>;

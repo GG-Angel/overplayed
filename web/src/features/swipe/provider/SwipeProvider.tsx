@@ -1,12 +1,12 @@
 import { useMemo, useState } from "react";
-import type { SwipesFormOptions, Track } from "@/lib/types";
+import type { SwipeSubmissionForm, Track } from "@/lib/types";
 import useSwipes from "../hooks/useSwipes";
 import { SwipeContext } from "./SwipeContext";
 import { Outlet, useParams } from "react-router-dom";
 import ErrorState from "@/components/states/ErrorState";
-import { usePlaylistMetadata } from "@/features/playlist/api/get-playlist-metadata";
+import { usePlaylist } from "@/features/playlist/api/get-playlist";
 import LoadingState from "@/components/states/LoadingState";
-import { usePrefetchedPlaylistItems } from "@/features/playlist/api/get-playlist-items";
+import { usePlaylistTracks } from "@/features/playlist/api/get-playlist-tracks";
 
 const SwipeProvider = () => {
   const { playlistId } = useParams();
@@ -14,46 +14,35 @@ const SwipeProvider = () => {
   return <SwipeProviderInner playlistId={playlistId} />;
 };
 
-const initialOptions: SwipesFormOptions = { backup_enabled: true };
+const initialOptions: SwipeSubmissionForm["options"] = { backup_enabled: true };
 
 const SwipeProviderInner = ({ playlistId }: { playlistId: string }) => {
-  const [options, setOptions] = useState<SwipesFormOptions>(initialOptions);
+  const [options, setOptions] = useState<SwipeSubmissionForm["options"]>(initialOptions);
   const session = useSwipes<Track>();
 
-  const playlist = usePlaylistMetadata(playlistId);
-  const playlistItems = usePrefetchedPlaylistItems(playlistId, session.swipes.length);
-  const playlistTracks = useMemo(
-    () => playlistItems.data?.pages.flatMap((p) => p.items.map((i) => i.track)) ?? [],
-    [playlistItems.data?.pages]
-  );
+  const playlist = usePlaylist(playlistId);
+  const tracks = usePlaylistTracks(playlistId, session.swipes.length);
 
   const contextValue = useMemo(() => {
-    if (!playlist.isSuccess || !playlistItems.isSuccess) return null;
+    if (!playlist.isSuccess || !tracks.isSuccess) return null;
     return {
       session,
       options,
       setOptions,
       playlist: {
-        pagination: playlistItems.data.pages[playlistItems.data.pages.length - 1].metadata,
         metadata: playlist.data,
-        tracks: playlistTracks,
+        tracks: tracks.data.pages.flatMap((p) => p.tracks),
       },
     };
-  }, [
-    session,
-    options,
-    playlist.isSuccess,
-    playlist.data,
-    playlistItems.isSuccess,
-    playlistItems.data,
-    playlistTracks,
-  ]);
+  }, [session, options, playlist.isSuccess, playlist.data, tracks.isSuccess, tracks.data]);
 
-  if (playlist.isError || playlistItems.isError)
+  if (playlist.isError || tracks.isError) {
     return <ErrorState message="Failed to Load Playlist" />;
+  }
 
-  if (!playlist.isSuccess || !playlistItems.isSuccess)
+  if (!playlist.isSuccess || !tracks.isSuccess) {
     return <LoadingState message={`Loading ${!playlist.isSuccess ? "playlist" : "tracks"}...`} />;
+  }
 
   return (
     <SwipeContext.Provider value={contextValue}>

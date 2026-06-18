@@ -1,6 +1,6 @@
-import type { PlaylistMetadata } from "@/lib/types";
+import type { Playlist } from "@/lib/types";
 
 export type PlaylistDisplayProps = {
-  playlist: PlaylistMetadata;
+  playlist: Playlist;
   onClick?: (playlistId: string) => void;
 };
