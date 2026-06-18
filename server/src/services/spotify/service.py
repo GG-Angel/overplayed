@@ -77,7 +77,7 @@ class SpotifyService:
         # TODO: raise not ready error here if a task is running for getting the playlist tracks!
         # option a) identify task by playlist and session id in api, may not scale to multiple instances
         # option b) store task info in redis to scale
-        # option c) lock?
+        # option c) lock? it has to be resistant to multiple instances hitting this exact spot at the same time! (at time of append)
 
         page: List[Track] = []
         page_ready: Future[None] = asyncio.Future()
