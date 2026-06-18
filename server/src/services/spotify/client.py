@@ -51,6 +51,7 @@ class SpotifyClient:
         return playlists
 
     async def get_saved_tracks_total(self) -> int:
+        """Gets the user's total saved tracks."""
         response = await self._run(self.spotify.current_user_saved_tracks, limit=1)
         return response["total"]
 

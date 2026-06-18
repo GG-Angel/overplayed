@@ -25,10 +25,6 @@ class ExternalUrls(BaseModel):
     spotify: str
 
 
-class ExternalIds(BaseModel):
-    isrc: str
-
-
 class Resource(BaseModel):
     id: str
     uri: str
@@ -50,12 +46,10 @@ class CurrentUser(User):
     images: List[Image]
 
 
-# TODO: flatten into Playlist
-class PlaylistSize(BaseModel):
-    total: int
-
-
 class Playlist(Resource):
+    class Tracks(BaseModel):
+        total: int
+
     collaborative: bool
     description: Optional[str]
     images: Optional[List[Image]]
@@ -63,7 +57,7 @@ class Playlist(Resource):
     owner: User
     public: bool
     snapshot_id: str
-    tracks: PlaylistSize
+    tracks: Tracks
     external_urls: ExternalUrls
 
 
@@ -83,6 +77,9 @@ class Album(Resource):
 
 
 class Track(Resource):
+    class ExternalIds(BaseModel):
+        isrc: str
+
     explicit: bool
     album: Album
     artists: List[Artist]

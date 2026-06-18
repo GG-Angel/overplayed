@@ -4,10 +4,9 @@ from pydantic import BaseModel
 from services.spotify.models import (
     CurrentUser,
     Playlist,
-    LIKED_SONGS_ID,
     User,
-    PlaylistSize,
     ExternalUrls,
+    LIKED_SONGS_ID,
 )
 
 
@@ -47,7 +46,7 @@ def build_liked_songs_playlist(user: CurrentUser, total: int) -> Playlist:
         name="Liked Songs",
         description=None,
         owner=User.model_validate(user.model_dump()),
-        tracks=PlaylistSize(total=total),
+        tracks=Playlist.Tracks(total=total),
         external_urls=ExternalUrls(
             spotify="https://open.spotify.com/collection/tracks"
         ),
