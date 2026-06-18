@@ -4,11 +4,7 @@ export const externalUrlsSchema = z.object({
   spotify: z.url(),
 });
 
-export const externalIdsSchema = z.object({
-  isrc: z.string(),
-});
-
-export const resourceRefSchema = z.object({
+export const resourceSchema = z.object({
   id: z.string(),
   uri: z.string(),
 });
@@ -19,7 +15,7 @@ export const imageSchema = z.object({
   height: z.number().int().nullable(),
 });
 
-export const userSchema = resourceRefSchema.extend({
+export const userSchema = resourceSchema.extend({
   display_name: z.string().nullable(),
   external_urls: externalUrlsSchema,
 });
@@ -29,12 +25,12 @@ export const currentUserSchema = userSchema.extend({
   images: z.array(imageSchema),
 });
 
-export const artistSchema = resourceRefSchema.extend({
+export const artistSchema = resourceSchema.extend({
   name: z.string(),
   external_urls: externalUrlsSchema,
 });
 
-export const albumSchema = resourceRefSchema.extend({
+export const albumSchema = resourceSchema.extend({
   name: z.string(),
   album_type: z.enum(["album", "single", "compilation"]),
   images: z.array(imageSchema),
@@ -44,7 +40,7 @@ export const albumSchema = resourceRefSchema.extend({
   external_urls: externalUrlsSchema,
 });
 
-export const trackSchema = resourceRefSchema.extend({
+export const trackSchema = resourceSchema.extend({
   name: z.string(),
   explicit: z.boolean(),
   is_local: z.boolean(),
@@ -52,14 +48,10 @@ export const trackSchema = resourceRefSchema.extend({
   album: albumSchema,
   artists: z.array(artistSchema),
   external_urls: externalUrlsSchema,
-  external_ids: externalIdsSchema,
+  external_ids: z.object({ isrc: z.string() }),
 });
 
-export const playlistTrackCountSchema = z.object({
-  total: z.number().int().nonnegative(),
-});
-
-export const playlistMetadataSchema = resourceRefSchema.extend({
+export const playlistSchema = resourceSchema.extend({
   name: z.string(),
   description: z.string().nullable(),
   collaborative: z.boolean(),
@@ -67,23 +59,14 @@ export const playlistMetadataSchema = resourceRefSchema.extend({
   snapshot_id: z.string(),
   owner: userSchema,
   images: z.array(imageSchema).nullable(),
-  tracks: playlistTrackCountSchema,
+  tracks: z.object({ total: z.number().int().nonnegative() }),
   external_urls: externalUrlsSchema,
 });
 
-export const playlistItemSchema = z.object({
-  added_at: z.iso.datetime(),
-  track: trackSchema,
-});
-
-export const playlistPageMetadataSchema = z.object({
+export const playlistPageSchema = z.object({
   has_more: z.boolean(),
   next_offset: z.number().int().nonnegative().nullable(),
-});
-
-export const playlistPageSchema = z.object({
-  metadata: playlistPageMetadataSchema,
-  items: z.array(playlistItemSchema),
+  tracks: z.array(trackSchema),
 });
 
 export const trackPreviewSchema = z.object({
@@ -129,7 +112,7 @@ export const swipesFormSchema = z.object({
 });
 
 export const swipesResponseSchema = z.object({
-  backup_playlist: playlistMetadataSchema.nullable(),
+  backup_playlist: playlistSchema.nullable(),
 });
 
 export type Image = z.infer<typeof imageSchema>;
@@ -138,10 +121,7 @@ export type CurrentUser = z.infer<typeof currentUserSchema>;
 export type Artist = z.infer<typeof artistSchema>;
 export type Album = z.infer<typeof albumSchema>;
 export type Track = z.infer<typeof trackSchema>;
-export type PlaylistMetadata = z.infer<typeof playlistMetadataSchema>;
-export type PlaylistTrackCount = z.infer<typeof playlistTrackCountSchema>;
-export type PlaylistItem = z.infer<typeof playlistItemSchema>;
-export type PlaylistPageMetadata = z.infer<typeof playlistPageMetadataSchema>;
+export type Playlist = z.infer<typeof playlistSchema>;
 export type PlaylistPage = z.infer<typeof playlistPageSchema>;
 export type TrackPreview = z.infer<typeof trackPreviewSchema>;
 export type GlobalSwipeMetrics = z.infer<typeof globalSwipeMetricsSchema>;

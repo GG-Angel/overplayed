@@ -12,3 +12,11 @@
 
 - Add a page to show the user's history and personal stats.
 - Pile in the background on completion of deleted tracks.
+
+## Queue System Breakthrough Oh My Goodness
+
+- Block duplicate emails from the queue or for already existing users (unique).
+- To check if a user actually exists, hit Spotify's signup endpoint with their email. Will receive a 400 if already exists: { already_exists: {} }
+  - POST https://spclient.wg.spotify.com/signup/public/v2/account/validate
+  - Get "signupServiceAppKey":"a1e486e2729f46d6bb368d6b2bcda326" from page source of signup page.
+  - If we get "invalid_argument" back, refresh the app key.
