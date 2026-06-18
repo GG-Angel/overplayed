@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+export const LIKED_SONGS_ID = "liked-songs";
+
 export const externalUrlsSchema = z.object({
   spotify: z.url(),
 });

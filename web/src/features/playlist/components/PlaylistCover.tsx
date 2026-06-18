@@ -1,9 +1,7 @@
-import { extractImageUrl } from "@/lib/utils";
-import type { PlaylistDisplayProps } from "./props";
+import { extractPlaylistCoverUrl, type PlaylistDisplayProps } from "./utils";
 
 const PlaylistCover = ({ playlist, onClick }: PlaylistDisplayProps) => {
-  const coverUrl = extractImageUrl(playlist.images ?? [], "lg");
-
+  const coverUrl = extractPlaylistCoverUrl(playlist);
   return (
     <button
       onClick={() => onClick?.(playlist.id)}

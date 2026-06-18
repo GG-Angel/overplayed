@@ -74,6 +74,11 @@ class SpotifyService:
         ) is not None:
             return self._build_playlist_page(cached, offset, limit)
 
+        # TODO: raise not ready error here if a task is running for getting the playlist tracks!
+        # option a) identify task by playlist and session id in api, may not scale to multiple instances
+        # option b) store task info in redis to scale
+        # option c) lock?
+
         page: List[Track] = []
         page_ready: Future[None] = asyncio.Future()
 

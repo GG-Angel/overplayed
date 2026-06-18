@@ -11,7 +11,7 @@ class Settings(BaseSettings):
 
     spotify_client_id: str = Field(...)
     spotify_client_secret: str = Field(...)
-    spotify_scope: str = "playlist-read-private playlist-modify-private playlist-modify-public user-library-read user-read-email"
+    spotify_scope: str = "user-read-email user-library-read user-library-modify playlist-read-private playlist-modify-private playlist-modify-public"
 
     database_user: str = Field(...)
     database_password: str = Field(...)

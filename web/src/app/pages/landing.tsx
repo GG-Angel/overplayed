@@ -12,7 +12,7 @@ import { useGlobalSwipeMetrics } from "@/features/metrics/api/get-swipe-metrics"
 import useSwipeCarousel from "@/features/swipe/hooks/useSwipeCarousel";
 import carouselTracks from "@/assets/carousel-tracks.json";
 import z from "zod";
-import { trackSchema } from "@/lib/types";
+import { LIKED_SONGS_ID, trackSchema } from "@/lib/types";
 import { useUserPlaylists } from "@/features/playlist/api/get-playlists";
 import { useSwipeLeaderboard } from "@/features/metrics/api/get-swipe-leaderboad";
 import { Scissors } from "lucide-react";
@@ -193,9 +193,9 @@ const LandingPage = () => {
       {playlists &&
         metrics &&
         (() => {
-          const mostTracksPlaylist = playlists.reduce((prev, curr) =>
-            curr.tracks.total > prev.tracks.total ? curr : prev
-          );
+          const mostTracksPlaylist = playlists
+            .filter((p) => p.id !== LIKED_SONGS_ID)
+            .reduce((prev, curr) => (curr.tracks.total > prev.tracks.total ? curr : prev));
           const estimatedSkips = Math.round(mostTracksPlaylist.tracks.total * metrics.cut_rate);
           return (
             <>
