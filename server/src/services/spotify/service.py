@@ -76,7 +76,7 @@ class SpotifyService:
         page: List[Track] = []
         page_ready = asyncio.Future()
         task = asyncio.create_task(
-            self._fetch_and_cache_playlist_tracks(
+            self._get_and_cache_playlist_tracks(
                 playlist, offset, limit, page, page_ready
             )
         )
@@ -95,8 +95,11 @@ class SpotifyService:
         await self.spotify.add_playlist_tracks(playlist_id, uris)
         await self._invalidate_playlists()
 
-    async def delete_playlist_tracks(self, playlist_id: str, uris: List[str]) -> None:
-        await self.spotify.remove_playlist_tracks(playlist_id, uris)
+    async def remove_playlist_tracks(self, playlist_id: str, uris: List[str]) -> None:
+        if playlist_id == LIKED_SONGS_ID:
+            await self.spotify.remove_saved_tracks(uris)
+        else:
+            await self.spotify.remove_playlist_tracks(playlist_id, uris)
         await self._invalidate_playlists()
 
     async def _invalidate_playlists(self) -> None:
@@ -115,12 +118,7 @@ class SpotifyService:
             next_offset=offset + len(tracks) if has_more else None,
         )
 
-    def _get_playlist_tracks_source(self, playlist_id: str) -> AsyncIterator[Track]:
-        if playlist_id == LIKED_SONGS_ID:
-            return self.spotify.get_saved_tracks()
-        return self.spotify.get_playlist_tracks(playlist_id)
-
-    async def _fetch_and_cache_playlist_tracks(
+    async def _get_and_cache_playlist_tracks(
         self,
         playlist: Playlist,
         offset: int,
@@ -128,10 +126,15 @@ class SpotifyService:
         page: List[Track],
         page_ready: Future[None],
     ) -> None:
+        def get_tracks(playlist_id: str) -> AsyncIterator[Track]:
+            if playlist_id == LIKED_SONGS_ID:
+                return self.spotify.get_saved_tracks()
+            return self.spotify.get_playlist_tracks(playlist_id)
+
         try:
             batch: List[Track] = []
             fetch_offset = 0
-            async for item in self._get_playlist_tracks_source(playlist.id):
+            async for item in get_tracks(playlist.id):
                 batch.append(item)
                 if offset <= fetch_offset < offset + limit:
                     page.append(item)

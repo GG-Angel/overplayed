@@ -71,7 +71,7 @@ async def handle_swipes(
             f"Generated on {get_formatted_date()}",
         )
         await spotify.add_playlist_tracks(backup.id, form.uris)
-    await spotify.delete_playlist_tracks(source.id, form.uris)
+    await spotify.remove_playlist_tracks(source.id, form.uris)
 
     # record user and session
     background_tasks.add_task(
