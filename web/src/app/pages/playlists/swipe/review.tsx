@@ -15,14 +15,16 @@ const SwipeReviewPage = () => {
   const { session, options, setOptions } = useSwipeContext();
   const navigate = useNavigate();
 
-  const handleBackupToggle = useCallback(
+  const handleToggleBackup = useCallback(
     () => setOptions((prev) => ({ ...prev, backup_enabled: !prev.backup_enabled })),
     [setOptions]
   );
 
+  // TODO: provide option to remove from liked songs as well when playlist id !== "liked-songs"
+
   const navigateHome = () => navigate("/", { replace: true });
-  const navigateToSwipePage = () => navigate("..");
-  const navigateToSwipeSubmit = () => navigate("../submit");
+  const navigateToSwipe = () => navigate("..");
+  const navigateToSubmit = () => navigate("../submit");
 
   useConfetti({ enabled: session.swipes.length > 0 && session.dislikes.length === 0 });
 
@@ -37,7 +39,7 @@ const SwipeReviewPage = () => {
             <Button variant="secondary" onClick={navigateHome}>
               Return Home
             </Button>
-            <Button variant="primary" onClick={navigateToSwipePage}>
+            <Button variant="primary" onClick={navigateToSwipe}>
               Swipe Tracks
             </Button>
           </>
@@ -60,7 +62,7 @@ const SwipeReviewPage = () => {
         }
         actions={
           <>
-            <Button variant="secondary" onClick={navigateToSwipePage}>
+            <Button variant="secondary" onClick={navigateToSwipe}>
               Keep Swiping
             </Button>
             <Button variant="primary" onClick={navigateHome}>
@@ -109,13 +111,13 @@ const SwipeReviewPage = () => {
             <p className="text-sm text-destructive">Removed tracks will be lost permanently.</p>
           )}
         </div>
-        <Checkbox enabled={options.backup_enabled} onEnabledChange={handleBackupToggle} />
+        <Checkbox enabled={options.backup_enabled} onEnabledChange={handleToggleBackup} />
       </Card>
       <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:w-fit sm:self-end">
-        <Button variant="secondary" onClick={navigateToSwipePage}>
+        <Button variant="secondary" onClick={navigateToSwipe}>
           Keep Swiping
         </Button>
-        <Button variant="primary" onClick={navigateToSwipeSubmit}>
+        <Button variant="primary" onClick={navigateToSubmit}>
           Confirm Deletion
         </Button>
       </div>

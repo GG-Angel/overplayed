@@ -1,4 +1,4 @@
-import api from "@/lib/api-client";
+import api from "@/lib/api";
 import {
   swipeSubmissionResponseSchema,
   type SwipeSubmissionForm,

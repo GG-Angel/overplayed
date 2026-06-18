@@ -45,7 +45,7 @@ const SwipeSongsPage = () => {
   };
 
   if (playlist.tracks.length <= 0) {
-    return <ErrorState message="This Playlist is Empty" />;
+    return <ErrorState message="Playlist is Empty" />;
   }
 
   return (

@@ -2,11 +2,10 @@
 
 ## Needs
 
-- Add liked songs as a playlist option.
-- Use available-media option for getting playlist items to avoid manual track filtering.
-- Cache leaderboard response.
+- Add an option on review to remove tracks from liked songs playlist.
 - Add a modal warning when leaving the swipe page with unsaved changes.
 - Test website on mobile devices.
+- Cache leaderboard response.
 
 ## Nice to Haves
 

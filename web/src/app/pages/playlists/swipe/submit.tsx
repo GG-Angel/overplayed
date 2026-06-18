@@ -33,7 +33,7 @@ const SwipeSubmitPage = () => {
   const navigateHome = () => navigate("/", { replace: true });
   const navigateToSwipePage = () => navigate("..");
 
-  if (!controller.canSubmit) {
+  if (!controller.hasDislikes) {
     return (
       <MessageState
         kaomoji={kaomojis.uncertain}

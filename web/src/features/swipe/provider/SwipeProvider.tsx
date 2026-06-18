@@ -19,7 +19,6 @@ const initialOptions: SwipeSubmissionForm["options"] = { backup_enabled: true };
 const SwipeProviderInner = ({ playlistId }: { playlistId: string }) => {
   const [options, setOptions] = useState<SwipeSubmissionForm["options"]>(initialOptions);
   const session = useSwipes<Track>();
-
   const playlist = usePlaylist(playlistId);
   const tracks = usePlaylistTracks(playlistId, session.swipes.length);
 

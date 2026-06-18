@@ -1,10 +1,9 @@
-import api from "@/lib/api-client";
 import { isAxiosError } from "axios";
 import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { env } from "@/lib/env";
 import { queryKeys } from "@/lib/query";
 import { currentUserSchema } from "@/lib/types";
-import { buildURLWithParams } from "@/lib/api";
+import api, { buildURLWithQueryParams } from "@/lib/api";
 
 const getUser = async () => {
   try {
@@ -39,7 +38,7 @@ const useAuth = () => {
   });
 
   const redirectToLogin = (currentPath: string) => {
-    window.location.href = buildURLWithParams(`${env.API_BASE_URL}/auth/login`, {
+    window.location.href = buildURLWithQueryParams(`${env.API_BASE_URL}/auth/login`, {
       redirectTo: currentPath,
     });
   };

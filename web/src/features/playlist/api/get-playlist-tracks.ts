@@ -1,10 +1,8 @@
-import { buildURLWithParams } from "@/lib/api";
+import api, { buildURLWithQueryParams } from "@/lib/api";
 import { queryKeys } from "@/lib/query";
 import { playlistPageSchema, type PlaylistPage } from "@/lib/types";
 import { infiniteQueryOptions, useInfiniteQuery } from "@tanstack/react-query";
-import api from "@/lib/api-client";
 import { useEffect } from "react";
-import { TRACKS_PREFETCH_THRESHOLD } from "@/lib/constants";
 
 const getPlaylistTracks = async ({
   playlistId,
@@ -14,7 +12,7 @@ const getPlaylistTracks = async ({
   offset?: number;
 }): Promise<PlaylistPage> => {
   return playlistPageSchema.parse(
-    await api.get(buildURLWithParams(`/playlists/${playlistId}/tracks`, { offset }))
+    await api.get(buildURLWithQueryParams(`/playlists/${playlistId}/tracks`, { offset }))
   );
 };
 
@@ -32,6 +30,8 @@ const useInfinitePlaylistTracks = (playlistId: string) => {
     ...getInfinitePlaylistTracksQueryOptions(playlistId),
   });
 };
+
+const TRACKS_PREFETCH_THRESHOLD = 20;
 
 export const usePlaylistTracks = (playlistId: string, index: number) => {
   const query = useInfinitePlaylistTracks(playlistId);

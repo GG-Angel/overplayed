@@ -1,6 +1,6 @@
 import { queryOptions, useQueries, useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query";
-import api from "@/lib/api-client";
+import api from "@/lib/api";
 import { trackPreviewSchema, type TrackPreview } from "@/lib/types";
 
 const getTrackPreviewUrl = async (isrc: string): Promise<TrackPreview> => {
