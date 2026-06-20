@@ -17,8 +17,8 @@ const UserMenu = () => {
   const location = useLocation();
 
   const handleLogout = async () => {
-    await logoutMutation.mutateAsync();
     navigate("/");
+    await logoutMutation.mutateAsync();
   };
 
   if (isLoading) {
