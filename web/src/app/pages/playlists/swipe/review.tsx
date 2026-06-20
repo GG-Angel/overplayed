@@ -96,7 +96,7 @@ const SwipeReviewPage = () => {
       </div>
       <div className="flex flex-col gap-3">
         <h2>The following tracks will be removed:</h2>
-        <div className="flex flex-col gap-3 max-h-107 overflow-y-auto snap-y snap-mandatory">
+        <div className="flex flex-col gap-3 snap-y snap-mandatory *:snap-start max-h-124 overflow-y-auto">
           {session.dislikes.map((track) => (
             <TrackCard
               key={track.uri}
