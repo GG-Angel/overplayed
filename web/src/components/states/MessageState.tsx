@@ -26,7 +26,7 @@ const MessageState = ({
     <main className="flex flex-col h-full justify-center gap-4">
       <div className="text-center">
         <p className={cn("text-4xl xs:text-5xl font-bold", MESSAGE_TONES[tone])}>{kaomoji}</p>
-        <p className="heading-2 mt-2">{title}</p>
+        <p className="heading-3 mt-2">{title}</p>
         {subtitle}
       </div>
       {actions && (
