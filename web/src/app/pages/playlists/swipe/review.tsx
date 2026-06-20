@@ -109,6 +109,7 @@ const SwipeReviewPage = () => {
       </div>
       <Divider />
       <div className="flex flex-col gap-3">
+        <h3>Options</h3>
         <Card
           className="flex justify-between items-center gap-4 pr-6 py-3 cursor-pointer select-none"
           onClick={toggleBackup}
