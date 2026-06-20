@@ -6,6 +6,8 @@ export type SwipeContextValues = {
   session: ReturnType<typeof useSwipes<Track>>;
   options: SwipeSubmissionForm["options"];
   setOptions: Dispatch<SetStateAction<SwipeSubmissionForm["options"]>>;
+  hasSubmitted: boolean;
+  setHasSubmitted: Dispatch<SetStateAction<boolean>>;
   playlist: {
     metadata: Playlist;
     tracks: Track[];

@@ -24,11 +24,14 @@ const initialOptions: SwipeSubmissionForm["options"] = {
 
 const SwipeProviderInner = ({ playlistId }: { playlistId: string }) => {
   const [options, setOptions] = useState<SwipeSubmissionForm["options"]>(initialOptions);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
   const session = useSwipes<Track>();
   const playlist = usePlaylist(playlistId);
   const tracks = usePlaylistTracks(playlistId, session.swipes.length);
-
-  const blocker = useNavBlocker(session.swipes.length > 0, `/playlists/${playlistId}/swipe`);
+  const blocker = useNavBlocker(
+    session.swipes.length > 0 && !hasSubmitted,
+    `/playlists/${playlistId}/swipe`
+  );
 
   const contextValue = useMemo(() => {
     if (!playlist.isSuccess || !tracks.isSuccess) return null;
@@ -36,12 +39,22 @@ const SwipeProviderInner = ({ playlistId }: { playlistId: string }) => {
       session,
       options,
       setOptions,
+      hasSubmitted,
+      setHasSubmitted,
       playlist: {
         metadata: playlist.data,
         tracks: tracks.data.pages.flatMap((p) => p.tracks),
       },
     };
-  }, [session, options, playlist.isSuccess, playlist.data, tracks.isSuccess, tracks.data]);
+  }, [
+    session,
+    options,
+    hasSubmitted,
+    playlist.isSuccess,
+    playlist.data,
+    tracks.isSuccess,
+    tracks.data,
+  ]);
 
   if (playlist.isError || tracks.isError) {
     return <ErrorState message="Failed to Load Playlist" />;

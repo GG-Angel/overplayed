@@ -10,25 +10,32 @@ import { useEffect, useEffectEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const SwipeSubmitPage = () => {
-  const { playlist, session } = useSwipeContext();
-  const controller = useSubmitSwipes();
   const navigate = useNavigate();
+  const { playlist, session, setHasSubmitted } = useSwipeContext();
+  const controller = useSubmitSwipes();
   const [dislikePercentage] = useState(() =>
     playlist.metadata.tracks.total > 0
       ? Math.round((session.dislikes.length / playlist.metadata.tracks.total) * 100)
       : 0
   );
 
+  // submit on page load
   const initialSubmit = useEffectEvent(() => {
-    controller.start(); // submit on page load
+    controller.start();
   });
-
   useEffect(() => {
     initialSubmit();
   }, []);
 
   // show confetti on success
   useConfetti({ enabled: controller.mutation.isSuccess });
+
+  // prevent leave modal on successful completion
+  useEffect(() => {
+    if (controller.mutation.isSuccess) {
+      setHasSubmitted(true);
+    }
+  });
 
   const navigateHome = () => navigate("/", { replace: true });
   const navigateToSwipePage = () => navigate("..");
