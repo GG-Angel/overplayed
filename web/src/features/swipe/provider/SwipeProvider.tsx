@@ -7,6 +7,9 @@ import ErrorState from "@/components/states/ErrorState";
 import { usePlaylist } from "@/features/playlist/api/get-playlist";
 import LoadingState from "@/components/states/LoadingState";
 import { usePlaylistTracks } from "@/features/playlist/api/get-playlist-tracks";
+import useNavBlocker from "@/hooks/useNavBlocker";
+import Modal from "@/components/ui/Modal";
+import Button from "@/components/ui/Button";
 
 const SwipeProvider = () => {
   const { playlistId } = useParams();
@@ -24,6 +27,8 @@ const SwipeProviderInner = ({ playlistId }: { playlistId: string }) => {
   const session = useSwipes<Track>();
   const playlist = usePlaylist(playlistId);
   const tracks = usePlaylistTracks(playlistId, session.swipes.length);
+
+  const blocker = useNavBlocker(session.swipes.length > 0, `/playlists/${playlistId}/swipe`);
 
   const contextValue = useMemo(() => {
     if (!playlist.isSuccess || !tracks.isSuccess) return null;
@@ -49,6 +54,21 @@ const SwipeProviderInner = ({ playlistId }: { playlistId: string }) => {
   return (
     <SwipeContext.Provider value={contextValue}>
       <Outlet />
+      {blocker.state === "blocked" && (
+        <Modal title="Leave without saving?" onClose={() => blocker.reset()}>
+          <p className="text-muted">
+            Your swipes haven't been submitted yet. If you leave now, your progress will be lost.
+          </p>
+          <div className="flex justify-end gap-2">
+            <Button variant="secondary" onClick={() => blocker.reset()}>
+              Stay
+            </Button>
+            <Button variant="primary" onClick={() => blocker.proceed()}>
+              Leave
+            </Button>
+          </div>
+        </Modal>
+      )}
     </SwipeContext.Provider>
   );
 };
