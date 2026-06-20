@@ -57,6 +57,7 @@ async def get_spotify_service(
         cache=cache,
         user_id=session.user_id,
         background_tasks=state.background_tasks,
+        playlist_locks=state.playlist_locks,
     )
 
 

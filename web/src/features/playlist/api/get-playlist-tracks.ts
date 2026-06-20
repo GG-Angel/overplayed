@@ -22,6 +22,7 @@ const getInfinitePlaylistTracksQueryOptions = (playlistId: string) => {
     queryFn: ({ pageParam }) => getPlaylistTracks({ playlistId, offset: pageParam }),
     getNextPageParam: (lastPage) => lastPage.next_offset,
     initialPageParam: 0,
+    retry: 3,
   });
 };
 

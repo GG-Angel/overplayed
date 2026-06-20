@@ -79,21 +79,25 @@ class SpotifyService:
             (playlist.id, playlist.snapshot_id),
             Lock(),
         )
+
         if lock.locked():
             raise NotReadyException()
+        await lock.acquire()
 
-        page: List[Track] = []
-        page_ready: Future[None] = asyncio.Future()
-        task = asyncio.create_task(
-            self._fetch_and_cache_playlist_tracks(
-                playlist, offset, limit, page, page_ready, lock
+        try:
+            page: List[Track] = []
+            page_ready: Future[None] = asyncio.Future()
+            task = asyncio.create_task(
+                self._fetch_and_cache_playlist_tracks(
+                    playlist, offset, limit, page, page_ready
+                )
             )
-        )
-        self.background_tasks.add(task)
-        task.add_done_callback(self.background_tasks.discard)
-
-        await page_ready
-        return self._build_playlist_page(page, offset, limit)
+            self.background_tasks.add(task)
+            task.add_done_callback(self.background_tasks.discard)
+            await page_ready
+            return self._build_playlist_page(page, offset, limit)
+        finally:
+            lock.release()
 
     async def _fetch_and_cache_playlist_tracks(
         self,
@@ -102,43 +106,41 @@ class SpotifyService:
         limit: int,
         page: List[Track],
         page_ready: Future[None],
-        lock: Lock,
     ) -> None:
-        async with lock:
-            if playlist.id == LIKED_SONGS_ID:
-                tracks = self.spotify.get_saved_tracks()
-            else:
-                tracks = self.spotify.get_playlist_tracks(playlist.id)
+        if playlist.id == LIKED_SONGS_ID:
+            tracks = self.spotify.get_saved_tracks()
+        else:
+            tracks = self.spotify.get_playlist_tracks(playlist.id)
 
-            try:
-                batch: List[Track] = []
-                current_offset = 0
-                async for track in tracks:
-                    batch.append(track)
-                    if offset <= current_offset < offset + limit:
-                        page.append(track)
-                    current_offset += 1
+        try:
+            batch: List[Track] = []
+            current_offset = 0
+            async for track in tracks:
+                batch.append(track)
+                if offset <= current_offset < offset + limit:
+                    page.append(track)
+                current_offset += 1
 
-                    if len(page) == limit and not page_ready.done():
-                        page_ready.set_result(None)
+                if len(page) == limit and not page_ready.done():
+                    page_ready.set_result(None)
 
-                    if len(batch) >= self.spotify.playlist_tracks_limit:
-                        await self.cache.push_playlist_tracks(
-                            self.user_id, playlist.id, playlist.snapshot_id, batch
-                        )
-                        batch = []
-
-                if batch:
+                if len(batch) >= self.spotify.playlist_tracks_limit:
                     await self.cache.push_playlist_tracks(
                         self.user_id, playlist.id, playlist.snapshot_id, batch
                     )
-                if not page_ready.done():
-                    page_ready.set_result(None)
-            except Exception as e:
-                if not page_ready.done():
-                    page_ready.set_exception(e)
-                else:
-                    raise
+                    batch = []
+
+            if batch:
+                await self.cache.push_playlist_tracks(
+                    self.user_id, playlist.id, playlist.snapshot_id, batch
+                )
+            if not page_ready.done():
+                page_ready.set_result(None)
+        except Exception as e:
+            if not page_ready.done():
+                page_ready.set_exception(e)
+            else:
+                raise
 
     async def create_playlist(self, name: str, description: str) -> Playlist:
         new_playlist = await self.spotify.create_playlist(name, description)
