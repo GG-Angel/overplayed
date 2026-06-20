@@ -1,3 +1,4 @@
+from asyncio import Task, Lock
 from fastapi import Request, Depends
 from aiohttp import ClientSession
 from spotipy import SpotifyOAuth
@@ -22,19 +23,21 @@ class State:
         self.db_engine = db_engine
         self.db_sessionmaker = db_sessionmaker
         self.redis_pool = redis_pool
+        self.background_tasks: set[Task] = set()
+        self.playlist_locks: dict[tuple[str, str], Lock] = {}
 
 
-def get_app_state(request: Request) -> State:
+def get_state(request: Request) -> State:
     return request.app.state[APP_STATE_KEY]
 
 
-def get_settings(state: State = Depends(get_app_state)) -> Settings:
+def get_settings(state: State = Depends(get_state)) -> Settings:
     return state.settings
 
 
-def get_oauth(state: State = Depends(get_app_state)) -> SpotifyOAuth:
+def get_oauth(state: State = Depends(get_state)) -> SpotifyOAuth:
     return state.oauth
 
 
-def get_session(state: State = Depends(get_app_state)) -> ClientSession:
+def get_session(state: State = Depends(get_state)) -> ClientSession:
     return state.session

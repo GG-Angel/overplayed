@@ -10,9 +10,10 @@ from services.spotify.utils import get_formatted_date
 from services.spotify.models import (
     Playlist,
     PlaylistPage,
-    SpotifyIdPattern,
     SwipesForm,
     SwipesResponse,
+    PlaylistIdRegex,
+    LIKED_SONGS_ID,
 )
 
 router = APIRouter()
@@ -31,21 +32,21 @@ async def handle_get_user_playlists(
 @limiter.limit("60/minute")
 async def handle_get_user_playlist(
     request: Request,
-    playlist_id: Annotated[str, Path(pattern=SpotifyIdPattern)],
+    playlist_id: Annotated[str, Path(pattern=PlaylistIdRegex)],
     spotify: SpotifyService = Depends(get_spotify_service),
 ) -> Playlist:
     return await spotify.get_playlist(playlist_id)
 
 
-@router.get("/{playlist_id}/items")
+@router.get("/{playlist_id}/tracks")
 @limiter.limit("30/minute")
-async def handle_get_playlist_items(
+async def handle_get_playlist_tracks(
     request: Request,
-    playlist_id: Annotated[str, Path(pattern=SpotifyIdPattern)],
+    playlist_id: Annotated[str, Path(pattern=PlaylistIdRegex)],
     offset: int = Query(0, ge=0),
     spotify: SpotifyService = Depends(get_spotify_service),
 ) -> PlaylistPage:
-    return await spotify.get_playlist_items(playlist_id, offset=offset)
+    return await spotify.get_playlist_tracks(playlist_id, offset=offset)
 
 
 @router.post("/{playlist_id}/swipes")
@@ -53,14 +54,12 @@ async def handle_get_playlist_items(
 async def handle_swipes(
     request: Request,
     background_tasks: BackgroundTasks,
-    playlist_id: Annotated[str, Path(pattern=SpotifyIdPattern)],
+    playlist_id: Annotated[str, Path(pattern=PlaylistIdRegex)],
     form: SwipesForm,
     spotify: SpotifyService = Depends(get_spotify_service),
     db: DatabaseService = Depends(get_database_service),
 ) -> SwipesResponse:
-    user = await spotify.get_current_user()
     source = await spotify.get_playlist(playlist_id)
-
     if not (len(form.uris) <= form.tracks_swiped <= source.tracks.total):
         raise BadRequestException()
 
@@ -70,29 +69,38 @@ async def handle_swipes(
             f"Overplayed / {source.name}",
             f"Generated on {get_formatted_date()}",
         )
-        await spotify.add_playlist_items(backup.id, form.uris)
-    await spotify.delete_playlist_items(source.id, form.uris)
+        await spotify.add_playlist_tracks(backup.id, form.uris)
 
-    # record user and session
-    background_tasks.add_task(
-        db.upsert_user,
+    await spotify.remove_playlist_tracks(source.id, form.uris)
+    if form.options.remove_from_likes and playlist_id != LIKED_SONGS_ID:
+        await spotify.remove_playlist_tracks(LIKED_SONGS_ID, form.uris)
+
+    background_tasks.add_task(record_swipes, spotify, db, source, form)
+    return SwipesResponse(backup_playlist=backup)
+
+
+async def record_swipes(
+    spotify: SpotifyService,
+    db: DatabaseService,
+    source_playlist: Playlist,
+    form: SwipesForm,
+) -> None:
+    user = await spotify.get_current_user()
+    await db.upsert_user(
         User(
             id=user.id,
             display_name=user.display_name,
             spotify_url=user.external_urls.spotify,
             picture_url=user.images[-1].url if user.images else None,
-        ),
+        )
     )
-    background_tasks.add_task(
-        db.record_swipe_session,
+    await db.record_swipe_session(
         SwipeSession(
             user_id=spotify.user_id,
-            playlist_id=source.id,
-            snapshot_id=source.snapshot_id,
-            total_tracks=source.tracks.total,
+            playlist_id=source_playlist.id,
+            snapshot_id=source_playlist.snapshot_id,
+            total_tracks=source_playlist.tracks.total,
             tracks_swiped=form.tracks_swiped,
             tracks_cut=len(form.uris),
-        ),
+        )
     )
-
-    return SwipesResponse(backup_playlist=backup)

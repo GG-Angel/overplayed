@@ -1,6 +1,13 @@
 from datetime import datetime
 from typing import get_args, get_origin
 from pydantic import BaseModel
+from services.spotify.models import (
+    CurrentUser,
+    Playlist,
+    User,
+    ExternalUrls,
+    LIKED_SONGS_ID,
+)
 
 
 def spotify_fields(model: type[BaseModel], is_nested: bool = False) -> str:
@@ -26,6 +33,24 @@ def spotify_fields(model: type[BaseModel], is_nested: bool = False) -> str:
 
     fields_str = ",".join(fields)
     return f"items({fields_str})" if is_nested else fields_str
+
+
+def build_liked_songs_playlist(user: CurrentUser, total: int) -> Playlist:
+    return Playlist(
+        id=LIKED_SONGS_ID,
+        uri=LIKED_SONGS_ID,
+        snapshot_id=f"liked-{total}",
+        collaborative=False,
+        public=False,
+        images=None,
+        name="Liked Songs",
+        description=None,
+        owner=User.model_validate(user.model_dump()),
+        tracks=Playlist.Tracks(total=total),
+        external_urls=ExternalUrls(
+            spotify="https://open.spotify.com/collection/tracks"
+        ),
+    )
 
 
 def get_formatted_date() -> str:

@@ -11,7 +11,10 @@ import DropdownMenuDivider from "@/components/ui/dropdown/DropdownMenuDivider";
 import DropdownMenuSection from "@/components/ui/dropdown/DropdownMenuSection";
 import { kaomojis } from "@/lib/kaomoji";
 import PlaylistRow from "@/features/playlist/components/PlaylistRow";
-import type { PlaylistDisplayProps } from "@/features/playlist/components/props";
+import type { PlaylistDisplayProps } from "@/features/playlist/components/utils";
+import PlaylistCover from "@/features/playlist/components/PlaylistCover";
+import DropdownMenuButton from "@/components/ui/dropdown/DropdownMenuButton";
+import Input from "@/components/ui/Input";
 import {
   ArrowDown,
   ArrowUp,
@@ -22,9 +25,6 @@ import {
   Search,
   type LucideIcon,
 } from "lucide-react";
-import PlaylistCover from "@/features/playlist/components/PlaylistCover";
-import DropdownMenuButton from "@/components/ui/dropdown/DropdownMenuButton";
-import Input from "@/components/ui/Input";
 
 type PlaylistSortKey = "alphabetical" | "tracks";
 type PlaylistSortOrder = "ascending" | "descending";

@@ -8,14 +8,14 @@ const useSubmitSwipes = () => {
   const queryClient = useQueryClient();
   const { playlist, options, session } = useSwipeContext();
 
-  const tracksToRemove = useMemo(() => session.dislikes.map((t) => t.uri), [session.dislikes]);
-  const canSubmit = tracksToRemove.length > 0;
+  const dislikedTracks = useMemo(() => session.dislikes.map((t) => t.uri), [session.dislikes]);
+  const hasDislikes = dislikedTracks.length > 0;
 
   const submitMutation = useMutation({
     mutationFn: () =>
       submitSwipes(playlist.metadata.id, {
         options,
-        uris: tracksToRemove,
+        uris: dislikedTracks,
         tracks_swiped: session.swipes.length,
       }),
     onSuccess: async () => {
@@ -28,13 +28,13 @@ const useSubmitSwipes = () => {
   });
 
   const start = useCallback(() => {
-    if (!canSubmit) return;
+    if (!hasDislikes) return;
     submitMutation.mutate();
-  }, [submitMutation, canSubmit]);
+  }, [submitMutation, hasDislikes]);
 
   return {
     start,
-    canSubmit,
+    hasDislikes,
     mutation: submitMutation,
   };
 };

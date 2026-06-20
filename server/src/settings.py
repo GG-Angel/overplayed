@@ -11,7 +11,7 @@ class Settings(BaseSettings):
 
     spotify_client_id: str = Field(...)
     spotify_client_secret: str = Field(...)
-    spotify_scope: str = "playlist-read-private playlist-modify-private playlist-modify-public user-read-email"
+    spotify_scope: str = "user-read-email user-library-read user-library-modify playlist-read-private playlist-modify-private playlist-modify-public"
 
     database_user: str = Field(...)
     database_password: str = Field(...)
@@ -28,9 +28,14 @@ class Settings(BaseSettings):
     ttl_sessions: int = 60 * 60 * 24 * 14
     ttl_users: int = 60 * 60 * 2
     ttl_playlists: int = 90
-    ttl_playlist_items: int = 60 * 60
+    ttl_playlist_tracks: int = 60 * 60
     ttl_previews_hit: int = 60 * 10
     ttl_previews_miss: int = 60 * 60 * 2
+
+    playlist_limit: int = 50
+    playlist_tracks_limit: int = 100
+    get_saved_tracks_limit: int = 50
+    edit_saved_tracks_limit: int = 40
 
     @property
     def db_url(self) -> str:

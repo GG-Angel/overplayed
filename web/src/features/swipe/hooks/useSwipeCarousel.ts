@@ -4,7 +4,7 @@ import { type Track } from "@/lib/types";
 import { wrapSlice } from "@/lib/utils";
 
 const SWIPE_DURATION = 1750;
-const SWIPE_RIGHT_CHANCE = 0.5;
+const LIKE_CHANCE = 0.5;
 const MAX_CARD_STACK_HEIGHT = 3;
 
 const useSwipeCarousel = (tracks: Track[]) => {
@@ -18,7 +18,7 @@ const useSwipeCarousel = (tracks: Track[]) => {
     let swiperId: ReturnType<typeof setTimeout>;
 
     const swipe = () => {
-      const direction = Math.random() >= SWIPE_RIGHT_CHANCE ? "right" : "left";
+      const direction = Math.random() >= LIKE_CHANCE ? "right" : "left";
       topCardRef.current?.swipe(direction);
       swiperId = setTimeout(swipe, SWIPE_DURATION);
     };

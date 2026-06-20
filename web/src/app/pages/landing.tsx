@@ -12,21 +12,19 @@ import { useGlobalSwipeMetrics } from "@/features/metrics/api/get-swipe-metrics"
 import useSwipeCarousel from "@/features/swipe/hooks/useSwipeCarousel";
 import carouselTracks from "@/assets/carousel-tracks.json";
 import z from "zod";
-import { trackSchema } from "@/lib/types";
+import { LIKED_SONGS_ID, trackSchema } from "@/lib/types";
 import { useUserPlaylists } from "@/features/playlist/api/get-playlists";
 import { useSwipeLeaderboard } from "@/features/metrics/api/get-swipe-leaderboad";
 import { Scissors } from "lucide-react";
 
 const LandingPage = () => {
-  const auth = useAuth();
-  const location = useLocation();
   const navigate = useNavigate();
-
+  const location = useLocation();
+  const auth = useAuth();
+  const carousel = useSwipeCarousel(z.array(trackSchema).parse(carouselTracks));
   const { data: metrics } = useGlobalSwipeMetrics();
   const { data: leaderboard } = useSwipeLeaderboard();
   const { data: playlists } = useUserPlaylists({ enabled: !!auth.user });
-
-  const carousel = useSwipeCarousel(z.array(trackSchema).parse(carouselTracks));
 
   return (
     <main className="flex flex-col gap-8 w-full max-w-3xl self-center py-8">
@@ -40,7 +38,7 @@ const LandingPage = () => {
       <h2 className="text-center">
         <span className="xs:block">
           Tinder for your playlists. Swipe right to keep, left to cut.
-        </span>{" "}
+        </span>
         <span className="xs:block">Clean up years of saved songs in minutes.</span>
       </h2>
 
@@ -195,9 +193,9 @@ const LandingPage = () => {
       {playlists &&
         metrics &&
         (() => {
-          const mostTracksPlaylist = playlists.reduce((prev, curr) =>
-            curr.tracks.total > prev.tracks.total ? curr : prev
-          );
+          const mostTracksPlaylist = playlists
+            .filter((p) => p.id !== LIKED_SONGS_ID)
+            .reduce((prev, curr) => (curr.tracks.total > prev.tracks.total ? curr : prev));
           const estimatedSkips = Math.round(mostTracksPlaylist.tracks.total * metrics.cut_rate);
           return (
             <>

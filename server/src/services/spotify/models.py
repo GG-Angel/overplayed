@@ -1,9 +1,11 @@
 from typing import Optional, List, Annotated
 from pydantic import BaseModel, Field, PositiveInt
 
-_SpotifyIdInner = r"[0-9A-Za-z]{22}"
-SpotifyIdPattern = rf"^{_SpotifyIdInner}$"
-SpotifyUriPattern = rf"^spotify:track:{_SpotifyIdInner}$"
+LIKED_SONGS_ID = "liked-songs"
+SpotifyIdPattern = r"[0-9A-Za-z]{22}"
+SpotifyIdRegex = rf"^{SpotifyIdPattern}$"
+TrackUriRegex = rf"^spotify:track:{SpotifyIdPattern}$"
+PlaylistIdRegex = rf"^({LIKED_SONGS_ID}|{SpotifyIdPattern})$"
 
 
 class TokenInfo(BaseModel):
@@ -23,12 +25,7 @@ class ExternalUrls(BaseModel):
     spotify: str
 
 
-class ExternalIds(BaseModel):
-    isrc: str
-
-
 class Resource(BaseModel):
-    href: str
     id: str
     uri: str
 
@@ -49,11 +46,10 @@ class CurrentUser(User):
     images: List[Image]
 
 
-class PlaylistItemCount(BaseModel):
-    total: int
-
-
 class Playlist(Resource):
+    class Tracks(BaseModel):
+        total: int
+
     collaborative: bool
     description: Optional[str]
     images: Optional[List[Image]]
@@ -61,7 +57,7 @@ class Playlist(Resource):
     owner: User
     public: bool
     snapshot_id: str
-    tracks: PlaylistItemCount
+    tracks: Tracks
     external_urls: ExternalUrls
 
 
@@ -81,6 +77,9 @@ class Album(Resource):
 
 
 class Track(Resource):
+    class ExternalIds(BaseModel):
+        isrc: str
+
     explicit: bool
     album: Album
     artists: List[Artist]
@@ -91,31 +90,20 @@ class Track(Resource):
     external_ids: ExternalIds
 
 
-class PlaylistItem(BaseModel):
-    added_at: str
-    added_by: Resource
-    is_local: bool
-    track: Track
-
-
-class PlaylistPageMetadata(BaseModel):
-    total_items: int
+class PlaylistPage(BaseModel):
     has_more: bool
     next_offset: int | None
-
-
-class PlaylistPage(BaseModel):
-    metadata: PlaylistPageMetadata
-    items: List[PlaylistItem]
+    tracks: List[Track]
 
 
 class SwipesFormOptions(BaseModel):
     backup_enabled: bool
+    remove_from_likes: bool
 
 
 class SwipesForm(BaseModel):
     options: SwipesFormOptions
-    uris: List[Annotated[str, Field(pattern=SpotifyUriPattern)]] = Field(min_length=1)
+    uris: List[Annotated[str, Field(pattern=TrackUriRegex)]] = Field(min_length=1)
     tracks_swiped: PositiveInt
 
 

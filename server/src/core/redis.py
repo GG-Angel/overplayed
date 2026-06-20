@@ -2,7 +2,7 @@ from settings import Settings
 from typing import AsyncGenerator
 from fastapi import Depends
 from redis.asyncio import ConnectionPool, Redis
-from state import get_app_state, State
+from state import get_state, State
 
 
 def build_redis_pool(settings: Settings) -> ConnectionPool:
@@ -11,7 +11,7 @@ def build_redis_pool(settings: Settings) -> ConnectionPool:
     )
 
 
-async def get_redis(state: State = Depends(get_app_state)) -> AsyncGenerator[Redis]:
+async def get_redis(state: State = Depends(get_state)) -> AsyncGenerator[Redis]:
     redis = Redis(connection_pool=state.redis_pool)
     try:
         yield redis

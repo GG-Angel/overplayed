@@ -1,10 +1,8 @@
-import { extractImageUrl } from "@/lib/utils";
 import { ArrowUpRight } from "lucide-react";
-import type { PlaylistDisplayProps } from "./props";
+import { extractPlaylistCoverUrl, type PlaylistDisplayProps } from "./utils";
 
 const PlaylistCard = ({ playlist, onClick }: PlaylistDisplayProps) => {
-  const coverUrl = extractImageUrl(playlist.images ?? [], "lg");
-
+  const coverUrl = extractPlaylistCoverUrl(playlist);
   return (
     <button
       onClick={() => onClick?.(playlist.id)}

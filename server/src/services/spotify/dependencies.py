@@ -6,7 +6,7 @@ from spotipy import SpotifyOAuth, Spotify
 from time import time
 from fastapi import Depends, Cookie
 from cache.client import RedisClient, get_redis_client
-from state import get_oauth, get_settings
+from state import get_oauth, get_settings, State, get_state
 from services.spotify.models import SessionInfo, TokenInfo
 from services.spotify.cache import SpotifyCache
 from services.spotify.service import SpotifyService
@@ -26,14 +26,16 @@ def get_spotify_cache(
         ttl_sessions=settings.ttl_sessions,
         ttl_users=settings.ttl_users,
         ttl_playlists=settings.ttl_playlists,
-        ttl_playlist_items=settings.ttl_playlist_items,
+        ttl_playlist_tracks=settings.ttl_playlist_tracks,
     )
 
 
 async def get_spotify_service(
     session_id: Optional[str] = Cookie(default=None),
+    state: State = Depends(get_state),
     oauth: SpotifyOAuth = Depends(get_oauth),
     cache: SpotifyCache = Depends(get_spotify_cache),
+    settings: Settings = Depends(get_settings),
 ) -> SpotifyService:
     if not session_id or not (session := await cache.get_session(session_id)):
         raise UnauthorizedException()
@@ -47,9 +49,15 @@ async def get_spotify_service(
         spotify=SpotifyClient(
             spotify=Spotify(auth=session.access_token),
             user_id=session.user_id,
+            playlist_limit=settings.playlist_limit,
+            playlist_tracks_limit=settings.playlist_tracks_limit,
+            get_saved_tracks_limit=settings.get_saved_tracks_limit,
+            edit_saved_tracks_limit=settings.edit_saved_tracks_limit,
         ),
         cache=cache,
         user_id=session.user_id,
+        background_tasks=state.background_tasks,
+        playlist_locks=state.playlist_locks,
     )
 
 
