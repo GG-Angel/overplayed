@@ -28,7 +28,7 @@ const SwipeProviderInner = ({ playlistId }: { playlistId: string }) => {
   const session = useSwipes<Track>();
   const playlist = usePlaylist(playlistId);
   const tracks = usePlaylistTracks(playlistId, session.swipes.length);
-  const blocker = useNavBlocker(
+  const leaveBlocker = useNavBlocker(
     session.swipes.length > 0 && !hasSubmitted,
     `/playlists/${playlistId}/swipe`
   );
@@ -67,17 +67,20 @@ const SwipeProviderInner = ({ playlistId }: { playlistId: string }) => {
   return (
     <SwipeContext.Provider value={contextValue}>
       <Outlet />
-      {blocker.state === "blocked" && (
-        <Modal title="Leave without saving?" onClose={() => blocker.reset()}>
-          <p className="text-muted">
-            Your swipes haven't been submitted yet. If you leave now, your progress will be lost.
-          </p>
-          <div className="flex justify-end gap-2">
-            <Button variant="secondary" onClick={() => blocker.reset()}>
-              Stay
-            </Button>
-            <Button variant="primary" onClick={() => blocker.proceed()}>
+      {leaveBlocker.state === "blocked" && (
+        <Modal onClose={() => leaveBlocker.reset()} className="flex flex-col gap-6">
+          <div className="flex flex-col gap-2">
+            <h2>Leave without saving?</h2>
+            <p className="text-muted">
+              Your swipes haven't been submitted yet. If you leave now, your progress will be lost.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 lg:w-1/2 lg:self-end gap-2">
+            <Button variant="secondary" onClick={() => leaveBlocker.proceed()}>
               Leave
+            </Button>
+            <Button variant="primary" onClick={() => leaveBlocker.reset()}>
+              Stay
             </Button>
           </div>
         </Modal>
