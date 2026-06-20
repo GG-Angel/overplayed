@@ -16,6 +16,7 @@ import { LIKED_SONGS_ID, trackSchema } from "@/lib/types";
 import { useUserPlaylists } from "@/features/playlist/api/get-playlists";
 import { useSwipeLeaderboard } from "@/features/metrics/api/get-swipe-leaderboad";
 import { Scissors } from "lucide-react";
+import Modal from "@/components/ui/Modal";
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -214,6 +215,9 @@ const LandingPage = () => {
             </>
           );
         })()}
+
+      {/*  TODO: remove atfer done */}
+      <Modal title="Are you sure?">nuts</Modal>
     </main>
   );
 };
