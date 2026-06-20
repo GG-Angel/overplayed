@@ -15,7 +15,7 @@ const Modal = ({ title, onClose, children }: ModalProps) => {
   const ref = useClickOutside<HTMLDivElement>(onClose);
   return (
     <div className="flex items-center justify-center fixed top-0 left-0 size-full z-1000 backdrop-blur-md bg-background/75">
-      <Card ref={ref} className="flex flex-col gap-2 w-5/6 max-w-3xl py-3">
+      <Card ref={ref} className="flex flex-col gap-3 w-5/6 max-w-3xl py-3">
         <div className="flex items-center justify-between gap-4">
           <h2>{title}</h2>
           <IconButton icon={X} onClick={onClose} size="xs" />
