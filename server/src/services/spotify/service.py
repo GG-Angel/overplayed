@@ -1,7 +1,7 @@
 import asyncio
 from services.spotify.utils import build_liked_songs_playlist
-from asyncio import Task, Future
-from core.exceptions import NotFoundException
+from asyncio import Task, Future, Lock
+from core.exceptions import NotFoundException, NotReadyException
 from typing import List
 from services.spotify.client import SpotifyClient
 from services.spotify.cache import SpotifyCache
@@ -21,11 +21,13 @@ class SpotifyService:
         cache: SpotifyCache,
         user_id: str,
         background_tasks: set[Task],
+        playlist_locks: dict[tuple[str, str], Lock],
     ):
         self.spotify = spotify
         self.cache = cache
         self.user_id = user_id
         self.background_tasks = background_tasks
+        self.playlist_locks = playlist_locks
 
     async def get_current_user(self) -> CurrentUser:
         if cached := await self.cache.get_user(self.user_id):
@@ -67,22 +69,42 @@ class SpotifyService:
         if playlist.tracks.total == 0:
             return self._build_playlist_page([], offset, limit)
 
-        if (
-            cached := await self.cache.get_playlist_tracks(
-                self.user_id, playlist_id, playlist.snapshot_id, offset, limit
-            )
-        ) is not None:
+        cached = await self.cache.get_playlist_tracks(
+            self.user_id, playlist_id, playlist.snapshot_id, offset, limit
+        )
+        if cached is not None:
             return self._build_playlist_page(cached, offset, limit)
 
-        # TODO: raise not ready error here if a task is running for getting the playlist tracks!
-        # option a) identify task by playlist and session id in api, may not scale to multiple instances
-        # option b) store task info in redis to scale
-        # option c) lock? it has to be resistant to multiple instances hitting this exact spot at the same time! (at time of append)
+        lock = self.playlist_locks.setdefault(
+            (playlist.id, playlist.snapshot_id),
+            Lock(),
+        )
+        if lock.locked():
+            raise NotReadyException()
 
         page: List[Track] = []
         page_ready: Future[None] = asyncio.Future()
+        task = asyncio.create_task(
+            self._fetch_and_cache_playlist_tracks(
+                playlist, offset, limit, page, page_ready, lock
+            )
+        )
+        self.background_tasks.add(task)
+        task.add_done_callback(self.background_tasks.discard)
 
-        async def fetch_and_cache() -> None:
+        await page_ready
+        return self._build_playlist_page(page, offset, limit)
+
+    async def _fetch_and_cache_playlist_tracks(
+        self,
+        playlist: Playlist,
+        offset: int,
+        limit: int,
+        page: List[Track],
+        page_ready: Future[None],
+        lock: Lock,
+    ) -> None:
+        async with lock:
             if playlist.id == LIKED_SONGS_ID:
                 tracks = self.spotify.get_saved_tracks()
             else:
@@ -117,13 +139,6 @@ class SpotifyService:
                     page_ready.set_exception(e)
                 else:
                     raise
-
-        task = asyncio.create_task(fetch_and_cache())
-        self.background_tasks.add(task)
-        task.add_done_callback(self.background_tasks.discard)
-
-        await page_ready
-        return self._build_playlist_page(page, offset, limit)
 
     async def create_playlist(self, name: str, description: str) -> Playlist:
         new_playlist = await self.spotify.create_playlist(name, description)
