@@ -98,6 +98,7 @@ class PlaylistPage(BaseModel):
 
 class SwipesFormOptions(BaseModel):
     backup_enabled: bool
+    remove_from_likes: bool
 
 
 class SwipesForm(BaseModel):

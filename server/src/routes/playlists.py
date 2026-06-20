@@ -13,6 +13,7 @@ from services.spotify.models import (
     SwipesForm,
     SwipesResponse,
     PlaylistIdRegex,
+    LIKED_SONGS_ID,
 )
 
 router = APIRouter()
@@ -69,7 +70,10 @@ async def handle_swipes(
             f"Generated on {get_formatted_date()}",
         )
         await spotify.add_playlist_tracks(backup.id, form.uris)
+
     await spotify.remove_playlist_tracks(source.id, form.uris)
+    if form.options.remove_from_likes and playlist_id != LIKED_SONGS_ID:
+        await spotify.remove_playlist_tracks(LIKED_SONGS_ID, form.uris)
 
     background_tasks.add_task(record_swipes, spotify, db, source, form)
     return SwipesResponse(backup_playlist=backup)
