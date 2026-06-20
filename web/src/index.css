@@ -67,6 +67,9 @@
     @apply text-3xl sm:text-4xl md:text-5xl tracking-tighter font-bold;
   }
   h2 {
+    @apply text-xl md:text-2xl tracking-tighter font-semibold;
+  }
+  h3 {
     @apply text-base sm:text-lg tracking-tight font-medium;
   }
 }
@@ -76,6 +79,9 @@
     @apply text-5xl tracking-tighter font-bold;
   }
   .heading-2 {
+    @apply text-xl tracking-tight font-semibold;
+  }
+  .heading-3 {
     @apply text-lg tracking-tight font-medium;
   }
 }

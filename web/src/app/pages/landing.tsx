@@ -35,12 +35,12 @@ const LandingPage = () => {
         </span>
       </h1>
 
-      <h2 className="text-center">
+      <h3 className="text-center">
         <span className="xs:block">
           Tinder for your playlists. Swipe right to keep, left to cut.
         </span>
         <span className="xs:block">Clean up years of saved songs in minutes.</span>
-      </h2>
+      </h3>
 
       <Button
         className="self-center"
@@ -68,7 +68,7 @@ const LandingPage = () => {
       </Card>
 
       <div className="flex flex-col gap-3">
-        <h2 className="text-center">Three steps toward a cleaner playlist</h2>
+        <h3 className="text-center">Three steps toward a cleaner playlist</h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {[
             {
@@ -99,7 +99,7 @@ const LandingPage = () => {
 
       {metrics && (
         <div className="flex flex-col gap-3">
-          <h2 className="text-center">Global statistics</h2>
+          <h3 className="text-center">Global statistics</h3>
           {(() => {
             const metricsSummary = [
               { label: "Songs swiped", amount: formatCount(metrics.total_swipes) },
@@ -124,7 +124,7 @@ const LandingPage = () => {
 
       {leaderboard && (
         <div className="flex flex-col overflow-auto">
-          <h2 className="text-center">Top users</h2>
+          <h3 className="text-center">Top users</h3>
 
           {leaderboard.length > 0 ? (
             <>
