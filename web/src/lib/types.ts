@@ -103,6 +103,7 @@ export const leaderboardSchema = z.array(
 
 export const swipesFormOptionsSchema = z.object({
   backup_enabled: z.boolean(),
+  remove_from_likes: z.boolean(),
 });
 
 export const swipeSubmissionFormSchema = z.object({

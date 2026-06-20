@@ -14,7 +14,10 @@ const SwipeProvider = () => {
   return <SwipeProviderInner playlistId={playlistId} />;
 };
 
-const initialOptions: SwipeSubmissionForm["options"] = { backup_enabled: true };
+const initialOptions: SwipeSubmissionForm["options"] = {
+  backup_enabled: true,
+  remove_from_likes: false,
+};
 
 const SwipeProviderInner = ({ playlistId }: { playlistId: string }) => {
   const [options, setOptions] = useState<SwipeSubmissionForm["options"]>(initialOptions);

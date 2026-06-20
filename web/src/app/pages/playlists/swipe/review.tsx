@@ -2,25 +2,30 @@ import MessageState from "@/components/states/MessageState";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Checkbox from "@/components/ui/Checkbox";
+import Divider from "@/components/ui/Divider";
 import Metric from "@/components/ui/Metric";
 import TrackCard from "@/features/playlist/components/TrackCard";
 import { useSwipeContext } from "@/features/swipe/provider/SwipeContext";
 import useConfetti from "@/hooks/useConfetti";
 import { kaomojis } from "@/lib/kaomoji";
+import { LIKED_SONGS_ID } from "@/lib/types";
 import { formatCount, pluralize } from "@/lib/utils";
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 const SwipeReviewPage = () => {
-  const { session, options, setOptions } = useSwipeContext();
+  const { playlist, session, options, setOptions } = useSwipeContext();
   const navigate = useNavigate();
 
-  const handleToggleBackup = useCallback(
+  const toggleBackup = useCallback(
     () => setOptions((prev) => ({ ...prev, backup_enabled: !prev.backup_enabled })),
     [setOptions]
   );
 
-  // TODO: provide option to remove from liked songs as well when playlist id !== "liked-songs"
+  const toggleRemoveFromLikes = useCallback(
+    () => setOptions((prev) => ({ ...prev, remove_from_likes: !prev.remove_from_likes })),
+    [setOptions]
+  );
 
   const navigateHome = () => navigate("/", { replace: true });
   const navigateToSwipe = () => navigate("..");
@@ -102,17 +107,43 @@ const SwipeReviewPage = () => {
           ))}
         </div>
       </div>
-      <Card className="flex justify-between items-center gap-4 pr-6 py-3">
-        <div>
-          <p>Back up removed tracks?</p>
-          {options.backup_enabled ? (
-            <p className="text-sm text-muted">Saves removed tracks to a new playlist.</p>
-          ) : (
-            <p className="text-sm text-destructive">Removed tracks will be lost permanently.</p>
-          )}
-        </div>
-        <Checkbox enabled={options.backup_enabled} onEnabledChange={handleToggleBackup} />
-      </Card>
+      <Divider />
+      <div className="flex flex-col gap-3">
+        <Card
+          className="flex justify-between items-center gap-4 pr-6 py-3 cursor-pointer select-none"
+          onClick={toggleBackup}
+        >
+          <div>
+            <p>Back up removed tracks?</p>
+            {options.backup_enabled ? (
+              <p className="text-sm text-muted">Saves removed tracks to a new playlist.</p>
+            ) : (
+              <p className="text-sm text-destructive">Removed tracks will be lost permanently.</p>
+            )}
+          </div>
+          <Checkbox enabled={options.backup_enabled} onEnabledChange={undefined} />
+        </Card>
+        {playlist.metadata.id !== LIKED_SONGS_ID && (
+          <Card
+            className="flex justify-between items-center gap-4 pr-6 py-3 cursor-pointer select-none"
+            onClick={toggleRemoveFromLikes}
+          >
+            <div>
+              <p>Remove from liked songs?</p>
+              {options.remove_from_likes ? (
+                <p className="text-sm text-destructive">
+                  Tracks will also be removed from liked songs.
+                </p>
+              ) : (
+                <p className="text-sm text-muted">
+                  Tracks will only be removed from the current playlist.
+                </p>
+              )}
+            </div>
+            <Checkbox enabled={options.remove_from_likes} onEnabledChange={undefined} />
+          </Card>
+        )}
+      </div>
       <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:w-fit sm:self-end">
         <Button variant="secondary" onClick={navigateToSwipe}>
           Keep Swiping
