@@ -9,6 +9,7 @@ export const queryConfig = {
 
 export const queryKeys = {
   user: ["user"] as const,
+  userStats: () => [...queryKeys.user, "stats"] as const,
   metrics: ["metrics"] as const,
   leaderboard: ["leaderboard"] as const,
   preview: (isrc: string) => ["preview", isrc] as const,

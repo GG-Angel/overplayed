@@ -1,10 +1,11 @@
 import LoadingState from "@/components/states/LoadingState";
 import Card from "@/components/ui/Card";
+import Metric from "@/components/ui/Metric";
 import useAuth from "@/features/user/auth/useAuth";
 import { extractImageUrl } from "@/lib/utils";
 
 const StatisticsPage = () => {
-  const { user, isLoading } = useAuth();
+  const { user } = useAuth();
   const profilePictureUrl = extractImageUrl(user?.images ?? [], "lg");
 
   if (!user) {
@@ -24,6 +25,12 @@ const StatisticsPage = () => {
           <p className="text-muted text-sm">Joined on uhhh</p>
         </div>
       </Card>
+      <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
+        <Metric label="Total Swipes" amount={0} />
+        <Metric label="Total Swipes" amount={0} />
+        <Metric label="Total Swipes" amount={0} />
+        <Metric label="Total Swipes" amount={0} />
+      </div>
     </main>
   );
 };

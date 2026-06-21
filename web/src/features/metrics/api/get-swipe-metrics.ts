@@ -7,6 +7,10 @@ const getGlobalSwipeMetrics = async () => {
   return globalMetricsSchema.parse(await api.get(`/metrics`));
 };
 
+const getUserSwipeMetrics = async () => {
+  return globalMetricsSchema.parse(await api.get(`/metrics/me`));
+};
+
 const getGlobalSwipeMetricQueryOptions = () => {
   return queryOptions({
     queryKey: queryKeys.metrics,
@@ -15,6 +19,18 @@ const getGlobalSwipeMetricQueryOptions = () => {
   });
 };
 
+const getUserSwipeMetricQueryOptions = () => {
+  return queryOptions({
+    queryKey: queryKeys.userStats(),
+    queryFn: getUserSwipeMetrics,
+    staleTime: 2 * 60 * 1000,
+  });
+};
+
 export const useGlobalSwipeMetrics = () => {
   return useQuery(getGlobalSwipeMetricQueryOptions());
+};
+
+export const useUserSwipeMetrics = () => {
+  return useQuery(getUserSwipeMetricQueryOptions());
 };
