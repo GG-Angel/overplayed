@@ -13,6 +13,7 @@ import SwipeSongsPage from "./pages/playlists/swipe/songs";
 import SwipeProvider from "@/features/swipe/provider/SwipeProvider";
 import SwipeReviewPage from "./pages/playlists/swipe/review";
 import SwipeSubmitPage from "./pages/playlists/swipe/submit";
+import StatisticsPage from "./pages/statistics";
 
 const NotFound = <Route path="*" element={<ErrorState message="Page Not Found" />} />;
 
@@ -20,6 +21,9 @@ const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" Component={PageLayout} errorElement={<ErrorState />}>
       <Route index Component={LandingPage} />
+      <Route path="statistics" Component={ProtectedRoute}>
+        <Route index Component={StatisticsPage} />
+      </Route>
       <Route path="playlists" Component={ProtectedRoute}>
         <Route index Component={SelectionPage} />
         <Route path=":playlistId">

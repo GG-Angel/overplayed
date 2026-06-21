@@ -1,4 +1,4 @@
-from database.service import DatabaseService, get_database_service, SwipeLeaderboardRow
+from database.service import DatabaseService, get_database_service, LeaderboardRow
 from services.spotify.models import CurrentUser
 from services.spotify.dependencies import get_spotify_service
 from services.spotify.service import SpotifyService
@@ -23,5 +23,5 @@ async def handle_get_current_user(
 async def handle_get_swipe_leaderboard(
     request: Request,
     db: DatabaseService = Depends(get_database_service),
-) -> list[SwipeLeaderboardRow]:
+) -> list[LeaderboardRow]:
     return await db.get_swipe_leaderboard()

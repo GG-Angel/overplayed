@@ -2,14 +2,15 @@
 
 ## Needs
 
-- Add a modal warning when leaving the swipe page with unsaved changes.
+- Add traefik.
+- User statistics.
 - Test website on mobile devices.
-- Cache leaderboard response.
 
 ## Nice to Haves
 
 - Add a page to show the user's history and personal stats.
 - Pile in the background on completion of deleted tracks.
+- Cache leaderboard response.
 
 ## Queue System Breakthrough Oh My Goodness
 

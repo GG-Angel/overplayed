@@ -168,7 +168,7 @@ async def test_submit_swipes_more_uris_than_swiped(
     async with session.post(
         f"/playlists/{first_playlist_id}/swipes",
         json={
-            "options": {"backup_enabled": False},
+            "options": {"backup_enabled": False, "remove_from_likes": False},
             "uris": [FAKE_URI, FAKE_URI_2],
             "tracks_swiped": 1,
         },
@@ -182,7 +182,7 @@ async def test_submit_swipes_exceeds_playlist_total(
     async with session.post(
         f"/playlists/{first_playlist_id}/swipes",
         json={
-            "options": {"backup_enabled": False},
+            "options": {"backup_enabled": False, "remove_from_likes": False},
             "uris": [FAKE_URI],
             "tracks_swiped": 1_000_000_000,
         },
