@@ -1,14 +1,15 @@
 import LoadingState from "@/components/states/LoadingState";
 import Card from "@/components/ui/Card";
 import Metric from "@/components/ui/Metric";
+import { useUserSwipeMetrics } from "@/features/metrics/api/get-swipe-metrics";
 import useAuth from "@/features/user/auth/useAuth";
-import { extractImageUrl } from "@/lib/utils";
+import { extractImageUrl, formatCount, formatPercentage } from "@/lib/utils";
 
 const StatisticsPage = () => {
   const { user } = useAuth();
-  const profilePictureUrl = extractImageUrl(user?.images ?? [], "lg");
+  const { data: metrics } = useUserSwipeMetrics();
 
-  if (!user) {
+  if (!user || !metrics) {
     return <LoadingState message="Loading statistics..." />;
   }
 
@@ -17,19 +18,28 @@ const StatisticsPage = () => {
       <h1 className="text-center">Your Statistics</h1>
       <Card tone="muted" className="flex items-center gap-3">
         <img
-          src={profilePictureUrl}
+          src={extractImageUrl(user?.images ?? [], "lg")}
           className="shrink-0 aspect-square object-cover rounded-full size-16"
         />
-        <div className="text-left grow truncate *:truncate">
-          <h2>{user.display_name ?? user.email}</h2>
-          <p className="text-muted text-sm">Joined on uhhh</p>
+        <div className="truncate *:truncate">
+          <h2>{user.display_name ?? "Unknown"}</h2>
+          <p className="text-muted text-sm">{user.email}</p>
         </div>
       </Card>
-      <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
-        <Metric label="Total Swipes" amount={0} />
-        <Metric label="Total Swipes" amount={0} />
-        <Metric label="Total Swipes" amount={0} />
-        <Metric label="Total Swipes" amount={0} />
+      <div className="flex flex-col gap-3">
+        <Metric label="Total Swipes" amount={formatCount(metrics.num_swipes)} />
+        <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
+          <Metric label="Total Dislikes" tone="negative" amount={formatCount(metrics.num_cuts)} />
+          <Metric label="Total Likes" tone="positive" amount={formatCount(metrics.num_kept)} />
+        </div>
+        <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
+          <Metric label="Cut Rate" tone="muted" amount={formatPercentage(metrics.cut_rate)} />
+          <Metric
+            label="Playlists Cleaned"
+            tone="muted"
+            amount={formatCount(metrics.num_modified)}
+          />
+        </div>
       </div>
     </main>
   );

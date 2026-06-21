@@ -78,15 +78,20 @@ export const trackPreviewSchema = z.object({
   expires_at: z.number().int().nonnegative().nullable(),
 });
 
-const metricsSchema = z.object({
-  total_swipes: z.number().int().nonnegative(),
-  total_cuts: z.number().int().nonnegative(),
+export const userMetricsSchema = z.object({
+  num_swipes: z.number().int().nonnegative(),
+  num_modified: z.number().int().nonnegative(),
+  num_cuts: z.number().int().nonnegative(),
+  num_kept: z.number().int().nonnegative(),
   cut_rate: z.number().nonnegative(),
 });
 
-export const globalMetricsSchema = metricsSchema.extend({
+export const globalMetricsSchema = z.object({
   total_sessions: z.number().int().nonnegative(),
   total_users: z.number().int().nonnegative(),
+  total_swipes: z.number().int().nonnegative(),
+  total_cuts: z.number().int().nonnegative(),
+  cut_rate: z.number().nonnegative(),
 });
 
 export const leaderboardSchema = z.array(
@@ -97,7 +102,11 @@ export const leaderboardSchema = z.array(
       spotify_url: z.string(),
       picture_url: z.string().nullable(),
     }),
-    metrics: metricsSchema,
+    metrics: {
+      total_swipes: z.number().int().nonnegative(),
+      total_cuts: z.number().int().nonnegative(),
+      cut_rate: z.number().nonnegative(),
+    },
   })
 );
 
