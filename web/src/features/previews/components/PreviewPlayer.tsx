@@ -1,10 +1,12 @@
-import { useCallback, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useRef, useState } from "react";
 import { Pause, Play, Volume1, Volume2, VolumeOff, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Card from "@/components/ui/Card";
 import IconButton from "@/components/ui/IconButton";
-import Waveform, { type WaveformHandler } from "./Waveform";
 import WaveformSkeleton from "./WaveformSkeleton";
+import type { WaveformHandler } from "./Waveform";
+
+const Waveform = lazy(() => import("./Waveform"));
 
 type PreviewPlayerProps = {
   url: string | null | undefined;
@@ -24,8 +26,22 @@ const AudioPlayer = ({ url, className }: PreviewPlayerProps) => {
   const [isReady, setIsReady] = useState(false);
   const [volumeIndex, setVolumeIndex] = useState(0);
   const waveformRef = useRef<WaveformHandler>(null);
-
   const showWaveform = isReady && (isPlaying || url);
+
+  const handlePlay = useCallback(() => {
+    setIsReady(true);
+    setIsPlaying(true);
+  }, []);
+
+  const handlePause = useCallback(() => setIsPlaying(false), []);
+
+  const cycleVolume = useCallback(() => {
+    setVolumeIndex((i) => {
+      const next = (i + 1) % VOLUME_STEPS.length;
+      waveformRef.current?.setVolume(VOLUME_STEPS[next].value);
+      return next;
+    });
+  }, []);
 
   return (
     <Card padding="sm" className={cn("flex items-center gap-3 py-2", className)}>
@@ -37,27 +53,18 @@ const AudioPlayer = ({ url, className }: PreviewPlayerProps) => {
         onClick={() => waveformRef.current?.playPause()}
       />
       <div className="relative flex-1 self-stretch">
-        <Waveform
-          url={url}
-          waveformRef={waveformRef}
-          onPlay={useCallback(() => {
-            setIsReady(true);
-            setIsPlaying(true);
-          }, [])}
-          onPause={useCallback(() => setIsPlaying(false), [])}
-          className={cn("absolute inset-0 min-w-1", !showWaveform && "invisible")}
-        />
-        {!showWaveform && <WaveformSkeleton className="absolute inset-0 z-10" />}
+        <Suspense fallback={<WaveformSkeleton className="absolute inset-0 z-10" />}>
+          <Waveform
+            url={url}
+            waveformRef={waveformRef}
+            onPlay={handlePlay}
+            onPause={handlePause}
+            className={cn("absolute inset-0 min-w-1", !showWaveform && "invisible")}
+          />
+          {!showWaveform && <WaveformSkeleton className="absolute inset-0 z-10" />}
+        </Suspense>
       </div>
-      <IconButton
-        size="xs"
-        icon={VOLUME_STEPS[volumeIndex].icon}
-        onClick={useCallback(() => {
-          const next = (volumeIndex + 1) % VOLUME_STEPS.length;
-          setVolumeIndex(next);
-          waveformRef.current?.setVolume(VOLUME_STEPS[next].value);
-        }, [volumeIndex])}
-      />
+      <IconButton size="xs" icon={VOLUME_STEPS[volumeIndex].icon} onClick={cycleVolume} />
     </Card>
   );
 };

@@ -8,12 +8,6 @@ import ErrorState from "@/components/states/ErrorState";
 import LandingPage from "./pages/landing";
 import PageLayout from "@/components/layout/PageLayout";
 import { ProtectedRoute } from "@/features/user/auth/ProtectedRoute";
-import SelectionPage from "./pages/playlists/selection";
-import SwipeSongsPage from "./pages/playlists/swipe/songs";
-import SwipeProvider from "@/features/swipe/provider/SwipeProvider";
-import SwipeReviewPage from "./pages/playlists/swipe/review";
-import SwipeSubmitPage from "./pages/playlists/swipe/submit";
-import StatisticsPage from "./pages/statistics";
 
 const NotFound = <Route path="*" element={<ErrorState message="Page Not Found" />} />;
 
@@ -22,15 +16,41 @@ const router = createBrowserRouter(
     <Route path="/" Component={PageLayout} errorElement={<ErrorState />}>
       <Route index Component={LandingPage} />
       <Route path="statistics" Component={ProtectedRoute}>
-        <Route index Component={StatisticsPage} />
+        <Route
+          index
+          lazy={async () => ({ Component: (await import("./pages/statistics")).default })}
+        />
       </Route>
       <Route path="playlists" Component={ProtectedRoute}>
-        <Route index Component={SelectionPage} />
+        <Route
+          index
+          lazy={async () => ({ Component: (await import("./pages/playlists/selection")).default })}
+        />
         <Route path=":playlistId">
-          <Route path="swipe" Component={SwipeProvider}>
-            <Route index Component={SwipeSongsPage} />
-            <Route path="review" Component={SwipeReviewPage} />
-            <Route path="submit" Component={SwipeSubmitPage} />
+          <Route
+            path="swipe"
+            lazy={async () => ({
+              Component: (await import("@/features/swipe/provider/SwipeProvider")).default,
+            })}
+          >
+            <Route
+              index
+              lazy={async () => ({
+                Component: (await import("./pages/playlists/swipe/songs")).default,
+              })}
+            />
+            <Route
+              path="review"
+              lazy={async () => ({
+                Component: (await import("./pages/playlists/swipe/review")).default,
+              })}
+            />
+            <Route
+              path="submit"
+              lazy={async () => ({
+                Component: (await import("./pages/playlists/swipe/submit")).default,
+              })}
+            />
           </Route>
         </Route>
       </Route>
