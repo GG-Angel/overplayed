@@ -2,13 +2,10 @@
 
 ## Needs
 
-- Add traefik.
-- User statistics.
 - Test website on mobile devices.
 
 ## Nice to Haves
 
-- Add a page to show the user's history and personal stats.
 - Pile in the background on completion of deleted tracks.
 - Cache leaderboard response.
 

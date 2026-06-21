@@ -79,18 +79,13 @@ class DatabaseService:
             cut_rate=round(total_cuts / total_swipes, 2) if total_swipes else 0.0,
         )
 
-    async def get_user_swipe_metrics(
-        self, user_id: str, since: timedelta = timedelta(days=30)
-    ) -> UserSwipeMetrics:
+    async def get_user_swipe_metrics(self, user_id: str) -> UserSwipeMetrics:
         result = await self.db.execute(
             select(
                 func.coalesce(func.sum(SwipeSession.tracks_swiped), 0),
                 func.coalesce(func.sum(SwipeSession.tracks_cut), 0),
                 func.count(distinct(SwipeSession.playlist_id)),
-            ).where(
-                SwipeSession.user_id == user_id,
-                SwipeSession.created_at >= datetime.now(timezone.utc) - since,
-            )
+            ).where(SwipeSession.user_id == user_id)
         )
         num_swipes, num_cuts, num_modified = result.one()
         return UserSwipeMetrics(
