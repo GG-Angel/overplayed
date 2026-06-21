@@ -3,13 +3,11 @@ services:
     image: redis:alpine
     restart: unless-stopped
     command: redis-server --requirepass ${REDIS_PASSWORD}
-    container_name: overplayed-redis
     volumes:
       - redis-data:/data
   overplayed-db:
     image: postgres:alpine
     restart: unless-stopped
-    container_name: overplayed-db
     environment:
       - POSTGRES_USER
       - POSTGRES_PASSWORD
@@ -22,7 +20,6 @@ services:
       dockerfile: Dockerfile
     env_file: server/.env
     restart: unless-stopped
-    container_name: overplayed-server
     ports:
       - 8080:8080
     depends_on:
