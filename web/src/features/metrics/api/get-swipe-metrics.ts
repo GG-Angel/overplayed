@@ -21,7 +21,7 @@ const getGlobalSwipeMetricQueryOptions = () => {
 
 const getUserSwipeMetricQueryOptions = () => {
   return queryOptions({
-    queryKey: queryKeys.userStats(),
+    queryKey: queryKeys.userMetrics(),
     queryFn: getUserSwipeMetrics,
     staleTime: 2 * 60 * 1000,
   });

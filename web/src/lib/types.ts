@@ -102,11 +102,11 @@ export const leaderboardSchema = z.array(
       spotify_url: z.string(),
       picture_url: z.string().nullable(),
     }),
-    metrics: {
+    metrics: z.object({
       total_swipes: z.number().int().nonnegative(),
       total_cuts: z.number().int().nonnegative(),
       cut_rate: z.number().nonnegative(),
-    },
+    }),
   })
 );
 
