@@ -1,12 +1,33 @@
 services:
+  overplayed-caddy:
+    image: caddy:2.11.4-alpine
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - overplayed-server
+  overplayed-server:
+    build:
+      context: server
+      dockerfile: Dockerfile
+    env_file: server/.env
+    restart: unless-stopped
+    depends_on:
+      - overplayed-redis
+      - overplayed-db
   overplayed-redis:
-    image: redis:alpine
+    image: redis:8.8.0-alpine
     restart: unless-stopped
     command: redis-server --requirepass ${REDIS_PASSWORD}
     volumes:
       - redis-data:/data
   overplayed-db:
-    image: postgres:alpine
+    image: postgres:18.4-alpine3.24
     restart: unless-stopped
     environment:
       - POSTGRES_USER
@@ -14,18 +35,9 @@ services:
       - POSTGRES_DB
     volumes:
       - postgres-data:/var/lib/postgresql
-  overplayed-server:
-    build:
-      context: server
-      dockerfile: Dockerfile
-    env_file: server/.env
-    restart: unless-stopped
-    ports:
-      - 8080:8080
-    depends_on:
-      - overplayed-redis
-      - overplayed-db
 
 volumes:
   redis-data:
   postgres-data:
+  caddy-data:
+  caddy-config:

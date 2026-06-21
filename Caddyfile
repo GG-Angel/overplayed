@@ -1,0 +1,3 @@
+api.overplayed.gaelangel.com {
+    reverse_proxy overplayed-server:8080
+}
