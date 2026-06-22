@@ -6,17 +6,17 @@ from app.spotify.users import NewUser
 
 
 class QueueManager:
-    def __init__(self, redis: Redis):
+    def __init__(self, redis: Redis, key: str):
         self.redis = redis
-        self.cache_key = "queue:waiting"
+        self.key = key
 
     async def enqueue(self, user: NewUser) -> int:
-        pos = await self.redis.rpush(self.cache_key, user.model_dump_json())
+        pos = await self.redis.rpush(self.key, user.model_dump_json())
         logger.info(f"Queued user: {user.name} (pos: {pos})")
         return pos
 
     async def dequeue(self, count: int = 1) -> list[NewUser]:
-        result = await self.redis.lpop(self.cache_key, count=count)
+        result = await self.redis.lpop(self.key, count=count)
 
         if result is None or not isinstance(result, list):
             logger.info("Queue is empty. No users dequeued.")
@@ -27,11 +27,11 @@ class QueueManager:
         return users
 
     async def get_size(self) -> int:
-        return await self.redis.llen(self.cache_key)
+        return await self.redis.llen(self.key)
 
 
 async def main():
-    manager = QueueManager(FakeRedis())
+    manager = QueueManager(FakeRedis(), "queue")
 
     assert await manager.get_size() == 0
     await manager.enqueue(NewUser(name="John Doe", email="johnexample@gmail.com"))
