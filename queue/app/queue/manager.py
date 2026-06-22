@@ -2,11 +2,11 @@ import asyncio
 from fakeredis.aioredis import FakeRedis
 from loguru import logger
 from redis.asyncio import Redis
-from app.spotify.users import NewUser
+from spotify.users import NewUser
 
 
 class QueueManager:
-    def __init__(self, redis: Redis, key: str):
+    def __init__(self, redis: Redis, key: str = "queue:waiting"):
         self.redis = redis
         self.key = key
 
@@ -31,7 +31,7 @@ class QueueManager:
 
 
 async def main():
-    manager = QueueManager(FakeRedis(), "queue")
+    manager = QueueManager(FakeRedis())
 
     assert await manager.get_size() == 0
     await manager.enqueue(NewUser(name="John Doe", email="johnexample@gmail.com"))
