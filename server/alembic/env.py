@@ -11,8 +11,6 @@ from settings import settings  # noqa: F401
 from core.database import Base
 import database.schemas  # noqa: F401
 
-settings.database_host = "localhost"
-
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
