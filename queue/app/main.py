@@ -1,6 +1,5 @@
 from pydantic import BaseModel
-from loguru import logger
-from aiohttp import ClientSession, ClientResponseError
+from aiohttp import ClientSession
 from cryptography.fernet import Fernet
 from redis.asyncio import Redis, ConnectionPool
 from contextlib import asynccontextmanager
@@ -12,9 +11,10 @@ from spotify.validate import SpotifyUserValidator
 from spotify.users import SpotifyUserManagementClient, NewUser, USER_LIMIT
 from queues.manager import QueueRepository
 from cache import RedisCache
+from worker import QueueWorker
 from service import (
-    QueueService,
     get_queue,
+    QueueService,
     UserAlreadyActive,
     UserDoesNotExist,
     UserAlreadyInQueue,
@@ -31,28 +31,34 @@ async def lifespan(app: FastAPI):
         redis = Redis(connection_pool=redis_pool)
         cache = RedisCache(redis=redis)
         fernet = Fernet(settings.redis_key)
-        validator = await SpotifyUserValidator.create(session)
         auth = SpotifyTokenClient(
-            session, cache, fernet, settings.spotify_auth_client_id
+            session=session,
+            cache=cache,
+            fernet=fernet,
+            auth_client_id=settings.spotify_auth_client_id,
         )
-        users = SpotifyUserManagementClient(
-            session, cache, auth, settings.spotify_app_client_id
+        queue = QueueService(
+            users=SpotifyUserManagementClient(
+                session=session,
+                cache=cache,
+                auth=auth,
+                client_id=settings.spotify_app_client_id,
+            ),
+            validator=await SpotifyUserValidator.create(session=session),
+            queue=QueueRepository(redis=redis),
         )
-        queue = QueueRepository(redis)
+        worker = QueueWorker(queue)
 
-        try:
-            await auth.seed_refresh_token(settings.spotify_refresh_token)
-        except ClientResponseError:
-            logger.critical(
-                "Invalid Spotify refresh token or auth client id. Please renew."
-            )
-            raise
+        # seed and validate credentials
+        await auth.seed_refresh_token(settings.spotify_refresh_token)
 
-        app.state[APP_STATE_KEY] = State(
-            validator=validator, auth=auth, users=users, queue=queue
-        )
+        # start background queue worker
+        worker.start()
+
+        app.state[APP_STATE_KEY] = State(queue=queue)
         yield
     finally:
+        await worker.stop()
         await session.close()
         await redis_pool.aclose()
 
@@ -62,7 +68,7 @@ app = FastAPI(lifespan=lifespan)
 
 @app.get("/")
 def handle_healthcheck():
-    return ":p"
+    return ":o"
 
 
 @app.get("/favicon.ico")

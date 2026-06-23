@@ -1,18 +1,12 @@
 from fastapi import Request
 from dataclasses import dataclass
-from spotify.users import SpotifyUserManagementClient
-from spotify.validate import SpotifyUserValidator
-from spotify.token import SpotifyTokenClient
 from settings import APP_STATE_KEY
-from queues.manager import QueueRepository
+from service import QueueService
 
 
 @dataclass
 class State:
-    auth: SpotifyTokenClient
-    users: SpotifyUserManagementClient
-    validator: SpotifyUserValidator
-    queue: QueueRepository
+    queue: QueueService
 
 
 def get_state(request: Request) -> State:

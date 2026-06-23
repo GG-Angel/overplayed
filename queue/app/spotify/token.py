@@ -5,7 +5,7 @@ from fakeredis.aioredis import FakeRedis
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from os import environ
-from aiohttp import ClientSession
+from aiohttp import ClientSession, ClientResponseError
 from cache import Cache, RedisCache
 
 TOKEN_URL = "https://accounts.spotify.com/api/token"
@@ -43,7 +43,11 @@ class SpotifyTokenClient:
         if await self.cache.exists(REFRESH_KEY):
             logger.info("Refresh token already exists - no action taken.")
             return
-        token = await self._renew_token(refresh_token)  # raises if invalid
+        try:
+            token = await self._renew_token(refresh_token)
+        except ClientResponseError:
+            logger.critical("Spotify refresh token or auth client id are invalid. Please renew.")  # fmt:skip
+            raise
         await self._store_token(token)
         logger.success("Seeded and verified refresh token.")
 

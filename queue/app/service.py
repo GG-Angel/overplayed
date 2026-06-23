@@ -92,8 +92,4 @@ class QueueService:
 
 
 def get_queue(state: State = Depends(get_state)) -> QueueService:
-    return QueueService(
-        users=state.users,
-        validator=state.validator,
-        queue=state.queue,
-    )
+    return state.queue
