@@ -6,10 +6,10 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends
 from state import State, get_state
 from settings import APP_STATE_KEY, settings
-from spotify.token import seed_refresh_token, TokenManager
+from spotify.token import TokenManager
 from spotify.validate import UserValidator
 from spotify.users import UserManager
-from queue.manager import QueueManager
+from queues.manager import QueueManager
 
 
 @asynccontextmanager
@@ -26,10 +26,8 @@ async def lifespan(app: FastAPI):
         users = UserManager(session, redis, auth, settings.spotify_app_client_id)
         queue = QueueManager(redis)
 
-        # seed and verify credentials
-        await seed_refresh_token(redis, fernet, settings.spotify_refresh_token)
         try:
-            await auth.get_access_token()
+            await auth.seed_refresh_token(settings.spotify_refresh_token)
         except ClientResponseError:
             logger.critical(
                 "Invalid Spotify refresh token or auth client id. Please renew."
@@ -54,5 +52,5 @@ def healthcheck():
 
 
 @app.get("/queue")
-def get_queue(state: State = Depends(get_state)):
-    return state.users.get_users()
+async def get_queue(state: State = Depends(get_state)):
+    return await state.users.get_users()

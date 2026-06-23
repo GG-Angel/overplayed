@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     redis_host: str = Field(...)
     redis_port: int = Field(...)
     redis_password: str = Field(...)
-    redis_key: bytes = Field(..., min_length=32, max_length=32)
+    redis_key: bytes = Field(..., min_length=44, max_length=44)
 
     model_config = SettingsConfigDict(
         env_file=".env",

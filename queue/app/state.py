@@ -4,7 +4,7 @@ from spotify.users import UserManager
 from spotify.validate import UserValidator
 from spotify.token import TokenManager
 from settings import APP_STATE_KEY
-from queue.manager import QueueManager
+from queues.manager import QueueManager
 
 
 @dataclass

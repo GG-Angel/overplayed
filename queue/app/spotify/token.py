@@ -35,16 +35,29 @@ class TokenManager:
         self.fernet = fernet
         self.auth_client_id = auth_client_id
 
+    async def seed_refresh_token(self, refresh_token: str) -> None:
+        if await self.redis.exists(REFRESH_KEY):
+            logger.info("Refresh token already exists - no action taken.")
+            return
+        token = await self._renew_token(refresh_token)  # raises if invalid
+        await self._store_token(token)
+        logger.success("Seeded and verified refresh token.")
+
     async def get_access_token(self) -> str:
         cached = await self._get_decrypted(ACCESS_KEY)
         if cached is not None:
             return cached
-        return await self._renew_access_token()  # miss -> refresh needed
 
-    async def _renew_access_token(self) -> str:
         refresh_token = await self._get_decrypted(REFRESH_KEY)
         if refresh_token is None:
             raise RuntimeError("No refresh token stored; seed one first.")
+
+        token = await self._renew_token(refresh_token)
+        await self._store_token(token)
+        logger.success("Renewed token.")
+        return token.access_token
+
+    async def _renew_token(self, refresh_token: str) -> Token:
         async with self.session.post(
             TOKEN_URL,
             data={
@@ -54,10 +67,7 @@ class TokenManager:
             },
         ) as response:
             response.raise_for_status()
-            token = Token.model_validate(await response.json())
-            await self._store_token(token)
-            logger.success("Renewed token.")
-            return token.access_token
+            return Token.model_validate(await response.json())
 
     async def _store_token(self, token: Token) -> None:
         ttl = max(1, token.expires_in - 60)  # expire early
@@ -76,28 +86,15 @@ class TokenManager:
         return self._decrypt(stored) if stored is not None else None
 
 
-async def seed_refresh_token(redis: Redis, fernet: Fernet, refresh_token: str) -> None:
-    was_set = await redis.set(
-        REFRESH_KEY, fernet.encrypt(refresh_token.encode()), nx=True
-    )
-    logger.info(
-        "Seeded refresh token."
-        if was_set
-        else "Refresh token already exists - no action taken."
-    )
-
-
 async def main():
     load_dotenv()
     redis = FakeRedis()
     fernet = Fernet(environ["REDIS_KEY"])
-    # 1. seed refresh token on startup
-    await seed_refresh_token(redis, fernet, environ["SPOTIFY_REFRESH_TOKEN"])
-    # 2. serve access tokens with manager
     async with ClientSession() as session:
         manager = TokenManager(
             session, redis, fernet, environ["SPOTIFY_AUTH_CLIENT_ID"]
         )
+        await manager.seed_refresh_token(environ["SPOTIFY_REFRESH_TOKEN"])
         token = await manager.get_access_token()
         print(f"Access Token: {token[:10]}...")
 

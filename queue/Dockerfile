@@ -15,4 +15,4 @@ USER appuser
 
 EXPOSE 8000
 
-CMD ["uv" "run" "fastapi", "run", "app/main.py", "--port", "8000"]
+CMD ["uv", "run", "--no-cache", "fastapi", "run", "app/main.py", "--port", "8000"]

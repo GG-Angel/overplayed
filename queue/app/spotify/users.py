@@ -8,7 +8,7 @@ from loguru import logger
 from datetime import datetime
 from pydantic import BaseModel
 from aiohttp import ClientSession
-from .token import TokenManager, seed_refresh_token
+from .token import TokenManager
 
 USER_LIMIT = 5
 USERS_KEY = "queue:users"
@@ -95,10 +95,10 @@ async def main():
     redis = FakeRedis()
     fernet = Fernet(environ["REDIS_KEY"])
 
-    await seed_refresh_token(redis, fernet, environ["SPOTIFY_REFRESH_TOKEN"])
     async with ClientSession() as session:
         auth = TokenManager(session, redis, fernet, environ["SPOTIFY_AUTH_CLIENT_ID"])
         manager = UserManager(session, redis, auth, environ["SPOTIFY_APP_CLIENT_ID"])
+        await auth.seed_refresh_token(environ["SPOTIFY_REFRESH_TOKEN"])
         users = await manager.get_users()
         print(f"Current users: {users}")
 
