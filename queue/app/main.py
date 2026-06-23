@@ -9,7 +9,7 @@ from state import State
 from settings import APP_STATE_KEY, settings
 from spotify.token import SpotifyTokenClient
 from spotify.validate import SpotifyUserValidator
-from spotify.users import SpotifyUserManagementClient, NewUser
+from spotify.users import SpotifyUserManagementClient, NewUser, USER_LIMIT
 from queues.manager import QueueRepository
 from cache import RedisCache
 from service import (
@@ -70,29 +70,27 @@ def handle_favicon():
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
+class ViewQueueResponse(BaseModel):
+    total_active_users: int
+    total_queued_users: int
+    is_full: bool
+
+
 @app.get("/queue")
-async def view_queue(queue: QueueService = Depends(get_queue)):
-    return await queue.list_queued_users()
-
-
-# @router.get("/queue")
-# async def get_queue(
-#     request: Request,
-#     state: State = Depends(get_state),
-# ) -> QueueDetails:
-#     users = await state.users.get_users()
-#     queue_size = await state.queue.get_size()
-#     return QueueDetails(
-#         active_users=len(users),
-#         available_slots=max(0, USER_LIMIT - len(users)),
-#         queue_size=queue_size,
-#     )
+async def view_queue(queue: QueueService = Depends(get_queue)) -> ViewQueueResponse:
+    active = await queue.list_active_users()
+    queued = await queue.list_queued_users()
+    return ViewQueueResponse(
+        total_active_users=len(active),
+        total_queued_users=len(queued),
+        is_full=len(active) + len(queued) >= USER_LIMIT,
+    )
 
 
 class EnqueueUserResponse(BaseModel):
     position: int
-    # session est start time
-    # session est end time
+    # session est start time (num queued * 24 hr + time remaining for active users) nah wrong
+    # session est end time (start time + 24 hr?)
 
 
 @app.post("/queue")

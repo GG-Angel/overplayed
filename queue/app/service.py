@@ -37,7 +37,7 @@ class QueueService:
             raise UserDoesNotExist()
         return await self._queue_manager.enqueue(user)
 
-    async def list_current_users(self) -> list[User]:
+    async def list_active_users(self) -> list[User]:
         return await self._user_manager.get_users()
 
     async def list_queued_users(self) -> list[NewUser]:
