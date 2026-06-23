@@ -1,6 +1,6 @@
 from fastapi import Depends
-from queues.manager import QueueManager
-from spotify.users import UserManager, NewUser
+from queues.manager import UserQueueController
+from spotify.users import UserRepository, NewUser
 from spotify.validate import UserValidator
 from state import State, get_state
 
@@ -20,9 +20,9 @@ class UserDoesNotExist(Exception):
 class QueueService:
     def __init__(
         self,
-        user_manager: UserManager,
+        user_manager: UserRepository,
         user_validator: UserValidator,
-        queue_manager: QueueManager,
+        queue_manager: UserQueueController,
     ):
         self._user_manager = user_manager
         self._user_validator = user_validator

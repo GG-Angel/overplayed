@@ -7,10 +7,11 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends, Response, status, HTTPException
 from state import State, get_state
 from settings import APP_STATE_KEY, settings
-from spotify.token import TokenManager
+from spotify.token import TokenRepository
 from spotify.validate import UserValidator
-from spotify.users import UserManager, NewUser
-from queues.manager import QueueManager
+from spotify.users import UserRepository, NewUser
+from queues.manager import UserQueueController
+from cache import RedisCache
 from service import (
     QueueService,
     get_queue,
@@ -28,11 +29,12 @@ async def lifespan(app: FastAPI):
     )
     try:
         redis = Redis(connection_pool=redis_pool)
+        cache = RedisCache(redis=redis)
         fernet = Fernet(settings.redis_key)
         validator = await UserValidator.create(session)
-        auth = TokenManager(session, redis, fernet, settings.spotify_auth_client_id)
-        users = UserManager(session, redis, auth, settings.spotify_app_client_id)
-        queue = QueueManager(redis)
+        auth = TokenRepository(session, cache, fernet, settings.spotify_auth_client_id)
+        users = UserRepository(session, cache, auth, settings.spotify_app_client_id)
+        queue = UserQueueController(redis)
 
         try:
             await auth.seed_refresh_token(settings.spotify_refresh_token)

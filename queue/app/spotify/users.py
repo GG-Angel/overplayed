@@ -4,12 +4,13 @@ from cryptography.fernet import Fernet
 from dotenv import load_dotenv
 from os import environ
 from fakeredis.aioredis import FakeRedis
-from redis.asyncio import Redis
 from loguru import logger
 from datetime import datetime
 from pydantic import BaseModel
 from aiohttp import ClientSession
-from .token import TokenManager
+from cache import Cache, RedisCache
+from .token import TokenRepository
+
 
 USER_LIMIT = 5
 USERS_KEY = "queue:users"
@@ -37,16 +38,16 @@ class TokenProvider(Protocol):
     async def get_access_token(self) -> str: ...
 
 
-class UserManager:
+class UserRepository:
     def __init__(
         self,
         session: ClientSession,
-        redis: Redis,
+        cache: Cache,
         auth: TokenProvider,
         client_id: str,
     ):
         self.session = session
-        self.redis = redis
+        self.cache = cache
         self.auth = auth
         self.client_id = client_id
 
@@ -57,7 +58,7 @@ class UserManager:
         return {"Authorization": f"Bearer {await self.auth.get_access_token()}"}
 
     async def get_users(self) -> list[User]:
-        if cached := await self.redis.get(USERS_KEY):
+        if cached := await self.cache.get(USERS_KEY):
             return UserTable.model_validate_json(cached).users
 
         async with self.session.get(
@@ -66,7 +67,7 @@ class UserManager:
             raise_for_status=True,
         ) as response:
             table = UserTable.model_validate(await response.json())
-            await self.redis.set(USERS_KEY, table.model_dump_json(), ex=300)
+            await self.cache.set(USERS_KEY, table.model_dump_json(), ttl=300)
             return table.users
 
     async def is_user_active(self, email: str) -> bool:
@@ -85,7 +86,7 @@ class UserManager:
             raise_for_status=True,
         ) as response:
             added_user = User.model_validate(await response.json())
-            await self.redis.delete(USERS_KEY)
+            await self.cache.delete(USERS_KEY)
             logger.info(f"Added user: {added_user.name}")
             return added_user
 
@@ -95,18 +96,20 @@ class UserManager:
             headers=await self._build_headers(),
             raise_for_status=True,
         )
-        await self.redis.delete(USERS_KEY)
+        await self.cache.delete(USERS_KEY)
         logger.info(f"Removed user: {user.name}")
 
 
 async def main():
     load_dotenv()
-    redis = FakeRedis()
+    redis = RedisCache(FakeRedis())
     fernet = Fernet(environ["REDIS_KEY"])
 
     async with ClientSession() as session:
-        auth = TokenManager(session, redis, fernet, environ["SPOTIFY_AUTH_CLIENT_ID"])
-        manager = UserManager(session, redis, auth, environ["SPOTIFY_APP_CLIENT_ID"])
+        auth = TokenRepository(
+            session, redis, fernet, environ["SPOTIFY_AUTH_CLIENT_ID"]
+        )
+        manager = UserRepository(session, redis, auth, environ["SPOTIFY_APP_CLIENT_ID"])
         await auth.seed_refresh_token(environ["SPOTIFY_REFRESH_TOKEN"])
         users = await manager.get_users()
         print(f"Current users: {users}")

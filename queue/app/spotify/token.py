@@ -1,12 +1,12 @@
-from cryptography.fernet import Fernet
 import asyncio
+from cryptography.fernet import Fernet
 from loguru import logger
 from fakeredis.aioredis import FakeRedis
 from pydantic import BaseModel
-from redis.asyncio import Redis
 from dotenv import load_dotenv
 from os import environ
 from aiohttp import ClientSession
+from cache import Cache, RedisCache
 
 TOKEN_URL = "https://accounts.spotify.com/api/token"
 ACCESS_KEY = "queue:access_token"
@@ -22,21 +22,21 @@ class Token(BaseModel):
     id_token: str
 
 
-class TokenManager:
+class TokenRepository:
     def __init__(
         self,
         session: ClientSession,
-        redis: Redis,
+        cache: Cache,
         fernet: Fernet,
         auth_client_id: str,
     ):
         self.session = session
-        self.redis = redis
+        self.cache = cache
         self.fernet = fernet
         self.auth_client_id = auth_client_id
 
     async def seed_refresh_token(self, refresh_token: str) -> None:
-        if await self.redis.exists(REFRESH_KEY):
+        if await self.cache.exists(REFRESH_KEY):
             logger.info("Refresh token already exists - no action taken.")
             return
         token = await self._renew_token(refresh_token)  # raises if invalid
@@ -71,27 +71,27 @@ class TokenManager:
 
     async def _store_token(self, token: Token) -> None:
         ttl = max(1, token.expires_in - 60)  # expire early
-        await self.redis.set(ACCESS_KEY, self._encrypt(token.access_token), ex=ttl)
-        await self.redis.set(REFRESH_KEY, self._encrypt(token.refresh_token))
+        await self.cache.set(ACCESS_KEY, self._encrypt(token.access_token), ttl=ttl)
+        await self.cache.set(REFRESH_KEY, self._encrypt(token.refresh_token))
         logger.info(f"Stored access (ttl={ttl}s) and rotated refresh token.")
 
-    def _encrypt(self, value: str) -> bytes:
-        return self.fernet.encrypt(value.encode())
-
-    def _decrypt(self, value: str | bytes) -> str:
-        return self.fernet.decrypt(value).decode()
-
     async def _get_decrypted(self, key: str) -> str | None:
-        stored = await self.redis.get(key)
+        stored = await self.cache.get(key)
         return self._decrypt(stored) if stored is not None else None
+
+    def _encrypt(self, value: str) -> str:
+        return self.fernet.encrypt(value.encode()).decode()
+
+    def _decrypt(self, value: str) -> str:
+        return self.fernet.decrypt(value).decode()
 
 
 async def main():
     load_dotenv()
-    redis = FakeRedis()
+    redis = RedisCache(FakeRedis())
     fernet = Fernet(environ["REDIS_KEY"])
     async with ClientSession() as session:
-        manager = TokenManager(
+        manager = TokenRepository(
             session, redis, fernet, environ["SPOTIFY_AUTH_CLIENT_ID"]
         )
         await manager.seed_refresh_token(environ["SPOTIFY_REFRESH_TOKEN"])

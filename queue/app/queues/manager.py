@@ -7,7 +7,7 @@ from spotify.users import NewUser
 QUEUE_KEY = "queue:waiting"
 
 
-class QueueManager:
+class UserQueueController:
     def __init__(self, redis: Redis):
         self.redis = redis
 
@@ -39,7 +39,7 @@ class QueueManager:
 
 
 async def main():
-    manager = QueueManager(FakeRedis())
+    manager = UserQueueController(FakeRedis())
     assert await manager.get_size() == 0
     await manager.enqueue(NewUser(name="John Doe", email="johnexample@gmail.com"))
     await manager.enqueue(NewUser(name="Jane Doe", email="janeexample@gmail.com"))
