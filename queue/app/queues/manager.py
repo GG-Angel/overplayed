@@ -27,30 +27,29 @@ class QueueRepository:
         logger.info(f"Dequeued {len(users)} users: {[u.name for u in users]}")
         return users
 
-    async def get_size(self) -> int:
-        return await self.redis.llen(QUEUE_KEY)
-
-    async def is_user_in_queue(self, email: str) -> bool:
-        waiting_users = [
+    async def get_users(self) -> list[NewUser]:
+        return [
             NewUser.model_validate_json(u)
             for u in await self.redis.lrange(QUEUE_KEY, 0, -1)
         ]
-        return email in set([u.email for u in waiting_users])
+
+    async def is_user_in_queue(self, email: str) -> bool:
+        return email in set([u.email for u in await self.get_users()])
 
 
 async def main():
     manager = QueueRepository(FakeRedis())
-    assert await manager.get_size() == 0
+    assert len(await manager.get_users()) == 0
     await manager.enqueue(NewUser(name="John Doe", email="johnexample@gmail.com"))
     await manager.enqueue(NewUser(name="Jane Doe", email="janeexample@gmail.com"))
     await manager.enqueue(NewUser(name="Evelyn Lee", email="evelynexample@gmail.com"))
-    assert await manager.get_size() == 3
+    assert len(await manager.get_users()) == 3
     await manager.dequeue()
-    assert await manager.get_size() == 2
+    assert len(await manager.get_users()) == 2
     await manager.dequeue(count=2)
-    assert await manager.get_size() == 0
+    assert len(await manager.get_users()) == 0
     await manager.dequeue(count=10)
-    assert await manager.get_size() == 0
+    assert len(await manager.get_users()) == 0
 
 
 if __name__ == "__main__":

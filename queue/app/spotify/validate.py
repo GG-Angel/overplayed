@@ -4,9 +4,9 @@ from bs4 import BeautifulSoup
 from aiohttp import ClientSession
 
 
-class UserValidator:
+class SpotifyUserValidator:
     @classmethod
-    async def create(cls, session: ClientSession) -> "UserValidator":
+    async def create(cls, session: ClientSession) -> "SpotifyUserValidator":
         return cls(session, await cls._get_signup_key(session))
 
     @staticmethod
@@ -56,7 +56,7 @@ class UserValidator:
 
 async def main():
     async with ClientSession() as session:
-        validator = await UserValidator.create(session)
+        validator = await SpotifyUserValidator.create(session)
         print(await validator.does_user_exist("example@gmail.com"))
         print(await validator.does_user_exist("iudawyudg56d67t12byd1@doesnotexist.com"))
 

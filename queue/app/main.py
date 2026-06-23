@@ -5,10 +5,10 @@ from cryptography.fernet import Fernet
 from redis.asyncio import Redis, ConnectionPool
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends, Response, status, HTTPException
-from state import State, get_state
+from state import State
 from settings import APP_STATE_KEY, settings
 from spotify.token import SpotifyTokenClient
-from spotify.validate import UserValidator
+from spotify.validate import SpotifyUserValidator
 from spotify.users import SpotifyUserManagementClient, NewUser
 from queues.manager import QueueRepository
 from cache import RedisCache
@@ -31,7 +31,7 @@ async def lifespan(app: FastAPI):
         redis = Redis(connection_pool=redis_pool)
         cache = RedisCache(redis=redis)
         fernet = Fernet(settings.redis_key)
-        validator = await UserValidator.create(session)
+        validator = await SpotifyUserValidator.create(session)
         auth = SpotifyTokenClient(
             session, cache, fernet, settings.spotify_auth_client_id
         )
@@ -71,8 +71,8 @@ def handle_favicon():
 
 
 @app.get("/queue")
-async def view_queue(state: State = Depends(get_state)):
-    return await state.users.get_users()
+async def view_queue(queue: QueueService = Depends(get_queue)):
+    return await queue.list_queued_users()
 
 
 # @router.get("/queue")
@@ -97,8 +97,7 @@ class EnqueueUserResponse(BaseModel):
 
 @app.post("/queue")
 async def enqueue_user(
-    user: NewUser,
-    queue: QueueService = Depends(get_queue),
+    user: NewUser, queue: QueueService = Depends(get_queue)
 ) -> EnqueueUserResponse:
     try:
         position = await queue.enqueue(user)
