@@ -1,6 +1,5 @@
-from cryptography.fernet import Fernet
 import asyncio
-import json
+from cryptography.fernet import Fernet
 from dotenv import load_dotenv
 from os import environ
 from fakeredis.aioredis import FakeRedis
@@ -61,9 +60,9 @@ class UserManager:
             headers=await self._build_headers(),
             raise_for_status=True,
         ) as response:
-            result = await response.json()
-            await self.redis.set(USERS_KEY, json.dumps(result), ex=300)
-            return UserTable.model_validate(result).users
+            table = UserTable.model_validate(await response.json())
+            await self.redis.set(USERS_KEY, table.model_dump_json(), ex=300)
+            return table.users
 
     async def add_user(self, new_user: NewUser) -> User:
         current_users = await self.get_users()
