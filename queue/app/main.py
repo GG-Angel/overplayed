@@ -13,7 +13,7 @@ from spotify.users import UserManager, NewUser
 from queues.manager import QueueManager
 from service import (
     QueueService,
-    get_queue_service,
+    get_queue,
     UserAlreadyActive,
     UserDoesNotExist,
     UserAlreadyInQueue,
@@ -65,7 +65,7 @@ def handle_favicon():
 
 
 @app.get("/queue")
-async def get_queue(state: State = Depends(get_state)):
+async def view_queue(state: State = Depends(get_state)):
     return await state.users.get_users()
 
 
@@ -92,7 +92,7 @@ class EnqueueUserResponse(BaseModel):
 @app.post("/queue")
 async def enqueue_user(
     user: NewUser,
-    queue: QueueService = Depends(get_queue_service),
+    queue: QueueService = Depends(get_queue),
 ) -> EnqueueUserResponse:
     try:
         position = await queue.enqueue(user)

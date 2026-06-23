@@ -38,7 +38,7 @@ class QueueService:
         return await self._queue_manager.enqueue(user)
 
 
-def get_queue_service(state: State = Depends(get_state)) -> QueueService:
+def get_queue(state: State = Depends(get_state)) -> QueueService:
     return QueueService(
         user_manager=state.users,
         user_validator=state.validator,
