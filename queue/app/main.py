@@ -11,6 +11,14 @@ from spotify.token import TokenManager
 from spotify.validate import UserValidator
 from spotify.users import UserManager, NewUser
 from queues.manager import QueueManager
+from service import (
+    QueueService,
+    get_queue_service,
+    EnqueueUserResponse,
+    UserAlreadyActive,
+    UserDoesNotExist,
+    UserAlreadyInQueue,
+)
 
 
 @asynccontextmanager
@@ -76,31 +84,22 @@ async def get_queue(state: State = Depends(get_state)):
 #     )
 
 
-class EnqueueUserResponse(BaseModel):
-    position: int
-
-
 @app.post("/queue")
 async def enqueue_user(
-    user: NewUser, state: State = Depends(get_state)
+    user: NewUser,
+    queue: QueueService = Depends(get_queue_service),
 ) -> EnqueueUserResponse:
-    if await state.queue.is_user_in_queue(user.email):
+    try:
+        return await queue.enqueue_user(user)
+    except UserAlreadyActive:
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="User is already in queue",
+            status_code=status.HTTP_409_CONFLICT, detail="User already active"
         )
-
-    if await state.users.is_user_active(user.email):
+    except UserAlreadyInQueue:
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="User is already active",
+            status_code=status.HTTP_409_CONFLICT, detail="User already in queue"
         )
-
-    if not await state.validator.does_user_exist(user.email):
+    except UserDoesNotExist:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User does not exist",
+            status_code=status.HTTP_404_NOT_FOUND, detail="User does not exist"
         )
-
-    position = await state.queue.enqueue(user)
-    return EnqueueUserResponse(position=position)
