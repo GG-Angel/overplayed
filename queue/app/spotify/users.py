@@ -16,6 +16,10 @@ USER_LIMIT = 5
 USERS_KEY = "queue:users"
 
 
+class UserCapacityError(Exception):
+    pass
+
+
 class NewUser(BaseModel):
     name: str
     email: str
@@ -77,7 +81,9 @@ class SpotifyUserManagementClient:
     async def add_user(self, new_user: NewUser) -> User:
         current_users = await self.get_users()
         if len(current_users) >= USER_LIMIT:
-            raise RuntimeError(f"Cannot add user {new_user.name} - the table is full.")
+            raise UserCapacityError(
+                f"Cannot add user {new_user.name} - the table is full."
+            )
 
         async with self.session.post(
             url=self._build_url(write=True),

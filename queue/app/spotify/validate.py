@@ -4,6 +4,14 @@ from bs4 import BeautifulSoup
 from aiohttp import ClientSession
 
 
+class InvalidSignupKeyError(Exception):
+    pass
+
+
+class MissingSignupKeyError(Exception):
+    pass
+
+
 class SpotifyUserValidator:
     @classmethod
     async def create(cls, session: ClientSession) -> "SpotifyUserValidator":
@@ -15,12 +23,14 @@ class SpotifyUserValidator:
             soup = BeautifulSoup(await response.text(), "html.parser")
             script_tag = soup.find("script", id="__NEXT_DATA__")
             if not script_tag:
-                raise RuntimeError("Signup page missing __NEXT_DATA__ script tag.")
+                raise MissingSignupKeyError(
+                    "Signup page missing __NEXT_DATA__ script tag."
+                )
             data = json.loads(script_tag.text)
             try:
                 return data["props"]["pageProps"]["keys"]["signupServiceAppKey"]
             except KeyError as e:
-                raise RuntimeError(
+                raise MissingSignupKeyError(
                     f"Signup key not found in page JSON: missing {e}."
                 ) from e
 
@@ -48,7 +58,7 @@ class SpotifyUserValidator:
                 return False  # invalid email
 
             if _retried:
-                raise RuntimeError("API key refresh failed.")
+                raise InvalidSignupKeyError("Signup key invalid after refresh.")
 
             self.signup_key = await self._get_signup_key(self.session)
             return await self.does_user_exist(email, _retried=True)

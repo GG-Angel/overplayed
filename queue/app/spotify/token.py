@@ -13,6 +13,10 @@ ACCESS_KEY = "queue:access_token"
 REFRESH_KEY = "queue:refresh_token"
 
 
+class MissingRefreshTokenError(Exception):
+    pass
+
+
 class Token(BaseModel):
     access_token: str
     token_type: str
@@ -50,7 +54,7 @@ class SpotifyTokenClient:
 
         refresh_token = await self._get_decrypted(REFRESH_KEY)
         if refresh_token is None:
-            raise RuntimeError("No refresh token stored; seed one first.")
+            raise MissingRefreshTokenError("No refresh token stored; seed one first.")
 
         token = await self._renew_token(refresh_token)
         await self._store_token(token)
