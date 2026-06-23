@@ -5,15 +5,15 @@ APP_STATE_KEY = "APP_STATE"
 
 
 class Settings(BaseSettings):
-    spotify_client_id: str = Field(...)
+    spotify_app_client_id: str = Field(...)
+    spotify_auth_client_id: str = Field(...)
     spotify_refresh_token: str = Field(...)
 
-    redis_host: str = "redis"
-    redis_port: int = 6379
+    redis_user: str = Field(...)
+    redis_host: str = Field(...)
+    redis_port: int = Field(...)
     redis_password: str = Field(...)
-
-    redis_users_key: str = "queue:current-users"
-    redis_queue_key: str = "queue:waiting"
+    redis_key: bytes = Field(..., min_length=32, max_length=32)
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -23,7 +23,7 @@ class Settings(BaseSettings):
 
     @property
     def redis_url(self) -> str:
-        return f"redis://:{self.redis_password}@{self.redis_host}:{self.redis_port}"
+        return f"redis://{self.redis_user}:{self.redis_password}@{self.redis_host}:{self.redis_port}"
 
 
 settings = Settings()
