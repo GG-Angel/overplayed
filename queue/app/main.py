@@ -4,7 +4,7 @@ from cryptography.fernet import Fernet
 from redis.asyncio import Redis, ConnectionPool
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends, Response, status, HTTPException
-from state import State
+from state import State, get_state
 from settings import APP_STATE_KEY, settings
 from spotify.token import SpotifyTokenClient
 from spotify.validate import SpotifyUserValidator
@@ -13,7 +13,6 @@ from queues.manager import QueueRepository
 from cache import RedisCache
 from worker import QueueWorker
 from service import (
-    get_queue,
     QueueService,
     UserAlreadyActive,
     UserDoesNotExist,
@@ -83,9 +82,9 @@ class ViewQueueResponse(BaseModel):
 
 
 @app.get("/queue")
-async def view_queue(queue: QueueService = Depends(get_queue)) -> ViewQueueResponse:
-    active = await queue.list_active_users()
-    queued = await queue.list_queued_users()
+async def view_queue(state: State = Depends(get_state)) -> ViewQueueResponse:
+    active = await state.queue.list_active_users()
+    queued = await state.queue.list_queued_users()
     return ViewQueueResponse(
         total_active_users=len(active),
         total_queued_users=len(queued),
@@ -101,10 +100,11 @@ class EnqueueUserResponse(BaseModel):
 
 @app.post("/queue")
 async def enqueue_user(
-    user: NewUser, queue: QueueService = Depends(get_queue)
+    user: NewUser,
+    state: State = Depends(get_state),
 ) -> EnqueueUserResponse:
     try:
-        position = await queue.enqueue(user)
+        position = await state.queue.enqueue(user)
         return EnqueueUserResponse(position=position)
     except UserAlreadyActive:
         raise HTTPException(

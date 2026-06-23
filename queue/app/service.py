@@ -1,11 +1,9 @@
 from loguru import logger
 from aiohttp import ClientResponseError
 from datetime import datetime, timezone, timedelta
-from fastapi import Depends
 from queues.manager import QueueRepository
 from spotify.users import SpotifyUserManagementClient, NewUser, User, USER_LIMIT
 from spotify.validate import SpotifyUserValidator
-from state import State, get_state
 
 ACCESS_DURATION = timedelta(hours=24)
 
@@ -50,7 +48,7 @@ class QueueService:
             try:
                 await self._users.remove_user(user)
                 users_removed.append(user)
-                logger.success(f"Evicted user {user.name}.")
+                logger.info(f"Evicted user: {user.name}.")
             except ClientResponseError:
                 logger.warning(f"Failed to evict user {user.name}, skipping.")
         return users_removed
@@ -71,7 +69,7 @@ class QueueService:
         for user in new_users:
             try:
                 users_added.append(await self._users.add_user(user))
-                logger.success(f"Admitted user {user.name}.")
+                logger.info(f"Added user: {user.name}.")
             except ClientResponseError:
                 logger.error(f"Failed to add user {user.name}, skipping.")
         return users_added
@@ -89,7 +87,3 @@ class QueueService:
         removed = await self._evict_expired_users()
         added = await self._fill_available_slots()
         logger.success(f"Evicted {len(removed)} and admitted {len(added)} new users.")
-
-
-def get_queue(state: State = Depends(get_state)) -> QueueService:
-    return state.queue

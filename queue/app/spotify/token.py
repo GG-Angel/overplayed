@@ -62,7 +62,7 @@ class SpotifyTokenClient:
 
         token = await self._renew_token(refresh_token)
         await self._store_token(token)
-        logger.success("Renewed token.")
+        logger.debug("Renewed token.")
         return token.access_token
 
     async def _renew_token(self, refresh_token: str) -> Token:
@@ -81,7 +81,7 @@ class SpotifyTokenClient:
         ttl = max(1, token.expires_in - 60)  # expire early
         await self.cache.set(ACCESS_KEY, self._encrypt(token.access_token), ttl=ttl)
         await self.cache.set(REFRESH_KEY, self._encrypt(token.refresh_token))
-        logger.info(f"Stored access (ttl={ttl}s) and rotated refresh token.")
+        logger.debug(f"Stored access (ttl={ttl}s) and rotated refresh token.")
 
     async def _get_decrypted(self, key: str) -> str | None:
         stored = await self.cache.get(key)
