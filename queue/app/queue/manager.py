@@ -32,13 +32,11 @@ class QueueManager:
 
 async def main():
     manager = QueueManager(FakeRedis())
-
     assert await manager.get_size() == 0
     await manager.enqueue(NewUser(name="John Doe", email="johnexample@gmail.com"))
     await manager.enqueue(NewUser(name="Jane Doe", email="janeexample@gmail.com"))
     await manager.enqueue(NewUser(name="Evelyn Lee", email="evelynexample@gmail.com"))
     assert await manager.get_size() == 3
-
     await manager.dequeue()
     assert await manager.get_size() == 2
     await manager.dequeue(count=2)

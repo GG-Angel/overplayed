@@ -1,15 +1,18 @@
+from cryptography.fernet import Fernet
+import asyncio
+import json
 from dotenv import load_dotenv
 from os import environ
 from fakeredis.aioredis import FakeRedis
-import asyncio
-import json
 from redis.asyncio import Redis
 from loguru import logger
 from datetime import datetime
 from pydantic import BaseModel
 from aiohttp import ClientSession
+from .token import TokenManager, seed_refresh_token
 
 USER_LIMIT = 5
+USERS_KEY = "queue:users"
 
 
 class NewUser(BaseModel):
@@ -35,58 +38,68 @@ class UserManager:
         self,
         session: ClientSession,
         redis: Redis,
+        auth: TokenManager,
         client_id: str,
-        limit: int = 5,
-        key: str = "queue:users",
     ):
         self.session = session
         self.redis = redis
+        self.auth = auth
         self.client_id = client_id
-        self.limit = limit
-        self.key = key
+
+    def _build_url(self, *, write: bool = False) -> str:
+        return f"https://developer.spotify.com/api/{'w' if write else ''}s4d/warp/clients/{self.client_id}/users"
+
+    async def _build_headers(self) -> dict[str, str]:
+        return {"Authorization": f"Bearer {await self.auth.get_access_token()}"}
 
     async def get_users(self) -> list[User]:
-        if cached := await self.redis.get(self.key):
+        if cached := await self.redis.get(USERS_KEY):
             return UserTable.model_validate_json(cached).users
 
-        async with self.session.get(self._build_url(write=False)) as response:
+        async with self.session.get(
+            url=self._build_url(),
+            headers=await self._build_headers(),
+            raise_for_status=True,
+        ) as response:
             result = await response.json()
-            await self.redis.set(self.key, json.dumps(result), ex=300)
+            await self.redis.set(USERS_KEY, json.dumps(result), ex=300)
             return UserTable.model_validate(result).users
 
     async def add_user(self, new_user: NewUser) -> User:
         current_users = await self.get_users()
-        if len(current_users) >= self.limit:
+        if len(current_users) >= USER_LIMIT:
             raise RuntimeError(f"Cannot add user {new_user.name} - the table is full.")
 
         async with self.session.post(
-            self._build_url(write=True),
+            url=self._build_url(write=True),
+            headers=await self._build_headers(),
             json=new_user.model_dump(),
+            raise_for_status=True,
         ) as response:
             added_user = User.model_validate(await response.json())
-            await self.redis.delete(self.key)
+            await self.redis.delete(USERS_KEY)
             logger.info(f"Added user: {added_user.name}")
             return added_user
 
     async def remove_user(self, user: User) -> None:
-        await self.session.delete(f"{self._build_url(write=True)}/id/{user.id}")
-        await self.redis.delete(self.key)
+        await self.session.delete(
+            url=f"{self._build_url(write=True)}/id/{user.id}",
+            headers=await self._build_headers(),
+            raise_for_status=True,
+        )
+        await self.redis.delete(USERS_KEY)
         logger.info(f"Removed user: {user.name}")
-
-    def _build_url(self, write: bool) -> str:
-        return f"/api/{'w' if write else ''}s4d/warp/clients/{self.client_id}/users"
 
 
 async def main():
     load_dotenv()
+    redis = FakeRedis()
+    fernet = Fernet(environ["REDIS_KEY"])
 
-    # TODO: auto refresh token
-    async with ClientSession(
-        base_url="https://developer.spotify.com",
-        headers={"Authorization": f"Bearer {environ['SPOTIFY_BEARER_TOKEN']}"},
-        raise_for_status=True,
-    ) as session:
-        manager = UserManager(session, FakeRedis(), environ["SPOTIFY_CLIENT_ID"])
+    await seed_refresh_token(redis, fernet, environ["SPOTIFY_REFRESH_TOKEN"])
+    async with ClientSession() as session:
+        auth = TokenManager(session, redis, fernet, environ["SPOTIFY_AUTH_CLIENT_ID"])
+        manager = UserManager(session, redis, auth, environ["SPOTIFY_APP_CLIENT_ID"])
         users = await manager.get_users()
         print(f"Current users: {users}")
 
