@@ -14,7 +14,6 @@ from queues.manager import QueueManager
 from service import (
     QueueService,
     get_queue_service,
-    EnqueueUserResponse,
     UserAlreadyActive,
     UserDoesNotExist,
     UserAlreadyInQueue,
@@ -57,7 +56,7 @@ app = FastAPI(lifespan=lifespan)
 
 @app.get("/")
 def handle_healthcheck():
-    return ":o"
+    return ":p"
 
 
 @app.get("/favicon.ico")
@@ -84,13 +83,20 @@ async def get_queue(state: State = Depends(get_state)):
 #     )
 
 
+class EnqueueUserResponse(BaseModel):
+    position: int
+    # session est start time
+    # session est end time
+
+
 @app.post("/queue")
 async def enqueue_user(
     user: NewUser,
     queue: QueueService = Depends(get_queue_service),
 ) -> EnqueueUserResponse:
     try:
-        return await queue.enqueue_user(user)
+        position = await queue.enqueue(user)
+        return EnqueueUserResponse(position=position)
     except UserAlreadyActive:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail="User already active"

@@ -1,3 +1,4 @@
+from typing import Protocol
 import asyncio
 from cryptography.fernet import Fernet
 from dotenv import load_dotenv
@@ -32,12 +33,16 @@ class UserTable(BaseModel):
     users: list[User]
 
 
+class TokenProvider(Protocol):
+    async def get_access_token(self) -> str: ...
+
+
 class UserManager:
     def __init__(
         self,
         session: ClientSession,
         redis: Redis,
-        auth: TokenManager,
+        auth: TokenProvider,
         client_id: str,
     ):
         self.session = session
