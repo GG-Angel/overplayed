@@ -6,7 +6,7 @@ APP_STATE_KEY = "APP_STATE"
 
 class Settings(BaseSettings):
     spotify_client_id: str = Field(...)
-    spotify_bearer_token: str = Field(...)
+    spotify_refresh_token: str = Field(...)
 
     redis_host: str = "redis"
     redis_port: int = 6379
