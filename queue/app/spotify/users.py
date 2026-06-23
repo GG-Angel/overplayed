@@ -9,7 +9,7 @@ from datetime import datetime
 from pydantic import BaseModel
 from aiohttp import ClientSession
 from cache import Cache, RedisCache
-from .token import TokenRepository
+from .token import SpotifyTokenClient
 
 
 USER_LIMIT = 5
@@ -38,7 +38,7 @@ class TokenProvider(Protocol):
     async def get_access_token(self) -> str: ...
 
 
-class UserRepository:
+class SpotifyUserManagementClient:
     def __init__(
         self,
         session: ClientSession,
@@ -106,10 +106,12 @@ async def main():
     fernet = Fernet(environ["REDIS_KEY"])
 
     async with ClientSession() as session:
-        auth = TokenRepository(
+        auth = SpotifyTokenClient(
             session, redis, fernet, environ["SPOTIFY_AUTH_CLIENT_ID"]
         )
-        manager = UserRepository(session, redis, auth, environ["SPOTIFY_APP_CLIENT_ID"])
+        manager = SpotifyUserManagementClient(
+            session, redis, auth, environ["SPOTIFY_APP_CLIENT_ID"]
+        )
         await auth.seed_refresh_token(environ["SPOTIFY_REFRESH_TOKEN"])
         users = await manager.get_users()
         print(f"Current users: {users}")

@@ -22,7 +22,7 @@ class Token(BaseModel):
     id_token: str
 
 
-class TokenRepository:
+class SpotifyTokenClient:
     def __init__(
         self,
         session: ClientSession,
@@ -91,7 +91,7 @@ async def main():
     redis = RedisCache(FakeRedis())
     fernet = Fernet(environ["REDIS_KEY"])
     async with ClientSession() as session:
-        manager = TokenRepository(
+        manager = SpotifyTokenClient(
             session, redis, fernet, environ["SPOTIFY_AUTH_CLIENT_ID"]
         )
         await manager.seed_refresh_token(environ["SPOTIFY_REFRESH_TOKEN"])
