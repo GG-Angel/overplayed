@@ -1,16 +1,13 @@
-from asyncio import Task
 from fastapi import Request
-from queue_manager import QueueManager
-from user_manager import UserManager
-from core.settings import settings
+from dataclasses import dataclass
+from settings import APP_STATE_KEY
+from service import QueueService
 
 
+@dataclass
 class State:
-    def __init__(self, users: UserManager, queue: QueueManager):
-        self.users = users
-        self.queue = queue
-        self.tasks: set[Task] = set()
+    queue: QueueService
 
 
-def get_state(request: Request) -> QueueManager:
-    return request.app.state[settings.app_state_key]
+def get_state(request: Request) -> State:
+    return request.app.state[APP_STATE_KEY]
