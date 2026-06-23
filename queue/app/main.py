@@ -4,7 +4,7 @@ from aiohttp import ClientSession, ClientResponseError
 from cryptography.fernet import Fernet
 from redis.asyncio import Redis, ConnectionPool
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Depends, Response, status, Request, HTTPException
+from fastapi import FastAPI, Depends, Response, status, HTTPException
 from state import State, get_state
 from settings import APP_STATE_KEY, settings
 from spotify.token import TokenManager

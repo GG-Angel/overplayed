@@ -45,7 +45,7 @@ class UserValidator:
                 return True
 
             if "field_errors" in error.get("invalid_argument", {}):
-                raise ValueError("Invalid email.")
+                return False  # invalid email
 
             if _retried:
                 raise RuntimeError("API key refresh failed.")
