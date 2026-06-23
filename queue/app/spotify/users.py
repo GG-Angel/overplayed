@@ -75,16 +75,15 @@ class SpotifyUserManagementClient:
             return table.users
 
     async def is_user_active(self, email: str) -> bool:
-        current_users = await self.get_users()
-        return email in set([u.email for u in current_users])
+        active_users = await self.get_users()
+        return email in set([u.email for u in active_users])
 
     async def add_user(self, new_user: NewUser) -> User:
-        current_users = await self.get_users()
-        if len(current_users) >= USER_LIMIT:
+        active_users = await self.get_users()
+        if len(active_users) >= USER_LIMIT:
             raise UserCapacityError(
                 f"Cannot add user {new_user.name} - the table is full."
             )
-
         async with self.session.post(
             url=self._build_url(write=True),
             headers=await self._build_headers(),
@@ -93,7 +92,7 @@ class SpotifyUserManagementClient:
         ) as response:
             added_user = User.model_validate(await response.json())
             await self.cache.delete(USERS_KEY)
-            logger.info(f"Added user: {added_user.name}")
+            logger.debug(f"Added user: {added_user.name}")
             return added_user
 
     async def remove_user(self, user: User) -> None:
@@ -103,7 +102,7 @@ class SpotifyUserManagementClient:
             raise_for_status=True,
         )
         await self.cache.delete(USERS_KEY)
-        logger.info(f"Removed user: {user.name}")
+        logger.debug(f"Removed user: {user.name}")
 
 
 async def main():
