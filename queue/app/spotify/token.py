@@ -31,14 +31,21 @@ class TokenManager:
         self.redis = redis
         self.client_id = client_id
 
+    async def seed_refresh_token(self, refresh_token: str) -> None:
+        was_set = await self.redis.set(REFRESH_KEY, refresh_token, nx=True)
+        if was_set:
+            logger.info("Seeded refresh token.")
+        else:
+            logger.info("Refresh token already exists - no seeding performed.")
+
     async def get_access_token(self) -> str:
-        cached = await self._get(ACCESS_KEY)
+        cached = await self._get_stored_token(ACCESS_KEY)
         if cached is not None:
             return cached
-        return await self.renew_access_token()  # miss -> refresh needed
+        return await self._renew_access_token()  # miss -> refresh needed
 
-    async def renew_access_token(self) -> str:
-        refresh_token = await self._get(REFRESH_KEY)
+    async def _renew_access_token(self) -> str:
+        refresh_token = await self._get_stored_token(REFRESH_KEY)
         if refresh_token is None:
             raise RuntimeError("No refresh token stored; seed one first.")
 
@@ -50,20 +57,18 @@ class TokenManager:
                 "client_id": self.client_id,
             },
         ) as response:
-            print(response)
-            response.raise_for_status()
             token = Token.model_validate(await response.json())
-            await self._save_token(token)
+            await self._store_token(token)
             logger.success("Renewed token.")
             return token.access_token
 
-    async def _save_token(self, token: Token) -> None:
+    async def _store_token(self, token: Token) -> None:
         ttl = max(1, token.expires_in - 60)  # expire before for safety
         await self.redis.set(ACCESS_KEY, token.access_token, ex=ttl)
         await self.redis.set(REFRESH_KEY, token.refresh_token)
         logger.info(f"Stored access (ttl={ttl}s) and rotated refresh token.")
 
-    async def _get(self, key: str) -> str | None:
+    async def _get_stored_token(self, key: str) -> str | None:
         value = await self.redis.get(key)
         if value is not None and isinstance(value, bytes):
             value = value.decode()
@@ -73,15 +78,19 @@ class TokenManager:
 async def main():
     load_dotenv()
 
-
-    redis = FakeRedis()
-    await redis.set(REFRESH_KEY, environ["SPOTIFY_REFRESH_TOKEN"])
-
     async with ClientSession() as session:
-        manager = TokenManager(session, redis, environ["SPOTIFY_CLIENT_ID"])
+        manager = TokenManager(
+            session,
+            FakeRedis(),
+            # environ["REDIS_KEY"].encode(),
+            environ["SPOTIFY_CLIENT_ID"],
+        )
+
+        await manager.seed_refresh_token(environ["SPOTIFY_REFRESH_TOKEN"])
+
         for i in range(3):
             token = await manager.get_access_token()
-            print(f"Token #{i + 1}: " + token)
+            print(f"Token #{i + 1}: {token[:10]}...")
             await asyncio.sleep(1)
 
 
