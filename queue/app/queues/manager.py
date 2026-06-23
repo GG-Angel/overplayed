@@ -30,6 +30,13 @@ class QueueManager:
     async def get_size(self) -> int:
         return await self.redis.llen(QUEUE_KEY)
 
+    async def is_user_in_queue(self, email: str) -> bool:
+        waiting_users = [
+            NewUser.model_validate_json(u)
+            for u in await self.redis.lrange(QUEUE_KEY, 0, -1)
+        ]
+        return email in set([u.email for u in waiting_users])
+
 
 async def main():
     manager = QueueManager(FakeRedis())

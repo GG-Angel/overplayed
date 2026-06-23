@@ -64,6 +64,10 @@ class UserManager:
             await self.redis.set(USERS_KEY, table.model_dump_json(), ex=300)
             return table.users
 
+    async def is_user_active(self, email: str) -> bool:
+        current_users = await self.get_users()
+        return email in set([u.email for u in current_users])
+
     async def add_user(self, new_user: NewUser) -> User:
         current_users = await self.get_users()
         if len(current_users) >= USER_LIMIT:

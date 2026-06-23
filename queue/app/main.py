@@ -1,14 +1,15 @@
+from pydantic import BaseModel
 from loguru import logger
 from aiohttp import ClientSession, ClientResponseError
 from cryptography.fernet import Fernet
 from redis.asyncio import Redis, ConnectionPool
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Response, status, Request, HTTPException
 from state import State, get_state
 from settings import APP_STATE_KEY, settings
 from spotify.token import TokenManager
 from spotify.validate import UserValidator
-from spotify.users import UserManager
+from spotify.users import UserManager, NewUser
 from queues.manager import QueueManager
 
 
@@ -47,8 +48,13 @@ app = FastAPI(lifespan=lifespan)
 
 
 @app.get("/")
-def healthcheck():
+def handle_healthcheck():
     return ":o"
+
+
+@app.get("/favicon.ico")
+def handle_favicon():
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @app.get("/queue")
@@ -70,10 +76,31 @@ async def get_queue(state: State = Depends(get_state)):
 #     )
 
 
-# @router.post("/queue")
-# async def enqueue_user(
-#     request: Request,
-#     user: NewUser,
-#     state: State = Depends(get_state),
-# ) -> QueuePosition:
-#     return QueuePosition(position=await state.queue.enqueue(user))
+class EnqueueUserResponse(BaseModel):
+    position: int
+
+
+@app.post("/queue")
+async def enqueue_user(
+    user: NewUser, state: State = Depends(get_state)
+) -> EnqueueUserResponse:
+    if await state.queue.is_user_in_queue(user.email):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="User is already in queue",
+        )
+
+    if await state.users.is_user_active(user.email):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="User is already active",
+        )
+
+    if not await state.validator.does_user_exist(user.email):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User does not exist",
+        )
+
+    position = await state.queue.enqueue(user)
+    return EnqueueUserResponse(position=position)

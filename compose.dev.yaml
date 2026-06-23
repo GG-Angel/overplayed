@@ -17,6 +17,8 @@ services:
       dockerfile: Dockerfile
     env_file: queue/.env
     container_name: overplayed-queue
+    ports:
+      - 8000:8000
     depends_on:
       - redis
   redis:
