@@ -111,6 +111,13 @@ const RequestAccessPage = () => {
       <Button variant="secondary" onClick={handleSubmit} disabled={submitMutation.isPending}>
         {submitMutation.isPending ? "Submitting..." : "Submit Request"}
       </Button>
+      {/* TODO: show sucess/failure messages */}
+      {/* {submitMutation.isError && (
+        <p className="text-destructive text-sm">{submitMutation.error.message}</p>
+      )}
+      {submitMutation.isSuccess && (
+        <p className="text-success text-sm">Request submitted — you're in the queue!</p>
+      )} */}
 
       {/* Modal */}
       {isModalActive && (
