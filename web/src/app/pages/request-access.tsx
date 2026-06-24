@@ -3,7 +3,7 @@ import Divider from "@/components/ui/Divider";
 import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
 import { useQueueStatus } from "@/features/user/api/get-queue-status";
-import { Info, Key, ThumbsUp, User } from "lucide-react";
+import { Info, Key, Plus, ThumbsUp, User } from "lucide-react";
 import { useState } from "react";
 
 const RequestAccessPage = () => {
@@ -13,11 +13,12 @@ const RequestAccessPage = () => {
   const [email, setEmail] = useState<string>("");
 
   return (
-    <main className="flex flex-col gap-6 max-w-xl py-2">
+    <main className="flex flex-col gap-6 max-w-xl py-2 self-center">
       <div className="flex flex-col gap-3">
-        <h1 className="flex items-center gap-4">
-          Request Access <Key className="text-accent size-10" />
-        </h1>
+        <div className="flex items-center gap-4">
+          <h1>Request Access</h1>
+          <Key className="text-accent hidden xs:block size-6 sm:size-8 md:size-10" />
+        </div>
         <p>
           Spotify caps the number of users a third-party app like this can serve at once, so access
           is granted in turns.
@@ -31,32 +32,42 @@ const RequestAccessPage = () => {
         </button>
       </div>
       <Divider />
-      <div>
-        {queue && (
-          <>
-            {(() => {
-              const active = queue.total_active_users;
-              const queued = Math.min(
-                queue.user_limit - queue.total_active_users,
-                queue.total_queued_users
-              );
-              const empty = queue.user_limit - active - queued;
-              return (
-                <div className="flex items-center gap-1">
+      <div className="flex flex-col gap-3 text-center">
+        <h2>Availability</h2>
+        {queue &&
+          (() => {
+            const active = queue.total_active_users;
+            const queued = Math.min(
+              queue.user_limit - queue.total_active_users,
+              queue.total_queued_users
+            );
+            const empty = queue.user_limit - active - queued;
+            const inLine = active + queue.total_queued_users - queue.user_limit;
+            return (
+              <>
+                <div className="flex justify-center items-center gap-0.5">
                   {Array.from({ length: active }).map((_, i) => (
-                    <User key={`active-${i}`} className="size-8 text-success" />
+                    <User key={`active-${i}`} className="size-10 text-destructive" />
                   ))}
                   {Array.from({ length: queued }).map((_, i) => (
-                    <User key={`queued-${i}`} className="size-8 text-success/50" />
+                    <User key={`queued-${i}`} className="size-10 text-destructive opacity-50" />
                   ))}
                   {Array.from({ length: empty }).map((_, i) => (
-                    <User key={`empty-${i}`} className="size-8 text-muted" />
+                    <User key={`empty-${i}`} className="size-10 text-success" />
                   ))}
+                  {inLine >= 1 && <Plus className="text-destructive opacity-50" />}
                 </div>
-              );
-            })()}
-          </>
-        )}
+                {!queue.is_full ? (
+                  <p className="text-sm">There is {empty} slot available — claim your spot!</p>
+                ) : (
+                  <p className="text-sm">
+                    No slots are currently available. {inLine}{" "}
+                    {inLine == 1 ? "user is" : "users are"} in line.
+                  </p>
+                )}
+              </>
+            );
+          })()}
       </div>
       <Divider />
       <div className="flex flex-col gap-6">
@@ -73,8 +84,8 @@ const RequestAccessPage = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
-        <Button>Submit Request</Button>
       </div>
+      <Button variant="secondary">Submit Request</Button>
 
       {/* Modal */}
       {isModalActive && (
