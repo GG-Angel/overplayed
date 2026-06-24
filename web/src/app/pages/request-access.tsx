@@ -34,9 +34,9 @@ const RequestAccessPage = () => {
   return (
     <main className="flex flex-col gap-6 max-w-xl py-2 self-center">
       <div className="flex flex-col gap-3">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <h1>Request Access</h1>
-          <Key className="text-accent hidden xs:block size-6 sm:size-8 md:size-10" />
+          <Key className="text-accent shrink-0 size-6 sm:size-8 md:size-10" />
         </div>
         <p>
           Spotify caps the number of users a third-party app like this can serve at once, so access
@@ -45,7 +45,7 @@ const RequestAccessPage = () => {
         <p>Join the queue and we'll let you in as soon as a spot frees up!</p>
         <button
           onClick={() => setIsModalActive(true)}
-          className="text-muted text-sm w-fit flex items-center gap-1.5 cursor-pointer hover:underline"
+          className="text-muted text-sm w-fit text-left flex items-center gap-1.5 cursor-pointer hover:underline"
         >
           <Info className="size-4" /> Why do you need these details?
         </button>
@@ -61,7 +61,7 @@ const RequestAccessPage = () => {
             const waiting = Math.max(0, total - queueState.user_limit);
             return (
               <>
-                <div className="flex justify-center items-center gap-0.5">
+                <div className="flex justify-center items-center gap-0.5 flex-wrap">
                   {Array.from({ length: queueState.user_limit }).map((_, i) => (
                     <User
                       key={i}
