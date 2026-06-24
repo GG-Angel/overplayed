@@ -2,6 +2,7 @@
 
 ## Needs
 
+- Add queue rate limits.
 - Test website on mobile devices.
 
 ## CI/CD Notes

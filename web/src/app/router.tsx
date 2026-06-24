@@ -15,6 +15,12 @@ const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" Component={PageLayout} errorElement={<ErrorState />}>
       <Route index Component={LandingPage} />
+      <Route
+        path="request-access"
+        lazy={async () => ({
+          Component: (await import("./pages/request-access")).default,
+        })}
+      />
       <Route path="statistics" Component={ProtectedRoute}>
         <Route
           index
