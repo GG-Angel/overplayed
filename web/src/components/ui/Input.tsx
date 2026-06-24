@@ -16,7 +16,7 @@ const Input = ({ label, hint, error, icon: Icon, className, ...props }: InputPro
 
   return (
     <div className="flex flex-col gap-2">
-      {label && <label>{label}</label>}
+      {label && <label className="font-medium text-sm">{label}</label>}
       <Card
         onClick={() => searchRef.current?.focus()}
         radius="xs"

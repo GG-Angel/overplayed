@@ -2,25 +2,25 @@ import Button from "@/components/ui/Button";
 import Divider from "@/components/ui/Divider";
 import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
-import { useQueueStatus } from "@/features/user/api/get-queue-status";
+import { useQueueState } from "@/features/user/api/get-queue-state";
 import { useSubmitAccessRequest } from "@/features/user/api/submit-access-request";
 import { accessRequestSchema, type AccessRequest } from "@/lib/types";
 import { Info, Key, Plus, ThumbsUp, User } from "lucide-react";
-import { useState } from "react";
+import { useState, type SubmitEventHandler } from "react";
 
 const RequestAccessPage = () => {
   const [isModalActive, setIsModalActive] = useState<boolean>(false);
-  const [fullName, setFullName] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [errors, setErrors] = useState<Partial<Record<keyof AccessRequest, string>>>({});
+  const [form, setForm] = useState<AccessRequest>({ name: "", email: "" });
+  const [errors, setErrors] = useState<Partial<AccessRequest>>({});
 
-  const { data: queue } = useQueueStatus();
-  const submitMutation = useSubmitAccessRequest({ name: fullName, email });
+  const { data: queueState } = useQueueState();
+  const submitMutation = useSubmitAccessRequest(form);
 
-  const handleSubmit = () => {
+  const handleSubmit: SubmitEventHandler<HTMLFormElement> = (e) => {
+    e.preventDefault();
     if (submitMutation.isPending) return;
 
-    const result = accessRequestSchema.safeParse({ name: fullName, email });
+    const result = accessRequestSchema.safeParse(form);
     if (!result.success) {
       setErrors(Object.fromEntries(result.error.issues.map((i) => [i.path[0], i.message])));
       return;
@@ -52,15 +52,15 @@ const RequestAccessPage = () => {
       <Divider />
       <div className="flex flex-col gap-3 text-center">
         <h2>Availability</h2>
-        {queue ? (
+        {queueState ? (
           (() => {
-            const active = queue.total_active_users;
+            const active = queueState.total_active_users;
             const queued = Math.min(
-              queue.user_limit - queue.total_active_users,
-              queue.total_queued_users
+              queueState.user_limit - queueState.total_active_users,
+              queueState.total_queued_users
             );
-            const empty = queue.user_limit - active - queued;
-            const inLine = active + queue.total_queued_users - queue.user_limit;
+            const empty = queueState.user_limit - active - queued;
+            const inLine = active + queueState.total_queued_users - queueState.user_limit;
             return (
               <>
                 <div className="flex justify-center items-center gap-0.5">
@@ -75,7 +75,7 @@ const RequestAccessPage = () => {
                   ))}
                   {inLine >= 1 && <Plus className="text-destructive opacity-50" />}
                 </div>
-                {!queue.is_full ? (
+                {!queueState.is_full ? (
                   <p className="text-sm">There is {empty} slot available — claim your spot!</p>
                 ) : (
                   <p className="text-sm">
@@ -91,33 +91,28 @@ const RequestAccessPage = () => {
         )}
       </div>
       <Divider />
-      <div className="flex flex-col gap-6">
+      <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
         <Input
+          type="text"
           label="Account full name"
-          hint="Note: This is not your username."
+          hint="Note: Do not enter your username — use the full name on your account."
           placeholder="e.g., John Doe"
-          value={fullName}
-          onChange={(e) => setFullName(e.target.value)}
+          value={form.name}
           error={errors.name}
+          onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
         />
         <Input
+          type="email"
           label="Account email"
           placeholder="e.g., example@gmail.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          value={form.email}
           error={errors.email}
+          onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
         />
-      </div>
-      <Button variant="secondary" onClick={handleSubmit} disabled={submitMutation.isPending}>
-        {submitMutation.isPending ? "Submitting..." : "Submit Request"}
-      </Button>
-      {/* TODO: show sucess/failure messages */}
-      {/* {submitMutation.isError && (
-        <p className="text-destructive text-sm">{submitMutation.error.message}</p>
-      )}
-      {submitMutation.isSuccess && (
-        <p className="text-success text-sm">Request submitted — you're in the queue!</p>
-      )} */}
+        <Button type="submit" variant="secondary" disabled={submitMutation.isPending}>
+          {submitMutation.isPending ? "Submitting..." : "Submit Request"}
+        </Button>
+      </form>
 
       {/* Modal */}
       {isModalActive && (
