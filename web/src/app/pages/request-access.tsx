@@ -5,6 +5,7 @@ import Modal from "@/components/ui/Modal";
 import { useQueueState } from "@/features/user/api/get-queue-state";
 import { useSubmitAccessRequest } from "@/features/user/api/submit-access-request";
 import { accessRequestSchema, type AccessRequest } from "@/lib/types";
+import { formatCount } from "@/lib/utils";
 import { Info, Key, Plus, ThumbsUp, User } from "lucide-react";
 import { useState, type SubmitEventHandler } from "react";
 
@@ -54,33 +55,27 @@ const RequestAccessPage = () => {
         <h2>Availability</h2>
         {queueState ? (
           (() => {
-            const active = queueState.total_active_users;
-            const queued = Math.min(
-              queueState.user_limit - queueState.total_active_users,
-              queueState.total_queued_users
-            );
-            const empty = queueState.user_limit - active - queued;
-            const inLine = active + queueState.total_queued_users - queueState.user_limit;
+            const total = queueState.total_active_users + queueState.total_queued_users;
+            const active = Math.min(total, queueState.user_limit);
+            const empty = Math.max(0, queueState.user_limit - active);
+            const waiting = Math.max(0, total - queueState.user_limit);
             return (
               <>
                 <div className="flex justify-center items-center gap-0.5">
-                  {Array.from({ length: active }).map((_, i) => (
-                    <User key={`active-${i}`} className="size-10 text-destructive" />
+                  {Array.from({ length: queueState.user_limit }).map((_, i) => (
+                    <User
+                      key={i}
+                      className={`size-10 ${i < active ? "text-destructive" : "text-success"}`}
+                    />
                   ))}
-                  {Array.from({ length: queued }).map((_, i) => (
-                    <User key={`queued-${i}`} className="size-10 text-destructive opacity-50" />
-                  ))}
-                  {Array.from({ length: empty }).map((_, i) => (
-                    <User key={`empty-${i}`} className="size-10 text-success" />
-                  ))}
-                  {inLine >= 1 && <Plus className="text-destructive opacity-50" />}
+                  {waiting > 0 && <Plus className="text-destructive" />}
                 </div>
-                {!queueState.is_full ? (
+                {empty > 0 ? (
                   <p className="text-sm">There is {empty} slot available — claim your spot!</p>
                 ) : (
                   <p className="text-sm">
-                    No slots are currently available. {inLine}{" "}
-                    {inLine == 1 ? "user is" : "users are"} in line.
+                    No slots are currently available. {formatCount(waiting)}{" "}
+                    {waiting == 1 ? "user is" : "users are"} in line.
                   </p>
                 )}
               </>
