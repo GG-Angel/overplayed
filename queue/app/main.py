@@ -53,7 +53,7 @@ async def lifespan(app: FastAPI):
         await auth.seed_refresh_token(settings.spotify_refresh_token)
 
         # start background queue worker
-        worker.start()
+        # worker.start()
 
         app.state[APP_STATE_KEY] = State(queue=queue)
         yield
@@ -88,6 +88,7 @@ class ViewQueueResponse(BaseModel):
     total_active_users: int
     total_queued_users: int
     is_full: bool
+    user_limit: int
 
 
 @app.get("/queue")
@@ -98,6 +99,7 @@ async def view_queue(state: State = Depends(get_state)) -> ViewQueueResponse:
         total_active_users=len(active),
         total_queued_users=len(queued),
         is_full=len(active) + len(queued) >= USER_LIMIT,
+        user_limit=USER_LIMIT,
     )
 
 

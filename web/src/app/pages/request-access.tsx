@@ -3,11 +3,11 @@ import Divider from "@/components/ui/Divider";
 import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
 import { useQueueStatus } from "@/features/user/api/get-queue-status";
-import { Info, Key, ThumbsUp } from "lucide-react";
+import { Info, Key, ThumbsUp, User } from "lucide-react";
 import { useState } from "react";
 
 const RequestAccessPage = () => {
-  const queue = useQueueStatus();
+  const { data: queue } = useQueueStatus();
   const [isModalActive, setIsModalActive] = useState<boolean>(false);
   const [fullName, setFullName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
@@ -31,6 +31,34 @@ const RequestAccessPage = () => {
         </button>
       </div>
       <Divider />
+      <div>
+        {queue && (
+          <>
+            {(() => {
+              const active = queue.total_active_users;
+              const queued = Math.min(
+                queue.user_limit - queue.total_active_users,
+                queue.total_queued_users
+              );
+              const empty = queue.user_limit - active - queued;
+              return (
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: active }).map((_, i) => (
+                    <User key={`active-${i}`} className="size-8 text-success" />
+                  ))}
+                  {Array.from({ length: queued }).map((_, i) => (
+                    <User key={`queued-${i}`} className="size-8 text-success/50" />
+                  ))}
+                  {Array.from({ length: empty }).map((_, i) => (
+                    <User key={`empty-${i}`} className="size-8 text-muted" />
+                  ))}
+                </div>
+              );
+            })()}
+          </>
+        )}
+      </div>
+      <Divider />
       <div className="flex flex-col gap-6">
         <Input
           label="Account full name"
@@ -47,8 +75,8 @@ const RequestAccessPage = () => {
         />
         <Button>Submit Request</Button>
       </div>
-      {/* TODO: configure CORS on queue */}
-      <div>{queue.data?.total_active_users}</div>
+
+      {/* Modal */}
       {isModalActive && (
         <Modal onClose={() => setIsModalActive(false)} className="flex flex-col gap-3">
           <h2>Why we need these details</h2>
