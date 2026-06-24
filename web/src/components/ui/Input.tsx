@@ -5,11 +5,12 @@ import type { LucideIcon } from "lucide-react";
 
 export type InputProps = ComponentProps<"input"> & {
   label?: string;
+  hint?: string;
   icon?: LucideIcon;
   className?: string;
 };
 
-const Input = ({ label, icon: Icon, className, ...props }: InputProps) => {
+const Input = ({ label, hint, icon: Icon, className, ...props }: InputProps) => {
   const searchRef = useRef<HTMLInputElement>(null);
 
   return (
@@ -27,6 +28,7 @@ const Input = ({ label, icon: Icon, className, ...props }: InputProps) => {
         {Icon && <Icon className="text-muted" />}
         <input ref={searchRef} className={cn("w-full outline-none", className)} {...props} />
       </Card>
+      {hint && <p className="text-xs text-muted">{hint}</p>}
     </div>
   );
 };
