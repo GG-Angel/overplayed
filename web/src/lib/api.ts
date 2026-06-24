@@ -16,11 +16,14 @@ function authRequestInterceptor(config: InternalAxiosRequestConfig) {
   return config;
 }
 
-const api = Axios.create({
-  baseURL: env.API_BASE_URL,
-});
+function createApiClient(baseURL: string) {
+  const client = Axios.create({ baseURL });
+  client.interceptors.request.use(authRequestInterceptor);
+  client.interceptors.response.use((response) => response.data);
+  return client;
+}
 
-api.interceptors.request.use(authRequestInterceptor);
-api.interceptors.response.use((response) => response.data);
+const api = createApiClient(env.API_BASE_URL);
+export const queueApi = createApiClient(env.QUEUE_BASE_URL);
 
 export default api;

@@ -10,6 +10,9 @@ export const queryConfig = {
 export const queryKeys = {
   user: ["user"] as const,
   userMetrics: () => [...queryKeys.user, "metrics"] as const,
+  queue: {
+    status: ["queue", "status"] as const,
+  },
   metrics: ["metrics"] as const,
   leaderboard: ["leaderboard"] as const,
   preview: (isrc: string) => ["preview", isrc] as const,

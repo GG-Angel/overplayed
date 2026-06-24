@@ -1,3 +1,4 @@
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from aiohttp import ClientSession
 from cryptography.fernet import Fernet
@@ -63,6 +64,14 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[settings.frontend_url],
+    allow_credentials=True,
+    allow_methods=["GET", "POST"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/")

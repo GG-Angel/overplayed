@@ -125,6 +125,17 @@ export const swipeSubmissionResponseSchema = z.object({
   backup_playlist: playlistSchema.nullable(),
 });
 
+export const queueStatusSchema = z.object({
+  total_active_users: z.number().nonnegative(),
+  total_queued_users: z.number().nonnegative(),
+  is_full: z.boolean(),
+});
+
+export const accessRequestFormSchema = z.object({
+  name: z.string().min(1).trim(),
+  email: z.email(),
+});
+
 export type Image = z.infer<typeof imageSchema>;
 export type User = z.infer<typeof userSchema>;
 export type CurrentUser = z.infer<typeof currentUserSchema>;
@@ -138,3 +149,5 @@ export type SwipeSubmissionForm = z.infer<typeof swipeSubmissionFormSchema>;
 export type SwipeSubmissionResponse = z.infer<typeof swipeSubmissionResponseSchema>;
 export type Metrics = z.infer<typeof globalMetricsSchema>;
 export type Leaderboard = z.infer<typeof leaderboardSchema>;
+export type QueueStatus = z.infer<typeof queueStatusSchema>;
+export type AccessRequestForm = z.infer<typeof accessRequestFormSchema>;
