@@ -6,11 +6,12 @@ import type { LucideIcon } from "lucide-react";
 export type InputProps = ComponentProps<"input"> & {
   label?: string;
   hint?: string;
+  error?: string;
   icon?: LucideIcon;
   className?: string;
 };
 
-const Input = ({ label, hint, icon: Icon, className, ...props }: InputProps) => {
+const Input = ({ label, hint, error, icon: Icon, className, ...props }: InputProps) => {
   const searchRef = useRef<HTMLInputElement>(null);
 
   return (
@@ -29,6 +30,7 @@ const Input = ({ label, hint, icon: Icon, className, ...props }: InputProps) => 
         <input ref={searchRef} className={cn("w-full outline-none", className)} {...props} />
       </Card>
       {hint && <p className="text-xs text-muted">{hint}</p>}
+      {error && <p className="text-xs text-destructive">{error}</p>}
     </div>
   );
 };

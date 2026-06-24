@@ -3,14 +3,32 @@ import Divider from "@/components/ui/Divider";
 import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
 import { useQueueStatus } from "@/features/user/api/get-queue-status";
+import { useSubmitAccessRequest } from "@/features/user/api/submit-access-request";
+import { accessRequestSchema, type AccessRequest } from "@/lib/types";
 import { Info, Key, Plus, ThumbsUp, User } from "lucide-react";
 import { useState } from "react";
 
 const RequestAccessPage = () => {
-  const { data: queue } = useQueueStatus();
   const [isModalActive, setIsModalActive] = useState<boolean>(false);
   const [fullName, setFullName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
+  const [errors, setErrors] = useState<Partial<Record<keyof AccessRequest, string>>>({});
+
+  const { data: queue } = useQueueStatus();
+  const submitMutation = useSubmitAccessRequest({ name: fullName, email });
+
+  const handleSubmit = () => {
+    if (submitMutation.isPending) return;
+
+    const result = accessRequestSchema.safeParse({ name: fullName, email });
+    if (!result.success) {
+      setErrors(Object.fromEntries(result.error.issues.map((i) => [i.path[0], i.message])));
+      return;
+    }
+
+    setErrors({});
+    submitMutation.mutate();
+  };
 
   return (
     <main className="flex flex-col gap-6 max-w-xl py-2 self-center">
@@ -34,7 +52,7 @@ const RequestAccessPage = () => {
       <Divider />
       <div className="flex flex-col gap-3 text-center">
         <h2>Availability</h2>
-        {queue &&
+        {queue ? (
           (() => {
             const active = queue.total_active_users;
             const queued = Math.min(
@@ -67,7 +85,10 @@ const RequestAccessPage = () => {
                 )}
               </>
             );
-          })()}
+          })()
+        ) : (
+          <div className="w-full max-w-sm self-center h-18 bg-card rounded-2xl animate-pulse" />
+        )}
       </div>
       <Divider />
       <div className="flex flex-col gap-6">
@@ -77,15 +98,19 @@ const RequestAccessPage = () => {
           placeholder="e.g., John Doe"
           value={fullName}
           onChange={(e) => setFullName(e.target.value)}
+          error={errors.name}
         />
         <Input
           label="Account email"
           placeholder="e.g., example@gmail.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          error={errors.email}
         />
       </div>
-      <Button variant="secondary">Submit Request</Button>
+      <Button variant="secondary" onClick={handleSubmit} disabled={submitMutation.isPending}>
+        {submitMutation.isPending ? "Submitting..." : "Submit Request"}
+      </Button>
 
       {/* Modal */}
       {isModalActive && (

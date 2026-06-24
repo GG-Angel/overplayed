@@ -132,9 +132,13 @@ export const queueStatusSchema = z.object({
   user_limit: z.number().nonnegative(),
 });
 
-export const accessRequestFormSchema = z.object({
-  name: z.string().min(1).trim(),
-  email: z.email(),
+export const accessRequestSchema = z.object({
+  name: z.string().trim().min(1, "Full name is required"),
+  email: z.email("Enter a valid email").trim(),
+});
+
+export const accessResponseSchema = z.object({
+  position: z.number().nonnegative(),
 });
 
 export type Image = z.infer<typeof imageSchema>;
@@ -151,4 +155,5 @@ export type SwipeSubmissionResponse = z.infer<typeof swipeSubmissionResponseSche
 export type Metrics = z.infer<typeof globalMetricsSchema>;
 export type Leaderboard = z.infer<typeof leaderboardSchema>;
 export type QueueStatus = z.infer<typeof queueStatusSchema>;
-export type AccessRequestForm = z.infer<typeof accessRequestFormSchema>;
+export type AccessRequest = z.infer<typeof accessRequestSchema>;
+export type AccessResponse = z.infer<typeof accessResponseSchema>;
