@@ -112,7 +112,7 @@ async def enqueue_user(
         )
 
 
-@app.get("/status")
+@app.post("/status")
 async def view_user_status(
     user: NewUser, state: State = Depends(get_state)
 ) -> UserStatusResult:

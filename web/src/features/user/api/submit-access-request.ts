@@ -12,7 +12,10 @@ export const useSubmitAccessRequest = (form: AccessRequest) => {
   return useMutation({
     mutationFn: () => submitAccessRequest(form),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.queue() });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.queue() }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.userAccess() }),
+      ]);
     },
   });
 };

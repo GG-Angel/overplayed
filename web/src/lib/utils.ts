@@ -39,6 +39,10 @@ export function formatCount(n: number): string {
   return `${(n / 1_000_000).toFixed(1)}m`;
 }
 
+export function formatDateTime(iso: string): string {
+  return new Date(iso).toLocaleString();
+}
+
 export function wrapSlice<T>(arr: T[], start: number, end: number): T[] {
   const len = arr.length;
   const actualStart = start % len;

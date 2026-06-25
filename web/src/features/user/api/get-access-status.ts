@@ -1,16 +1,17 @@
 import { queueApi } from "@/lib/api";
 import { queryKeys } from "@/lib/query";
-import { accessStatusSchema } from "@/lib/types";
+import { accessStatusSchema, type AccessRequest } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 
-const getAccessStatus = async () => {
-  return accessStatusSchema.parse(await queueApi.get("/status"));
+const getAccessStatus = async (form: AccessRequest) => {
+  return accessStatusSchema.parse(await queueApi.post("/status", form));
 };
 
-export const useAccessStatus = () => {
+export const useAccessStatus = (form: AccessRequest) => {
   return useQuery({
-    queryFn: getAccessStatus,
+    queryFn: () => getAccessStatus(form),
     queryKey: queryKeys.userAccess(),
     staleTime: 30 * 1000,
+    enabled: false,
   });
 };

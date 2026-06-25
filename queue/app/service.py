@@ -124,7 +124,7 @@ class QueueService:
 
     async def get_user_status(self, user: NewUser) -> UserStatusResult:
         active = await self.list_active_users()
-        active_user = next((u for u in active if u.email == user.email), None)
+        active_user = next((u for u in active if u == user), None)
         if active_user:
             return UserStatusResult(
                 position=None,
@@ -135,11 +135,7 @@ class QueueService:
 
         queued = await self.list_queued_users()
         position = next(
-            (
-                i + 1
-                for i, queued_user in enumerate(queued)
-                if queued_user.email == user.email
-            ),
+            (i + 1 for i, queued_user in enumerate(queued) if queued_user == user),
             None,
         )
         if position is None:
