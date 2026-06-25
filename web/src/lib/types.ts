@@ -137,7 +137,7 @@ export const accessRequestSchema = z.object({
   email: z.email("Enter a valid email").trim(),
 });
 
-export const accessResponseSchema = z.object({
+export const accessStatusSchema = z.object({
   position: z.number().nonnegative().nullable(),
   admitted: z.boolean(),
   start_time: z.iso.datetime(),
@@ -159,4 +159,4 @@ export type Metrics = z.infer<typeof globalMetricsSchema>;
 export type Leaderboard = z.infer<typeof leaderboardSchema>;
 export type QueueStatus = z.infer<typeof queueStatusSchema>;
 export type AccessRequest = z.infer<typeof accessRequestSchema>;
-export type AccessResponse = z.infer<typeof accessResponseSchema>;
+export type AccessStatus = z.infer<typeof accessStatusSchema>;

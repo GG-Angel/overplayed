@@ -2,7 +2,7 @@ import Button from "@/components/ui/Button";
 import Divider from "@/components/ui/Divider";
 import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
-import { useQueueState } from "@/features/user/api/get-queue-state";
+import { useQueueStatus } from "@/features/user/api/get-queue-state";
 import { useSubmitAccessRequest } from "@/features/user/api/submit-access-request";
 import { accessRequestSchema, type AccessRequest } from "@/lib/types";
 import { formatCount } from "@/lib/utils";
@@ -14,7 +14,7 @@ const RequestAccessPage = () => {
   const [form, setForm] = useState<AccessRequest>({ name: "", email: "" });
   const [errors, setErrors] = useState<Partial<AccessRequest>>({});
 
-  const { data: queue } = useQueueState();
+  const { data: queue } = useQueueStatus();
   const submitMutation = useSubmitAccessRequest(form);
 
   const validateForm = () => {

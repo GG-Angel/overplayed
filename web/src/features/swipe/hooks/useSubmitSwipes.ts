@@ -20,10 +20,8 @@ const useSubmitSwipes = () => {
       }),
     onSuccess: async () => {
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.playlists.all }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.metrics }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.userMetrics() }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.leaderboard }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.playlists() }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.metrics() }),
       ]);
     },
   });
