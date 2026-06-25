@@ -17,17 +17,26 @@ const RequestAccessPage = () => {
   const { data: queue } = useQueueState();
   const submitMutation = useSubmitAccessRequest(form);
 
-  const handleSubmit: SubmitEventHandler<HTMLFormElement> = (e) => {
-    e.preventDefault();
-    if (submitMutation.isPending) return;
-
+  const validateForm = () => {
     const result = accessRequestSchema.safeParse(form);
     if (!result.success) {
       setErrors(Object.fromEntries(result.error.issues.map((i) => [i.path[0], i.message])));
-      return;
+      return false;
     }
-
     setErrors({});
+    return true;
+  };
+
+  const handleCheckStatus = () => {
+    if (submitMutation.isPending) return;
+    if (!validateForm()) return;
+    // TODO: finish rest
+  };
+
+  const handleSubmitRequest: SubmitEventHandler<HTMLFormElement> = (e) => {
+    e.preventDefault();
+    if (submitMutation.isPending) return;
+    if (!validateForm()) return;
     submitMutation.mutate();
   };
 
@@ -96,7 +105,7 @@ const RequestAccessPage = () => {
         )}
       </div>
       <Divider />
-      <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
+      <form className="flex flex-col gap-6" onSubmit={handleSubmitRequest}>
         <Input
           type="text"
           label="Account full name"
@@ -121,6 +130,7 @@ const RequestAccessPage = () => {
             icon={<CircleQuestionMark className="size-4" />}
             type="button"
             variant="secondary"
+            onClick={handleCheckStatus}
           >
             Check Status
           </Button>

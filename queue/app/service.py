@@ -22,14 +22,18 @@ class UserDoesNotExist(Exception):
     pass
 
 
-class EnqueueResult(BaseModel):
+class UserNotAdded(Exception):
+    pass
+
+
+class UserStatusResult(BaseModel):
     position: int | None
     admitted: bool
     start_time: datetime
     end_time: datetime
 
 
-class ViewResult(BaseModel):
+class ViewQueueResult(BaseModel):
     active_users: int
     queued_users: int
     user_limit: int
@@ -90,67 +94,78 @@ class QueueService:
                 logger.error(f"Failed to add user {user.name}, skipping.")
         return users_added
 
-    def _estimate_start_times(
-        self, active_users: list[User], in_queue: int, now: datetime
-    ) -> list[datetime]:
+    def _get_start_time(
+        self,
+        active_users: list[User],
+        position: int,
+        now: datetime,
+    ) -> datetime:
         heap = [u.createdAt + ACCESS_DURATION for u in active_users]
         heap += [now] * max(0, USER_LIMIT - len(active_users))
         heapq.heapify(heap)
 
-        starts = []
-        for _ in range(in_queue):
-            slot_free = heapq.heappop(heap)
-            start = max(slot_free, now)  # can't start in the past
-            starts.append(start)
+        start = now
+        for _ in range(position):
+            start = max(heapq.heappop(heap), now)  # can't start in the past
             heapq.heappush(heap, start + ACCESS_DURATION)  # they hold it 24h
-        return starts  # starts[i] = est. start for the i-th person in line
+        return start
 
-    async def enqueue(self, user: NewUser) -> EnqueueResult:
-        if await self._queue.is_user_in_queue(user.email):
+    async def enqueue(self, user: NewUser) -> UserStatusResult:
+        if await self._queue.has_user(user.email):
             raise UserAlreadyInQueue()
         if await self._users.is_user_active(user.email):
             raise UserAlreadyActive()
         if not await self._validator.does_user_exist(user.email):
             raise UserDoesNotExist()
 
-        position = await self._queue.enqueue(user)
-        now = datetime.now(timezone.utc)
+        await self._queue.enqueue(user)
+        await self._fill_available_slots()
+        return await self.get_user_status(user)
 
-        added = await self._fill_available_slots()
-        admitted = any(u.email == user.email for u in added)
-        if admitted:
-            return EnqueueResult(
+    async def get_user_status(self, user: NewUser) -> UserStatusResult:
+        active = await self.list_active_users()
+        active_user = next((u for u in active if u.email == user.email), None)
+        if active_user:
+            return UserStatusResult(
                 position=None,
                 admitted=True,
-                start_time=now,
-                end_time=now + ACCESS_DURATION,
+                start_time=active_user.createdAt,
+                end_time=active_user.createdAt + ACCESS_DURATION,
             )
 
-        start_time = self._estimate_start_times(
-            await self.list_active_users(),
-            await self._queue.get_size(),
-            now,
-        )[position - 1]
-
-        return EnqueueResult(
+        queued = await self.list_queued_users()
+        position = next(
+            (
+                i + 1
+                for i, queued_user in enumerate(queued)
+                if queued_user.email == user.email
+            ),
+            None,
+        )
+        if position is None:
+            raise UserNotAdded()
+        start_time = self._get_start_time(active, position, datetime.now(timezone.utc))
+        return UserStatusResult(
             position=position,
             admitted=False,
             start_time=start_time,
             end_time=start_time + ACCESS_DURATION,
         )
 
-    async def view(self) -> ViewResult:
+    async def get_queue_status(self) -> ViewQueueResult:
         active = await self.list_active_users()
         queued = await self._queue.get_size()
-        return ViewResult(
+        next_available = (
+            self._get_start_time(active, queued + 1, datetime.now(timezone.utc))
+            if len(active) + queued >= USER_LIMIT
+            else None
+        )
+
+        return ViewQueueResult(
             active_users=len(active),
             queued_users=queued,
             user_limit=USER_LIMIT,
-            next_available_time=self._estimate_start_times(
-                active, queued + 1, datetime.now(timezone.utc)
-            )[queued]
-            if len(active) + queued >= USER_LIMIT
-            else None,
+            next_available_time=next_available,
         )
 
     async def process(self) -> None:

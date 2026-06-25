@@ -1,6 +1,4 @@
-from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 from aiohttp import ClientSession
 from cryptography.fernet import Fernet
 from redis.asyncio import Redis, ConnectionPool
@@ -19,6 +17,9 @@ from service import (
     UserAlreadyActive,
     UserDoesNotExist,
     UserAlreadyInQueue,
+    ViewQueueResult,
+    UserStatusResult,
+    UserNotAdded,
 )
 
 
@@ -85,44 +86,18 @@ def handle_favicon():
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-class ViewQueueResponse(BaseModel):
-    active_users: int
-    queued_users: int
-    user_limit: int
-    next_available_time: datetime | None
-
-
 @app.get("/queue")
-async def view_queue(state: State = Depends(get_state)) -> ViewQueueResponse:
-    result = await state.queue.view()
-    return ViewQueueResponse(
-        active_users=result.active_users,
-        queued_users=result.queued_users,
-        user_limit=result.user_limit,
-        next_available_time=result.next_available_time,
-    )
-
-
-class EnqueueUserResponse(BaseModel):
-    position: int | None
-    admitted: bool
-    start_time: datetime
-    end_time: datetime
+async def view_queue(state: State = Depends(get_state)) -> ViewQueueResult:
+    return await state.queue.get_queue_status()
 
 
 @app.post("/queue")
 async def enqueue_user(
     user: NewUser,
     state: State = Depends(get_state),
-) -> EnqueueUserResponse:
+) -> UserStatusResult:
     try:
-        result = await state.queue.enqueue(user)
-        return EnqueueUserResponse(
-            position=result.position,
-            admitted=result.admitted,
-            start_time=result.start_time,
-            end_time=result.end_time,
-        )
+        return await state.queue.enqueue(user)
     except UserAlreadyActive:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail="User already active"
@@ -135,8 +110,15 @@ async def enqueue_user(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User does not exist"
         )
-    except Exception:
+
+
+@app.get("/status")
+async def view_user_status(
+    user: NewUser, state: State = Depends(get_state)
+) -> UserStatusResult:
+    try:
+        return await state.queue.get_user_status(user)
+    except UserNotAdded:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to queue user",
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not added"
         )
