@@ -10,7 +10,7 @@ from state import State, get_state
 from settings import APP_STATE_KEY, settings
 from spotify.token import SpotifyTokenClient
 from spotify.validate import SpotifyUserValidator
-from spotify.users import SpotifyUserManagementClient, NewUser, USER_LIMIT
+from spotify.users import SpotifyUserManagementClient, NewUser
 from queues.manager import QueueRepository
 from cache import RedisCache
 from worker import QueueWorker
@@ -89,16 +89,17 @@ class ViewQueueResponse(BaseModel):
     active_users: int
     queued_users: int
     user_limit: int
+    next_available_time: datetime | None
 
 
 @app.get("/queue")
 async def view_queue(state: State = Depends(get_state)) -> ViewQueueResponse:
-    active = await state.queue.list_active_users()
-    queued = await state.queue.list_queued_users()
+    result = await state.queue.view()
     return ViewQueueResponse(
-        active_users=len(active),
-        queued_users=len(queued),
-        user_limit=USER_LIMIT,
+        active_users=result.active_users,
+        queued_users=result.queued_users,
+        user_limit=result.user_limit,
+        next_available_time=result.next_available_time,
     )
 
 

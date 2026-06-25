@@ -29,6 +29,13 @@ class EnqueueResult(BaseModel):
     end_time: datetime
 
 
+class ViewResult(BaseModel):
+    active_users: int
+    queued_users: int
+    user_limit: int
+    next_available_time: datetime | None
+
+
 class QueueService:
     def __init__(
         self,
@@ -107,10 +114,10 @@ class QueueService:
             raise UserDoesNotExist()
 
         position = await self._queue.enqueue(user)
-        added = await self._fill_available_slots()
-        admitted = any(u.email == user.email for u in added)
         now = datetime.now(timezone.utc)
 
+        added = await self._fill_available_slots()
+        admitted = any(u.email == user.email for u in added)
         if admitted:
             return EnqueueResult(
                 position=None,
@@ -130,6 +137,20 @@ class QueueService:
             admitted=False,
             start_time=start_time,
             end_time=start_time + ACCESS_DURATION,
+        )
+
+    async def view(self) -> ViewResult:
+        active = await self.list_active_users()
+        queued = await self._queue.get_size()
+        return ViewResult(
+            active_users=len(active),
+            queued_users=queued,
+            user_limit=USER_LIMIT,
+            next_available_time=self._estimate_start_times(
+                active, queued + 1, datetime.now(timezone.utc)
+            )[queued]
+            if len(active) + queued >= USER_LIMIT
+            else None,
         )
 
     async def process(self) -> None:

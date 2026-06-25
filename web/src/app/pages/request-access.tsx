@@ -14,7 +14,7 @@ const RequestAccessPage = () => {
   const [form, setForm] = useState<AccessRequest>({ name: "", email: "" });
   const [errors, setErrors] = useState<Partial<AccessRequest>>({});
 
-  const { data: queueState } = useQueueState();
+  const { data: queue } = useQueueState();
   const submitMutation = useSubmitAccessRequest(form);
 
   const handleSubmit: SubmitEventHandler<HTMLFormElement> = (e) => {
@@ -53,16 +53,16 @@ const RequestAccessPage = () => {
       <Divider />
       <div className="flex flex-col gap-3 text-center">
         <h2>Availability</h2>
-        {queueState ? (
+        {queue ? (
           (() => {
-            const total = queueState.active_users + queueState.queued_users;
-            const active = Math.min(total, queueState.user_limit);
-            const empty = Math.max(0, queueState.user_limit - active);
-            const waiting = Math.max(0, total - queueState.user_limit);
+            const total = queue.active_users + queue.queued_users;
+            const active = Math.min(total, queue.user_limit);
+            const empty = Math.max(0, queue.user_limit - active);
+            const waiting = Math.max(0, total - queue.user_limit);
             return (
               <>
                 <div className="flex justify-center items-center gap-0.5 flex-wrap">
-                  {Array.from({ length: queueState.user_limit }).map((_, i) => (
+                  {Array.from({ length: queue.user_limit }).map((_, i) => (
                     <User
                       key={i}
                       className={`size-10 ${i < active ? "text-destructive" : "text-success"}`}
@@ -76,10 +76,17 @@ const RequestAccessPage = () => {
                     your spot!
                   </p>
                 ) : (
-                  <p className="text-sm">
-                    No slots are currently available. {formatCount(waiting)}{" "}
-                    {waiting == 1 ? "user is" : "users are"} in line.
-                  </p>
+                  <div className="flex flex-col gap-1.5">
+                    <p className="text-sm">
+                      No slots are currently available. {formatCount(waiting)}{" "}
+                      {waiting == 1 ? "user is" : "users are"} in line.
+                    </p>
+                    {queue.next_available_time && (
+                      <p className="text-xs text-muted tracking-wide">
+                        Next available time: {new Date(queue.next_available_time).toLocaleString()}
+                      </p>
+                    )}
+                  </div>
                 )}
               </>
             );
@@ -109,13 +116,13 @@ const RequestAccessPage = () => {
           disabled={submitMutation.isPending}
           onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
         />
-        <Button type="submit" variant="secondary" disabled={submitMutation.isPending}>
-          {submitMutation.isPending ? "Submitting..." : "Submit Request"}
-        </Button>
+        <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
+          <Button variant="secondary">Check Status</Button>
+          <Button type="submit" disabled={submitMutation.isPending}>
+            {submitMutation.isPending ? "Submitting..." : "Submit Request"}
+          </Button>
+        </div>
       </form>
-      <div>
-        
-      </div>
 
       {/* Modal */}
       {isModalActive && (

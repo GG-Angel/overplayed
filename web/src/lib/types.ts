@@ -129,6 +129,7 @@ export const queueStatusSchema = z.object({
   active_users: z.number().nonnegative(),
   queued_users: z.number().nonnegative(),
   user_limit: z.number().nonnegative(),
+  next_available_time: z.iso.datetime().nullable(),
 });
 
 export const accessRequestSchema = z.object({
