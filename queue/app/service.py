@@ -1,3 +1,4 @@
+from pydantic import BaseModel
 from loguru import logger
 from aiohttp import ClientResponseError
 from datetime import datetime, timezone, timedelta
@@ -18,6 +19,11 @@ class UserAlreadyActive(Exception):
 
 class UserDoesNotExist(Exception):
     pass
+
+
+class EnqueueResult(BaseModel):
+    position: int
+    admitted: bool
 
 
 class QueueService:
@@ -74,14 +80,18 @@ class QueueService:
                 logger.error(f"Failed to add user {user.name}, skipping.")
         return users_added
 
-    async def enqueue(self, user: NewUser) -> int:
+    async def enqueue(self, user: NewUser) -> EnqueueResult:
         if await self._queue.is_user_in_queue(user.email):
             raise UserAlreadyInQueue()
         if await self._users.is_user_active(user.email):
             raise UserAlreadyActive()
         if not await self._validator.does_user_exist(user.email):
             raise UserDoesNotExist()
-        return await self._queue.enqueue(user)
+
+        position = await self._queue.enqueue(user)
+        added = await self._fill_available_slots()
+        admitted = any(u.email == user.email for u in added)
+        return EnqueueResult(position=position, admitted=admitted)
 
     async def process(self) -> None:
         removed = await self._evict_expired_users()

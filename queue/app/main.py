@@ -85,9 +85,8 @@ def handle_favicon():
 
 
 class ViewQueueResponse(BaseModel):
-    total_active_users: int
-    total_queued_users: int
-    is_full: bool
+    active_users: int
+    queued_users: int
     user_limit: int
 
 
@@ -96,15 +95,15 @@ async def view_queue(state: State = Depends(get_state)) -> ViewQueueResponse:
     active = await state.queue.list_active_users()
     queued = await state.queue.list_queued_users()
     return ViewQueueResponse(
-        total_active_users=len(active),
-        total_queued_users=len(queued),
-        is_full=len(active) + len(queued) >= USER_LIMIT,
+        active_users=len(active),
+        queued_users=len(queued),
         user_limit=USER_LIMIT,
     )
 
 
 class EnqueueUserResponse(BaseModel):
     position: int
+    admitted: bool
     # session est start time (num queued * 24 hr + time remaining for active users) nah wrong
     # session est end time (start time + 24 hr?)
 
@@ -115,8 +114,8 @@ async def enqueue_user(
     state: State = Depends(get_state),
 ) -> EnqueueUserResponse:
     try:
-        position = await state.queue.enqueue(user)
-        return EnqueueUserResponse(position=position)
+        result = await state.queue.enqueue(user)
+        return EnqueueUserResponse(position=result.position, admitted=result.admitted)
     except UserAlreadyActive:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail="User already active"
