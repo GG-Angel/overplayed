@@ -6,7 +6,7 @@ import { useQueueState } from "@/features/user/api/get-queue-state";
 import { useSubmitAccessRequest } from "@/features/user/api/submit-access-request";
 import { accessRequestSchema, type AccessRequest } from "@/lib/types";
 import { formatCount } from "@/lib/utils";
-import { Info, Key, Plus, ThumbsUp, User } from "lucide-react";
+import { CircleQuestionMark, Info, Key, Mail, Plus, ThumbsUp, User } from "lucide-react";
 import { useState, type SubmitEventHandler } from "react";
 
 const RequestAccessPage = () => {
@@ -117,8 +117,18 @@ const RequestAccessPage = () => {
           onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
         />
         <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
-          <Button variant="secondary">Check Status</Button>
-          <Button type="submit" disabled={submitMutation.isPending}>
+          <Button
+            icon={<CircleQuestionMark className="size-4" />}
+            type="button"
+            variant="secondary"
+          >
+            Check Status
+          </Button>
+          <Button
+            icon={<Mail className="size-4" />}
+            type="submit"
+            disabled={submitMutation.isPending}
+          >
             {submitMutation.isPending ? "Submitting..." : "Submit Request"}
           </Button>
         </div>
