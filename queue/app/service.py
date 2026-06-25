@@ -1,3 +1,4 @@
+import heapq
 from pydantic import BaseModel
 from loguru import logger
 from aiohttp import ClientResponseError
@@ -24,6 +25,8 @@ class UserDoesNotExist(Exception):
 class EnqueueResult(BaseModel):
     position: int
     admitted: bool
+    start_time: datetime
+    end_time: datetime
 
 
 class QueueService:
@@ -80,6 +83,21 @@ class QueueService:
                 logger.error(f"Failed to add user {user.name}, skipping.")
         return users_added
 
+    def _estimate_start_times(
+        self, active_users: list[User], in_queue: int, now: datetime
+    ) -> list[datetime]:
+        heap = [u.createdAt + ACCESS_DURATION for u in active_users]
+        heap += [now] * max(0, USER_LIMIT - len(active_users))
+        heapq.heapify(heap)
+
+        starts = []
+        for _ in range(in_queue):
+            slot_free = heapq.heappop(heap)
+            start = max(slot_free, now)  # can't start in the past
+            starts.append(start)
+            heapq.heappush(heap, start + ACCESS_DURATION)  # they hold it 24h
+        return starts  # starts[i] = est. start for the i-th person in line
+
     async def enqueue(self, user: NewUser) -> EnqueueResult:
         if await self._queue.is_user_in_queue(user.email):
             raise UserAlreadyInQueue()
@@ -91,7 +109,28 @@ class QueueService:
         position = await self._queue.enqueue(user)
         added = await self._fill_available_slots()
         admitted = any(u.email == user.email for u in added)
-        return EnqueueResult(position=position, admitted=admitted)
+        now = datetime.now(timezone.utc)
+
+        if admitted:
+            return EnqueueResult(
+                position=position,
+                admitted=admitted,
+                start_time=now,
+                end_time=now + ACCESS_DURATION,
+            )
+
+        start_time = self._estimate_start_times(
+            await self.list_active_users(),
+            await self._queue.get_size(),
+            now,
+        )[position - 1]
+
+        return EnqueueResult(
+            position=position,
+            admitted=admitted,
+            start_time=start_time,
+            end_time=start_time + ACCESS_DURATION,
+        )
 
     async def process(self) -> None:
         removed = await self._evict_expired_users()

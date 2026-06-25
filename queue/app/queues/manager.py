@@ -33,6 +33,9 @@ class QueueRepository:
             for u in await self.redis.lrange(QUEUE_KEY, 0, -1)
         ]
 
+    async def get_size(self) -> int:
+        return await self.redis.llen(QUEUE_KEY)
+
     async def is_user_in_queue(self, email: str) -> bool:
         return email in set([u.email for u in await self.get_users()])
 

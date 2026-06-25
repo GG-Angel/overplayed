@@ -1,3 +1,4 @@
+from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from aiohttp import ClientSession
@@ -104,8 +105,8 @@ async def view_queue(state: State = Depends(get_state)) -> ViewQueueResponse:
 class EnqueueUserResponse(BaseModel):
     position: int
     admitted: bool
-    # session est start time (num queued * 24 hr + time remaining for active users) nah wrong
-    # session est end time (start time + 24 hr?)
+    start_time: datetime
+    end_time: datetime
 
 
 @app.post("/queue")
@@ -115,7 +116,12 @@ async def enqueue_user(
 ) -> EnqueueUserResponse:
     try:
         result = await state.queue.enqueue(user)
-        return EnqueueUserResponse(position=result.position, admitted=result.admitted)
+        return EnqueueUserResponse(
+            position=result.position,
+            admitted=result.admitted,
+            start_time=result.start_time,
+            end_time=result.end_time,
+        )
     except UserAlreadyActive:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail="User already active"
