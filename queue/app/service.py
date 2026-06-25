@@ -23,7 +23,7 @@ class UserDoesNotExist(Exception):
 
 
 class EnqueueResult(BaseModel):
-    position: int
+    position: int | None
     admitted: bool
     start_time: datetime
     end_time: datetime
@@ -113,8 +113,8 @@ class QueueService:
 
         if admitted:
             return EnqueueResult(
-                position=position,
-                admitted=admitted,
+                position=None,
+                admitted=True,
                 start_time=now,
                 end_time=now + ACCESS_DURATION,
             )
@@ -127,7 +127,7 @@ class QueueService:
 
         return EnqueueResult(
             position=position,
-            admitted=admitted,
+            admitted=False,
             start_time=start_time,
             end_time=start_time + ACCESS_DURATION,
         )

@@ -7,11 +7,12 @@ export type InputProps = ComponentProps<"input"> & {
   label?: string;
   hint?: string;
   error?: string;
+  disabled?: boolean;
   icon?: LucideIcon;
   className?: string;
 };
 
-const Input = ({ label, hint, error, icon: Icon, className, ...props }: InputProps) => {
+const Input = ({ label, hint, error, disabled, icon: Icon, className, ...props }: InputProps) => {
   const searchRef = useRef<HTMLInputElement>(null);
 
   return (
@@ -22,12 +23,18 @@ const Input = ({ label, hint, error, icon: Icon, className, ...props }: InputPro
         radius="xs"
         padding="none"
         className={cn(
-          "flex items-center gap-2 py-2 px-3 cursor-text focus-within:border-muted",
+          "flex items-center gap-2 py-2 px-3 cursor-text focus-within:border-muted transition-opacity",
+          disabled && "opacity-50",
           className
         )}
       >
         {Icon && <Icon className="text-muted" />}
-        <input ref={searchRef} className={cn("w-full outline-none", className)} {...props} />
+        <input
+          ref={searchRef}
+          className={cn("w-full outline-none", className)}
+          disabled={disabled}
+          {...props}
+        />
       </Card>
       {hint && <p className="text-xs text-muted">{hint}</p>}
       {error && <p className="text-xs text-destructive">{error}</p>}

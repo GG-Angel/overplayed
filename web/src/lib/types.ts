@@ -137,7 +137,10 @@ export const accessRequestSchema = z.object({
 });
 
 export const accessResponseSchema = z.object({
-  position: z.number().nonnegative(),
+  position: z.number().nonnegative().nullable(),
+  admitted: z.boolean(),
+  start_time: z.iso.datetime(),
+  end_time: z.iso.datetime(),
 });
 
 export type Image = z.infer<typeof imageSchema>;

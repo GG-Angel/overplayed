@@ -97,6 +97,7 @@ const RequestAccessPage = () => {
           placeholder="e.g., John Doe"
           value={form.name}
           error={errors.name}
+          disabled={submitMutation.isPending}
           onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
         />
         <Input
@@ -105,12 +106,16 @@ const RequestAccessPage = () => {
           placeholder="e.g., example@gmail.com"
           value={form.email}
           error={errors.email}
+          disabled={submitMutation.isPending}
           onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
         />
         <Button type="submit" variant="secondary" disabled={submitMutation.isPending}>
           {submitMutation.isPending ? "Submitting..." : "Submit Request"}
         </Button>
       </form>
+      <div>
+        
+      </div>
 
       {/* Modal */}
       {isModalActive && (
