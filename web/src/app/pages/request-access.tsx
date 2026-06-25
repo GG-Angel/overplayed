@@ -55,7 +55,7 @@ const RequestAccessPage = () => {
         <h2>Availability</h2>
         {queueState ? (
           (() => {
-            const total = queueState.total_active_users + queueState.total_queued_users;
+            const total = queueState.active_users + queueState.queued_users;
             const active = Math.min(total, queueState.user_limit);
             const empty = Math.max(0, queueState.user_limit - active);
             const waiting = Math.max(0, total - queueState.user_limit);
@@ -71,7 +71,10 @@ const RequestAccessPage = () => {
                   {waiting > 0 && <Plus className="text-destructive" />}
                 </div>
                 {empty > 0 ? (
-                  <p className="text-sm">There is {empty} slot available — claim your spot!</p>
+                  <p className="text-sm">
+                    There {empty == 1 ? `is ${empty} slot` : `are ${empty} slots`} available — claim
+                    your spot!
+                  </p>
                 ) : (
                   <p className="text-sm">
                     No slots are currently available. {formatCount(waiting)}{" "}

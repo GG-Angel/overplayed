@@ -126,9 +126,8 @@ export const swipeSubmissionResponseSchema = z.object({
 });
 
 export const queueStatusSchema = z.object({
-  total_active_users: z.number().nonnegative(),
-  total_queued_users: z.number().nonnegative(),
-  is_full: z.boolean(),
+  active_users: z.number().nonnegative(),
+  queued_users: z.number().nonnegative(),
   user_limit: z.number().nonnegative(),
 });
 
