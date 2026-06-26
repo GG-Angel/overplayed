@@ -138,6 +138,10 @@ export const accessRequestSchema = z.object({
 });
 
 export const accessStatusSchema = z.object({
+  user: z.object({
+    name: z.string(),
+    email: z.email(),
+  }),
   position: z.number().nonnegative().nullable(),
   admitted: z.boolean(),
   start_time: z.iso.datetime(),

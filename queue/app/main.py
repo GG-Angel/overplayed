@@ -23,6 +23,14 @@ from service import (
 )
 
 
+class UserStatusResponse(UserStatusResult):
+    user: NewUser
+
+
+class ViewQueueResponse(ViewQueueResult):
+    pass
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     session = ClientSession()
@@ -87,17 +95,30 @@ def handle_favicon():
 
 
 @app.get("/queue")
-async def view_queue(state: State = Depends(get_state)) -> ViewQueueResult:
-    return await state.queue.get_queue_status()
+async def view_queue(state: State = Depends(get_state)) -> ViewQueueResponse:
+    result = await state.queue.get_queue_status()
+    return ViewQueueResponse(
+        active_users=result.active_users,
+        queued_users=result.queued_users,
+        user_limit=result.user_limit,
+        next_available_time=result.next_available_time,
+    )
 
 
 @app.post("/queue")
 async def enqueue_user(
     user: NewUser,
     state: State = Depends(get_state),
-) -> UserStatusResult:
+) -> UserStatusResponse:
     try:
-        return await state.queue.enqueue(user)
+        result = await state.queue.enqueue(user)
+        return UserStatusResponse(
+            user=user,
+            position=result.position,
+            admitted=result.admitted,
+            start_time=result.start_time,
+            end_time=result.end_time,
+        )
     except UserAlreadyActive:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail="User already active"
@@ -115,9 +136,16 @@ async def enqueue_user(
 @app.post("/status")
 async def view_user_status(
     user: NewUser, state: State = Depends(get_state)
-) -> UserStatusResult:
+) -> UserStatusResponse:
     try:
-        return await state.queue.get_user_status(user)
+        result = await state.queue.get_user_status(user)
+        return UserStatusResponse(
+            user=user,
+            position=result.position,
+            admitted=result.admitted,
+            start_time=result.start_time,
+            end_time=result.end_time,
+        )
     except UserNotAdded:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not added"

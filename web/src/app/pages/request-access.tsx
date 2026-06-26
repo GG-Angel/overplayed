@@ -13,6 +13,42 @@ import { formatCount, formatDateTime } from "@/lib/utils";
 import { CircleQuestionMark, Info, Key, Mail, Plus, ThumbsUp, User } from "lucide-react";
 import { useState, type SubmitEventHandler } from "react";
 
+const SubmitError = ({ message }: { message: string }) => (
+  <Card tone="negative" padding="lg" radius="lg" className="flex flex-col gap-2 py-4">
+    <p>
+      <span className="font-medium">Request Error:</span> {message}
+    </p>
+  </Card>
+);
+
+const AdmittedStatus = ({ name, endTime }: { name: string; endTime: string }) => (
+  <Card tone="positive" padding="lg" radius="lg" className="flex flex-col gap-2 py-6">
+    <h2>{name}'s Status</h2>
+    <p className="font-medium">
+      You're in! <span className="text-success">{kaomojis.working}</span>
+    </p>
+    <p className="brightness-50">You have access until {formatDateTime(endTime)}.</p>
+  </Card>
+);
+
+const QueuedStatus = ({
+  name,
+  position,
+  startTime,
+}: {
+  name: string;
+  position: number;
+  startTime: string;
+}) => (
+  <Card tone="muted" padding="lg" radius="lg" className="flex flex-col gap-2 py-6">
+    <h2>{name}'s Status</h2>
+    <p className="font-medium">
+      You're <span className="text-success">#{position}</span> in line.
+    </p>
+    <p className="text-muted">Access opens at {formatDateTime(startTime)}.</p>
+  </Card>
+);
+
 const RequestAccessPage = () => {
   const [isModalActive, setIsModalActive] = useState<boolean>(false);
   const [form, setForm] = useState<AccessRequest>({ name: "", email: "" });
@@ -162,7 +198,7 @@ const RequestAccessPage = () => {
         </Card>
       ) : accessStatus.isFetched ? (
         <Card tone="muted" padding="lg" radius="lg" className="flex flex-col gap-2 py-6">
-          <h2>Your Status</h2>
+          <h2>{accessStatus.isSuccess ? `${accessStatus.data?.user.name}'s` : "Your"} Status</h2>
           {accessStatus.isSuccess ? (
             <div className="flex flex-col gap-0.5">
               {accessStatus.data.admitted ? (
