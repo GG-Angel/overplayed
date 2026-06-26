@@ -1,6 +1,10 @@
 import { env } from "@/lib/env";
 import Axios, { type InternalAxiosRequestConfig } from "axios";
 
+export type ApiError = {
+  detail: string;
+};
+
 export const buildURLWithQueryParams = (
   url: string,
   params: Record<string, string | number>

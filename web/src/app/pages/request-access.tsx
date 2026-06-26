@@ -3,6 +3,7 @@ import Card from "@/components/ui/Card";
 import Divider from "@/components/ui/Divider";
 import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
+import { Spinner } from "@/components/ui/Spinner";
 import { useAccessStatus } from "@/features/user/api/get-access-status";
 import { useQueueStatus } from "@/features/user/api/get-queue-state";
 import { useSubmitAccessRequest } from "@/features/user/api/submit-access-request";
@@ -45,7 +46,7 @@ const RequestAccessPage = () => {
   };
 
   return (
-    <main className="flex flex-col gap-6 max-w-xl py-2 self-center">
+    <main className="flex flex-col gap-6 max-w-xl pt-2 pb-8 self-center">
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-3">
           <h1>Request Access</h1>
@@ -150,32 +151,46 @@ const RequestAccessPage = () => {
           </Button>
         </div>
       </form>
-      {accessStatus.isFetched && (
+      {submitMutation.isPending ? (
+        <Spinner className="self-center my-2" />
+      ) : submitMutation.isError ? (
+        <Card tone="negative" padding="lg" radius="lg" className="flex flex-col gap-2 py-4">
+          <p>
+            <span className="font-medium">Request Error:</span>{" "}
+            {submitMutation.error.response?.data.detail ?? "Please try again."}
+          </p>
+        </Card>
+      ) : accessStatus.isFetched ? (
         <Card tone="muted" padding="lg" radius="lg" className="flex flex-col gap-2 py-6">
           <h2>Your Status</h2>
-          {accessStatus.data && accessStatus.data.admitted && (
+          {accessStatus.isSuccess ? (
             <div className="flex flex-col gap-0.5">
-              <p className="font-medium">
-                You're in! <span className="text-success">{kaomojis.working}</span>
-              </p>
-              <p className="text-muted">
-                You have access until {formatDateTime(accessStatus.data.end_time)}.
-              </p>
+              {accessStatus.data.admitted ? (
+                <>
+                  <p className="font-medium">
+                    You're in! <span className="text-success">{kaomojis.working}</span>
+                  </p>
+                  <p className="text-muted">
+                    You have access until {formatDateTime(accessStatus.data.end_time)}.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="font-medium">
+                    You're <span className="text-success">#{accessStatus.data.position}</span> in
+                    line.
+                  </p>
+                  <p className="text-muted">
+                    Access opens at {formatDateTime(accessStatus.data.start_time)}.
+                  </p>
+                </>
+              )}
             </div>
+          ) : (
+            <p>This user isn't active or in the queue.</p>
           )}
-          {accessStatus.data && !accessStatus.data.admitted && (
-            <div className="flex flex-col gap-0.5">
-              <p className="font-medium">
-                You're <span className="text-success">#{accessStatus.data.position}</span> in line.
-              </p>
-              <p className="text-muted">
-                Access opens at {formatDateTime(accessStatus.data.start_time)}.
-              </p>
-            </div>
-          )}
-          {accessStatus.isError && <p>This user isn't active or in the queue.</p>}
         </Card>
-      )}
+      ) : null}
 
       {/* Modal */}
       {isModalActive && (
