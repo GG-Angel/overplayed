@@ -1,3 +1,4 @@
+import asyncio
 import heapq
 from pydantic import BaseModel
 from loguru import logger
@@ -124,7 +125,10 @@ class QueueService:
 
     async def get_user_status(self, user: NewUser) -> UserStatusResult:
         active = await self.list_active_users()
-        active_user = next((u for u in active if u == user), None)
+        active_user = next(
+            (u for u in active if u.name == user.name and u.email == user.email),
+            None,
+        )
         if active_user:
             return UserStatusResult(
                 position=None,

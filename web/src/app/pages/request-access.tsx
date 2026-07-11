@@ -13,10 +13,10 @@ import { formatCount, formatDateTime } from "@/lib/utils";
 import { CircleQuestionMark, Info, Key, Mail, Plus, ThumbsUp, User } from "lucide-react";
 import { useState, type SubmitEventHandler } from "react";
 
-const SubmitError = ({ message }: { message: string }) => (
+const ErrorStatus = ({ message }: { message: string }) => (
   <Card tone="negative" padding="lg" radius="lg" className="flex flex-col gap-2 py-4">
     <p>
-      <span className="font-medium">Request Error:</span> {message}
+      <span className="font-medium">Error:</span> {message}
     </p>
   </Card>
 );
@@ -24,10 +24,12 @@ const SubmitError = ({ message }: { message: string }) => (
 const AdmittedStatus = ({ name, endTime }: { name: string; endTime: string }) => (
   <Card tone="positive" padding="lg" radius="lg" className="flex flex-col gap-2 py-6">
     <h2>{name}'s Status</h2>
-    <p className="font-medium">
-      You're in! <span className="text-success">{kaomojis.working}</span>
-    </p>
-    <p className="brightness-50">You have access until {formatDateTime(endTime)}.</p>
+    <div className="flex flex-col gap-0.5">
+      <p className="font-medium">
+        You're in! <span className="text-success">{kaomojis.working}</span>
+      </p>
+      <p className="brightness-50">You have access until {formatDateTime(endTime)}.</p>
+    </div>
   </Card>
 );
 
@@ -42,10 +44,12 @@ const QueuedStatus = ({
 }) => (
   <Card tone="muted" padding="lg" radius="lg" className="flex flex-col gap-2 py-6">
     <h2>{name}'s Status</h2>
-    <p className="font-medium">
-      You're <span className="text-success">#{position}</span> in line.
-    </p>
-    <p className="text-muted">Access opens at {formatDateTime(startTime)}.</p>
+    <div className="flex flex-col gap-0.5">
+      <p className="font-medium">
+        You're <span className="text-success">#{position}</span> in line.
+      </p>
+      <p className="text-muted">Access opens at {formatDateTime(startTime)}.</p>
+    </div>
   </Card>
 );
 
@@ -187,46 +191,30 @@ const RequestAccessPage = () => {
           </Button>
         </div>
       </form>
-      {submitMutation.isPending ? (
+
+      {/* Results */}
+      {submitMutation.isPending || accessStatus.isLoading ? (
         <Spinner className="self-center my-2" />
       ) : submitMutation.isError ? (
-        <Card tone="negative" padding="lg" radius="lg" className="flex flex-col gap-2 py-4">
-          <p>
-            <span className="font-medium">Request Error:</span>{" "}
-            {submitMutation.error.response?.data.detail ?? "Please try again."}
-          </p>
-        </Card>
-      ) : accessStatus.isFetched ? (
-        <Card tone="muted" padding="lg" radius="lg" className="flex flex-col gap-2 py-6">
-          <h2>{accessStatus.isSuccess ? `${accessStatus.data?.user.name}'s` : "Your"} Status</h2>
-          {accessStatus.isSuccess ? (
-            <div className="flex flex-col gap-0.5">
-              {accessStatus.data.admitted ? (
-                <>
-                  <p className="font-medium">
-                    You're in! <span className="text-success">{kaomojis.working}</span>
-                  </p>
-                  <p className="text-muted">
-                    You have access until {formatDateTime(accessStatus.data.end_time)}.
-                  </p>
-                </>
-              ) : (
-                <>
-                  <p className="font-medium">
-                    You're <span className="text-success">#{accessStatus.data.position}</span> in
-                    line.
-                  </p>
-                  <p className="text-muted">
-                    Access opens at {formatDateTime(accessStatus.data.start_time)}.
-                  </p>
-                </>
-              )}
-            </div>
-          ) : (
-            <p>This user isn't active or in the queue.</p>
-          )}
-        </Card>
-      ) : null}
+        <ErrorStatus
+          message={
+            submitMutation.error.response?.data.detail ?? "Failed to submit. Please try again."
+          }
+        />
+      ) : accessStatus.isError ? (
+        <ErrorStatus message="User isn't active or in the queue." />
+      ) : (
+        accessStatus.isSuccess &&
+        (accessStatus.data.admitted ? (
+          <AdmittedStatus name={accessStatus.data.user.name} endTime={accessStatus.data.end_time} />
+        ) : (
+          <QueuedStatus
+            name={accessStatus.data.user.name}
+            position={accessStatus.data.position!}
+            startTime={accessStatus.data.start_time}
+          />
+        ))
+      )}
 
       {/* Modal */}
       {isModalActive && (
