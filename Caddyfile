@@ -2,3 +2,8 @@ api-overplayed.gaelangel.com {
 	reverse_proxy server:8080
 	tls /etc/ssl/certs/certificate.pem /etc/ssl/private/key.pem
 }
+
+queue-overplayed.gaelangel.com {
+	reverse_proxy queue:8000
+	tls /etc/ssl/certs/certificate.pem /etc/ssl/private/key.pem
+}

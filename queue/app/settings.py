@@ -5,6 +5,8 @@ APP_STATE_KEY = "APP_STATE"
 
 
 class Settings(BaseSettings):
+    frontend_url: str = Field(...)
+
     spotify_app_client_id: str = Field(...)
     spotify_auth_client_id: str = Field(...)
     spotify_refresh_token: str = Field(...)

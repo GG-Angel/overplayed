@@ -1,7 +1,7 @@
 import api, { buildURLWithQueryParams } from "@/lib/api";
 import { queryKeys } from "@/lib/query";
 import { playlistPageSchema, type PlaylistPage } from "@/lib/types";
-import { infiniteQueryOptions, useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 
 const getPlaylistTracks = async ({
@@ -16,19 +16,13 @@ const getPlaylistTracks = async ({
   );
 };
 
-const getInfinitePlaylistTracksQueryOptions = (playlistId: string) => {
-  return infiniteQueryOptions({
-    queryKey: queryKeys.playlists.tracks(playlistId),
+const useInfinitePlaylistTracks = (playlistId: string) => {
+  return useInfiniteQuery({
+    queryKey: queryKeys.playlistTracks(playlistId),
     queryFn: ({ pageParam }) => getPlaylistTracks({ playlistId, offset: pageParam }),
     getNextPageParam: (lastPage) => lastPage.next_offset,
     initialPageParam: 0,
     retry: 3,
-  });
-};
-
-const useInfinitePlaylistTracks = (playlistId: string) => {
-  return useInfiniteQuery({
-    ...getInfinitePlaylistTracksQueryOptions(playlistId),
   });
 };
 

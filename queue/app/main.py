@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
 from aiohttp import ClientSession
 from cryptography.fernet import Fernet
 from redis.asyncio import Redis, ConnectionPool
@@ -8,7 +8,7 @@ from state import State, get_state
 from settings import APP_STATE_KEY, settings
 from spotify.token import SpotifyTokenClient
 from spotify.validate import SpotifyUserValidator
-from spotify.users import SpotifyUserManagementClient, NewUser, USER_LIMIT
+from spotify.users import SpotifyUserManagementClient, NewUser
 from queues.manager import QueueRepository
 from cache import RedisCache
 from worker import QueueWorker
@@ -17,7 +17,18 @@ from service import (
     UserAlreadyActive,
     UserDoesNotExist,
     UserAlreadyInQueue,
+    ViewQueueResult,
+    UserStatusResult,
+    UserNotAdded,
 )
+
+
+class UserStatusResponse(UserStatusResult):
+    user: NewUser
+
+
+class ViewQueueResponse(ViewQueueResult):
+    pass
 
 
 @asynccontextmanager
@@ -64,6 +75,14 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[settings.frontend_url],
+    allow_credentials=True,
+    allow_methods=["GET", "POST"],
+    allow_headers=["*"],
+)
+
 
 @app.get("/")
 def handle_healthcheck():
@@ -75,37 +94,31 @@ def handle_favicon():
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-class ViewQueueResponse(BaseModel):
-    total_active_users: int
-    total_queued_users: int
-    is_full: bool
-
-
 @app.get("/queue")
 async def view_queue(state: State = Depends(get_state)) -> ViewQueueResponse:
-    active = await state.queue.list_active_users()
-    queued = await state.queue.list_queued_users()
+    result = await state.queue.get_queue_status()
     return ViewQueueResponse(
-        total_active_users=len(active),
-        total_queued_users=len(queued),
-        is_full=len(active) + len(queued) >= USER_LIMIT,
+        active_users=result.active_users,
+        queued_users=result.queued_users,
+        user_limit=result.user_limit,
+        next_available_time=result.next_available_time,
     )
-
-
-class EnqueueUserResponse(BaseModel):
-    position: int
-    # session est start time (num queued * 24 hr + time remaining for active users) nah wrong
-    # session est end time (start time + 24 hr?)
 
 
 @app.post("/queue")
 async def enqueue_user(
     user: NewUser,
     state: State = Depends(get_state),
-) -> EnqueueUserResponse:
+) -> UserStatusResponse:
     try:
-        position = await state.queue.enqueue(user)
-        return EnqueueUserResponse(position=position)
+        result = await state.queue.enqueue(user)
+        return UserStatusResponse(
+            user=user,
+            position=result.position,
+            admitted=result.admitted,
+            start_time=result.start_time,
+            end_time=result.end_time,
+        )
     except UserAlreadyActive:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail="User already active"
@@ -118,8 +131,22 @@ async def enqueue_user(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User does not exist"
         )
-    except Exception:
+
+
+@app.post("/status")
+async def view_user_status(
+    user: NewUser, state: State = Depends(get_state)
+) -> UserStatusResponse:
+    try:
+        result = await state.queue.get_user_status(user)
+        return UserStatusResponse(
+            user=user,
+            position=result.position,
+            admitted=result.admitted,
+            start_time=result.start_time,
+            end_time=result.end_time,
+        )
+    except UserNotAdded:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to queue user",
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not added"
         )

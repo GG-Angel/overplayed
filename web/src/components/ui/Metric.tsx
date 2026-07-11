@@ -1,29 +1,14 @@
-import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
-import Card from "./Card";
+import Card, { type CardProps } from "./Card";
 
-const metricVariants = cva("flex flex-1 flex-col justify-center items-center", {
-  variants: {
-    tone: {
-      neutral: "",
-      muted: "bg-card/40 border-card-border/40",
-      negative: "text-destructive bg-destructive/5 border-destructive/10",
-      positive: "text-primary bg-primary/5 border-primary/10",
-    },
-  },
-  defaultVariants: {
-    tone: "neutral",
-  },
-});
-
-type MetricProps = VariantProps<typeof metricVariants> & {
+type MetricProps = CardProps & {
   amount: number | string;
   label: string;
   className?: string;
 };
 
-const Metric = ({ amount, label, tone, className }: MetricProps) => (
-  <Card className={cn(metricVariants({ tone }), className)}>
+const Metric = ({ amount, label, className, ...props }: MetricProps) => (
+  <Card className={cn("flex flex-1 flex-col justify-center items-center", className)} {...props}>
     <p className="text-sm font-medium text-current/60">{label}</p>
     <data className="text-4xl tracking-tight font-semibold" value={amount}>
       {amount}

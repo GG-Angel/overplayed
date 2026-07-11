@@ -8,13 +8,25 @@ import ErrorState from "@/components/states/ErrorState";
 import LandingPage from "./pages/landing";
 import PageLayout from "@/components/layout/PageLayout";
 import { ProtectedRoute } from "@/features/user/auth/ProtectedRoute";
+import LoadingState from "@/components/states/LoadingState";
 
 const NotFound = <Route path="*" element={<ErrorState message="Page Not Found" />} />;
 
 const router = createBrowserRouter(
   createRoutesFromElements(
-    <Route path="/" Component={PageLayout} errorElement={<ErrorState />}>
+    <Route
+      path="/"
+      Component={PageLayout}
+      errorElement={<ErrorState />}
+      hydrateFallbackElement={<LoadingState />}
+    >
       <Route index Component={LandingPage} />
+      <Route
+        path="request-access"
+        lazy={async () => ({
+          Component: (await import("./pages/request-access")).default,
+        })}
+      />
       <Route path="statistics" Component={ProtectedRoute}>
         <Route
           index

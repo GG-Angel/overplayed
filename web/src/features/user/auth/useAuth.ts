@@ -1,5 +1,5 @@
 import { isAxiosError } from "axios";
-import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { env } from "@/lib/env";
 import { queryKeys } from "@/lib/query";
 import { currentUserSchema } from "@/lib/types";
@@ -16,13 +16,12 @@ const getUser = async () => {
 
 const logoutUser = async () => await api.post("/auth/logout");
 
-const userOptions = queryOptions({
-  queryKey: queryKeys.user,
-  queryFn: getUser,
-  staleTime: 2 * 60 * 1000,
-});
-
-const useUser = () => useQuery(userOptions);
+const useUser = () =>
+  useQuery({
+    queryKey: queryKeys.userProfile(),
+    queryFn: getUser,
+    staleTime: 2 * 60 * 1000,
+  });
 
 const useAuth = () => {
   const queryClient = useQueryClient();

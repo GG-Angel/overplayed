@@ -9,7 +9,7 @@ const getTrackPreviewUrl = async (isrc: string): Promise<TrackPreview> => {
 
 const getTrackPreviewUrlQueryOptions = (isrc: string | undefined) => {
   return queryOptions({
-    queryKey: queryKeys.preview(isrc!),
+    queryKey: queryKeys.trackPreview(isrc!),
     queryFn: () => getTrackPreviewUrl(isrc!),
     staleTime: ({ state }) => (state.data?.expires_in ?? 60 * 60) * 1000,
     enabled: !!isrc,

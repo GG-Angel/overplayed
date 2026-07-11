@@ -2,6 +2,7 @@
 
 ## Needs
 
+- Add queue rate limits.
 - Test website on mobile devices.
 
 ## CI/CD Notes
@@ -12,6 +13,9 @@
 
 - Pile in the background on completion of deleted tracks.
 - Cache leaderboard response.
+- Save request access credentials to local storage and fill them automatically on page visit?
+- Add ability to check the user's current queue status.
+- Show how long until the next spot is open if a user were to request access rn.
 
 ## Queue System Breakthrough Oh My Goodness
 

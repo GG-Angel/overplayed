@@ -4,7 +4,12 @@ import type { ComponentProps } from "react";
 
 const cardVariants = cva("flex overflow-hidden border-2 text-card-foreground shadow-md", {
   variants: {
-    tone: { default: "bg-card border-card-border", muted: "bg-card/40 border-card-border/40" },
+    tone: {
+      default: "bg-card border-card-border",
+      muted: "bg-card/40 border-card-border/40",
+      negative: "text-destructive bg-destructive/5 border-destructive/10",
+      positive: "text-primary bg-primary/5 border-primary/10",
+    },
     radius: {
       xs: "rounded-md",
       sm: "rounded-lg",

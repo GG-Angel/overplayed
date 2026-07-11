@@ -8,14 +8,22 @@ export const queryConfig = {
 } satisfies DefaultOptions;
 
 export const queryKeys = {
-  user: ["user"] as const,
-  userMetrics: () => [...queryKeys.user, "metrics"] as const,
-  metrics: ["metrics"] as const,
-  leaderboard: ["leaderboard"] as const,
-  preview: (isrc: string) => ["preview", isrc] as const,
-  playlists: {
-    all: ["playlists"] as const,
-    metadata: (playlistId: string) => [...queryKeys.playlists.all, playlistId, "metadata"] as const,
-    tracks: (playlistId: string) => [...queryKeys.playlists.all, playlistId, "tracks"] as const,
-  },
+  user: () => ["user"] as const,
+  userProfile: () => [...queryKeys.user(), "profile"] as const,
+  userAccess: () => [...queryKeys.user(), "access"] as const,
+
+  queue: () => ["queue"] as const,
+  queueStatus: () => [...queryKeys.queue(), "status"],
+
+  metrics: () => ["metrics"] as const,
+  metricsGlobal: () => [...queryKeys.metrics(), "global"] as const,
+  metricsUser: () => [...queryKeys.metrics(), "user"] as const,
+  metricsLeaderboard: () => [...queryKeys.metrics(), "leaderboard"] as const,
+
+  playlists: () => ["playlists"] as const,
+  playlistMetadata: (playlistId: string) =>
+    [...queryKeys.playlists(), playlistId, "metadata"] as const,
+  playlistTracks: (playlistId: string) => [...queryKeys.playlists(), playlistId, "tracks"] as const,
+
+  trackPreview: (isrc: string) => ["preview", isrc] as const,
 } as const;

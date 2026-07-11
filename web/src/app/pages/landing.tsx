@@ -15,7 +15,7 @@ import z from "zod";
 import { LIKED_SONGS_ID, trackSchema } from "@/lib/types";
 import { useUserPlaylists } from "@/features/playlist/api/get-playlists";
 import { useSwipeLeaderboard } from "@/features/metrics/api/get-swipe-leaderboad";
-import { Scissors } from "lucide-react";
+import { Key, Scissors } from "lucide-react";
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -38,20 +38,31 @@ const LandingPage = () => {
       <h3 className="text-center">
         <span className="xs:block">
           Tinder for your playlists. Swipe right to keep, left to cut.
-        </span>
+        </span>{" "}
         <span className="xs:block">Clean up years of saved songs in minutes.</span>
       </h3>
 
-      <Button
-        className="self-center"
-        size="lg"
-        icon={<SpotifyIcon className="size-5" />}
-        onClick={() =>
-          auth.user ? navigate("/playlists") : auth.redirectToLogin(location.pathname)
-        }
-      >
-        {auth.user ? "View your playlists" : "Log in with Spotify — it's free"}
-      </Button>
+      <div className="flex flex-col xs:flex-row items-center gap-3 w-full max-w-xl self-center">
+        <Button
+          className="w-full"
+          icon={<Key className="size-5 shrink-0" />}
+          size="lg"
+          variant="secondary"
+          onClick={() => navigate("/request-access")}
+        >
+          Request Access
+        </Button>
+        <Button
+          className="w-full"
+          size="lg"
+          icon={<SpotifyIcon className="size-5 shrink-0" />}
+          onClick={() =>
+            auth.user ? navigate("/playlists") : auth.redirectToLogin(location.pathname)
+          }
+        >
+          {auth.user ? "View your playlists" : "Log in with Spotify"}
+        </Button>
+      </div>
 
       <Card
         className="flex flex-col items-center gap-6 pointer-events-none py-6"
