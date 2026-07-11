@@ -18,7 +18,9 @@ class Settings(BaseSettings):
     redis_key: bytes = Field(..., min_length=44, max_length=44)
 
     model_config = SettingsConfigDict(
-        env_file=".env", extra="ignore", case_sensitive=False
+        env_file=".env",
+        case_sensitive=False,
+        extra="ignore",
     )
 
     @property

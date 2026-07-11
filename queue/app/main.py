@@ -1,79 +1,66 @@
-from fastapi.middleware.cors import CORSMiddleware
-from aiohttp import ClientSession
 from cryptography.fernet import Fernet
-from redis.asyncio import Redis, ConnectionPool
+from redis.asyncio import ConnectionPool, Redis
+from aiohttp import ClientSession
+from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Depends, Response, status, HTTPException
-from state import State, get_state
-from settings import APP_STATE_KEY, settings
-from spotify.token import SpotifyTokenClient
-from spotify.validate import SpotifyUserValidator
-from spotify.users import SpotifyUserManagementClient, NewUser
-from queues.manager import QueueRepository
-from cache import RedisCache
-from worker import QueueWorker
-from service import (
-    QueueService,
-    UserAlreadyActive,
-    UserDoesNotExist,
-    UserAlreadyInQueue,
-    ViewQueueResult,
-    UserStatusResult,
-    UserNotAdded,
+from fastapi import FastAPI, Response, status
+from settings import settings, APP_STATE_KEY
+from services.queue import QueueService, QueueRepository, QueueWorker
+from state import State
+from routers.queue import router as queue_router
+from services.spotify import (
+    SpotifyTokenProvider,
+    SpotifyUserManager,
+    SpotifyUserValidator,
 )
-
-
-class UserStatusResponse(UserStatusResult):
-    user: NewUser
-
-
-class ViewQueueResponse(ViewQueueResult):
-    pass
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    session = ClientSession()
-    redis_pool = ConnectionPool.from_url(
-        settings.redis_url, decode_responses=True, max_connections=10
-    )
     try:
+        http = ClientSession()
+        crypto = Fernet(key=settings.redis_key)
+
+        redis_pool = ConnectionPool.from_url(
+            url=settings.redis_url,
+            decode_responses=True,
+            max_connections=10,
+        )
         redis = Redis(connection_pool=redis_pool)
-        cache = RedisCache(redis=redis)
-        fernet = Fernet(settings.redis_key)
-        auth = SpotifyTokenClient(
-            session=session,
-            cache=cache,
-            fernet=fernet,
-            auth_client_id=settings.spotify_auth_client_id,
+
+        token_provider = SpotifyTokenProvider(
+            http, redis, crypto, settings.spotify_auth_client_id
         )
-        queue = QueueService(
-            users=SpotifyUserManagementClient(
-                session=session,
-                cache=cache,
-                auth=auth,
-                client_id=settings.spotify_app_client_id,
+
+        queue_service = QueueService(
+            SpotifyUserManager(
+                http, redis, token_provider, settings.spotify_app_client_id
             ),
-            validator=await SpotifyUserValidator.create(session=session),
-            queue=QueueRepository(redis=redis),
+            await SpotifyUserValidator.create(http),
+            QueueRepository(redis),
         )
-        worker = QueueWorker(queue)
 
-        # seed and validate credentials
-        await auth.seed_refresh_token(settings.spotify_refresh_token)
+        queue_worker = QueueWorker(queue_service)
 
-        # start background queue worker
-        worker.start()
+        app.state[APP_STATE_KEY] = State(
+            queue_service=queue_service,
+            queue_worker=queue_worker,
+        )
 
-        app.state[APP_STATE_KEY] = State(queue=queue)
+        await token_provider.seed_token(settings.spotify_refresh_token)
+        queue_worker.start()
+
         yield
+
     finally:
-        await worker.stop()
-        await session.close()
-        await redis_pool.aclose()
+        if http is not None:
+            await http.close()
+        if redis_pool is not None:
+            await redis_pool.aclose()
 
 
 app = FastAPI(lifespan=lifespan)
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -94,59 +81,4 @@ def handle_favicon():
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@app.get("/queue")
-async def view_queue(state: State = Depends(get_state)) -> ViewQueueResponse:
-    result = await state.queue.get_queue_status()
-    return ViewQueueResponse(
-        active_users=result.active_users,
-        queued_users=result.queued_users,
-        user_limit=result.user_limit,
-        next_available_time=result.next_available_time,
-    )
-
-
-@app.post("/queue")
-async def enqueue_user(
-    user: NewUser,
-    state: State = Depends(get_state),
-) -> UserStatusResponse:
-    try:
-        result = await state.queue.enqueue(user)
-        return UserStatusResponse(
-            user=user,
-            position=result.position,
-            admitted=result.admitted,
-            start_time=result.start_time,
-            end_time=result.end_time,
-        )
-    except UserAlreadyActive:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail="User already active"
-        )
-    except UserAlreadyInQueue:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail="User already in queue"
-        )
-    except UserDoesNotExist:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User does not exist"
-        )
-
-
-@app.post("/status")
-async def view_user_status(
-    user: NewUser, state: State = Depends(get_state)
-) -> UserStatusResponse:
-    try:
-        result = await state.queue.get_user_status(user)
-        return UserStatusResponse(
-            user=user,
-            position=result.position,
-            admitted=result.admitted,
-            start_time=result.start_time,
-            end_time=result.end_time,
-        )
-    except UserNotAdded:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not added"
-        )
+app.include_router(queue_router, prefix="/queue", tags=["queue"])
