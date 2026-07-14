@@ -7,6 +7,7 @@ from fastapi import FastAPI, Response, status
 from settings import settings, APP_STATE_KEY
 from services.queue import QueueService, QueueRepository, QueueWorker
 from state import State
+from locking import DistributedLock
 from routers.queue import router as queue_router
 from services.spotify import (
     SpotifyTokenProvider,
@@ -38,6 +39,7 @@ async def lifespan(app: FastAPI):
             ),
             await SpotifyUserValidator.create(http),
             QueueRepository(redis),
+            DistributedLock(redis, "queue:lock", timeout=45, blocking_timeout=10),
         )
 
         queue_worker = QueueWorker(queue_service)

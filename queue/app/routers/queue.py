@@ -3,7 +3,7 @@ from services.queue import QueueService
 from state import get_queue_service
 from models import NewUser
 from dtos import QueueOverviewResponse, UserStatusResponse, QueueSignUpForm
-from errors import SpotifyError
+from errors import SpotifyError, QueueLockError
 
 
 router = APIRouter()
@@ -30,6 +30,10 @@ async def join_queue(
     try:
         result = await queue_service.enqueue_user(
             NewUser(name=form.name, email=form.email)
+        )
+    except QueueLockError:
+        raise HTTPException(
+            status_code=503, detail="Queue is busy, please try again later."
         )
     except SpotifyError as e:
         raise HTTPException(status_code=400, detail=str(e))

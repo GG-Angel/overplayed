@@ -26,3 +26,9 @@ class SpotifySessionError(SpotifyError):
     """Raised when a error occurs in the Spotify session process."""
 
     pass
+
+
+class QueueLockError(Exception):
+    """Raised when a distributed lock could not be acquired in time."""
+
+    pass

@@ -7,6 +7,7 @@ from loguru import logger
 from redis.asyncio import Redis
 from models import NewUser, ActiveUser, QueuedUser
 from services.spotify import SpotifyUserManager, SpotifyUserValidator
+from locking import DistributedLock
 from errors import SpotifySessionError, SpotifyValidationError
 
 
@@ -141,10 +142,12 @@ class QueueService:
         user_manager: SpotifyUserManager,
         user_validator: SpotifyUserValidator,
         queue: QueueRepository,
+        lock: DistributedLock,
     ):
         self._user_manager = user_manager
         self._user_validator = user_validator
         self._queue = queue
+        self._lock = lock
         self._user_limit = 5
         self._retry_limit = 3
         self._access_duration = timedelta(hours=24)
@@ -201,21 +204,30 @@ class QueueService:
 
     async def enqueue_user(self, user: NewUser) -> UserStatusResult:
         """Enqueue a new user to the queue."""
-        if await self._queue.has(user.email):
-            raise SpotifySessionError("Already in queue.")
+        async with self._lock:
+            if await self._queue.has(user.email):
+                raise SpotifySessionError("Already in queue.")
 
-        if await self._user_manager.has_user(user.email):
-            raise SpotifySessionError("Already active.")
+            if await self._user_manager.has_user(user.email):
+                raise SpotifySessionError("Already active.")
 
-        if not await self._user_validator.user_exists(user.email):
-            raise SpotifyValidationError("User does not exist.")
+            if not await self._user_validator.user_exists(user.email):
+                raise SpotifyValidationError("User does not exist.")
 
-        await self._queue.push(user)
-        await self.process_queue()
+            await self._queue.push(user)
+            await self._process_queue_locked()
         return await self.get_user_status(user.email)
 
     async def process_queue(self) -> None:
-        """Process the queue by removing expired users and filling available slots."""
+        """
+        Process the queue by removing expired users and filling available slots.
+        Acquires the distributed queue lock; used by the queue worker.
+        """
+        async with self._lock:
+            await self._process_queue_locked()
+
+    async def _process_queue_locked(self) -> None:
+        """Process the queue. Assumes the distributed queue lock is already held."""
         prune_result = await self._prune_expired_users()
         fill_result = await self._fill_available_slots()
 
