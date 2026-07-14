@@ -1,8 +1,5 @@
-"""Unit tests for SpotifyUserManager (app/services/spotify.py)."""
-
 import pytest
 from unittest.mock import AsyncMock
-
 from errors import SpotifyUserManagementError
 from services.spotify import SpotifyUserManager
 

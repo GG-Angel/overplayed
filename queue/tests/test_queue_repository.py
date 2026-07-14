@@ -1,5 +1,3 @@
-"""Unit tests for QueueRepository (app/services/queue.py)."""
-
 from services.queue import QueueRepository
 
 

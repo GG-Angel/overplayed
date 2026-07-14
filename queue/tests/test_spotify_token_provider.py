@@ -1,8 +1,5 @@
-"""Unit tests for SpotifyTokenProvider (app/services/spotify.py)."""
-
 import pytest
 from cryptography.fernet import Fernet
-
 from errors import SpotifyTokenError
 from services.spotify import SpotifyTokenProvider
 

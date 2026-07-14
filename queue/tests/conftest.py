@@ -1,15 +1,15 @@
-"""Shared fixtures for the queue microservice unit test suite."""
-
+import asyncio
+import pytest
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from typing import Any, AsyncIterator, Callable
-from unittest.mock import AsyncMock, MagicMock
-
-import pytest
+from unittest.mock import MagicMock
 from cryptography.fernet import Fernet
 from fakeredis.aioredis import FakeRedis
-
 from models import ActiveUser, NewUser, QueuedUser
+
+DEFAULT_NAME = "Ada Lovelace"
+DEFAULT_EMAIL = "ada@example.com"
 
 
 @pytest.fixture
@@ -45,9 +45,11 @@ class FakeResponse:
         self._raise_error = raise_error
 
     async def json(self) -> Any:
+        await asyncio.sleep(0)
         return self._json_data
 
     async def text(self) -> str:
+        await asyncio.sleep(0)
         return self._text_data
 
     def raise_for_status(self) -> None:
@@ -92,7 +94,7 @@ def make_async_cm() -> Callable[[Any], Any]:
 
 @pytest.fixture
 def make_new_user() -> Callable[..., NewUser]:
-    def _make(name: str = "Ada Lovelace", email: str = "ada@example.com") -> NewUser:
+    def _make(name: str = DEFAULT_NAME, email: str = DEFAULT_EMAIL) -> NewUser:
         return NewUser(name=name, email=email)
 
     return _make
@@ -101,8 +103,8 @@ def make_new_user() -> Callable[..., NewUser]:
 @pytest.fixture
 def make_queued_user() -> Callable[..., QueuedUser]:
     def _make(
-        name: str = "Ada Lovelace",
-        email: str = "ada@example.com",
+        name: str = DEFAULT_NAME,
+        email: str = DEFAULT_EMAIL,
         retries: int = 0,
         created_at: datetime | None = None,
     ) -> QueuedUser:
@@ -120,8 +122,8 @@ def make_queued_user() -> Callable[..., QueuedUser]:
 def make_active_user() -> Callable[..., ActiveUser]:
     def _make(
         id: str = "user-1",
-        name: str = "Ada Lovelace",
-        email: str = "ada@example.com",
+        name: str = DEFAULT_NAME,
+        email: str = DEFAULT_EMAIL,
         client_id: str = "client-1",
         created_at: datetime | None = None,
     ) -> ActiveUser:
@@ -134,12 +136,3 @@ def make_active_user() -> Callable[..., ActiveUser]:
         )
 
     return _make
-
-
-@pytest.fixture
-def async_lock() -> AsyncMock:
-    """A mocked async-context-manager lock (e.g. for DistributedLock substitution)."""
-    lock = AsyncMock()
-    lock.__aenter__.return_value = lock
-    lock.__aexit__.return_value = False
-    return lock

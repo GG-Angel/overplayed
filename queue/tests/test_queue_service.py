@@ -1,10 +1,6 @@
-"""Unit tests for QueueService (app/services/queue.py)."""
-
+import pytest
 from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock
-
-import pytest
-
 from errors import SpotifySessionError, SpotifyValidationError
 from services.queue import QueueRepository, QueueService
 
@@ -61,7 +57,7 @@ class TestGetQueueOverview:
     async def test_happy_path_below_capacity_no_wait_time(
         self, fake_redis, mocker, make_active_user
     ):
-        service, user_manager, _, queue, _ = make_service(fake_redis, mocker)
+        service, user_manager, _, _, _ = make_service(fake_redis, mocker)
         user_manager.get_users = AsyncMock(return_value=[make_active_user()])
 
         overview = await service.get_queue_overview()
@@ -73,7 +69,9 @@ class TestGetQueueOverview:
         self, fake_redis, mocker, make_active_user, make_new_user
     ):
         service, user_manager, _, queue, _ = make_service(fake_redis, mocker)
-        active_users = [make_active_user(id=str(i), email=f"u{i}@x.com") for i in range(5)]
+        active_users = [
+            make_active_user(id=str(i), email=f"u{i}@x.com") for i in range(5)
+        ]
         user_manager.get_users = AsyncMock(return_value=active_users)
         await queue.push(make_new_user(email="waiting@example.com"))
 
@@ -133,9 +131,7 @@ class TestEnqueueUser:
     async def test_exception_already_queued_raises_session_error(
         self, fake_redis, mocker, make_new_user
     ):
-        service, user_manager, user_validator, queue, _ = make_service(
-            fake_redis, mocker
-        )
+        service, _, _, queue, _ = make_service(fake_redis, mocker)
         await queue.push(make_new_user(email="dup@example.com"))
 
         with pytest.raises(SpotifySessionError, match="Already in queue"):
@@ -247,8 +243,10 @@ class TestFillAvailableSlots:
     async def test_boundary_no_available_slots_is_noop(
         self, fake_redis, mocker, make_active_user
     ):
-        service, user_manager, _, queue, _ = make_service(fake_redis, mocker)
-        full_users = [make_active_user(id=str(i), email=f"u{i}@x.com") for i in range(5)]
+        service, user_manager, _, _, _ = make_service(fake_redis, mocker)
+        full_users = [
+            make_active_user(id=str(i), email=f"u{i}@x.com") for i in range(5)
+        ]
         user_manager.get_users = AsyncMock(return_value=full_users)
 
         result = await service._fill_available_slots()
@@ -262,9 +260,7 @@ class TestFillAvailableSlots:
         service, user_manager, _, queue, _ = make_service(fake_redis, mocker)
         user_manager.get_users = AsyncMock(return_value=[])
         activated = make_active_user(email="second@example.com")
-        user_manager.add_user = AsyncMock(
-            side_effect=[RuntimeError("full"), activated]
-        )
+        user_manager.add_user = AsyncMock(side_effect=[RuntimeError("full"), activated])
         await queue.push(make_new_user(name="First", email="first@example.com"))
         await queue.push(make_new_user(name="Second", email="second@example.com"))
 

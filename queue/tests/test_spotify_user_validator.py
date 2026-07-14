@@ -1,9 +1,5 @@
-"""Unit tests for SpotifyUserValidator (app/services/spotify.py)."""
-
-from unittest.mock import AsyncMock
-
 import pytest
-
+from unittest.mock import AsyncMock
 from errors import SpotifyValidationError
 from services.spotify import SpotifyUserValidator
 
