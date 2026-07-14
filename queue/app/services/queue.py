@@ -41,15 +41,19 @@ class QueueRepository:
 
     async def push(self, user: NewUser) -> QueuePushResult:
         """Push a new user to the queue."""
-        entry = self._map_user(user)
+        entry = QueuedUser(
+            name=user.name,
+            email=user.email,
+            retries=0,
+            created_at=datetime.now(timezone.utc),
+        )
         position = await self._redis.rpush(self._queue_key, entry.model_dump_json())
         logger.debug(f"Queued user: {user.name} (position: {position})")
         return self.QueuePushResult(position=position)
 
     async def retry(self, user: QueuedUser) -> QueuePushResult:
         """Push a user to the front of the queue."""
-        entry = self._map_user(NewUser(name=user.name, email=user.email))
-        position = await self._redis.lpush(self._queue_key, entry.model_dump_json())
+        position = await self._redis.lpush(self._queue_key, user.model_dump_json())
         logger.debug(f"Retried user: {user.name} (retries: {user.retries})")
         return self.QueuePushResult(position=position)
 
@@ -85,15 +89,6 @@ class QueueRepository:
     async def size(self) -> int:
         """Get the size of the queue."""
         return await self._redis.llen(self._queue_key)
-
-    def _map_user(self, user: NewUser) -> QueuedUser:
-        """Map a NewUser to a QueuedUser."""
-        return QueuedUser(
-            name=user.name,
-            email=user.email,
-            retries=0,
-            created_at=datetime.now(timezone.utc),
-        )
 
 
 class QueueService:
@@ -320,4 +315,8 @@ class QueueWorker:
             logger.warning("Worker not started.")
             return
         self._task.cancel()
-        await self._task
+        try:
+            await self._task
+        except asyncio.CancelledError:
+            pass
+        logger.info("Stopped queue worker.")

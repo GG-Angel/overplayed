@@ -88,7 +88,7 @@ class SpotifyTokenProvider:
 
     async def seed_token(self, refresh_token: str) -> None:
         """Seed the refresh token into Redis if it doesn't already exist."""
-        if self._redis.exists(self._refresh_token_key):
+        if await self._redis.exists(self._refresh_token_key):
             logger.warning("Refresh token already exists - no action taken.")
             return
 
@@ -136,7 +136,7 @@ class SpotifyTokenProvider:
 
     async def _persist_token(self, token: Token) -> None:
         """Save the access and refresh tokens to Redis."""
-        ttl = max(token.expires_in - 60, 0)  # expire early
+        ttl = max(token.expires_in - 60, 1)  # expire early, must stay positive
         await self._redis.set(
             self._access_token_key, self._encrypt(token.access_token), ex=ttl
         )
@@ -205,7 +205,7 @@ class SpotifyUserManager:
     async def get_users(self) -> list[ActiveUser]:
         """Get the list of active users for the Spotify app."""
         if cached := await self._redis.get(self._users_key):
-            return self.GetUsersResponse.model_validate(cached).users
+            return self.GetUsersResponse.model_validate_json(cached).users
         try:
             return await self._fetch_users()
         except Exception as e:
