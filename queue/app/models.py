@@ -1,4 +1,5 @@
-from pydantic import BaseModel
+from pydantic.alias_generators import to_camel
+from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 
 
@@ -15,6 +16,12 @@ class QueuedUser(BaseModel):
 
 
 class ActiveUser(BaseModel):
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        serialize_by_alias=False,
+    )
+
     id: str
     name: str
     email: str

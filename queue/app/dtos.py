@@ -15,17 +15,21 @@ class QueueOverviewResponse(BaseModel):
     next_available_time: datetime | None
 
 
-class UserStatusResponse(BaseModel):
-    class Active(BaseModel):
-        status: Literal["active"] = "active"
-        name: str
-        estimated_end_time: datetime
+class UserActiveResponse(BaseModel):
+    status: Literal["active"] = "active"
+    name: str
+    estimated_end_time: datetime
 
-    class InQueue(BaseModel):
-        status: Literal["in_queue"] = "in_queue"
-        name: str
-        position_in_queue: int
-        estimated_wait_time: datetime
 
-    class NotInQueue(BaseModel):
-        status: Literal["not_in_queue"] = "not_in_queue"
+class UserInQueueResponse(BaseModel):
+    status: Literal["in_queue"] = "in_queue"
+    name: str
+    position_in_queue: int
+    estimated_wait_time: datetime
+
+
+class UserNotInQueueResponse(BaseModel):
+    status: Literal["not_in_queue"] = "not_in_queue"
+
+
+UserStatusResponse = UserActiveResponse | UserInQueueResponse | UserNotInQueueResponse

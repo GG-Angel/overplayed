@@ -94,22 +94,21 @@ class QueueRepository:
 class QueueService:
     """Service for managing queued and active users."""
 
-    class UserStatus(BaseModel):
-        """Status of a user in the queue or active list."""
+    class InQueueStatus(BaseModel):
+        status: Literal["in_queue"] = "in_queue"
+        position: int
+        user: QueuedUser
+        start_time: datetime
 
-        class InQueue(BaseModel):
-            status: Literal["in_queue"] = "in_queue"
-            position: int
-            user: QueuedUser
-            start_time: datetime
+    class ActiveStatus(BaseModel):
+        status: Literal["active"] = "active"
+        user: ActiveUser
+        end_time: datetime
 
-        class Active(BaseModel):
-            status: Literal["active"] = "active"
-            user: ActiveUser
-            end_time: datetime
+    class NotInQueueStatus(BaseModel):
+        status: Literal["not_in_queue"] = "not_in_queue"
 
-        class NotInQueue(BaseModel):
-            status: Literal["not_in_queue"] = "not_in_queue"
+    UserStatusResult = InQueueStatus | ActiveStatus | NotInQueueStatus
 
     class QueueOverviewResult(BaseModel):
         """Overview of the queue, including active users, queued users, and next available time."""
@@ -130,8 +129,6 @@ class QueueService:
         activated_users: list[ActiveUser] = []
         rejected_users: list[QueuedUser] = []
 
-    UserStatusResult = UserStatus.InQueue | UserStatus.Active | UserStatus.NotInQueue
-
     def __init__(
         self,
         user_manager: SpotifyUserManager,
@@ -151,7 +148,7 @@ class QueueService:
         """Get the status of a user."""
         queue_entry = await self._queue.get(email)
         if queue_entry is not None:
-            return self.UserStatus.InQueue(
+            return self.InQueueStatus(
                 position=queue_entry.position,
                 user=queue_entry.user,
                 start_time=await self._estimate_start_time(queue_entry.position),
@@ -159,12 +156,12 @@ class QueueService:
 
         active_user = await self._user_manager.get_user(email)
         if active_user is not None:
-            return self.UserStatus.Active(
+            return self.ActiveStatus(
                 user=active_user,
                 end_time=active_user.created_at + self._access_duration,
             )
 
-        return self.UserStatus.NotInQueue()
+        return self.NotInQueueStatus()
 
     async def get_queue_overview(self) -> QueueOverviewResult:
         """Get an overview of the queue, including active users, queued users, and next available time."""

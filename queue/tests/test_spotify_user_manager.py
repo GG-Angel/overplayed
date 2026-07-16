@@ -84,7 +84,7 @@ class TestHasUserAndGetUser:
     ):
         manager, _ = make_manager(mock_http, fake_redis, mocker)
         user = make_active_user(email="present@example.com")
-        response = manager.GetUsersResponse(users=[user])
+        response = manager.FetchUsersResponse(users=[user])
         mock_http.get.return_value = make_async_cm(
             make_http_response(json_data=response.model_dump(mode="json"))
         )
@@ -96,7 +96,7 @@ class TestHasUserAndGetUser:
         self, mock_http, fake_redis, mocker, make_async_cm, make_http_response
     ):
         manager, _ = make_manager(mock_http, fake_redis, mocker)
-        response = manager.GetUsersResponse(users=[])
+        response = manager.FetchUsersResponse(users=[])
         mock_http.get.return_value = make_async_cm(
             make_http_response(json_data=response.model_dump(mode="json"))
         )
@@ -110,7 +110,7 @@ class TestGetUsers:
     ):
         manager, _ = make_manager(mock_http, fake_redis, mocker)
         user = make_active_user()
-        cached = manager.GetUsersResponse(users=[user])
+        cached = manager.FetchUsersResponse(users=[user])
         await fake_redis.set(manager._users_key, cached.model_dump_json())
 
         users = await manager.get_users()
@@ -129,7 +129,7 @@ class TestGetUsers:
     ):
         manager, _ = make_manager(mock_http, fake_redis, mocker)
         user = make_active_user()
-        response = manager.GetUsersResponse(users=[user])
+        response = manager.FetchUsersResponse(users=[user])
         mock_http.get.return_value = make_async_cm(
             make_http_response(json_data=response.model_dump(mode="json"))
         )
@@ -139,13 +139,13 @@ class TestGetUsers:
         assert users == [user]
         assert await fake_redis.exists(manager._users_key)
 
-    async def test_exception_fetch_failure_wrapped(
-        self, mock_http, fake_redis, mocker
-    ):
+    async def test_exception_fetch_failure_wrapped(self, mock_http, fake_redis, mocker):
         manager, _ = make_manager(mock_http, fake_redis, mocker)
         mock_http.get.side_effect = RuntimeError("boom")
 
-        with pytest.raises(SpotifyUserManagementError, match="Failed to fetch active users"):
+        with pytest.raises(
+            SpotifyUserManagementError, match="Failed to fetch active users"
+        ):
             await manager.get_users()
 
 
@@ -183,7 +183,7 @@ class TestCacheInvalidation:
         await fake_redis.set(manager._users_key, "stale-cache")
         mock_http.delete.return_value = make_async_cm(make_http_response())
 
-        await manager.deactivate_user(make_active_user())
+        await manager._deactivate_user(make_active_user())
 
         assert not await fake_redis.exists(manager._users_key)
 

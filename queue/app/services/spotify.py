@@ -1,7 +1,8 @@
+from pydantic.alias_generators import to_camel
 from loguru import logger
 from cryptography.fernet import Fernet
 from redis.asyncio import Redis
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from aiohttp import ClientSession
 from errors import SpotifyValidationError, SpotifyTokenError, SpotifyUserManagementError
 from models import ActiveUser, NewUser
@@ -160,7 +161,7 @@ class SpotifyTokenProvider:
 
 
 class SpotifyUserManager:
-    class GetUsersResponse(BaseModel):
+    class FetchUsersResponse(BaseModel):
         users: list[ActiveUser]
 
     def __init__(
@@ -186,7 +187,7 @@ class SpotifyUserManager:
     async def remove_user(self, user: ActiveUser) -> None:
         """Remove a user from the Spotify app."""
         try:
-            await self.deactivate_user(user)
+            await self._deactivate_user(user)
         except Exception as e:
             raise SpotifyUserManagementError(
                 f"Failed to remove user {user.name}."
@@ -205,7 +206,7 @@ class SpotifyUserManager:
     async def get_users(self) -> list[ActiveUser]:
         """Get the list of active users for the Spotify app."""
         if cached := await self._redis.get(self._users_key):
-            return self.GetUsersResponse.model_validate_json(cached).users
+            return self.FetchUsersResponse.model_validate_json(cached).users
         try:
             return await self._fetch_users()
         except Exception as e:
@@ -218,7 +219,7 @@ class SpotifyUserManager:
             headers=await self._build_headers(),
             raise_for_status=True,
         ) as response:
-            table = self.GetUsersResponse.model_validate(await response.json())
+            table = self.FetchUsersResponse.model_validate(await response.json())
             await self._redis.set(self._users_key, table.model_dump_json(), ex=300)
             return table.users
 
@@ -235,7 +236,7 @@ class SpotifyUserManager:
             logger.debug(f"Added user: {active_user.name}")
             return active_user
 
-    async def deactivate_user(self, user: ActiveUser) -> None:
+    async def _deactivate_user(self, user: ActiveUser) -> None:
         """Deactivate a user in the Spotify app."""
         async with self._http.delete(
             url=f"{self._build_url(write=True)}/id/{user.id}",
