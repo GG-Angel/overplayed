@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+/// Api
+
 export const LIKED_SONGS_ID = "liked-songs";
 
 export const externalUrlsSchema = z.object({
@@ -125,29 +127,6 @@ export const swipeSubmissionResponseSchema = z.object({
   backup_playlist: playlistSchema.nullable(),
 });
 
-export const queueStatusSchema = z.object({
-  active_users: z.number().nonnegative(),
-  queued_users: z.number().nonnegative(),
-  user_limit: z.number().nonnegative(),
-  next_available_time: z.iso.datetime().nullable(),
-});
-
-export const accessRequestSchema = z.object({
-  name: z.string().trim().min(1, "Full name is required"),
-  email: z.email("Enter a valid email").trim(),
-});
-
-export const accessStatusSchema = z.object({
-  user: z.object({
-    name: z.string(),
-    email: z.email(),
-  }),
-  position: z.number().nonnegative().nullable(),
-  admitted: z.boolean(),
-  start_time: z.iso.datetime(),
-  end_time: z.iso.datetime(),
-});
-
 export type Image = z.infer<typeof imageSchema>;
 export type User = z.infer<typeof userSchema>;
 export type CurrentUser = z.infer<typeof currentUserSchema>;
@@ -161,6 +140,44 @@ export type SwipeSubmissionForm = z.infer<typeof swipeSubmissionFormSchema>;
 export type SwipeSubmissionResponse = z.infer<typeof swipeSubmissionResponseSchema>;
 export type Metrics = z.infer<typeof globalMetricsSchema>;
 export type Leaderboard = z.infer<typeof leaderboardSchema>;
-export type QueueStatus = z.infer<typeof queueStatusSchema>;
-export type AccessRequest = z.infer<typeof accessRequestSchema>;
-export type AccessStatus = z.infer<typeof accessStatusSchema>;
+
+/// Queue
+
+export const queueAccessRequestSchema = z.object({
+  name: z.string().trim().min(1, "Full name is required"),
+  email: z.email("Enter a valid email").trim(),
+});
+
+export const queueOverviewSchema = z.object({
+  num_active: z.number().min(0),
+  num_queued: z.number().min(0),
+  user_limit: z.number().min(0),
+  next_available_time: z.iso.datetime().nullable(),
+});
+
+const queueUserActiveSchema = z.object({
+  status: z.literal("active"),
+  name: z.string(),
+  estimated_end_time: z.iso.datetime(),
+});
+
+const queueUserInQueueSchema = z.object({
+  status: z.literal("in_queue"),
+  name: z.string(),
+  position_in_queue: z.number().int(),
+  estimated_start_time: z.iso.datetime(),
+});
+
+const queueUserNotInQueueSchema = z.object({
+  status: z.literal("not_in_queue"),
+});
+
+export const queueUserStatusSchema = z.discriminatedUnion("status", [
+  queueUserActiveSchema,
+  queueUserInQueueSchema,
+  queueUserNotInQueueSchema,
+]);
+
+export type QueueAccessRequest = z.infer<typeof queueAccessRequestSchema>;
+export type QueueOverview = z.infer<typeof queueOverviewSchema>;
+export type QueueUserStatus = z.infer<typeof queueUserStatusSchema>;

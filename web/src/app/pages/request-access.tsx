@@ -4,66 +4,74 @@ import Divider from "@/components/ui/Divider";
 import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
 import { Spinner } from "@/components/ui/Spinner";
-import { useAccessStatus } from "@/features/user/api/get-access-status";
+import { useCheckAccessStatus } from "@/features/user/api/get-access-status";
 import { useQueueStatus } from "@/features/user/api/get-queue-state";
 import { useSubmitAccessRequest } from "@/features/user/api/submit-access-request";
 import { kaomojis } from "@/lib/kaomoji";
-import { accessRequestSchema, type AccessRequest } from "@/lib/types";
 import { formatCount, formatDateTime } from "@/lib/utils";
 import { CircleQuestionMark, Info, Key, Mail, Plus, ThumbsUp, User } from "lucide-react";
 import { useState, type SubmitEventHandler } from "react";
+import {
+  queueAccessRequestSchema,
+  type QueueAccessRequest,
+  type QueueUserStatus,
+} from "@/lib/types";
 
-const ErrorStatus = ({ message }: { message: string }) => (
+const ErrorMessage = ({ message }: { message: string }) => (
   <Card tone="negative" padding="lg" radius="lg" className="flex flex-col gap-2 py-4">
-    <p>
-      <span className="font-medium">Error:</span> {message}
-    </p>
+    {message}
   </Card>
 );
 
-const AdmittedStatus = ({ name, endTime }: { name: string; endTime: string }) => (
-  <Card tone="positive" padding="lg" radius="lg" className="flex flex-col gap-2 py-6">
-    <h2>{name}'s Status</h2>
-    <div className="flex flex-col gap-0.5">
-      <p className="font-medium">
-        You're in! <span className="text-success">{kaomojis.working}</span>
-      </p>
-      <p className="brightness-50">You have access until {formatDateTime(endTime)}.</p>
-    </div>
-  </Card>
-);
+const AccessResult = ({ data }: { data: QueueUserStatus }) => {
+  const status = data.status;
 
-const QueuedStatus = ({
-  name,
-  position,
-  startTime,
-}: {
-  name: string;
-  position: number;
-  startTime: string;
-}) => (
-  <Card tone="muted" padding="lg" radius="lg" className="flex flex-col gap-2 py-6">
-    <h2>{name}'s Status</h2>
-    <div className="flex flex-col gap-0.5">
-      <p className="font-medium">
-        You're <span className="text-success">#{position}</span> in line.
-      </p>
-      <p className="text-muted">Access opens at {formatDateTime(startTime)}.</p>
-    </div>
-  </Card>
-);
+  if (status === "active") {
+    const { name, estimated_end_time } = data;
+    return (
+      <Card tone="positive" padding="lg" radius="lg" className="flex flex-col gap-2 py-6">
+        <h2>{name}'s Status</h2>
+        <div className="flex flex-col gap-0.5">
+          <p className="font-medium">
+            You're in! <span className="text-success">{kaomojis.working}</span>
+          </p>
+          <p className="brightness-75">
+            You have access until {formatDateTime(estimated_end_time)}.
+          </p>
+        </div>
+      </Card>
+    );
+  }
+
+  if (status === "in_queue") {
+    const { name, position_in_queue, estimated_start_time } = data;
+    return (
+      <Card tone="muted" padding="lg" radius="lg" className="flex flex-col gap-2 py-6">
+        <h2>{name}'s Status</h2>
+        <div className="flex flex-col gap-0.5">
+          <p className="font-medium">
+            You're <span className="text-success">#{position_in_queue}</span> in line.
+          </p>
+          <p className="text-muted">Access opens at {formatDateTime(estimated_start_time)}.</p>
+        </div>
+      </Card>
+    );
+  }
+
+  return <ErrorMessage message="This user is inactive." />;
+};
 
 const RequestAccessPage = () => {
   const [isModalActive, setIsModalActive] = useState<boolean>(false);
-  const [form, setForm] = useState<AccessRequest>({ name: "", email: "" });
-  const [errors, setErrors] = useState<Partial<AccessRequest>>({});
+  const [form, setForm] = useState<QueueAccessRequest>({ name: "", email: "" });
+  const [errors, setErrors] = useState<Partial<QueueAccessRequest>>({});
 
   const queueStatus = useQueueStatus();
-  const accessStatus = useAccessStatus(form);
+  const accessStatus = useCheckAccessStatus(form);
   const submitMutation = useSubmitAccessRequest(form);
 
   const validateForm = () => {
-    const result = accessRequestSchema.safeParse(form);
+    const result = queueAccessRequestSchema.safeParse(form);
     if (!result.success) {
       setErrors(Object.fromEntries(result.error.issues.map((i) => [i.path[0], i.message])));
       return false;
@@ -73,14 +81,13 @@ const RequestAccessPage = () => {
   };
 
   const handleCheckStatus = () => {
-    if (submitMutation.isPending) return;
     if (!validateForm()) return;
+    submitMutation.reset();
     accessStatus.refetch();
   };
 
   const handleSubmitRequest: SubmitEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
-    if (submitMutation.isPending) return;
     if (!validateForm()) return;
     submitMutation.mutate();
   };
@@ -109,7 +116,7 @@ const RequestAccessPage = () => {
         <h2>Availability</h2>
         {queueStatus.data ? (
           (() => {
-            const total = queueStatus.data.active_users + queueStatus.data.queued_users;
+            const total = queueStatus.data.num_active + queueStatus.data.num_queued;
             const active = Math.min(total, queueStatus.data.user_limit);
             const empty = Math.max(0, queueStatus.data.user_limit - active);
             const waiting = Math.max(0, total - queueStatus.data.user_limit);
@@ -187,34 +194,28 @@ const RequestAccessPage = () => {
             type="submit"
             disabled={submitMutation.isPending}
           >
-            {submitMutation.isPending ? "Submitting..." : "Submit Request"}
+            Submit Request
           </Button>
         </div>
       </form>
 
       {/* Results */}
-      {submitMutation.isPending || accessStatus.isLoading ? (
+      {(submitMutation.isPending || accessStatus.isFetching) && (
         <Spinner className="self-center my-2" />
-      ) : submitMutation.isError ? (
-        <ErrorStatus
+      )}
+
+      {submitMutation.isError && (
+        <ErrorMessage
           message={
-            submitMutation.error.response?.data.detail ?? "Failed to submit. Please try again."
+            submitMutation.error.response?.data.detail ??
+            "Failed to submit request. Please try again."
           }
         />
-      ) : accessStatus.isError ? (
-        <ErrorStatus message="User isn't active or in the queue." />
-      ) : (
-        accessStatus.isSuccess &&
-        (accessStatus.data.admitted ? (
-          <AdmittedStatus name={accessStatus.data.user.name} endTime={accessStatus.data.end_time} />
-        ) : (
-          <QueuedStatus
-            name={accessStatus.data.user.name}
-            position={accessStatus.data.position!}
-            startTime={accessStatus.data.start_time}
-          />
-        ))
       )}
+      {accessStatus.isError && <ErrorMessage message="Failed to check status. Please try again." />}
+
+      {submitMutation.data && <AccessResult data={submitMutation.data} />}
+      {accessStatus.data && <AccessResult data={accessStatus.data} />}
 
       {/* Modal */}
       {isModalActive && (

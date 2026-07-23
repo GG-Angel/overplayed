@@ -1,23 +1,22 @@
 import { queueApi, type ApiError } from "@/lib/api";
 import { queryKeys } from "@/lib/query";
-import { accessStatusSchema, type AccessRequest, type AccessStatus } from "@/lib/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
+import { queueUserStatusSchema, type QueueAccessRequest, type QueueUserStatus } from "@/lib/types";
 
-const submitAccessRequest = async (form: AccessRequest) => {
-  return accessStatusSchema.parse(await queueApi.post("/queue", form));
+const submitAccessRequest = async (form: QueueAccessRequest) => {
+  return queueUserStatusSchema.parse(await queueApi.post("/queue", form));
 };
 
-export const useSubmitAccessRequest = (form: AccessRequest) => {
+export const useSubmitAccessRequest = (form: QueueAccessRequest) => {
   const queryClient = useQueryClient();
 
-  return useMutation<AccessStatus, AxiosError<ApiError>>({
+  return useMutation<QueueUserStatus, AxiosError<ApiError>>({
     mutationFn: () => submitAccessRequest(form),
-    onSuccess: async (data) => {
-      queryClient.setQueryData(queryKeys.userAccess(), data);
+    onSuccess: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.queue() }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.userAccess() }),
+        queryClient.resetQueries({ queryKey: queryKeys.userAccess() }),
       ]);
     },
   });

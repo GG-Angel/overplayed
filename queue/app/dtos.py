@@ -25,7 +25,7 @@ class UserInQueueResponse(BaseModel):
     status: Literal["in_queue"] = "in_queue"
     name: str
     position_in_queue: int
-    estimated_wait_time: datetime
+    estimated_start_time: datetime
 
 
 class UserNotInQueueResponse(BaseModel):

@@ -52,7 +52,7 @@ async def join_queue(
             return UserInQueueResponse(
                 name=result.user.name,
                 position_in_queue=result.position,
-                estimated_wait_time=result.start_time,
+                estimated_start_time=result.start_time,
             )
         case _:
             raise HTTPException(status_code=500, detail="Unexpected status")
@@ -75,7 +75,7 @@ async def get_user_status(
             return UserInQueueResponse(
                 name=result.user.name,
                 position_in_queue=result.position,
-                estimated_wait_time=result.start_time,
+                estimated_start_time=result.start_time,
             )
         case _:
             return UserNotInQueueResponse()
