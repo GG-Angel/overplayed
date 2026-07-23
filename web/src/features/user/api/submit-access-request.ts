@@ -16,7 +16,7 @@ export const useSubmitAccessRequest = (form: QueueAccessRequest) => {
     onSuccess: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.queue() }),
-        queryClient.resetQueries({ queryKey: queryKeys.userAccess() }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.userAccess() }),
       ]);
     },
   });

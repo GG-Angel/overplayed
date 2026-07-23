@@ -8,7 +8,7 @@ from redis.asyncio import Redis
 from models import NewUser, ActiveUser, QueuedUser
 from services.spotify import SpotifyUserManager, SpotifyUserValidator
 from locking import DistributedLock
-from errors import SpotifySessionError, SpotifyValidationError
+from errors import SpotifyValidationError
 
 
 class QueueRepository:
@@ -197,17 +197,14 @@ class QueueService:
     async def enqueue_user(self, user: NewUser) -> UserStatusResult:
         """Enqueue a new user to the queue."""
         async with self._lock:
-            if await self._queue.has(user.email):
-                raise SpotifySessionError("Already in queue.")
-
-            if await self._user_manager.has_user(user.email):
-                raise SpotifySessionError("Already active.")
-
             if not await self._user_validator.user_exists(user.email):
-                raise SpotifyValidationError("User does not exist.")
+                raise SpotifyValidationError(f"{user.name} does not exist.")
 
-            await self._queue.push(user)
-            await self._process_queue_locked()
+            # return status if already in queue or active for idempotency
+            if not await self._queue.has(user.email) and not await self._user_manager.has_user(user.email):  # fmt: skip
+                await self._queue.push(user)
+                await self._process_queue_locked()
+
         return await self.get_user_status(user.email)
 
     async def process_queue(self) -> None:
@@ -253,7 +250,7 @@ class QueueService:
                     logger.warning(f"Failed to remove user {user.name}, skipping: {e}")
 
         logger.info(
-            f"Removed {len(result.evicted_users)} expired users: {[user.name for user in active_users]}."
+            f"Removed {len(result.evicted_users)} expired users: {[user.name for user in result.evicted_users]}."
         )
         return result
 

@@ -168,14 +168,9 @@ const queueUserInQueueSchema = z.object({
   estimated_start_time: z.iso.datetime(),
 });
 
-const queueUserNotInQueueSchema = z.object({
-  status: z.literal("not_in_queue"),
-});
-
 export const queueUserStatusSchema = z.discriminatedUnion("status", [
   queueUserActiveSchema,
   queueUserInQueueSchema,
-  queueUserNotInQueueSchema,
 ]);
 
 export type QueueAccessRequest = z.infer<typeof queueAccessRequestSchema>;

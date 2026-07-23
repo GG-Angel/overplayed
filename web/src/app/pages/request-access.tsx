@@ -4,12 +4,11 @@ import Divider from "@/components/ui/Divider";
 import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
 import { Spinner } from "@/components/ui/Spinner";
-import { useCheckAccessStatus } from "@/features/user/api/get-access-status";
 import { useQueueStatus } from "@/features/user/api/get-queue-state";
 import { useSubmitAccessRequest } from "@/features/user/api/submit-access-request";
 import { kaomojis } from "@/lib/kaomoji";
 import { formatCount, formatDateTime } from "@/lib/utils";
-import { CircleQuestionMark, Info, Key, Mail, Plus, ThumbsUp, User } from "lucide-react";
+import { Info, Key, Mail, Plus, ThumbsUp, User } from "lucide-react";
 import { useState, type SubmitEventHandler } from "react";
 import {
   queueAccessRequestSchema,
@@ -26,23 +25,6 @@ const ErrorMessage = ({ message }: { message: string }) => (
 const AccessResult = ({ data }: { data: QueueUserStatus }) => {
   const status = data.status;
 
-  if (status === "active") {
-    const { name, estimated_end_time } = data;
-    return (
-      <Card tone="positive" padding="lg" radius="lg" className="flex flex-col gap-2 py-6">
-        <h2>{name}'s Status</h2>
-        <div className="flex flex-col gap-0.5">
-          <p className="font-medium">
-            You're in! <span className="text-success">{kaomojis.working}</span>
-          </p>
-          <p className="brightness-75">
-            You have access until {formatDateTime(estimated_end_time)}.
-          </p>
-        </div>
-      </Card>
-    );
-  }
-
   if (status === "in_queue") {
     const { name, position_in_queue, estimated_start_time } = data;
     return (
@@ -58,7 +40,18 @@ const AccessResult = ({ data }: { data: QueueUserStatus }) => {
     );
   }
 
-  return <ErrorMessage message="This user is inactive." />;
+  const { name, estimated_end_time } = data;
+  return (
+    <Card tone="positive" padding="lg" radius="lg" className="flex flex-col gap-2 py-6">
+      <h2>{name}'s Status</h2>
+      <div className="flex flex-col gap-0.5">
+        <p className="font-medium">
+          You're in! <span className="text-success">{kaomojis.working}</span>
+        </p>
+        <p className="brightness-80">You have access until {formatDateTime(estimated_end_time)}.</p>
+      </div>
+    </Card>
+  );
 };
 
 const RequestAccessPage = () => {
@@ -67,7 +60,6 @@ const RequestAccessPage = () => {
   const [errors, setErrors] = useState<Partial<QueueAccessRequest>>({});
 
   const queueStatus = useQueueStatus();
-  const accessStatus = useCheckAccessStatus(form);
   const submitMutation = useSubmitAccessRequest(form);
 
   const validateForm = () => {
@@ -78,12 +70,6 @@ const RequestAccessPage = () => {
     }
     setErrors({});
     return true;
-  };
-
-  const handleCheckStatus = () => {
-    if (!validateForm()) return;
-    submitMutation.reset();
-    accessStatus.refetch();
   };
 
   const handleSubmitRequest: SubmitEventHandler<HTMLFormElement> = (e) => {
@@ -179,31 +165,17 @@ const RequestAccessPage = () => {
           onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
           onBlur={validateForm}
         />
-        <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
-          <Button
-            icon={<CircleQuestionMark className="size-4" />}
-            type="button"
-            variant="secondary"
-            onClick={handleCheckStatus}
-            disabled={accessStatus.isFetching}
-          >
-            Check Status
-          </Button>
-          <Button
-            icon={<Mail className="size-4" />}
-            type="submit"
-            disabled={submitMutation.isPending}
-          >
-            Submit Request
-          </Button>
-        </div>
+        <Button
+          icon={<Mail className="size-4" />}
+          type="submit"
+          disabled={submitMutation.isPending}
+        >
+          Submit Request
+        </Button>
       </form>
 
       {/* Results */}
-      {(submitMutation.isPending || accessStatus.isFetching) && (
-        <Spinner className="self-center my-2" />
-      )}
-
+      {submitMutation.isPending && <Spinner className="self-center my-2" />}
       {submitMutation.isError && (
         <ErrorMessage
           message={
@@ -212,10 +184,7 @@ const RequestAccessPage = () => {
           }
         />
       )}
-      {accessStatus.isError && <ErrorMessage message="Failed to check status. Please try again." />}
-
-      {submitMutation.data && <AccessResult data={submitMutation.data} />}
-      {accessStatus.data && <AccessResult data={accessStatus.data} />}
+      {submitMutation.isSuccess && <AccessResult data={submitMutation.data} />}
 
       {/* Modal */}
       {isModalActive && (
