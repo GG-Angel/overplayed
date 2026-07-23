@@ -1,10 +1,10 @@
 import { queueApi } from "@/lib/api";
 import { queryKeys } from "@/lib/query";
-import { queueStatusSchema } from "@/lib/types";
+import { queueOverviewSchema } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 
 const getQueueStatus = async () => {
-  return queueStatusSchema.parse(await queueApi.get("/queue"));
+  return queueOverviewSchema.parse(await queueApi.get("/queue"));
 };
 
 export const useQueueStatus = () => {

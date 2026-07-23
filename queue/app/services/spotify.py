@@ -38,7 +38,7 @@ class SpotifyUserValidator:
 
     async def user_exists(self, email: str, *, _retried: bool = False) -> bool:
         """Check if a Spotify user exists by validating the email address."""
-        async with self._http.get(
+        async with self._http.post(
             "https://spclient.wg.spotify.com/signup/public/v2/account/validate",
             json={
                 "fields": [{"field": "FIELD_EMAIL", "value": email}],
