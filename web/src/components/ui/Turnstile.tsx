@@ -1,6 +1,6 @@
 import { env } from "@/lib/env";
 import { cn } from "@/lib/utils";
-import { useEffect, useRef } from "react";
+import { useEffect, useImperativeHandle, useRef, type Ref } from "react";
 
 const SCRIPT_SRC = "https://challenges.cloudflare.com/turnstile/v0/api.js";
 const TURNSTILE_ACTION = "turnstile-spin-v2";
@@ -48,29 +48,42 @@ const loadTurnstile = (): Promise<void> => {
   return scriptPromise;
 };
 
+export type TurnstileHandle = {
+  reset: () => void;
+};
+
 type TurnstileProps = {
   onVerify: (token: string) => void;
   onExpire?: () => void;
   onError?: () => void;
   className?: string;
+  ref?: Ref<TurnstileHandle>;
 };
 
-const Turnstile = ({ onVerify, onExpire, onError, className }: TurnstileProps) => {
+const Turnstile = ({ onVerify, onExpire, onError, className, ref }: TurnstileProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const widgetIdRef = useRef<string | undefined>(undefined);
   const callbacks = useRef({ onVerify, onExpire, onError });
 
   useEffect(() => {
     callbacks.current = { onVerify, onExpire, onError };
   });
 
+  useImperativeHandle(ref, () => ({
+    reset: () => {
+      if (widgetIdRef.current && window.turnstile) {
+        window.turnstile.reset(widgetIdRef.current);
+      }
+    },
+  }));
+
   useEffect(() => {
-    let widgetId: string | undefined;
     let cancelled = false;
 
     loadTurnstile()
       .then(() => {
         if (cancelled || !containerRef.current || !window.turnstile) return;
-        widgetId = window.turnstile.render(containerRef.current, {
+        widgetIdRef.current = window.turnstile.render(containerRef.current, {
           sitekey: env.CLOUDFLARE_SITE_KEY,
           action: TURNSTILE_ACTION,
           callback: (token) => callbacks.current.onVerify(token),
@@ -82,7 +95,7 @@ const Turnstile = ({ onVerify, onExpire, onError, className }: TurnstileProps) =
 
     return () => {
       cancelled = true;
-      if (widgetId && window.turnstile) window.turnstile.remove(widgetId);
+      if (widgetIdRef.current && window.turnstile) window.turnstile.remove(widgetIdRef.current);
     };
   }, []);
 
