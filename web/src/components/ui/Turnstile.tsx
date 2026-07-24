@@ -2,7 +2,7 @@ import { env } from "@/lib/env";
 import { cn } from "@/lib/utils";
 import { useEffect, useImperativeHandle, useRef, type Ref } from "react";
 
-const SCRIPT_SRC = "https://challenges.cloudflare.com/turnstile/v0/api.js";
+const SCRIPT_SRC = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
 const TURNSTILE_ACTION = "turnstile-spin-v2";
 
 type RenderOptions = {
