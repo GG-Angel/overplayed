@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from datetime import datetime, timezone, timedelta
 from typing import List
 from core.database import get_db
@@ -6,42 +7,29 @@ from database.schemas import SwipeSession, User
 from sqlalchemy.exc import IntegrityError
 from loguru import logger
 from fastapi import Depends
-from pydantic import BaseModel, ConfigDict
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-class UserSwipeMetrics(BaseModel):
-    num_swipes: int
-    num_modified: int
-    num_cuts: int
-    num_kept: int
-    cut_rate: float
-
-
-class GlobalSwipeMetrics(BaseModel):
-    total_swipes: int
-    total_cuts: int
-    cut_rate: float
+@dataclass
+class GlobalSwipeAggregates:
     total_sessions: int
     total_users: int
+    total_swipes: int
+    total_cuts: int
 
 
-class LeaderboardRow(BaseModel):
-    class User(BaseModel):
-        id: str
-        display_name: str | None
-        spotify_url: str
-        picture_url: str | None
+@dataclass
+class UserSwipeAggregates:
+    num_swipes: int
+    num_cuts: int
+    num_modified: int
 
-        model_config = ConfigDict(from_attributes=True)
 
-    class Metrics(BaseModel):
-        total_swipes: int
-        total_cuts: int
-        cut_rate: float
-
+@dataclass
+class LeaderboardEntry:
     user: User
-    metrics: Metrics
+    total_swipes: int
+    total_cuts: int
 
 
 class DatabaseService:
@@ -61,7 +49,7 @@ class DatabaseService:
         except IntegrityError:
             logger.warning(f"Ignoring swipe session record for user {session.user_id} due to integrity error")  # fmt: skip
 
-    async def get_global_swipe_metrics(self) -> GlobalSwipeMetrics:
+    async def get_global_swipe_metrics(self) -> GlobalSwipeAggregates:
         result = await self.db.execute(
             select(
                 func.count(SwipeSession.id),
@@ -71,15 +59,14 @@ class DatabaseService:
             )
         )
         total_sessions, total_users, total_swipes, total_cuts = result.one()
-        return GlobalSwipeMetrics(
+        return GlobalSwipeAggregates(
             total_sessions=total_sessions,
             total_users=total_users,
             total_swipes=total_swipes,
             total_cuts=total_cuts,
-            cut_rate=round(total_cuts / total_swipes, 2) if total_swipes else 0.0,
         )
 
-    async def get_user_swipe_metrics(self, user_id: str) -> UserSwipeMetrics:
+    async def get_user_swipe_metrics(self, user_id: str) -> UserSwipeAggregates:
         result = await self.db.execute(
             select(
                 func.coalesce(func.sum(SwipeSession.tracks_swiped), 0),
@@ -88,17 +75,15 @@ class DatabaseService:
             ).where(SwipeSession.user_id == user_id)
         )
         num_swipes, num_cuts, num_modified = result.one()
-        return UserSwipeMetrics(
+        return UserSwipeAggregates(
             num_swipes=num_swipes,
             num_cuts=num_cuts,
             num_modified=num_modified,
-            num_kept=max(0, num_swipes - num_cuts),
-            cut_rate=round(num_cuts / num_swipes, 2) if num_swipes > 0 else 0.0,
         )
 
     async def get_swipe_leaderboard(
         self, offset: int = 0, limit: int = 10, since: timedelta = timedelta(days=30)
-    ) -> List[LeaderboardRow]:
+    ) -> List[LeaderboardEntry]:
         total_swipes = func.coalesce(func.sum(SwipeSession.tracks_swiped), 0)
         total_cuts = func.coalesce(func.sum(SwipeSession.tracks_cut), 0)
         result = await self.db.execute(
@@ -111,14 +96,7 @@ class DatabaseService:
             .limit(limit)
         )
         return [
-            LeaderboardRow(
-                user=LeaderboardRow.User.model_validate(user),
-                metrics=LeaderboardRow.Metrics(
-                    total_swipes=swipes,
-                    total_cuts=cuts,
-                    cut_rate=round(cuts / swipes, 2) if swipes > 0 else 0.0,
-                ),
-            )
+            LeaderboardEntry(user=user, total_swipes=swipes, total_cuts=cuts)
             for user, swipes, cuts in result.all()
         ]
 
