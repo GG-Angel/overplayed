@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     redis_password: str = Field(...)
     redis_key: bytes = Field(..., min_length=44, max_length=44)
 
+    cloudflare_turnstile_secret: str = Field(...)
+
     model_config = SettingsConfigDict(
         env_file=".env", extra="ignore", case_sensitive=False
     )

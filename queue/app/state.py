@@ -1,6 +1,7 @@
 from fastapi import Request
 from dataclasses import dataclass
 from services.queue import QueueService, QueueWorker
+from services.turnstile import TurnstileVerifier
 from settings import APP_STATE_KEY
 
 
@@ -8,6 +9,7 @@ from settings import APP_STATE_KEY
 class State:
     queue_service: QueueService
     queue_worker: QueueWorker
+    turnstile_verifier: TurnstileVerifier
 
 
 def get_state(request: Request) -> State:
@@ -18,3 +20,8 @@ def get_state(request: Request) -> State:
 def get_queue_service(request: Request) -> QueueService:
     """Get the queue service from the application state."""
     return get_state(request).queue_service
+
+
+def get_turnstile_verifier(request: Request) -> TurnstileVerifier:
+    """Get the Turnstile verifier from the application state."""
+    return get_state(request).turnstile_verifier

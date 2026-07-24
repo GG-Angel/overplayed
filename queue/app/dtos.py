@@ -1,11 +1,14 @@
 from typing import Literal
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class QueueSignUpForm(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     name: str
     email: str
+    turnstile_token: str = Field(alias="cf-turnstile-response")
 
 
 class QueueOverviewResponse(BaseModel):

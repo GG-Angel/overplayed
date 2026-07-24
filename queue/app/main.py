@@ -9,6 +9,7 @@ from services.queue import QueueService, QueueRepository, QueueWorker
 from state import State
 from locking import DistributedLock
 from routers.queue import router as queue_router
+from services.turnstile import TurnstileVerifier
 from services.spotify import (
     SpotifyTokenProvider,
     SpotifyUserManager,
@@ -44,9 +45,14 @@ async def lifespan(app: FastAPI):
 
         queue_worker = QueueWorker(queue_service)
 
+        turnstile_verifier = TurnstileVerifier(
+            http, settings.cloudflare_turnstile_secret
+        )
+
         app.state[APP_STATE_KEY] = State(
             queue_service=queue_service,
             queue_worker=queue_worker,
+            turnstile_verifier=turnstile_verifier,
         )
 
         await token_provider.seed_token(settings.spotify_refresh_token)
