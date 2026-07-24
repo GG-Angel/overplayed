@@ -1,4 +1,22 @@
-.venv/
-__pycache__/
-*.pyc
-.git/
+# Virtual environment
+.venv
+
+# Python cache
+**/__pycache__
+**/*.pyc
+**/*.pyo
+.pytest_cache/
+
+# Secrets
+.env
+
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+
+# Docs
+README.md

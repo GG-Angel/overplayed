@@ -15,9 +15,7 @@ services:
     depends_on:
       - server
   server:
-    build:
-      context: server
-      dockerfile: Dockerfile
+    image: ggangel/overplayed-server:latest
     env_file: server/.env
     restart: unless-stopped
     container_name: overplayed-server
@@ -26,9 +24,7 @@ services:
       - redis
       - queue
   queue:
-    build:
-      context: queue
-      dockerfile: Dockerfile
+    image: ggangel/overplayed-queue:latest
     env_file: queue/.env
     restart: unless-stopped
     container_name: overplayed-queue
