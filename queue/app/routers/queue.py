@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from services.queue import QueueService
-from state import get_queue_service
+from services.turnstile import TurnstileVerifier
+from state import get_queue_service, get_turnstile_verifier
 from models import NewUser
 from errors import QueueLockError, SpotifyValidationError
 from dtos import (
@@ -29,9 +30,18 @@ async def get_overview(
 
 @router.post("/")
 async def join_queue(
+    request: Request,
     form: QueueSignUpForm,
     queue_service: QueueService = Depends(get_queue_service),
+    turnstile: TurnstileVerifier = Depends(get_turnstile_verifier),
 ) -> UserActiveResponse | UserInQueueResponse:
+    forwarded_for = request.headers.get("x-forwarded-for", "")
+    client_ip = forwarded_for.split(",")[0].strip() or (
+        request.client.host if request.client else None
+    )
+    if not await turnstile.verify(form.turnstile_token, client_ip):
+        raise HTTPException(status_code=403, detail="Captcha verification failed.")
+
     try:
         new_user = NewUser(name=form.name, email=form.email)
         result = await queue_service.enqueue_user(new_user)

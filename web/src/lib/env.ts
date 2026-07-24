@@ -4,6 +4,7 @@ const createEnv = () => {
   const EnvSchema = z.object({
     API_BASE_URL: z.url(),
     QUEUE_BASE_URL: z.url(),
+    CLOUDFLARE_SITE_KEY: z.string().min(1),
   });
 
   const envVars = Object.entries(import.meta.env).reduce<Record<string, string>>((acc, curr) => {

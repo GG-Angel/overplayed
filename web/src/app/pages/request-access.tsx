@@ -4,12 +4,13 @@ import Divider from "@/components/ui/Divider";
 import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
 import { Spinner } from "@/components/ui/Spinner";
+import Turnstile, { type TurnstileHandle } from "@/components/ui/Turnstile";
 import { useQueueStatus } from "@/features/user/api/get-queue-state";
 import { useSubmitAccessRequest } from "@/features/user/api/submit-access-request";
 import { kaomojis } from "@/lib/kaomoji";
 import { formatCount, formatDateTime } from "@/lib/utils";
 import { Info, Key, Mail, Plus, ThumbsUp, User } from "lucide-react";
-import { useState, type SubmitEventHandler } from "react";
+import { useRef, useState, type SubmitEventHandler } from "react";
 import {
   queueAccessRequestSchema,
   type QueueAccessRequest,
@@ -58,9 +59,11 @@ const RequestAccessPage = () => {
   const [isModalActive, setIsModalActive] = useState<boolean>(false);
   const [form, setForm] = useState<QueueAccessRequest>({ name: "", email: "" });
   const [errors, setErrors] = useState<Partial<QueueAccessRequest>>({});
+  const [token, setToken] = useState<string>("");
+  const turnstileRef = useRef<TurnstileHandle>(null);
 
   const queueStatus = useQueueStatus();
-  const submitMutation = useSubmitAccessRequest(form);
+  const submitMutation = useSubmitAccessRequest(form, token);
 
   const validateForm = () => {
     const result = queueAccessRequestSchema.safeParse(form);
@@ -74,8 +77,15 @@ const RequestAccessPage = () => {
 
   const handleSubmitRequest: SubmitEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
-    if (!validateForm()) return;
-    submitMutation.mutate();
+    if (!validateForm() || !token) return;
+    submitMutation.mutate(undefined, {
+      // turnstile tokens are single-use; refresh the challenge
+      // so the next submission gets a fresh token
+      onSettled: () => {
+        setToken("");
+        turnstileRef.current?.reset();
+      },
+    });
   };
 
   return (
@@ -165,10 +175,17 @@ const RequestAccessPage = () => {
           onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
           onBlur={validateForm}
         />
+        <Turnstile
+          ref={turnstileRef}
+          className="self-center"
+          onVerify={setToken}
+          onExpire={() => setToken("")}
+          onError={() => setToken("")}
+        />
         <Button
           icon={<Mail className="size-4" />}
           type="submit"
-          disabled={submitMutation.isPending}
+          disabled={submitMutation.isPending || !token}
         >
           Submit Request
         </Button>
