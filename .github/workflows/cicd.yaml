@@ -52,6 +52,9 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.SSH_PRIVATE_KEY_PASSPHRASE }}
           script: |
+            set -e
             cd ~/${{ github.event.repository.name }}
             docker compose pull
+            docker compose up -d db
+            docker compose run --rm server uv run --no-cache alembic upgrade head
             docker compose up -d --remove-orphans
