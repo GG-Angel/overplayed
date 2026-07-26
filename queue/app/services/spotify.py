@@ -1,8 +1,7 @@
-from pydantic.alias_generators import to_camel
 from loguru import logger
 from cryptography.fernet import Fernet
 from redis.asyncio import Redis
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 from aiohttp import ClientSession
 from errors import SpotifyValidationError, SpotifyTokenError, SpotifyUserManagementError
 from models import ActiveUser, NewUser

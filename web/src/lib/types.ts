@@ -143,8 +143,7 @@ export type Leaderboard = z.infer<typeof leaderboardSchema>;
 
 /// Queue
 
-export const queueAccessRequestSchema = z.object({
-  name: z.string().trim().min(1, "Full name is required"),
+export const accessRequestFormSchema = z.object({
   email: z.email("Enter a valid email").trim(),
 });
 
@@ -157,13 +156,13 @@ export const queueOverviewSchema = z.object({
 
 const queueUserActiveSchema = z.object({
   status: z.literal("active"),
-  name: z.string(),
+  email: z.email(),
   estimated_end_time: z.iso.datetime(),
 });
 
 const queueUserInQueueSchema = z.object({
   status: z.literal("in_queue"),
-  name: z.string(),
+  email: z.email(),
   position_in_queue: z.number().int(),
   estimated_start_time: z.iso.datetime(),
 });
@@ -173,6 +172,6 @@ export const queueUserStatusSchema = z.discriminatedUnion("status", [
   queueUserInQueueSchema,
 ]);
 
-export type QueueAccessRequest = z.infer<typeof queueAccessRequestSchema>;
+export type QueueAccessRequest = z.infer<typeof accessRequestFormSchema>;
 export type QueueOverview = z.infer<typeof queueOverviewSchema>;
 export type QueueUserStatus = z.infer<typeof queueUserStatusSchema>;
