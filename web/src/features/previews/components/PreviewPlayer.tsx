@@ -24,13 +24,11 @@ const VOLUME_STEPS: { value: number; icon: LucideIcon }[] = [
 
 const AudioPlayer = ({ preview, isLoading, isError, className }: PreviewPlayerProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isReady, setIsReady] = useState(false);
   const [volumeIndex, setVolumeIndex] = useState(0);
   const waveformRef = useRef<WaveformHandler>(null);
-  const showWaveform = isReady && (isPlaying || preview?.url);
+  const showWaveform = !isLoading && !isError && preview?.url;
 
   const handlePlay = useCallback(() => {
-    setIsReady(true);
     setIsPlaying(true);
   }, []);
 
@@ -50,7 +48,7 @@ const AudioPlayer = ({ preview, isLoading, isError, className }: PreviewPlayerPr
         size="xs"
         variant="green"
         icon={isPlaying && preview?.url ? Pause : Play}
-        disabled={!preview?.url}
+        disabled={!isPlaying && !preview?.url}
         onClick={() => waveformRef.current?.playPause()}
       />
       <div className="relative flex-1 self-stretch">
@@ -72,7 +70,7 @@ const AudioPlayer = ({ preview, isLoading, isError, className }: PreviewPlayerPr
               } else if (!preview?.url) {
                 return "no preview :(";
               } else {
-                return "press play to listen!";
+                return "play to listen!";
               }
             })()}
             pulse={isLoading}
