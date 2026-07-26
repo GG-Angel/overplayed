@@ -39,22 +39,21 @@ class QueueRepository:
         self._redis = redis
         self._queue_key = "queue:queued_users"
 
-    async def push(self, user: NewUser) -> QueuePushResult:
+    async def push(self, email: str) -> QueuePushResult:
         """Push a new user to the queue."""
         entry = QueuedUser(
-            name=user.name,
-            email=user.email,
+            email=email,
             retries=0,
             created_at=datetime.now(timezone.utc),
         )
         position = await self._redis.rpush(self._queue_key, entry.model_dump_json())
-        logger.debug(f"Queued user: {user.name} (position: {position})")
+        logger.debug(f"Queued user: {email} (position: {position})")
         return self.QueuePushResult(position=position)
 
     async def retry(self, user: QueuedUser) -> QueuePushResult:
         """Push a user to the front of the queue."""
         position = await self._redis.lpush(self._queue_key, user.model_dump_json())
-        logger.debug(f"Retried user: {user.name} (retries: {user.retries})")
+        logger.debug(f"Retried user: {user.email} (retries: {user.retries})")
         return self.QueuePushResult(position=position)
 
     async def pop(self, count: int = 1) -> QueuePopResult:
@@ -65,7 +64,7 @@ class QueueRepository:
             return self.QueuePopResult(users=[])
 
         users = [QueuedUser.model_validate_json(user) for user in data]
-        logger.debug(f"Dequeued {len(users)} users: {[u.name for u in users]}")
+        logger.debug(f"Dequeued {len(users)} users: {[user.email for user in users]}")
         return self.QueuePopResult(users=users)
 
     async def dump(self) -> QueueDumpResult:
@@ -110,7 +109,7 @@ class QueueService:
 
     UserStatusResult = InQueueStatus | ActiveStatus | NotInQueueStatus
 
-    class QueueOverviewResult(BaseModel):
+    class QueueSummary(BaseModel):
         """Overview of the queue, including active users, queued users, and next available time."""
 
         active_users: list[ActiveUser]
@@ -118,12 +117,12 @@ class QueueService:
         user_limit: int
         next_available_time: datetime | None
 
-    class PruneResult(BaseModel):
+    class UserEvictionResult(BaseModel):
         """Result of pruning active users."""
 
         evicted_users: list[ActiveUser] = []
 
-    class FillResult(BaseModel):
+    class UserFillResult(BaseModel):
         """Result of filling available slots with queued users."""
 
         activated_users: list[ActiveUser] = []
@@ -163,7 +162,7 @@ class QueueService:
 
         return self.NotInQueueStatus()
 
-    async def get_queue_overview(self) -> QueueOverviewResult:
+    async def get_queue_overview(self) -> QueueSummary:
         """Get an overview of the queue, including active users, queued users, and next available time."""
         active_users = await self._user_manager.get_users()
         queued_users = (await self._queue.dump()).users
@@ -172,7 +171,7 @@ class QueueService:
         if len(active_users) >= self._user_limit:
             next_available_time = await self._estimate_start_time(len(queued_users) + 1)
 
-        return self.QueueOverviewResult(
+        return self.QueueSummary(
             active_users=active_users,
             queued_users=queued_users,
             user_limit=self._user_limit,
@@ -194,18 +193,20 @@ class QueueService:
             heapq.heappush(heap, start + self._access_duration)  # have access for 24h
         return start
 
-    async def enqueue_user(self, user: NewUser) -> UserStatusResult:
+    async def enqueue_user(self, email: str) -> UserStatusResult:
         """Enqueue a new user to the queue."""
         async with self._lock:
-            if not await self._user_validator.user_exists(user.email):
-                raise SpotifyValidationError(f"{user.name} does not exist.")
+            if not await self._user_validator.user_exists(email):
+                raise SpotifyValidationError(f"{email} does not exist.")
 
-            # return status if already in queue or active for idempotency
-            if not await self._queue.has(user.email) and not await self._user_manager.has_user(user.email):  # fmt: skip
-                await self._queue.push(user)
+            # only enqueue if the user is not already in the queue or active for idempotency
+            if not await self._queue.has(
+                email
+            ) and not await self._user_manager.has_user(email):
+                await self._queue.push(email)
                 await self._process_queue_locked()
 
-        return await self.get_user_status(user.email)
+        return await self.get_user_status(email)
 
     async def process_queue(self) -> None:
         """
@@ -217,9 +218,10 @@ class QueueService:
 
     async def _process_queue_locked(self) -> None:
         """Process the queue. Assumes the distributed queue lock is already held."""
-        prune_result = await self._prune_expired_users()
+        eviction_result = await self._prune_expired_users()
         fill_result = await self._fill_available_slots()
 
+        # retry rejected users if they haven't reached the retry limit
         retried_users: list[QueuedUser] = []
         for user in reversed(fill_result.rejected_users):
             if user.retries < self._retry_limit:
@@ -228,18 +230,18 @@ class QueueService:
                 retried_users.append(user)
             else:
                 logger.warning(
-                    f"User {user.name} has reached the retry limit and will not be retried."
+                    f"User {user.email} has reached the retry limit and will not be retried."
                 )
 
         logger.success(
-            f"Processed queue: evicted {len(prune_result.evicted_users)}, admitted: {len(fill_result.activated_users)}, retrying: {len(retried_users)}."
+            f"Processed queue: evicted {len(eviction_result.evicted_users)}, admitted: {len(fill_result.activated_users)}, retrying: {len(retried_users)}."
         )
 
-    async def _prune_expired_users(self) -> PruneResult:
+    async def _prune_expired_users(self) -> UserEvictionResult:
         """Deactivate users whose access duration has expired from the Spotify app."""
         active_users = await self._user_manager.get_users()
         now = datetime.now(timezone.utc)
-        result = self.PruneResult()
+        result = self.UserEvictionResult()
 
         for user in active_users:
             if user.created_at + self._access_duration < now:
@@ -247,18 +249,18 @@ class QueueService:
                     await self._user_manager.remove_user(user)
                     result.evicted_users.append(user)
                 except Exception as e:
-                    logger.warning(f"Failed to remove user {user.name}, skipping: {e}")
+                    logger.warning(f"Failed to remove user {user.email}, skipping: {e}")
 
         logger.info(
-            f"Removed {len(result.evicted_users)} expired users: {[user.name for user in result.evicted_users]}."
+            f"Removed {len(result.evicted_users)} expired users: {[user.email for user in result.evicted_users]}."
         )
         return result
 
-    async def _fill_available_slots(self) -> FillResult:
+    async def _fill_available_slots(self) -> UserFillResult:
         """Fill available slots in Spotify's table with users from the queue."""
         active_users = await self._user_manager.get_users()
         available_slots = max(0, self._user_limit - len(active_users))
-        result = self.FillResult()
+        result = self.UserFillResult()
 
         if available_slots <= 0:
             logger.debug("No available slots to fill.")
@@ -267,16 +269,17 @@ class QueueService:
         dequeued_result = await self._queue.pop(count=available_slots)
         for user in dequeued_result.users:
             try:
-                new_user = NewUser(name=user.name, email=user.email)
+                # TODO: verify emails are acceptable names
+                new_user = NewUser(name=user.email, email=user.email)
                 active_user = await self._user_manager.add_user(new_user)
                 result.activated_users.append(active_user)
-                logger.info(f"Activated user: {user.name}.")
+                logger.info(f"Activated user: {user.email}.")
             except Exception as e:
                 result.rejected_users.append(user)
-                logger.warning(f"Failed to activate user {user.name}, skipping: {e}")
+                logger.warning(f"Failed to activate user {user.email}, skipping: {e}")
 
         logger.info(
-            f"Filled {len(result.activated_users)} slots with users: {[user.name for user in result.activated_users]}."
+            f"Filled {len(result.activated_users)} slots with users: {[user.email for user in result.activated_users]}."
         )
         return result
 

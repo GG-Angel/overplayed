@@ -1,8 +1,7 @@
-from pydantic.alias_generators import to_camel
 from loguru import logger
 from cryptography.fernet import Fernet
 from redis.asyncio import Redis
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 from aiohttp import ClientSession
 from errors import SpotifyValidationError, SpotifyTokenError, SpotifyUserManagementError
 from models import ActiveUser, NewUser
@@ -182,7 +181,7 @@ class SpotifyUserManager:
         try:
             return await self._activate_user(user)
         except Exception as e:
-            raise SpotifyUserManagementError(f"Failed to add user {user.name}.") from e
+            raise SpotifyUserManagementError(f"Failed to add user {user.email}.") from e
 
     async def remove_user(self, user: ActiveUser) -> None:
         """Remove a user from the Spotify app."""
@@ -190,7 +189,7 @@ class SpotifyUserManager:
             await self._deactivate_user(user)
         except Exception as e:
             raise SpotifyUserManagementError(
-                f"Failed to remove user {user.name}."
+                f"Failed to remove user {user.email}."
             ) from e
 
     async def has_user(self, email: str) -> bool:
@@ -233,7 +232,7 @@ class SpotifyUserManager:
         ) as response:
             active_user = ActiveUser.model_validate(await response.json())
             await self._redis.delete(self._users_key)
-            logger.debug(f"Added user: {active_user.name}")
+            logger.debug(f"Added user: {active_user.email}")
             return active_user
 
     async def _deactivate_user(self, user: ActiveUser) -> None:
@@ -244,7 +243,7 @@ class SpotifyUserManager:
             raise_for_status=True,
         ):
             await self._redis.delete(self._users_key)
-            logger.debug(f"Deactivated user: {user.name}")
+            logger.debug(f"Deactivated user: {user.email}")
 
     async def _build_headers(self) -> dict[str, str]:
         """Build the headers for Spotify's user management API."""

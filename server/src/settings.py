@@ -25,12 +25,12 @@ class Settings(BaseSettings):
     redis_password: str = Field(...)
     redis_key: bytes = Field(..., min_length=32, max_length=32)
 
-    ttl_sessions: int = 60 * 60 * 24 * 14
-    ttl_users: int = 60 * 60 * 2
-    ttl_playlists: int = 90
-    ttl_playlist_tracks: int = 60 * 60
-    ttl_previews_hit: int = 60 * 10
-    ttl_previews_miss: int = 60 * 60 * 2
+    ttl_sessions: int = 60 * 60 * 24 * 2  # 2 days
+    ttl_users: int = 60 * 60 * 2  # 2 hours
+    ttl_playlists: int = 90  # 90 seconds
+    ttl_playlist_tracks: int = 60 * 60  # 1 hour
+    ttl_previews_hit: int = 60 * 10  # 10 minutes
+    ttl_previews_miss: int = 60 * 60 * 2  # 2 hours
 
     playlist_limit: int = 50
     playlist_tracks_limit: int = 100

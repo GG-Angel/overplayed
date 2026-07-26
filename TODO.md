@@ -17,10 +17,7 @@
 
 ## Test Notes
 
-- Fix auth failed bad page (need lots of error boundaries)
-- Figure out way to not let users login when they don’t have access if possible
 - Full width search bar
-- Verify if the full name even matters for queueing users
 - 50% volume by default
 - Make volume a slider
 

@@ -4,17 +4,17 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 import { queueUserStatusSchema, type QueueAccessRequest, type QueueUserStatus } from "@/lib/types";
 
-const submitAccessRequest = async (form: QueueAccessRequest, token: string) => {
+const submitAccessRequest = async (form: QueueAccessRequest, turnstileToken: string) => {
   return queueUserStatusSchema.parse(
-    await queueApi.post("/queue", { ...form, "cf-turnstile-response": token })
+    await queueApi.post("/queue", { ...form, "cf-turnstile-response": turnstileToken })
   );
 };
 
-export const useSubmitAccessRequest = (form: QueueAccessRequest, token: string) => {
+export const useSubmitAccessRequest = (form: QueueAccessRequest, turnstileToken: string) => {
   const queryClient = useQueryClient();
 
   return useMutation<QueueUserStatus, AxiosError<ApiError>>({
-    mutationFn: () => submitAccessRequest(form, token),
+    mutationFn: () => submitAccessRequest(form, turnstileToken),
     onSuccess: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.queue() }),

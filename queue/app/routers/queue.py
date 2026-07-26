@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from services.queue import QueueService
 from services.turnstile import TurnstileVerifier
 from state import get_queue_service, get_turnstile_verifier
-from models import NewUser
 from errors import QueueLockError, SpotifyValidationError
 from dtos import (
     QueueOverviewResponse,
@@ -35,6 +34,7 @@ async def join_queue(
     queue_service: QueueService = Depends(get_queue_service),
     turnstile: TurnstileVerifier = Depends(get_turnstile_verifier),
 ) -> UserActiveResponse | UserInQueueResponse:
+    # verify Cloudflare Turnstile token
     forwarded_for = request.headers.get("x-forwarded-for", "")
     client_ip = forwarded_for.split(",")[0].strip() or (
         request.client.host if request.client else None
@@ -42,14 +42,18 @@ async def join_queue(
     if not await turnstile.verify(form.turnstile_token, client_ip):
         raise HTTPException(status_code=403, detail="Cloudflare verification failed.")
 
+    # enqueue user and handle potential errors
     try:
-        new_user = NewUser(name=form.name, email=form.email)
-        result = await queue_service.enqueue_user(new_user)
+        result = await queue_service.enqueue_user(form.email)
     except QueueLockError:
-        raise HTTPException(status_code=503, detail="Queue is busy.")
+        raise HTTPException(
+            status_code=503,
+            detail="The server is busy. Please try again later.",
+        )
     except SpotifyValidationError:
         raise HTTPException(
-            status_code=404, detail=f"User '{form.name}' ({form.email}) does not exist."
+            status_code=404,
+            detail=f"No Spotify user found for {form.email}.",
         )
     except Exception:
         raise HTTPException(status_code=500, detail="Queue error.")
@@ -57,12 +61,12 @@ async def join_queue(
     match result.status:
         case "active":
             return UserActiveResponse(
-                name=form.name,
+                email=form.email,
                 estimated_end_time=result.end_time,
             )
         case "in_queue":
             return UserInQueueResponse(
-                name=form.name,
+                email=form.email,
                 position_in_queue=result.position,
                 estimated_start_time=result.start_time,
             )
