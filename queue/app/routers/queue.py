@@ -40,7 +40,7 @@ async def join_queue(
         request.client.host if request.client else None
     )
     if not await turnstile.verify(form.turnstile_token, client_ip):
-        raise HTTPException(status_code=403, detail="Captcha verification failed.")
+        raise HTTPException(status_code=403, detail="Cloudflare verification failed.")
 
     try:
         new_user = NewUser(name=form.name, email=form.email)
