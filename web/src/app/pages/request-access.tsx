@@ -56,7 +56,12 @@ const AccessResult = ({ data }: { data: QueueUserStatus }) => {
 };
 
 const RequestAccessPage = () => {
-  const [isModalActive, setIsModalActive] = useState<boolean>(false);
+  const [isInfoModalVisible, setIsInfoModalVisible] = useState<boolean>(false);
+  const [isLoginErrorModalVisible, setIsLoginErrorModalVisible] = useState<boolean>(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.has("error");
+  });
+
   const [form, setForm] = useState<QueueAccessRequest>({ email: "" });
   const [errors, setErrors] = useState<Partial<QueueAccessRequest>>({});
   const [turnstileToken, setTurnstileToken] = useState<string>("");
@@ -101,7 +106,7 @@ const RequestAccessPage = () => {
         </p>
         <p>Join the waitlist and we'll let you in as soon as a spot frees up!</p>
         <button
-          onClick={() => setIsModalActive(true)}
+          onClick={() => setIsInfoModalVisible(true)}
           className="text-muted text-sm w-fit text-left flex items-center gap-1.5 cursor-pointer hover:underline"
         >
           <Info className="size-3.5" /> Why do you need my email?
@@ -200,39 +205,53 @@ const RequestAccessPage = () => {
       )}
       {submitMutation.isSuccess && <AccessResult data={submitMutation.data} />}
 
-      {/* Modal */}
-      {isModalActive && (
-        <Modal onClose={() => setIsModalActive(false)} className="flex flex-col gap-3">
-          <h2>Why we need these details</h2>
+      {/* Info modal */}
+      {isInfoModalVisible && (
+        <Modal onClose={() => setIsInfoModalVisible(false)} className="flex flex-col gap-3">
+          <h2>Why we need your email</h2>
           <p>
-            Spotify only lets a few approved accounts use this small app at a time. When your turn
-            comes, you're added to the allowlist automatically.
+            Spotify only lets a few approved accounts use this app at a time. When your turn comes,
+            we add your email to Spotify's allowlist so you can log in.
           </p>
-          <p>
-            For that to work, your name and email must match your Spotify account exactly. A
-            mismatch means login will fail, so be precise. These fields map directly to Spotify's
-            User Management table.
-          </p>
-          <p>
-            Read more about these limitations{" "}
+          <p>Use the exact email on your Spotify account — a mismatch means login will fail.</p>
+          <p className="text-muted text-sm">
+            Your email is used <span className="font-bold">only</span> to grant access.{" "}
             <a
               href="https://developer.spotify.com/blog/2026-02-06-update-on-developer-access-and-platform-security"
               target="_blank"
               rel="noopener noreferrer"
               className="text-accent hover:underline"
             >
-              here.
+              Learn more.
             </a>
-          </p>
-          <p className="text-muted text-sm">
-            These details are used <span className="font-bold">only</span> to grant access. Nothing
-            else.
           </p>
           <Button
             className="mt-2"
             icon={<ThumbsUp className="size-4" />}
             variant="secondary"
-            onClick={() => setIsModalActive(false)}
+            onClick={() => setIsInfoModalVisible(false)}
+          >
+            Understood.
+          </Button>
+        </Modal>
+      )}
+
+      {/* Login error modal */}
+      {isLoginErrorModalVisible && (
+        <Modal onClose={() => setIsLoginErrorModalVisible(false)} className="flex flex-col gap-3">
+          <h2>You don't have access yet</h2>
+          <p>
+            To log in, request access below with your Spotify email. We'll let you in as soon as
+            it's your turn.
+          </p>
+          <p className="text-muted text-sm">
+            Already requested? Make sure you're using the exact email on your Spotify account.
+          </p>
+          <Button
+            className="mt-2"
+            icon={<ThumbsUp className="size-4" />}
+            variant="secondary"
+            onClick={() => setIsLoginErrorModalVisible(false)}
           >
             Understood.
           </Button>
