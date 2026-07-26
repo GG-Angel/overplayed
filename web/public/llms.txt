@@ -1,0 +1,20 @@
+# Overplayed
+
+> Tinder for your Spotify playlists. Swipe right to keep, left to cut — clean up years of saved songs in minutes. A 30-second preview plays for each track, and cuts are reviewed and backed up before a one-click delete.
+
+Overplayed is a React single-page app that lets you log in with Spotify, pick any playlist (including Liked Songs), swipe through its tracks with audio previews, then review and delete the cuts. Access is invite-gated: new users request access before logging in. Global and per-user swipe statistics (songs swiped, cut rate, leaderboard) are tracked.
+
+## Pages
+
+- [Landing](https://overplayed.gaelangel.com/): Product overview, live swipe demo, three-step explanation, and global swipe statistics.
+- [Request access](https://overplayed.gaelangel.com/request-access): Form to request an invite (protected by Cloudflare Turnstile) before logging in with Spotify.
+- [Statistics](https://overplayed.gaelangel.com/statistics): Personal swipe metrics for the logged-in user (auth required).
+- [Playlists](https://overplayed.gaelangel.com/playlists): Select a Spotify playlist to clean up (auth required).
+- [Swipe](https://overplayed.gaelangel.com/playlists/:playlistId/swipe): Swipe through a playlist's tracks with 30-second audio previews (auth required).
+- [Review](https://overplayed.gaelangel.com/playlists/:playlistId/swipe/review): Review the tracks marked for cutting before deleting (auth required).
+- [Submit](https://overplayed.gaelangel.com/playlists/:playlistId/swipe/submit): Optionally back up and confirm deletion of the cut tracks (auth required).
+
+## Optional
+
+- [robots.txt](https://overplayed.gaelangel.com/robots.txt): Crawl rules; the /playlists app routes are disallowed as they require authentication.
+- [sitemap.xml](https://overplayed.gaelangel.com/sitemap.xml): Sitemap (only the public landing page is indexable).
