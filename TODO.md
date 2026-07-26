@@ -17,7 +17,6 @@
 
 ## Test Notes
 
-- Block access requests for users who are logged in
 - Full width search bar
 - 50% volume by default
 - Make volume a slider

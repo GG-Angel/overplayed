@@ -42,28 +42,38 @@ const LandingPage = () => {
         <span className="xs:block">Clean up years of saved songs in minutes.</span>
       </h3>
 
-      <div className="flex flex-col xs:flex-row items-center gap-3 w-full max-w-xl self-center">
-        {!auth.user && (
+      <div className="flex flex-col items-center justify-center xs:flex-row gap-3 w-full max-w-xl self-center">
+        {auth.user ? (
           <Button
-            className="w-full"
-            icon={<Key className="size-5 shrink-0" />}
+            className="self-center"
             size="lg"
-            variant="secondary"
-            onClick={() => navigate("/request-access")}
+            icon={<SpotifyIcon className="size-5 shrink-0" />}
+            onClick={() => navigate("/playlists")}
           >
-            Request Access
+            View your playlists
           </Button>
+        ) : (
+          <>
+            <Button
+              className="w-full"
+              icon={<Key className="size-5 shrink-0" />}
+              size="lg"
+              variant="primary"
+              onClick={() => navigate("/request-access")}
+            >
+              Request Access
+            </Button>
+            <Button
+              className="w-full"
+              size="lg"
+              icon={<SpotifyIcon className="size-5 shrink-0" />}
+              variant="secondary"
+              onClick={() => auth.redirectToLogin(location.pathname)}
+            >
+              Log in with Spotify
+            </Button>
+          </>
         )}
-        <Button
-          className="w-full"
-          size="lg"
-          icon={<SpotifyIcon className="size-5 shrink-0" />}
-          onClick={() =>
-            auth.user ? navigate("/playlists") : auth.redirectToLogin(location.pathname)
-          }
-        >
-          {auth.user ? "View your playlists" : "Log in with Spotify"}
-        </Button>
       </div>
 
       <Card
