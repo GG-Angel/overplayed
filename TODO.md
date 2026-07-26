@@ -17,11 +17,9 @@
 
 ## Test Notes
 
-- Full width search bar
 - 50% volume by default
 - Make volume a slider
 
-- Fix volume not autoplaying on mobile
 - Fix card clipping on narrow screens (min height)
 - Error message when song can’t play
 
