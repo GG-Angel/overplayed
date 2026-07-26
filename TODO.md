@@ -17,8 +17,7 @@
 
 ## Test Notes
 
-- Fix auth failed bad page (need lots of error boundaries)
-- Figure out way to not let users login when they don’t have access if possible
+- Block access requests for users who are logged in
 - Full width search bar
 - 50% volume by default
 - Make volume a slider
