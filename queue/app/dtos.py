@@ -6,7 +6,6 @@ from pydantic import BaseModel, ConfigDict, Field
 class QueueSignUpForm(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
-    name: str
     email: str
     turnstile_token: str = Field(alias="cf-turnstile-response")
 
@@ -20,12 +19,12 @@ class QueueOverviewResponse(BaseModel):
 
 class UserActiveResponse(BaseModel):
     status: Literal["active"] = "active"
-    name: str
+    email: str
     estimated_end_time: datetime
 
 
 class UserInQueueResponse(BaseModel):
     status: Literal["in_queue"] = "in_queue"
-    name: str
+    email: str
     position_in_queue: int
     estimated_start_time: datetime

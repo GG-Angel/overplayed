@@ -9,7 +9,6 @@ class NewUser(BaseModel):
 
 
 class QueuedUser(BaseModel):
-    name: str
     email: str
     retries: int
     created_at: datetime
