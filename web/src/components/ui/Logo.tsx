@@ -26,7 +26,7 @@ const Logo = () => {
     <Link
       to="/"
       aria-label="Overplayed - Navigate Home"
-      className="inline-flex items-center gap-1.5 select-none overflow-hidden"
+      className="inline-flex items-center gap-1.5 h-9 select-none overflow-hidden"
     >
       <SkipForward className="text-primary shrink-0" />
       <span className="text-lg font-semibold hidden sm:block">Overplayed</span>
