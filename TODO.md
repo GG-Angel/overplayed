@@ -14,3 +14,29 @@
 - Pile in the background on completion of deleted tracks.
 - Cache leaderboard response.
 - Save request access credentials to local storage and fill them automatically on page visit?
+
+## Test Notes
+
+- Fix auth failed bad page (need lots of error boundaries)
+- Figure out way to not let users login when they don’t have access if possible
+- Full width search bar
+- Verify if the full name even matters for queueing users
+- 50% volume by default
+- Make volume a slider
+
+- Fix volume not autoplaying on mobile
+- Fix card clipping on narrow screens (min height)
+- Error message when song can’t play
+
+- Provide way to access song during swipes
+- Previews aren’t available for niche songs
+
+- It wasn’t entirely clear that the checkmark means finish
+
+- Randomization option would be nice
+
+- Fading or rounded corners on scrollable lists
+- Bad padding on bottom of pages
+
+- Get access status automatically for logged in users
+- Display status
