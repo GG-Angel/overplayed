@@ -33,7 +33,11 @@ const UserMenu = () => {
     );
 
   return (
-    <Dropdown trigger={({ toggle }) => <Avatar user={user} onClick={toggle} />} align="right">
+    <Dropdown
+      trigger={({ toggle }) => <Avatar user={user} onClick={toggle} />}
+      align="right"
+      className="h-8"
+    >
       <DropdownMenu className="w-64">
         <DropdownMenuItem className="flex-col items-start gap-0.5 [&>span]:w-full [&>span]:truncate">
           <span className="font-medium">{user.display_name}</span>
