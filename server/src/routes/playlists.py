@@ -12,7 +12,7 @@ from services.swipe.service import SwipeService
 router = APIRouter()
 
 
-@router.get("/", response_model=List[PlaylistResponse])
+@router.get("", response_model=List[PlaylistResponse])
 @limiter.limit("30/minute")
 async def handle_get_user_playlists(
     request: Request,

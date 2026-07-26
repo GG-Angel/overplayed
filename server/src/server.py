@@ -49,11 +49,11 @@ def build_app(settings: Settings) -> FastAPI:
         allow_headers=["*"],
     )
 
-    @app.get("/")
+    @app.get("")
     def handle_healthcheck():
         return ":3"
 
-    @app.get("/favicon.ico")
+    @app.get("favicon.ico")
     def handle_favicon():
         return Response(status_code=status.HTTP_204_NO_CONTENT)
 

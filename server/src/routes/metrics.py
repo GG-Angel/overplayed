@@ -9,7 +9,7 @@ from routes.schemas import GlobalSwipeMetricsResponse, UserSwipeMetricsResponse
 router = APIRouter()
 
 
-@router.get("/")
+@router.get("")
 @limiter.limit("120/minute")
 async def get_global_swipe_metrics(
     request: Request,

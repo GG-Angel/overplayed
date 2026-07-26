@@ -5,7 +5,8 @@ from settings import settings
 
 
 async def main():
-    await server.start(build_app(settings))
+    app = build_app(settings)
+    await server.start(app)
 
 
 if __name__ == "__main__":
