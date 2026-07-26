@@ -15,7 +15,7 @@ from dtos import (
 router = APIRouter()
 
 
-@router.get("/")
+@router.get("")
 async def get_overview(
     queue_service: QueueService = Depends(get_queue_service),
 ) -> QueueOverviewResponse:
@@ -28,7 +28,7 @@ async def get_overview(
     )
 
 
-@router.post("/")
+@router.post("")
 async def join_queue(
     request: Request,
     form: QueueSignUpForm,

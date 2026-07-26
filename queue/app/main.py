@@ -8,7 +8,7 @@ from settings import settings, APP_STATE_KEY
 from services.queue import QueueService, QueueRepository, QueueWorker
 from state import State
 from locking import DistributedLock
-from routers.queue import router as queue_router
+from routers import queue
 from services.turnstile import TurnstileVerifier
 from services.spotify import (
     SpotifyTokenProvider,
@@ -79,14 +79,14 @@ app.add_middleware(
 )
 
 
-@app.get("/")
+@app.get("")
 def handle_healthcheck():
     return ":o"
 
 
-@app.get("/favicon.ico")
+@app.get("favicon.ico")
 def handle_favicon():
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-app.include_router(queue_router, prefix="/queue", tags=["queue"])
+app.include_router(queue.router, prefix="/queue", tags=["queue"])
