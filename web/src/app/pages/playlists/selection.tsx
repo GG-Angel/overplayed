@@ -93,8 +93,9 @@ const SelectionPage = () => {
   return (
     <main className="flex flex-col h-full gap-6">
       <h1 className="text-center">Select a Playlist</h1>
-      <div className="flex items-center justify-between gap-4 sm:grid sm:grid-cols-2 sm:gap-6">
+      <div className="flex items-center justify-between gap-8 md:grid md:grid-cols-2">
         <Input
+          className="flex-1"
           icon={Search}
           type="search"
           placeholder="Search for a playlist"
@@ -106,7 +107,7 @@ const SelectionPage = () => {
           className="justify-self-end h-full flex items-center"
           trigger={({ toggle }) => (
             <button
-              className="flex items-center gap-3 cursor-pointer font-medium hover:scale-105 active:scale-100 text-muted hover:text-foreground transition-all"
+              className="flex shrink-0 items-center gap-3 cursor-pointer font-medium hover:scale-105 active:scale-100 text-muted hover:text-foreground transition-all"
               onClick={toggle}
             >
               <span className="hidden xs:block">{SORT_CONFIG[sortKey].label}</span>

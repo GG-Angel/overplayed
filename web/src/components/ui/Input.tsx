@@ -16,7 +16,7 @@ const Input = ({ label, hint, error, disabled, icon: Icon, className, ...props }
   const searchRef = useRef<HTMLInputElement>(null);
 
   return (
-    <div className="flex flex-col gap-2 w-full">
+    <div className={cn("flex flex-col gap-2", className)}>
       {label && <label className="font-medium text-sm">{label}</label>}
       <Card
         onClick={() => searchRef.current?.focus()}
@@ -24,17 +24,11 @@ const Input = ({ label, hint, error, disabled, icon: Icon, className, ...props }
         padding="none"
         className={cn(
           "flex items-center gap-2 py-2 px-3 cursor-text focus-within:border-muted transition-opacity",
-          disabled && "opacity-50",
-          className
+          disabled && "opacity-50"
         )}
       >
-        {Icon && <Icon className="text-muted" />}
-        <input
-          ref={searchRef}
-          className={cn("w-full outline-none", className)}
-          disabled={disabled}
-          {...props}
-        />
+        {Icon && <Icon className="text-muted shrink-0" />}
+        <input ref={searchRef} className="w-full outline-none" disabled={disabled} {...props} />
       </Card>
       {hint && <p className="text-xs text-muted">{hint}</p>}
       {error && <p className="text-xs text-destructive">{error}</p>}

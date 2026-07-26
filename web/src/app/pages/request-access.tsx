@@ -9,7 +9,7 @@ import { useQueueStatus } from "@/features/user/api/get-queue-state";
 import { useSubmitAccessRequest } from "@/features/user/api/submit-access-request";
 import { kaomojis } from "@/lib/kaomoji";
 import { formatCount, formatDateTime } from "@/lib/utils";
-import { Info, Key, Mail, Plus, ThumbsUp, User } from "lucide-react";
+import { Info, Key, Plus, Send, ThumbsUp, User } from "lucide-react";
 import { useRef, useState, type SubmitEventHandler } from "react";
 import {
   accessRequestFormSchema,
@@ -166,6 +166,7 @@ const RequestAccessPage = () => {
       <form className="flex flex-col gap-6" onSubmit={handleSubmitRequest}>
         <div className="flex justify-between gap-3">
           <Input
+            className="flex-1"
             type="email"
             label="Spotify account email"
             placeholder="user@example.com"
@@ -177,7 +178,7 @@ const RequestAccessPage = () => {
           />
           <Button
             className="h-11 mt-7"
-            icon={<Mail className="size-4" />}
+            icon={<Send className="size-4" />}
             type="submit"
             size="lg"
             disabled={submitMutation.isPending || !turnstileToken || !form.email}
