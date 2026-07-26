@@ -1,17 +1,18 @@
-import { lazy, Suspense, useCallback, useRef, useState } from "react";
+import { lazy, useCallback, useRef, useState } from "react";
 import { Pause, Play, Volume1, Volume2, VolumeOff, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Card from "@/components/ui/Card";
 import IconButton from "@/components/ui/IconButton";
 import WaveformSkeleton from "./WaveformSkeleton";
 import type { WaveformHandler } from "./Waveform";
+import type { TrackPreview } from "@/lib/types";
 
 const Waveform = lazy(() => import("./Waveform"));
 
 type PreviewPlayerProps = {
-  url: string | null | undefined;
-  isLoading?: boolean;
-  isError?: boolean;
+  preview: TrackPreview | null | undefined;
+  isLoading: boolean;
+  isError: boolean;
   className?: string;
 };
 
@@ -21,12 +22,12 @@ const VOLUME_STEPS: { value: number; icon: LucideIcon }[] = [
   { value: 0, icon: VolumeOff },
 ] as const;
 
-const AudioPlayer = ({ url, className }: PreviewPlayerProps) => {
+const AudioPlayer = ({ preview, isLoading, isError, className }: PreviewPlayerProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const [volumeIndex, setVolumeIndex] = useState(0);
   const waveformRef = useRef<WaveformHandler>(null);
-  const showWaveform = isReady && (isPlaying || url);
+  const showWaveform = isReady && (isPlaying || preview?.url);
 
   const handlePlay = useCallback(() => {
     setIsReady(true);
@@ -48,21 +49,35 @@ const AudioPlayer = ({ url, className }: PreviewPlayerProps) => {
       <IconButton
         size="xs"
         variant="green"
-        icon={isPlaying && url ? Pause : Play}
-        disabled={!url}
+        icon={isPlaying && preview?.url ? Pause : Play}
+        disabled={!preview?.url}
         onClick={() => waveformRef.current?.playPause()}
       />
       <div className="relative flex-1 self-stretch">
-        <Suspense fallback={<WaveformSkeleton className="absolute inset-0 z-10" />}>
-          <Waveform
-            url={url}
-            waveformRef={waveformRef}
-            onPlay={handlePlay}
-            onPause={handlePause}
-            className={cn("absolute inset-0 min-w-1", !showWaveform && "invisible")}
+        <Waveform
+          url={preview?.url}
+          waveformRef={waveformRef}
+          onPlay={handlePlay}
+          onPause={handlePause}
+          className={cn("absolute inset-0 min-w-1", !showWaveform && "invisible")}
+        />
+        {!showWaveform && (
+          <WaveformSkeleton
+            className="absolute inset-0 z-10"
+            message={(() => {
+              if (isLoading) {
+                return "loading...";
+              } else if (isError) {
+                return "failed to load preview :(";
+              } else if (!preview?.url) {
+                return "no preview :(";
+              } else {
+                return "press play to listen!";
+              }
+            })()}
+            pulse={isLoading}
           />
-          {!showWaveform && <WaveformSkeleton className="absolute inset-0 z-10" />}
-        </Suspense>
+        )}
       </div>
       <IconButton size="xs" icon={VOLUME_STEPS[volumeIndex].icon} onClick={cycleVolume} />
     </Card>
