@@ -3,6 +3,9 @@ name: Continuous Integration
 on:
   push:
     branches: [main]
+    paths:
+      - "server/**"
+      - "queue/**"
   workflow_dispatch:
 
 jobs:
