@@ -43,15 +43,17 @@ const LandingPage = () => {
       </h3>
 
       <div className="flex flex-col xs:flex-row items-center gap-3 w-full max-w-xl self-center">
-        <Button
-          className="w-full"
-          icon={<Key className="size-5 shrink-0" />}
-          size="lg"
-          variant="secondary"
-          onClick={() => navigate("/request-access")}
-        >
-          Request Access
-        </Button>
+        {!auth.user && (
+          <Button
+            className="w-full"
+            icon={<Key className="size-5 shrink-0" />}
+            size="lg"
+            variant="secondary"
+            onClick={() => navigate("/request-access")}
+          >
+            Request Access
+          </Button>
+        )}
         <Button
           className="w-full"
           size="lg"
