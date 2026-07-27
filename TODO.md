@@ -20,10 +20,7 @@
 - Fix card clipping on narrow screens (min height)
 - Error message when song can’t play
 
-- Provide way to access song during swipes
 - Previews aren’t available for niche songs
-
-- It wasn’t entirely clear that the checkmark means finish
 
 - Randomization option would be nice
 

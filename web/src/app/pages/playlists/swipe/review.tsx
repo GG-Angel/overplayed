@@ -9,7 +9,7 @@ import { useSwipeContext } from "@/features/swipe/provider/SwipeContext";
 import useConfetti from "@/hooks/useConfetti";
 import { kaomojis } from "@/lib/kaomoji";
 import { LIKED_SONGS_ID } from "@/lib/types";
-import { formatCount, pluralize } from "@/lib/utils";
+import { cn, formatCount, pluralize } from "@/lib/utils";
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -96,15 +96,27 @@ const SwipeReviewPage = () => {
       </div>
       <div className="flex flex-col gap-3">
         <h3>The following tracks will be removed:</h3>
-        <div className="flex flex-col gap-3 snap-y snap-mandatory *:snap-start max-h-124 overflow-y-auto">
-          {session.dislikes.map((track) => (
-            <TrackCard
-              key={track.uri}
-              track={track}
-              orientation="horizontal"
-              className="snap-start"
-            />
-          ))}
+        <div className="relative">
+          <div
+            className={cn(
+              "max-h-124 overflow-y-auto snap-y",
+              session.dislikes.length > 5 && "pb-18"
+            )}
+          >
+            <div className="flex flex-col space-y-3">
+              {session.dislikes.map((track) => (
+                <TrackCard
+                  key={track.uri}
+                  track={track}
+                  orientation="horizontal"
+                  className="snap-start"
+                />
+              ))}
+            </div>
+          </div>
+          {session.dislikes.length > 5 && (
+            <div className="absolute bottom-0 left-0 w-full h-18 bg-linear-to-t from-background to-transparent pointer-events-none" />
+          )}
         </div>
       </div>
       <Divider />
