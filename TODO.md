@@ -17,11 +17,6 @@
 
 ## Test Notes
 
-- Full width search bar
-- 50% volume by default
-- Make volume a slider
-
-- Fix volume not autoplaying on mobile
 - Fix card clipping on narrow screens (min height)
 - Error message when song can’t play
 
@@ -37,3 +32,7 @@
 
 - Get access status automatically for logged in users
 - Display status
+
+- Add keyboard shortcuts for swiping and handling previews
+  - space for pause/play
+  - left/right arrows for swiping

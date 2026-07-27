@@ -84,7 +84,12 @@ const SwipeSongsPage = () => {
           canSwipe={canSwipe}
         />
       </div>
-      <AudioPlayer url={currentPreview.data?.url} className="w-full max-w-3xl" />
+      <AudioPlayer
+        preview={currentPreview.data}
+        isLoading={currentPreview.isLoading}
+        isError={currentPreview.isError}
+        className="w-full max-w-3xl"
+      />
     </main>
   );
 };

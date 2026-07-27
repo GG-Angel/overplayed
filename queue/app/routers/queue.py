@@ -53,7 +53,7 @@ async def join_queue(
     except SpotifyValidationError:
         raise HTTPException(
             status_code=404,
-            detail=f"No Spotify user found for {form.email}.",
+            detail=f"No Spotify user found for '{form.email}'.",
         )
     except Exception:
         raise HTTPException(status_code=500, detail="Queue error.")
