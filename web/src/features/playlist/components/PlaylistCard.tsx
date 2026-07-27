@@ -7,7 +7,7 @@ const PlaylistCard = ({ playlist, onClick }: PlaylistDisplayProps) => {
     <button
       onClick={() => onClick?.(playlist.id)}
       disabled={playlist.tracks.total <= 0}
-      className="group relative flex h-32 w-full gap-4 overflow-hidden rounded-xl border-2 border-card-border bg-card px-4 py-3 text-left not-disabled:cursor-pointer disabled:opacity-50"
+      className="group relative flex snap-start shrink-0 h-32 w-full gap-4 overflow-hidden rounded-xl border-2 border-card-border bg-card px-4 py-3 text-left not-disabled:cursor-pointer disabled:opacity-50"
     >
       {/* Blurred backdrop */}
       <img

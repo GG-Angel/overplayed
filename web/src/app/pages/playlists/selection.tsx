@@ -42,17 +42,17 @@ const LAYOUT_CONFIG: Record<
   text: {
     icon: Menu,
     component: PlaylistRow,
-    containerClassName: "flex flex-col gap-1",
+    containerClassName: "flex flex-col gap-y-1.5",
   },
   card: {
     icon: Rows,
     component: PlaylistCard,
-    containerClassName: "grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-6",
+    containerClassName: "grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6",
   },
   cover: {
     icon: LayoutGrid,
     component: PlaylistCover,
-    containerClassName: "grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-4",
+    containerClassName: "grid grid-cols-2 xs:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4",
   },
 };
 
@@ -60,7 +60,7 @@ const SelectionPage = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [sortKey, setSortKey] = useState<PlaylistSortKey>("tracks");
   const [sortOrder, setSortOrder] = useState<PlaylistSortOrder>("descending");
-  const [layout, setLayout] = useState<PlaylistLayout>("card");
+  const [layout, setLayout] = useState<PlaylistLayout>("cover");
   const { data: playlists, isLoading } = useUserPlaylists();
   const navigate = useNavigate();
 
@@ -153,21 +153,30 @@ const SelectionPage = () => {
           </DropdownMenu>
         </Dropdown>
       </div>
-      {isLoading ? (
-        <LoadingState message="Loading playlists..." />
-      ) : sortedPlaylists.length <= 0 ? (
-        <MessageState kaomoji={kaomojis.uncertain} title="No playlists found" />
-      ) : (
-        <div className={cn("pb-4", LAYOUT_CONFIG[layout].containerClassName)}>
-          {sortedPlaylists.map((p) => (
-            <Playlist
-              key={p.id}
-              playlist={p}
-              onClick={(playlistId) => navigate(`${playlistId}/swipe`)}
-            />
-          ))}
-        </div>
-      )}
+      {(() => {
+        if (isLoading) {
+          return <LoadingState message="Loading playlists..." />;
+        }
+
+        if (sortedPlaylists.length <= 0) {
+          return <MessageState kaomoji={kaomojis.uncertain} title="No playlists found" />;
+        }
+
+        return (
+          <section className="md:h-full md:overflow-y-scroll snap-y pb-32">
+            <div className={LAYOUT_CONFIG[layout].containerClassName}>
+              {sortedPlaylists.map((p) => (
+                <Playlist
+                  key={p.id}
+                  playlist={p}
+                  onClick={(playlistId) => navigate(`${playlistId}/swipe`)}
+                />
+              ))}
+            </div>
+            <div className="fixed bottom-0 left-0 w-full h-32 pointer-events-none bg-linear-to-t from-background to-transparent hidden md:block z-50" />
+          </section>
+        );
+      })()}
     </main>
   );
 };
