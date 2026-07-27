@@ -80,7 +80,7 @@ const SwipeReviewPage = () => {
   }
 
   return (
-    <main className="flex flex-col gap-6 py-2 w-full max-w-4xl self-center">
+    <main className="flex flex-col gap-6 py-2 w-full max-w-4xl self-center pb-32">
       <h1 className="text-center">Review Swipes</h1>
       <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
         <Metric
@@ -157,7 +157,7 @@ const SwipeReviewPage = () => {
           </Card>
         )}
       </div>
-      <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:w-fit sm:self-end">
+      <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:flex sm:self-end">
         <Button variant="secondary" onClick={navigateToSwipe}>
           Keep Swiping
         </Button>

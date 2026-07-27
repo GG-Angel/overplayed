@@ -49,14 +49,14 @@ const SwipeSongsPage = () => {
   }
 
   return (
-    <main className="flex flex-col items-center gap-4 w-full self-center h-full py-6 overflow-hidden">
+    <main className="flex flex-col items-center gap-4 w-full self-center h-full py-6 overflow-y-auto">
       <SwipeProgress
         className="w-full max-w-3xl"
         likes={session.likes.length}
         dislikes={session.dislikes.length}
         total={playlist.metadata.tracks.total}
       />
-      <div className="flex-1 flex flex-col w-full items-center justify-center gap-6 overflow-hidden">
+      <div className="flex-1 flex flex-col w-full items-center justify-center gap-6 overflow-hidden min-h-144">
         {!hasReachedEnd ? (
           <SwipeCardStack
             topCardRef={currentSwipeCardRef}

@@ -163,7 +163,7 @@ const SelectionPage = () => {
         }
 
         return (
-          <section className="md:h-full md:overflow-y-scroll snap-y pb-32">
+          <section className="md:h-full md:min-h-128 md:overflow-y-scroll snap-y pb-32">
             <div className={LAYOUT_CONFIG[layout].containerClassName}>
               {sortedPlaylists.map((p) => (
                 <Playlist
@@ -173,7 +173,7 @@ const SelectionPage = () => {
                 />
               ))}
             </div>
-            <div className="fixed bottom-0 left-0 w-full h-32 pointer-events-none bg-linear-to-t from-background to-transparent hidden md:block z-50" />
+            <div className="fixed bottom-0 left-0 w-full h-32 pointer-events-none bg-linear-to-t from-background to-transparent hidden md:block z-10" />
           </section>
         );
       })()}

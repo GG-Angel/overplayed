@@ -24,11 +24,10 @@
 
 - Randomization option would be nice
 
-- Fading or rounded corners on scrollable lists
-- Bad padding on bottom of pages
-
 - Get access status automatically for logged in users
 - Display status
+
+- Add more icons to buttons
 
 - Add keyboard shortcuts for swiping and handling previews
   - space for pause/play
