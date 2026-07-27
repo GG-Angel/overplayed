@@ -1,13 +1,16 @@
 import { lazy, useCallback, useRef, useState } from "react";
-import { Pause, Play, Volume1, Volume2, VolumeOff, type LucideIcon } from "lucide-react";
+import { Pause, Play } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Card from "@/components/ui/Card";
 import IconButton from "@/components/ui/IconButton";
 import WaveformSkeleton from "./WaveformSkeleton";
+import VolumeControl from "./VolumeControl";
 import type { WaveformHandler } from "./Waveform";
 import type { TrackPreview } from "@/lib/types";
 
 const Waveform = lazy(() => import("./Waveform"));
+
+const DEFAULT_VOLUME = 0.5;
 
 type PreviewPlayerProps = {
   preview: TrackPreview | null | undefined;
@@ -16,15 +19,9 @@ type PreviewPlayerProps = {
   className?: string;
 };
 
-const VOLUME_STEPS: { value: number; icon: LucideIcon }[] = [
-  { value: 1.0, icon: Volume2 },
-  { value: 0.5, icon: Volume1 },
-  { value: 0, icon: VolumeOff },
-] as const;
-
 const AudioPlayer = ({ preview, isLoading, isError, className }: PreviewPlayerProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [volumeIndex, setVolumeIndex] = useState(0);
+  const [volume, setVolume] = useState(DEFAULT_VOLUME);
   const waveformRef = useRef<WaveformHandler>(null);
   const showWaveform = !isLoading && !isError && preview?.url;
 
@@ -34,16 +31,8 @@ const AudioPlayer = ({ preview, isLoading, isError, className }: PreviewPlayerPr
 
   const handlePause = useCallback(() => setIsPlaying(false), []);
 
-  const cycleVolume = useCallback(() => {
-    setVolumeIndex((i) => {
-      const next = (i + 1) % VOLUME_STEPS.length;
-      waveformRef.current?.setVolume(VOLUME_STEPS[next].value);
-      return next;
-    });
-  }, []);
-
   return (
-    <Card padding="sm" className={cn("flex items-center gap-3 py-2", className)}>
+    <Card padding="sm" className={cn("flex items-center gap-3 overflow-visible py-2", className)}>
       <IconButton
         size="xs"
         variant="green"
@@ -55,6 +44,7 @@ const AudioPlayer = ({ preview, isLoading, isError, className }: PreviewPlayerPr
         <Waveform
           url={preview?.url}
           waveformRef={waveformRef}
+          volume={volume}
           onPlay={handlePlay}
           onPause={handlePause}
           className={cn("absolute inset-0 min-w-1", !showWaveform && "invisible")}
@@ -77,7 +67,7 @@ const AudioPlayer = ({ preview, isLoading, isError, className }: PreviewPlayerPr
           />
         )}
       </div>
-      <IconButton size="xs" icon={VOLUME_STEPS[volumeIndex].icon} onClick={cycleVolume} />
+      <VolumeControl volume={volume} onVolumeChange={setVolume} />
     </Card>
   );
 };
