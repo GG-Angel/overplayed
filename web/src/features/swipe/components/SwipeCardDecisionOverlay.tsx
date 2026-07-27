@@ -16,7 +16,7 @@ const SwipeCardDecisionOverlay = ({
   <motion.div
     style={{ opacity }}
     className={cn(
-      "absolute inset-0 flex justify-center items-center bg-linear-to-t rounded-xl",
+      "pointer-events-none absolute inset-0 flex justify-center items-center bg-linear-to-t rounded-xl",
       className
     )}
   >

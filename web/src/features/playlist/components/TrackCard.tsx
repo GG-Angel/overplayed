@@ -50,6 +50,7 @@ const TrackCard = ({ track, orientation, className, ...props }: TrackCardProps) 
           className="font-medium hover:underline"
           target="_blank"
           rel="noopener noreferrer"
+          draggable={false}
         >
           {track.name}
         </a>
