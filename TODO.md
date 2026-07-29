@@ -15,8 +15,4 @@
 
 - Randomization option would be nice
 
-- Get access status automatically for logged in users
-- Display status
-
 - Add more icons to buttons
-- Add help menu for shortcuts

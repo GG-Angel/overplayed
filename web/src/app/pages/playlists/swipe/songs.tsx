@@ -5,9 +5,11 @@ import SwipeButtons from "@/features/swipe/components/SwipeButtons";
 import type { SwipeCardController, SwipeDirection } from "@/features/swipe/components/SwipeCard";
 import SwipeCardStack from "@/features/swipe/components/SwipeCardStack";
 import SwipeProgress from "@/features/swipe/components/SwipeProgress";
+import ShortcutsHelp from "@/features/swipe/components/ShortcutsHelp";
 import useSwipePreviews from "@/features/swipe/hooks/useSwipePreviews";
 import { useSwipeContext } from "@/features/swipe/provider/SwipeContext";
 import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts";
+import { SWIPE_SHORTCUTS } from "@/lib/shortcuts";
 import { Check, Undo } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -20,6 +22,7 @@ const SwipeSongsPage = () => {
   useSwipePreviews();
 
   const [isSwiping, setIsSwiping] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
   const currentSwipeCardRef = useRef<SwipeCardController | null>(null);
 
   const currentIndex = session.swipes.length;
@@ -49,14 +52,15 @@ const SwipeSongsPage = () => {
   };
 
   // handle keyboard events for swiping and undoing
-  useKeyboardShortcuts({
-    arrowleft: () => triggerSwipe("left"),
-    a: () => triggerSwipe("left"),
-    arrowright: () => triggerSwipe("right"),
-    d: () => triggerSwipe("right"),
-    arrowup: () => session.undoSwipe(),
-    w: () => session.undoSwipe(),
-  });
+  useKeyboardShortcuts(
+    SWIPE_SHORTCUTS,
+    {
+      dislike: () => triggerSwipe("left"),
+      like: () => triggerSwipe("right"),
+      undo: session.undoSwipe,
+    },
+    !isHelpOpen
+  );
 
   if (playlist.tracks.length <= 0) {
     return <ErrorState message="Playlist is Empty" />;
@@ -88,21 +92,29 @@ const SwipeSongsPage = () => {
             </span>
           </p>
         )}
-        <SwipeButtons
-          onUndo={session.undoSwipe}
-          onDislike={() => triggerSwipe("left")}
-          onLike={() => triggerSwipe("right")}
-          onFinish={() => navigate("review")}
-          canUndo={canUndoOrFinish}
-          canFinish={canUndoOrFinish}
-          canSwipe={canSwipe}
-        />
+        <div className="flex flex-col items-center gap-3">
+          <SwipeButtons
+            onUndo={session.undoSwipe}
+            onDislike={() => triggerSwipe("left")}
+            onLike={() => triggerSwipe("right")}
+            onFinish={() => navigate("review")}
+            canUndo={canUndoOrFinish}
+            canFinish={canUndoOrFinish}
+            canSwipe={canSwipe}
+          />
+          <ShortcutsHelp
+            open={isHelpOpen}
+            onOpen={() => setIsHelpOpen(true)}
+            onClose={() => setIsHelpOpen(false)}
+          />
+        </div>
       </div>
       <AudioPlayer
         preview={currentPreview.data}
         isLoading={currentPreview.isLoading}
         isError={currentPreview.isError}
         className="w-full max-w-3xl"
+        shortcutsEnabled={!isHelpOpen}
       />
     </main>
   );

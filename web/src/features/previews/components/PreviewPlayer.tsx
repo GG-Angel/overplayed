@@ -9,6 +9,7 @@ import type { WaveformHandler } from "./Waveform";
 import type { TrackPreview } from "@/lib/types";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts";
+import { PREVIEW_SHORTCUTS } from "@/lib/shortcuts";
 
 const Waveform = lazy(() => import("./Waveform"));
 
@@ -20,9 +21,16 @@ type PreviewPlayerProps = {
   isLoading: boolean;
   isError: boolean;
   className?: string;
+  shortcutsEnabled?: boolean;
 };
 
-const AudioPlayer = ({ preview, isLoading, isError, className }: PreviewPlayerProps) => {
+const AudioPlayer = ({
+  preview,
+  isLoading,
+  isError,
+  className,
+  shortcutsEnabled = true,
+}: PreviewPlayerProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useLocalStorage(STORED_VOLUME_KEY, DEFAULT_VOLUME);
   const waveformRef = useRef<WaveformHandler>(null);
@@ -35,10 +43,14 @@ const AudioPlayer = ({ preview, isLoading, isError, className }: PreviewPlayerPr
   const handlePause = useCallback(() => setIsPlaying(false), []);
 
   // handle spacebar keydown to play/pause + mute/unmute the audio
-  useKeyboardShortcuts({
-    " ": () => waveformRef.current?.playPause(),
-    m: () => setVolume((prevVolume) => (prevVolume > 0 ? 0 : DEFAULT_VOLUME)),
-  });
+  useKeyboardShortcuts(
+    PREVIEW_SHORTCUTS,
+    {
+      playPause: () => waveformRef.current?.playPause(),
+      mute: () => setVolume((prevVolume) => (prevVolume > 0 ? 0 : DEFAULT_VOLUME)),
+    },
+    shortcutsEnabled
+  );
 
   return (
     <Card padding="sm" className={cn("flex items-center gap-3 overflow-visible py-2", className)}>
