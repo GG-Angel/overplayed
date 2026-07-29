@@ -10,6 +10,7 @@ import useConfetti from "@/hooks/useConfetti";
 import { kaomojis } from "@/lib/kaomoji";
 import { LIKED_SONGS_ID } from "@/lib/types";
 import { cn, formatCount, pluralize } from "@/lib/utils";
+import { Home, Play, Trash2, Undo2 } from "lucide-react";
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -41,10 +42,10 @@ const SwipeReviewPage = () => {
         subtitle={<p>You haven't swiped on any tracks...</p>}
         actions={
           <>
-            <Button variant="secondary" onClick={navigateHome}>
+            <Button icon={<Home className="size-4" />} variant="secondary" onClick={navigateHome}>
               Return Home
             </Button>
-            <Button variant="primary" onClick={navigateToSwipe}>
+            <Button icon={<Play className="size-4" />} variant="primary" onClick={navigateToSwipe}>
               Swipe Tracks
             </Button>
           </>
@@ -67,10 +68,14 @@ const SwipeReviewPage = () => {
         }
         actions={
           <>
-            <Button variant="secondary" onClick={navigateToSwipe}>
+            <Button
+              icon={<Undo2 className="size-4" />}
+              variant="secondary"
+              onClick={navigateToSwipe}
+            >
               Keep Swiping
             </Button>
-            <Button variant="primary" onClick={navigateHome}>
+            <Button icon={<Home className="size-4" />} variant="primary" onClick={navigateHome}>
               Return Home
             </Button>
           </>
@@ -158,11 +163,11 @@ const SwipeReviewPage = () => {
         )}
       </div>
       <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:flex sm:self-end">
-        <Button variant="secondary" onClick={navigateToSwipe}>
+        <Button icon={<Undo2 className="size-4" />} variant="secondary" onClick={navigateToSwipe}>
           Keep Swiping
         </Button>
-        <Button variant="primary" onClick={navigateToSubmit}>
-          Confirm Deletion
+        <Button icon={<Trash2 className="size-4" />} variant="primary" onClick={navigateToSubmit}>
+          Delete Tracks
         </Button>
       </div>
     </main>

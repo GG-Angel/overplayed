@@ -10,6 +10,7 @@ import { usePlaylistTracks } from "@/features/playlist/api/get-playlist-tracks";
 import useNavBlocker from "@/hooks/useNavBlocker";
 import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
+import { Play, Undo2 } from "lucide-react";
 
 const SwipeProvider = () => {
   const { playlistId } = useParams();
@@ -76,10 +77,18 @@ const SwipeProviderInner = ({ playlistId }: { playlistId: string }) => {
             </p>
           </div>
           <div className="grid grid-cols-2 lg:w-1/2 lg:self-end gap-2">
-            <Button variant="secondary" onClick={() => leaveBlocker.proceed()}>
+            <Button
+              icon={<Undo2 className="size-4" />}
+              variant="secondary"
+              onClick={() => leaveBlocker.proceed()}
+            >
               Leave
             </Button>
-            <Button variant="primary" onClick={() => leaveBlocker.reset()}>
+            <Button
+              icon={<Play className="size-4" />}
+              variant="primary"
+              onClick={() => leaveBlocker.reset()}
+            >
               Stay
             </Button>
           </div>

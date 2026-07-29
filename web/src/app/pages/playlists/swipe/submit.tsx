@@ -6,6 +6,7 @@ import { useSwipeContext } from "@/features/swipe/provider/SwipeContext";
 import useConfetti from "@/hooks/useConfetti";
 import { kaomojis } from "@/lib/kaomoji";
 import { openExternalUrl } from "@/lib/utils";
+import { ExternalLink, Home, Play, RotateCcw } from "lucide-react";
 import { useEffect, useEffectEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -49,10 +50,14 @@ const SwipeSubmitPage = () => {
         subtitle={<p>You haven't disliked any tracks...</p>}
         actions={
           <>
-            <Button variant="secondary" onClick={navigateHome}>
+            <Button icon={<Home className="size-4" />} variant="secondary" onClick={navigateHome}>
               Return Home
             </Button>
-            <Button variant="primary" onClick={navigateToSwipePage}>
+            <Button
+              icon={<Play className="size-4" />}
+              variant="primary"
+              onClick={navigateToSwipePage}
+            >
               Swipe Tracks
             </Button>
           </>
@@ -75,10 +80,14 @@ const SwipeSubmitPage = () => {
         }
         actions={
           <>
-            <Button variant="secondary" onClick={navigateHome}>
+            <Button icon={<Home className="size-4" />} variant="secondary" onClick={navigateHome}>
               Return Home
             </Button>
-            <Button variant="primary" onClick={controller.start}>
+            <Button
+              icon={<RotateCcw className="size-4" />}
+              variant="primary"
+              onClick={controller.start}
+            >
               Try Again
             </Button>
           </>
@@ -107,13 +116,14 @@ const SwipeSubmitPage = () => {
           <>
             {backupPlaylist && (
               <Button
+                icon={<ExternalLink className="size-4" />}
                 variant="secondary"
                 onClick={() => openExternalUrl(backupPlaylist.external_urls.spotify)}
               >
                 Open Backup Playlist
               </Button>
             )}
-            <Button variant="primary" onClick={navigateHome}>
+            <Button icon={<Home className="size-4" />} variant="primary" onClick={navigateHome}>
               Return Home
             </Button>
           </>

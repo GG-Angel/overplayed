@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import MessageState from "./MessageState";
 import Button from "../ui/Button";
 import { kaomojis } from "@/lib/kaomoji";
+import { Undo2 } from "lucide-react";
 
 type ErrorStateProps = {
   message?: string;
@@ -16,7 +17,11 @@ const ErrorState = ({ message = "Unexpected error!" }: ErrorStateProps) => {
       tone="negative"
       title={message}
       actions={
-        <Button variant="tertiary" onClick={() => navigate("/", { replace: true })}>
+        <Button
+          icon={<Undo2 className="size-4" />}
+          variant="tertiary"
+          onClick={() => navigate("/", { replace: true })}
+        >
           Return Home
         </Button>
       }
