@@ -15,4 +15,4 @@
 
 - Randomization option would be nice
 
-- Add more icons to buttons
+- Clicking on volume button should mute/unmute the audio.

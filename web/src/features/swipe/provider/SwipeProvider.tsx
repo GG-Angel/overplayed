@@ -30,7 +30,7 @@ const SwipeProviderInner = ({ playlistId }: { playlistId: string }) => {
   const playlist = usePlaylist(playlistId);
   const tracks = usePlaylistTracks(playlistId, session.swipes.length);
   const leaveBlocker = useNavBlocker(
-    session.swipes.length > 0 && !hasSubmitted,
+    session.dislikes.length > 0 && !hasSubmitted,
     `/playlists/${playlistId}/swipe`
   );
 
