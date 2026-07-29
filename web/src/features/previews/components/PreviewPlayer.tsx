@@ -8,10 +8,11 @@ import VolumeControl from "./VolumeControl";
 import type { WaveformHandler } from "./Waveform";
 import type { TrackPreview } from "@/lib/types";
 import useLocalStorage from "@/hooks/useLocalStorage";
+import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts";
 
 const Waveform = lazy(() => import("./Waveform"));
 
-const DEFAULT_VOLUME = 0.5;
+const DEFAULT_VOLUME = 0.3;
 const STORED_VOLUME_KEY = "volume";
 
 type PreviewPlayerProps = {
@@ -32,6 +33,12 @@ const AudioPlayer = ({ preview, isLoading, isError, className }: PreviewPlayerPr
   }, []);
 
   const handlePause = useCallback(() => setIsPlaying(false), []);
+
+  // handle spacebar keydown to play/pause + mute/unmute the audio
+  useKeyboardShortcuts({
+    " ": () => waveformRef.current?.playPause(),
+    m: () => setVolume((prevVolume) => (prevVolume > 0 ? 0 : DEFAULT_VOLUME)),
+  });
 
   return (
     <Card padding="sm" className={cn("flex items-center gap-3 overflow-visible py-2", className)}>

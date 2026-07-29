@@ -7,8 +7,9 @@ import SwipeCardStack from "@/features/swipe/components/SwipeCardStack";
 import SwipeProgress from "@/features/swipe/components/SwipeProgress";
 import useSwipePreviews from "@/features/swipe/hooks/useSwipePreviews";
 import { useSwipeContext } from "@/features/swipe/provider/SwipeContext";
+import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts";
 import { Check, Undo } from "lucide-react";
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const MAX_CARD_STACK_HEIGHT = 3;
@@ -29,11 +30,14 @@ const SwipeSongsPage = () => {
   const canUndoOrFinish = !isSwiping && currentIndex > 0;
   const canSwipe = !isSwiping && !hasReachedEnd;
 
-  const triggerSwipe = (direction: SwipeDirection) => {
-    if (!currentSwipeCardRef.current || !canSwipe) return;
-    setIsSwiping(true);
-    currentSwipeCardRef.current.swipe(direction);
-  };
+  const triggerSwipe = useCallback(
+    (direction: SwipeDirection) => {
+      if (!currentSwipeCardRef.current || !canSwipe) return;
+      setIsSwiping(true);
+      currentSwipeCardRef.current.swipe(direction);
+    },
+    [canSwipe]
+  );
 
   const recordSwipe = (direction: SwipeDirection) => {
     if (!currentTrack || hasReachedEnd) return;
@@ -43,6 +47,16 @@ const SwipeSongsPage = () => {
     });
     setIsSwiping(false);
   };
+
+  // handle keyboard events for swiping and undoing
+  useKeyboardShortcuts({
+    arrowleft: () => triggerSwipe("left"),
+    a: () => triggerSwipe("left"),
+    arrowright: () => triggerSwipe("right"),
+    d: () => triggerSwipe("right"),
+    arrowup: () => session.undoSwipe(),
+    w: () => session.undoSwipe(),
+  });
 
   if (playlist.tracks.length <= 0) {
     return <ErrorState message="Playlist is Empty" />;
