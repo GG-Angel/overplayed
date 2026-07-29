@@ -30,5 +30,10 @@
 - Add more icons to buttons
 
 - Add keyboard shortcuts for swiping and handling previews
+
   - space for pause/play
   - left/right arrows for swiping
+
+- Save volume to local storage
+- Save access creds to local storage
+- Revert default view back to cards for playlist selector

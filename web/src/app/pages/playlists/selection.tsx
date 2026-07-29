@@ -163,7 +163,7 @@ const SelectionPage = () => {
         }
 
         return (
-          <section className="md:h-full md:min-h-128 md:overflow-y-scroll snap-y pb-32">
+          <section className="md:h-full md:min-h-128 md:overflow-y-scroll md:[scrollbar-width:none] [&::-webkit-scrollbar]:hidden snap-y pb-32">
             <div className={LAYOUT_CONFIG[layout].containerClassName}>
               {sortedPlaylists.map((p) => (
                 <Playlist
