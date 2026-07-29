@@ -1,12 +1,14 @@
 import { Volume2, VolumeOff } from "lucide-react";
 import Card from "@/components/ui/Card";
+import IconButton from "@/components/ui/IconButton";
 
 type VolumeControlProps = {
   volume: number;
   onVolumeChange: (volume: number) => void;
+  onMuteToggle: () => void;
 };
 
-const VolumeControl = ({ volume, onVolumeChange }: VolumeControlProps) => {
+const VolumeControl = ({ volume, onVolumeChange, onMuteToggle }: VolumeControlProps) => {
   const VolumeIcon = volume === 0 ? VolumeOff : Volume2;
 
   return (
@@ -24,9 +26,13 @@ const VolumeControl = ({ volume, onVolumeChange }: VolumeControlProps) => {
         />
       </Card>
       <div className="absolute size-16 bottom-0" />
-      <div className="text-muted border-faded border-2 rounded-full p-2.5">
-        <VolumeIcon className="size-4" />
-      </div>
+      <IconButton
+        icon={VolumeIcon}
+        size="xs"
+        variant="neutral"
+        onClick={onMuteToggle}
+        className="z-10"
+      />
     </div>
   );
 };

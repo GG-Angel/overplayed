@@ -42,12 +42,16 @@ const AudioPlayer = ({
 
   const handlePause = useCallback(() => setIsPlaying(false), []);
 
+  const handleVolumeToggle = useCallback(() => {
+    setVolume((prevVolume) => (prevVolume > 0 ? 0 : DEFAULT_VOLUME));
+  }, [setVolume]);
+
   // handle spacebar keydown to play/pause + mute/unmute the audio
   useKeyboardShortcuts(
     PREVIEW_SHORTCUTS,
     {
       playPause: () => waveformRef.current?.playPause(),
-      mute: () => setVolume((prevVolume) => (prevVolume > 0 ? 0 : DEFAULT_VOLUME)),
+      mute: handleVolumeToggle,
     },
     shortcutsEnabled
   );
@@ -88,7 +92,7 @@ const AudioPlayer = ({
           />
         )}
       </div>
-      <VolumeControl volume={volume} onVolumeChange={setVolume} />
+      <VolumeControl volume={volume} onVolumeChange={setVolume} onMuteToggle={handleVolumeToggle} />
     </Card>
   );
 };
