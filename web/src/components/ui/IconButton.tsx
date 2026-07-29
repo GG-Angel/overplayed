@@ -4,16 +4,16 @@ import type { LucideIcon } from "lucide-react";
 import type { ComponentProps } from "react";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center rounded-full border-2 cursor-pointer active:opacity-75 disabled:opacity-25 disabled:pointer-events-none transition-opacity",
+  "inline-flex items-center justify-center rounded-full border-2 cursor-pointer active:opacity-75 disabled:opacity-25 disabled:pointer-events-none transition-all",
   {
     variants: {
       size: { xs: "p-2.5", sm: "p-4", md: "p-4.5" },
       variant: {
-        neutral: "text-muted border-faded",
-        green: "text-primary border-primary/50",
-        red: "text-destructive border-destructive/50",
-        yellow: "text-amber-400 border-amber-400/50",
-        blue: "text-sky-400 border-sky-400/50",
+        neutral: "text-muted border-faded hover:text-foreground hover:border-muted hover:bg-muted/10",
+        green: "text-primary border-primary/50 hover:border-primary hover:bg-primary/15",
+        red: "text-destructive border-destructive/50 hover:border-destructive hover:bg-destructive/15",
+        yellow: "text-amber-400 border-amber-400/50 hover:border-amber-400 hover:bg-amber-400/15",
+        blue: "text-sky-400 border-sky-400/50 hover:border-sky-400 hover:bg-sky-400/15",
       },
     },
     defaultVariants: { size: "md", variant: "neutral" },

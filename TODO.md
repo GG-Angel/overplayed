@@ -14,5 +14,3 @@
 - Previews aren’t available for niche songs
 
 - Randomization option would be nice
-
-- Clicking on volume button should mute/unmute the audio.
