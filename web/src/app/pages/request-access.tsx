@@ -16,6 +16,9 @@ import {
   type QueueAccessRequest,
   type QueueUserStatus,
 } from "@/lib/types";
+import useLocalStorage from "@/hooks/useLocalStorage";
+
+const STORED_FORM_KEY = "access-request-form";
 
 const ErrorMessage = ({ message }: { message: string }) => (
   <Card tone="negative" padding="lg" radius="lg" className="flex flex-col gap-2 py-4">
@@ -62,7 +65,7 @@ const RequestAccessPage = () => {
     return urlParams.has("error");
   });
 
-  const [form, setForm] = useState<QueueAccessRequest>({ email: "" });
+  const [form, setForm] = useLocalStorage<QueueAccessRequest>(STORED_FORM_KEY, { email: "" });
   const [errors, setErrors] = useState<Partial<QueueAccessRequest>>({});
   const [turnstileToken, setTurnstileToken] = useState<string>("");
   const turnstileRef = useRef<TurnstileHandle>(null);

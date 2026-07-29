@@ -23,7 +23,7 @@ type PreviewPlayerProps = {
 
 const AudioPlayer = ({ preview, isLoading, isError, className }: PreviewPlayerProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const { value: volume, setValue: setVolume } = useLocalStorage(STORED_VOLUME_KEY, DEFAULT_VOLUME);
+  const [volume, setVolume] = useLocalStorage(STORED_VOLUME_KEY, DEFAULT_VOLUME);
   const waveformRef = useRef<WaveformHandler>(null);
   const showWaveform = !isLoading && !isError && preview?.url;
 
