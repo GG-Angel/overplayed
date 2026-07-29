@@ -4,7 +4,10 @@ from aiohttp import ClientSession
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Response, status
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 from settings import settings, APP_STATE_KEY
+from core.limiter import limiter
 from services.queue import QueueService, QueueRepository, QueueWorker
 from state import State
 from locking import DistributedLock
@@ -68,6 +71,10 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # ty:ignore[invalid-argument-type]
 
 
 app.add_middleware(

@@ -5,6 +5,8 @@ APP_STATE_KEY = "APP_STATE"
 
 
 class Settings(BaseSettings):
+    debug: bool = False
+
     frontend_url: str = Field(...)
 
     spotify_app_client_id: str = Field(...)

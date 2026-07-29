@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from services.queue import QueueService
 from services.turnstile import TurnstileVerifier
 from state import get_queue_service, get_turnstile_verifier
+from core.limiter import limiter
 from errors import QueueLockError, SpotifyValidationError
 from dtos import (
     QueueOverviewResponse,
@@ -15,7 +16,9 @@ router = APIRouter()
 
 
 @router.get("")
+@limiter.limit("60/minute")
 async def get_overview(
+    request: Request,
     queue_service: QueueService = Depends(get_queue_service),
 ) -> QueueOverviewResponse:
     result = await queue_service.get_queue_overview()
@@ -28,6 +31,7 @@ async def get_overview(
 
 
 @router.post("")
+@limiter.limit("10/minute")
 async def join_queue(
     request: Request,
     form: QueueSignUpForm,
