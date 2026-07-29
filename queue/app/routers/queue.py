@@ -9,6 +9,7 @@ from dtos import (
     QueueSignUpForm,
     UserActiveResponse,
     UserInQueueResponse,
+    UserNotInQueueResponse,
 )
 
 
@@ -28,6 +29,31 @@ async def get_overview(
         user_limit=result.user_limit,
         next_available_time=result.next_available_time,
     )
+
+
+@router.get("/{email}")
+@limiter.limit("60/minute")
+async def get_user_status(
+    request: Request,
+    email: str,
+    queue_service: QueueService = Depends(get_queue_service),
+) -> UserActiveResponse | UserInQueueResponse | UserNotInQueueResponse:
+    result = await queue_service.get_user_status(email)
+
+    match result.status:
+        case "active":
+            return UserActiveResponse(
+                email=email,
+                estimated_end_time=result.end_time,
+            )
+        case "in_queue":
+            return UserInQueueResponse(
+                email=email,
+                position_in_queue=result.position,
+                estimated_start_time=result.start_time,
+            )
+        case "not_in_queue":
+            return UserNotInQueueResponse(email=email)
 
 
 @router.post("")

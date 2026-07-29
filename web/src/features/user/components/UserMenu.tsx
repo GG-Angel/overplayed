@@ -1,6 +1,7 @@
 import Button from "@/components/ui/Button";
 import useAuth from "../auth/useAuth";
 import Avatar from "./Avatar";
+import AccessStatus from "./AccessStatus";
 import { Spinner } from "@/components/ui/Spinner";
 import Dropdown from "@/components/ui/dropdown/Dropdown";
 import DropdownMenu from "@/components/ui/dropdown/DropdownMenu";
@@ -43,6 +44,7 @@ const UserMenu = () => {
           <span className="font-medium">{user.display_name}</span>
           <span className="text-xs text-muted">{user.email}</span>
         </DropdownMenuItem>
+        <AccessStatus />
         <DropdownMenuDivider />
         <DropdownMenuButton onClick={() => openExternalUrl(user.external_urls.spotify)}>
           <User className="size-4.5" />

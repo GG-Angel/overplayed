@@ -28,3 +28,8 @@ class UserInQueueResponse(BaseModel):
     email: str
     position_in_queue: int
     estimated_start_time: datetime
+
+
+class UserNotInQueueResponse(BaseModel):
+    status: Literal["not_in_queue"] = "not_in_queue"
+    email: str

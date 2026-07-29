@@ -43,6 +43,16 @@ export function formatDateTime(iso: string): string {
   return new Date(iso).toLocaleString();
 }
 
+export function formatDuration(ms: number): string {
+  const totalMinutes = Math.floor(ms / 60_000);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  if (totalMinutes > 0) return `${totalMinutes}m`;
+  return "<1m";
+}
+
 export function wrapSlice<T>(arr: T[], start: number, end: number): T[] {
   const len = arr.length;
   const actualStart = start % len;
