@@ -17,7 +17,7 @@ const Dropdown = ({ trigger, children, className, align = "left" }: DropdownProp
     <div ref={ref} className={cn("relative inline-block", className)}>
       {trigger({ open, toggle: () => setOpen((o) => !o) })}
       {open && (
-        <div className="absolute top-[calc(100%+4px)] z-50" style={{ [align]: 0 }}>
+        <div className="absolute top-[calc(100%+8px)] z-50" style={{ [align]: 0 }}>
           {children}
         </div>
       )}

@@ -17,9 +17,6 @@
 
 ## Test Notes
 
-- Fix card clipping on narrow screens (min height)
-- Error message when song can’t play
-
 - Previews aren’t available for niche songs
 
 - Randomization option would be nice

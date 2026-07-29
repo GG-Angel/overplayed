@@ -60,7 +60,7 @@ const SelectionPage = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [sortKey, setSortKey] = useState<PlaylistSortKey>("tracks");
   const [sortOrder, setSortOrder] = useState<PlaylistSortOrder>("descending");
-  const [layout, setLayout] = useState<PlaylistLayout>("cover");
+  const [layout, setLayout] = useState<PlaylistLayout>("card");
   const { data: playlists, isLoading } = useUserPlaylists();
   const navigate = useNavigate();
 
@@ -93,7 +93,7 @@ const SelectionPage = () => {
   return (
     <main className="flex flex-col h-full gap-6">
       <h1 className="text-center">Select a Playlist</h1>
-      <div className="flex items-center justify-between gap-8 md:grid md:grid-cols-2">
+      <div className="flex items-center justify-between gap-8">
         <Input
           className="flex-1"
           icon={Search}
