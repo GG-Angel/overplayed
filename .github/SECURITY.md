@@ -3,7 +3,7 @@
 ## Reporting a Vulnerability
 
 Please report security vulnerabilities privately through GitHub, using
-[**Report a vulnerability**](https://github.com/GG-Angel/overplayed-new/security/advisories/new)
+[**Report a vulnerability**](https://github.com/GG-Angel/overplayed/security/advisories/new)
 under the repository's Security tab.
 
 Do not open a public issue or pull request for a security vulnerability.
