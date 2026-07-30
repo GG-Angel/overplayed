@@ -1,8 +1,10 @@
-from settings import Settings
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
+
 from fastapi import Depends
 from redis.asyncio import ConnectionPool, Redis
-from state import get_state, State
+
+from settings import Settings
+from state import State, get_state
 
 
 def build_redis_pool(settings: Settings) -> ConnectionPool:

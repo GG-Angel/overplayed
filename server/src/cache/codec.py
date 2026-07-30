@@ -1,8 +1,9 @@
-from pydantic import BaseModel
-from typing import TypeVar, Type, Generic
-from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-from base64 import b64encode, b64decode
+from base64 import b64decode, b64encode
 from os import urandom
+from typing import TypeVar
+
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+from pydantic import BaseModel
 
 M = TypeVar("M", bound=BaseModel)
 
@@ -21,12 +22,12 @@ class Codec:
         nonce, ciphertext = raw[:12], raw[12:]
         return self._aesgcm.decrypt(nonce, ciphertext, None).decode()
 
-    def model(self, m: Type[M]) -> "ModelCodec[M]":
+    def model(self, m: type[M]) -> "ModelCodec[M]":
         return ModelCodec(m, self)
 
 
-class ModelCodec(Generic[M]):
-    def __init__(self, model: Type[M], codec: Codec):
+class ModelCodec[M: BaseModel]:
+    def __init__(self, model: type[M], codec: Codec):
         self._model = model
         self._codec = codec
 

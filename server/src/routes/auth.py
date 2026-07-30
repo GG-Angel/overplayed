@@ -1,18 +1,18 @@
-from services.spotify.models import TokenInfo, CurrentUser, SessionInfo
-from settings import Settings
-from core.limiter import limiter
 import asyncio
-from loguru import logger
 from urllib.parse import urlencode, urlparse
-from redis.asyncio import RedisError
-from spotipy import SpotifyOAuth, Spotify
-from typing import Optional
-from fastapi import APIRouter, Depends, Cookie, HTTPException, Request
+
+from fastapi import APIRouter, Cookie, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse, RedirectResponse
-from state import get_oauth, get_settings
+from loguru import logger
+from redis.asyncio import RedisError
+from spotipy import Spotify, SpotifyOAuth
+
+from core.limiter import limiter
 from services.spotify.cache import SpotifyCache
 from services.spotify.dependencies import get_spotify_cache
-
+from services.spotify.models import CurrentUser, SessionInfo, TokenInfo
+from settings import Settings
+from state import get_oauth, get_settings
 
 router = APIRouter()
 
@@ -35,9 +35,9 @@ def handle_login(
 @limiter.limit("15/minute")
 async def handle_callback(
     request: Request,
-    code: Optional[str] = None,
-    error: Optional[str] = None,
-    state: Optional[str] = None,
+    code: str | None = None,
+    error: str | None = None,
+    state: str | None = None,
     oauth: SpotifyOAuth = Depends(get_oauth),
     cache: SpotifyCache = Depends(get_spotify_cache),
     settings: Settings = Depends(get_settings),

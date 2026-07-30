@@ -1,5 +1,5 @@
-from fastapi import status
 from aiohttp import ClientSession
+from fastapi import status
 
 
 async def test_get_preview_found(session: ClientSession):
