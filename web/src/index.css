@@ -43,6 +43,15 @@
   --font-sans: "Geist Variable", system-ui, sans-serif;
 
   --breakpoint-xs: 480px;
+
+  --animate-flash: flash 0.5s ease-out;
+
+  @keyframes flash {
+    from {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+  }
 }
 
 @layer base {

@@ -53,6 +53,17 @@ export function formatDuration(ms: number): string {
   return "<1m";
 }
 
+export function shuffleArray<T>(arr: T[]): T[] {
+  const result = [...arr];
+
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+
+  return result;
+}
+
 export function wrapSlice<T>(arr: T[], start: number, end: number): T[] {
   const len = arr.length;
   const actualStart = start % len;

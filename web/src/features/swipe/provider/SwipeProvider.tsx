@@ -7,6 +7,7 @@ import ErrorState from "@/components/states/ErrorState";
 import { usePlaylist } from "@/features/playlist/api/get-playlist";
 import LoadingState from "@/components/states/LoadingState";
 import { usePlaylistTracks } from "@/features/playlist/api/get-playlist-tracks";
+import useTrackOrder from "../hooks/useTrackOrder";
 import useNavBlocker from "@/hooks/useNavBlocker";
 import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
@@ -34,6 +35,13 @@ const SwipeProviderInner = ({ playlistId }: { playlistId: string }) => {
     `/playlists/${playlistId}/swipe`
   );
 
+  const loadedTracks = useMemo(
+    () => tracks.data?.pages.flatMap((p) => p.tracks) ?? [],
+    [tracks.data]
+  );
+
+  const order = useTrackOrder(loadedTracks, session.swipes.length);
+
   const contextValue = useMemo(() => {
     if (!playlist.isSuccess || !tracks.isSuccess) return null;
     return {
@@ -42,20 +50,13 @@ const SwipeProviderInner = ({ playlistId }: { playlistId: string }) => {
       setOptions,
       hasSubmitted,
       setHasSubmitted,
+      shuffle: order.shuffle,
       playlist: {
         metadata: playlist.data,
-        tracks: tracks.data.pages.flatMap((p) => p.tracks),
+        tracks: order.tracks,
       },
     };
-  }, [
-    session,
-    options,
-    hasSubmitted,
-    playlist.isSuccess,
-    playlist.data,
-    tracks.isSuccess,
-    tracks.data,
-  ]);
+  }, [session, options, hasSubmitted, order, playlist.isSuccess, playlist.data, tracks.isSuccess]);
 
   if (playlist.isError || tracks.isError) {
     return <ErrorState message="Failed to Load Playlist" />;
