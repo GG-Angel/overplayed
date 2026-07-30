@@ -38,7 +38,7 @@ const useAuth = () => {
 
   const redirectToLogin = (currentPath: string) => {
     window.location.href = buildURLWithQueryParams(`${env.API_BASE_URL}/auth/login`, {
-      redirectTo: currentPath,
+      redirect_to: currentPath,
     });
   };
 
