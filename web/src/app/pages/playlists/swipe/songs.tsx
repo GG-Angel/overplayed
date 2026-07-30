@@ -6,7 +6,7 @@ import type { SwipeCardController, SwipeDirection } from "@/features/swipe/compo
 import SwipeCardStack from "@/features/swipe/components/SwipeCardStack";
 import SwipeProgress from "@/features/swipe/components/SwipeProgress";
 import ShortcutsHelp from "@/features/swipe/components/ShortcutsHelp";
-import ShuffleToggle from "@/features/swipe/components/ShuffleToggle";
+import ShuffleButton from "@/features/swipe/components/ShuffleButton";
 import useSwipePreviews from "@/features/swipe/hooks/useSwipePreviews";
 import { useSwipeContext } from "@/features/swipe/provider/SwipeContext";
 import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts";
@@ -18,7 +18,7 @@ import { useNavigate } from "react-router-dom";
 const MAX_CARD_STACK_HEIGHT = 3;
 
 const SwipeSongsPage = () => {
-  const { session, playlist, isShuffled, toggleShuffle } = useSwipeContext();
+  const { session, playlist, shuffle } = useSwipeContext();
   const navigate = useNavigate();
   useSwipePreviews();
 
@@ -33,6 +33,7 @@ const SwipeSongsPage = () => {
   const hasReachedEnd = currentIndex >= playlist.metadata.tracks.total;
   const canUndoOrFinish = !isSwiping && currentIndex > 0;
   const canSwipe = !isSwiping && !hasReachedEnd;
+  const canShuffle = !isSwiping && playlist.tracks.length - currentIndex > 1;
 
   const triggerSwipe = useCallback(
     (direction: SwipeDirection) => {
@@ -42,6 +43,11 @@ const SwipeSongsPage = () => {
     },
     [canSwipe]
   );
+
+  const triggerShuffle = useCallback(() => {
+    if (!canShuffle) return;
+    shuffle();
+  }, [canShuffle, shuffle]);
 
   const recordSwipe = (direction: SwipeDirection) => {
     if (!currentTrack || hasReachedEnd) return;
@@ -59,7 +65,7 @@ const SwipeSongsPage = () => {
       dislike: () => triggerSwipe("left"),
       like: () => triggerSwipe("right"),
       undo: session.undoSwipe,
-      shuffle: toggleShuffle,
+      shuffle: triggerShuffle,
     },
     !isHelpOpen
   );
@@ -105,7 +111,7 @@ const SwipeSongsPage = () => {
             canSwipe={canSwipe}
           />
           <div className="flex items-center gap-2">
-            <ShuffleToggle enabled={isShuffled} onToggle={toggleShuffle} />
+            <ShuffleButton onShuffle={triggerShuffle} disabled={!canShuffle} />
             <ShortcutsHelp
               open={isHelpOpen}
               onOpen={() => setIsHelpOpen(true)}

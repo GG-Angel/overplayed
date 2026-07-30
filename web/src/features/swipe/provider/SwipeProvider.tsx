@@ -50,8 +50,7 @@ const SwipeProviderInner = ({ playlistId }: { playlistId: string }) => {
       setOptions,
       hasSubmitted,
       setHasSubmitted,
-      isShuffled: order.isShuffled,
-      toggleShuffle: order.toggleShuffle,
+      shuffle: order.shuffle,
       playlist: {
         metadata: playlist.data,
         tracks: order.tracks,
