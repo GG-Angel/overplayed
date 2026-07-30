@@ -8,8 +8,12 @@ on:
       - "queue/**"
   workflow_dispatch:
 
+concurrency:
+  group: cicd-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
-  ci:
+  build:
     name: Build and Push Docker Images
     runs-on: ubuntu-latest
     permissions:
@@ -40,10 +44,12 @@ jobs:
           context: ./${{ matrix.context }}
           tags: ${{ matrix.image }}:latest
           push: true
+          cache-from: type=gha,scope=${{ matrix.context }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.context }}
 
-  cd:
+  deploy:
     name: Deploy on Server
-    needs: ci
+    needs: build
     runs-on: ubuntu-latest
     permissions: {}
     steps:
@@ -59,5 +65,5 @@ jobs:
             cd ~/${{ github.event.repository.name }}
             docker compose pull
             docker compose up -d db
-            docker compose run --rm server uv run --no-cache alembic upgrade head
+            docker compose run --rm server uv run --no-cache --no-dev alembic upgrade head
             docker compose up -d --remove-orphans
