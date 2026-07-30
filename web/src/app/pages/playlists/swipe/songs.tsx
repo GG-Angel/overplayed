@@ -24,6 +24,7 @@ const SwipeSongsPage = () => {
 
   const [isSwiping, setIsSwiping] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [shuffleCount, setShuffleCount] = useState(0);
   const currentSwipeCardRef = useRef<SwipeCardController | null>(null);
 
   const currentIndex = session.swipes.length;
@@ -47,6 +48,7 @@ const SwipeSongsPage = () => {
   const triggerShuffle = useCallback(() => {
     if (!canShuffle) return;
     shuffle();
+    setShuffleCount((prev) => prev + 1);
   }, [canShuffle, shuffle]);
 
   const recordSwipe = (direction: SwipeDirection) => {
@@ -111,7 +113,11 @@ const SwipeSongsPage = () => {
             canSwipe={canSwipe}
           />
           <div className="flex items-center gap-2">
-            <ShuffleButton onShuffle={triggerShuffle} disabled={!canShuffle} />
+            <ShuffleButton
+              onShuffle={triggerShuffle}
+              shuffleCount={shuffleCount}
+              disabled={!canShuffle}
+            />
             <ShortcutsHelp
               open={isHelpOpen}
               onOpen={() => setIsHelpOpen(true)}
