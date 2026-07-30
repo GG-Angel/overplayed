@@ -26,7 +26,7 @@ const SwipeProgress = ({ likes, dislikes, total, className }: SwipeProgressProps
     <div className={cn("flex flex-col", className)}>
       <div className="flex items-center gap-2">
         <p className="text-destructive min-w-12 text-right text-sm">{dislikes}</p>
-        <X className="text-destructive" />
+        <X className="text-destructive shrink-0" />
         <div
           className="flex mx-2 h-1 w-full overflow-hidden rounded-full bg-card"
           role="progressbar"
@@ -43,7 +43,7 @@ const SwipeProgress = ({ likes, dislikes, total, className }: SwipeProgressProps
             />
           ))}
         </div>
-        <Heart className="size-4.75 text-primary" />
+        <Heart className="size-4.75 text-primary shrink-0" />
         <p className="text-primary min-w-12 text-left text-sm">{likes}</p>
       </div>
       <p className="text-center text-sm text-muted">{remaining} left</p>
