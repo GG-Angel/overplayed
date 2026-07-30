@@ -8,6 +8,8 @@ export type SwipeContextValues = {
   setOptions: Dispatch<SetStateAction<SwipeSubmissionForm["options"]>>;
   hasSubmitted: boolean;
   setHasSubmitted: Dispatch<SetStateAction<boolean>>;
+  isShuffled: boolean;
+  toggleShuffle: () => void;
   playlist: {
     metadata: Playlist;
     tracks: Track[];

@@ -6,6 +6,7 @@ import type { SwipeCardController, SwipeDirection } from "@/features/swipe/compo
 import SwipeCardStack from "@/features/swipe/components/SwipeCardStack";
 import SwipeProgress from "@/features/swipe/components/SwipeProgress";
 import ShortcutsHelp from "@/features/swipe/components/ShortcutsHelp";
+import ShuffleToggle from "@/features/swipe/components/ShuffleToggle";
 import useSwipePreviews from "@/features/swipe/hooks/useSwipePreviews";
 import { useSwipeContext } from "@/features/swipe/provider/SwipeContext";
 import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts";
@@ -17,7 +18,7 @@ import { useNavigate } from "react-router-dom";
 const MAX_CARD_STACK_HEIGHT = 3;
 
 const SwipeSongsPage = () => {
-  const { session, playlist } = useSwipeContext();
+  const { session, playlist, isShuffled, toggleShuffle } = useSwipeContext();
   const navigate = useNavigate();
   useSwipePreviews();
 
@@ -58,6 +59,7 @@ const SwipeSongsPage = () => {
       dislike: () => triggerSwipe("left"),
       like: () => triggerSwipe("right"),
       undo: session.undoSwipe,
+      shuffle: toggleShuffle,
     },
     !isHelpOpen
   );
@@ -102,11 +104,14 @@ const SwipeSongsPage = () => {
             canFinish={canUndoOrFinish}
             canSwipe={canSwipe}
           />
-          <ShortcutsHelp
-            open={isHelpOpen}
-            onOpen={() => setIsHelpOpen(true)}
-            onClose={() => setIsHelpOpen(false)}
-          />
+          <div className="flex items-center gap-2">
+            <ShuffleToggle enabled={isShuffled} onToggle={toggleShuffle} />
+            <ShortcutsHelp
+              open={isHelpOpen}
+              onOpen={() => setIsHelpOpen(true)}
+              onClose={() => setIsHelpOpen(false)}
+            />
+          </div>
         </div>
       </div>
       <AudioPlayer
