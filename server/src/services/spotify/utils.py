@@ -1,12 +1,14 @@
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import get_args, get_origin
+
 from pydantic import BaseModel
+
 from services.spotify.models import (
+    LIKED_SONGS_ID,
     CurrentUser,
+    ExternalUrls,
     Playlist,
     User,
-    ExternalUrls,
-    LIKED_SONGS_ID,
 )
 
 
@@ -54,5 +56,5 @@ def build_liked_songs_playlist(user: CurrentUser, total: int) -> Playlist:
 
 
 def get_formatted_date() -> str:
-    """Return the current date formatted as 'Month D, YYYY'"""
-    return datetime.now().strftime("%B %-d, %Y")
+    """Return the current UTC date formatted as 'Month D, YYYY'"""
+    return datetime.now(UTC).strftime("%B %-d, %Y")

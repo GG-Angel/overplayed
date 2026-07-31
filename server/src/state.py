@@ -1,10 +1,12 @@
-from asyncio import Task, Lock
-from fastapi import Request, Depends
+from asyncio import Lock, Task
+
 from aiohttp import ClientSession
+from fastapi import Depends, Request
+from redis.asyncio import ConnectionPool
 from spotipy import SpotifyOAuth
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
-from redis.asyncio import ConnectionPool
-from settings import Settings, APP_STATE_KEY
+
+from settings import APP_STATE_KEY, Settings
 
 
 class State:
