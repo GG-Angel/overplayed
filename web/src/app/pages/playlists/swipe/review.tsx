@@ -87,7 +87,7 @@ const SwipeReviewPage = () => {
   return (
     <main className="flex flex-col gap-6 py-2 w-full max-w-4xl self-center pb-32">
       <h1 className="text-center">Review Swipes</h1>
-      <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
+      <div className="flex flex-col-reverse sm:flex-row gap-3">
         <Metric
           amount={formatCount(session.dislikes.length)}
           label={pluralize("Dislike", session.dislikes.length)}
@@ -104,7 +104,7 @@ const SwipeReviewPage = () => {
         <div className="relative">
           <div
             className={cn(
-              "max-h-124 overflow-y-auto snap-y",
+              "max-h-56 sm:max-h-124 overflow-y-auto snap-y",
               session.dislikes.length > 5 && "pb-18"
             )}
           >
