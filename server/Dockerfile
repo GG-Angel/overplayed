@@ -10,7 +10,7 @@ RUN uv sync --locked --no-cache --no-dev
 
 COPY . .
 
-RUN useradd --system --no-create-home appuser
+RUN useradd --system --no-create-home appuser && chown -R appuser /app
 USER appuser
 
 EXPOSE 8080
