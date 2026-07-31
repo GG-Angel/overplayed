@@ -70,8 +70,9 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: ESLint
-        run: bun run lint
+      # enable later once eslint supports TS 7
+      # - name: ESLint
+      #   run: bun run lint
 
       - name: Type check
         run: bun run typecheck
