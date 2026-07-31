@@ -38,7 +38,7 @@ const TrackCard = ({ track, orientation, className, ...props }: TrackCardProps) 
   const artistList = track.artists.map((t) => t.name).join(" · ");
 
   return (
-    <Card className={cn(cardVariants({ orientation }), className)} {...props}>
+    <Card className={cn(cardVariants({ orientation }), className)} tabIndex={-1} {...props}>
       <Image
         src={coverUrl}
         className={imageVariants({ orientation })}

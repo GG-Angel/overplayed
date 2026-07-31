@@ -15,17 +15,26 @@ type WaveformProps = {
   className?: string;
   onPlay?: () => void;
   onPause?: () => void;
+  onReady?: () => void;
 };
 
-const Waveform = ({ url, waveformRef, volume = 1, className, onPlay, onPause }: WaveformProps) => {
+const Waveform = ({
+  url,
+  waveformRef,
+  volume = 1,
+  className,
+  onPlay,
+  onPause,
+  onReady,
+}: WaveformProps) => {
   const ws = useRef<WaveSurfer>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const callbacks = useRef({ onPlay, onPause });
+  const callbacks = useRef({ onPlay, onPause, onReady });
   const volumeRef = useRef(volume);
 
   useEffect(() => {
-    callbacks.current = { onPlay, onPause };
-  }, [onPlay, onPause]);
+    callbacks.current = { onPlay, onPause, onReady };
+  }, [onPlay, onPause, onReady]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -48,6 +57,7 @@ const Waveform = ({ url, waveformRef, volume = 1, className, onPlay, onPause }: 
       ws.current.on("ready", () => {
         ws.current?.setVolume(volumeRef.current);
         ws.current?.play();
+        callbacks.current.onReady?.();
       }),
       ws.current.on("finish", () => {
         ws.current?.seekTo(0);
