@@ -33,6 +33,7 @@ const AudioPlayer = ({
 }: PreviewPlayerProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useLocalStorage(STORED_VOLUME_KEY, DEFAULT_VOLUME);
+  const [muteCount, setMuteCount] = useState(0);
   const waveformRef = useRef<WaveformHandler>(null);
   const showWaveform = !isLoading && !isError && preview?.url;
 
@@ -46,12 +47,18 @@ const AudioPlayer = ({
     setVolume((prevVolume) => (prevVolume > 0 ? 0 : DEFAULT_VOLUME));
   }, [setVolume]);
 
+  // flash the volume button so the shortcut has visible feedback
+  const handleMuteShortcut = useCallback(() => {
+    handleVolumeToggle();
+    setMuteCount((prev) => prev + 1);
+  }, [handleVolumeToggle]);
+
   // handle spacebar keydown to play/pause + mute/unmute the audio
   useKeyboardShortcuts(
     PREVIEW_SHORTCUTS,
     {
       playPause: () => waveformRef.current?.playPause(),
-      mute: handleVolumeToggle,
+      mute: handleMuteShortcut,
     },
     shortcutsEnabled
   );
@@ -92,7 +99,12 @@ const AudioPlayer = ({
           />
         )}
       </div>
-      <VolumeControl volume={volume} onVolumeChange={setVolume} onMuteToggle={handleVolumeToggle} />
+      <VolumeControl
+        volume={volume}
+        onVolumeChange={setVolume}
+        onMuteToggle={handleVolumeToggle}
+        muteCount={muteCount}
+      />
     </Card>
   );
 };
