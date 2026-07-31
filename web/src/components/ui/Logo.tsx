@@ -2,6 +2,7 @@ import { SkipForward } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { usePlaylist } from "@/features/playlist/api/get-playlist";
 import { extractPlaylistCoverUrl } from "@/features/playlist/components/utils";
+import Image from "./Image";
 
 const LogoPlaylistCrumb = ({ playlistId }: { playlistId: string }) => {
   const { data: playlist } = usePlaylist(playlistId);
@@ -13,7 +14,11 @@ const LogoPlaylistCrumb = ({ playlistId }: { playlistId: string }) => {
   return (
     <span className="inline-flex items-center gap-1.5 text-muted min-w-0">
       <span>/</span>
-      <img alt={`${playlist.name} cover`} src={coverUrl} className="size-5 rounded shrink-0" />
+      <Image
+        alt={playlist.name}
+        src={coverUrl}
+        className="aspect-square object-cover size-5 rounded"
+      />
       <span className="truncate">{playlist.name}</span>
     </span>
   );

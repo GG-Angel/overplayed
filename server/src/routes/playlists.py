@@ -1,10 +1,12 @@
-from typing import List, Annotated
-from fastapi import Request, Depends, APIRouter, Path, Query, BackgroundTasks
+from typing import Annotated
+
+from fastapi import APIRouter, BackgroundTasks, Depends, Path, Query, Request
+
 from core.limiter import limiter
-from routes.schemas import PlaylistResponse, PlaylistPageResponse, SwipesResponse
+from routes.schemas import PlaylistPageResponse, PlaylistResponse, SwipesResponse
 from services.spotify.dependencies import get_spotify_service
+from services.spotify.models import Playlist, PlaylistIdRegex, PlaylistPage
 from services.spotify.service import SpotifyService
-from services.spotify.models import Playlist, PlaylistPage, PlaylistIdRegex
 from services.swipe.dependencies import get_swipe_service
 from services.swipe.models import SwipesForm
 from services.swipe.service import SwipeService
@@ -12,12 +14,12 @@ from services.swipe.service import SwipeService
 router = APIRouter()
 
 
-@router.get("", response_model=List[PlaylistResponse])
+@router.get("", response_model=list[PlaylistResponse])
 @limiter.limit("30/minute")
 async def handle_get_user_playlists(
     request: Request,
     spotify: SpotifyService = Depends(get_spotify_service),
-) -> List[Playlist]:
+) -> list[Playlist]:
     return await spotify.get_user_playlists()
 
 

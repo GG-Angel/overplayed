@@ -1,8 +1,7 @@
-from services.previews.utils import parse_expiration_timestamp, parse_expires_in
-from services.previews.models import TrackPreview
-from services.previews.cache import DeezerCache, NO_PREVIEW
+from services.previews.cache import NO_PREVIEW, DeezerCache
 from services.previews.client import DeezerClient
-from typing import Optional
+from services.previews.models import TrackPreview
+from services.previews.utils import parse_expiration_timestamp, parse_expires_in
 
 
 class DeezerService:
@@ -26,7 +25,7 @@ class DeezerService:
             expires_in=parse_expires_in(url),
         )
 
-    async def _get_track_preview_url(self, isrc: str) -> Optional[str]:
+    async def _get_track_preview_url(self, isrc: str) -> str | None:
         cached = await self.cache.get_track_preview_url(isrc)
         if cached == NO_PREVIEW:
             return None

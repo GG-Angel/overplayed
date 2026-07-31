@@ -81,6 +81,10 @@
   h3 {
     @apply text-base sm:text-lg tracking-tight font-medium;
   }
+
+  img {
+    @apply text-transparent;
+  }
 }
 
 @layer components {
