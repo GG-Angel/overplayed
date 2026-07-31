@@ -1,9 +1,11 @@
-from typing import TypeVar
+from collections.abc import Mapping
+from typing import TypeVar, cast
 
 from fastapi import Depends
 from loguru import logger
 from pydantic import BaseModel
 from redis.asyncio import Redis
+from redis.typing import EncodableT, FieldT
 
 from core.redis import get_redis
 
@@ -19,6 +21,8 @@ class RedisClient:
         if data is None:
             logger.debug(f"MISS: {key}")
             return None
+        if isinstance(data, bytes):
+            data = data.decode()
         logger.debug(f"HIT: {key}")
         return data
 
@@ -27,10 +31,12 @@ class RedisClient:
         logger.debug(f"CACHED: {key} (ttl={ttl}s)")
 
     async def hget(self, key: str, field: str) -> str | None:
-        data = await self.redis.hget(key, field)  # ty:ignore[invalid-await]
+        data = await self.redis.hget(key, field)
         if data is None:
             logger.debug(f"MISS: {key} (field={field})")
             return None
+        if isinstance(data, bytes):
+            data = data.decode()
         logger.debug(f"HIT: {key} (field={field})")
         return data
 
@@ -46,13 +52,13 @@ class RedisClient:
         return mapping
 
     async def hset(self, key: str, field: str, value: str, ttl: int) -> None:
-        await self.redis.hsetex(key, field, value, ex=ttl)  # ty:ignore[invalid-await]
+        await self.redis.hsetex(key, field, value, ex=ttl)
         logger.debug(f"CACHED: {key} (key={key}, ttl={ttl}s)")
 
-    async def hsetall(self, key: str, mapping: dict[str, str], ttl: int) -> None:
+    async def hsetall(self, key: str, mapping: Mapping[str, str], ttl: int) -> None:
         async with self.redis.pipeline() as pipe:
             pipe.delete(key)
-            pipe.hsetex(key, mapping=mapping, ex=ttl)
+            pipe.hsetex(key, mapping=cast(Mapping[FieldT, EncodableT], mapping), ex=ttl)
             await pipe.execute()
         logger.debug(f"CACHED: {len(mapping)} entries (key={key}, ttl={ttl}s)")
 
