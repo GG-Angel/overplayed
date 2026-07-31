@@ -1,4 +1,3 @@
-from typing import Optional
 from aiohttp import ClientSession
 
 
@@ -7,7 +6,7 @@ class DeezerClient:
         self.session = session
         self.base_url = "https://api.deezer.com"
 
-    async def get_track_preview_url(self, isrc: str) -> Optional[str]:
+    async def get_track_preview_url(self, isrc: str) -> str | None:
         async with self.session.get(f"{self.base_url}/track/isrc:{isrc}") as response:
             response.raise_for_status()
             data = await response.json()

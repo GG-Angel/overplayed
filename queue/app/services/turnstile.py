@@ -25,7 +25,9 @@ class TurnstileVerifier:
             return False
 
         if result.get("success") is not True:
-            logger.warning(f"Turnstile verification failed: {result.get('error-codes')}")
+            logger.warning(
+                f"Turnstile verification failed: {result.get('error-codes')}"
+            )
             return False
 
         return True

@@ -1,18 +1,18 @@
-from services.spotify.models import TokenInfo, CurrentUser, SessionInfo
-from settings import Settings
-from core.limiter import limiter
 import asyncio
-from loguru import logger
-from urllib.parse import urlencode, urlparse
-from redis.asyncio import RedisError
-from spotipy import SpotifyOAuth, Spotify
-from typing import Optional
-from fastapi import APIRouter, Depends, Cookie, HTTPException, Request
+from urllib.parse import urlencode, urlsplit, urlunsplit
+
+from fastapi import APIRouter, Cookie, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse, RedirectResponse
-from state import get_oauth, get_settings
+from loguru import logger
+from redis.asyncio import RedisError
+from spotipy import Spotify, SpotifyOAuth
+
+from core.limiter import limiter
 from services.spotify.cache import SpotifyCache
 from services.spotify.dependencies import get_spotify_cache
-
+from services.spotify.models import CurrentUser, SessionInfo, TokenInfo
+from settings import Settings
+from state import get_oauth, get_settings
 
 router = APIRouter()
 
@@ -25,8 +25,7 @@ def handle_login(
     oauth: SpotifyOAuth = Depends(get_oauth),
 ) -> RedirectResponse:
     """Provides the Spotify OAuth url for this application."""
-    parsed = urlparse(redirect_to)
-    if parsed.scheme or parsed.netloc or not redirect_to.startswith("/"):
+    if not _is_valid_redirect_path(redirect_to):
         raise HTTPException(status_code=400, detail="Invalid redirect path.")
     return RedirectResponse(url=oauth.get_authorize_url(state=redirect_to))
 
@@ -35,9 +34,9 @@ def handle_login(
 @limiter.limit("15/minute")
 async def handle_callback(
     request: Request,
-    code: Optional[str] = None,
-    error: Optional[str] = None,
-    state: Optional[str] = None,
+    code: str | None = None,
+    error: str | None = None,
+    state: str | None = None,
     oauth: SpotifyOAuth = Depends(get_oauth),
     cache: SpotifyCache = Depends(get_spotify_cache),
     settings: Settings = Depends(get_settings),
@@ -48,7 +47,8 @@ async def handle_callback(
         params = urlencode({"error": "login_failed"})
         return RedirectResponse(f"{settings.frontend_url}/request-access?{params}")
 
-    if error or not code:
+    redirect_to = state or "/"
+    if error or not code or not _is_valid_redirect_path(redirect_to):
         return redirect_error()
 
     try:
@@ -61,8 +61,9 @@ async def handle_callback(
     except Exception:
         return redirect_error()
 
-    redirect_to = state or "/"
-    response = RedirectResponse(url=f"{settings.frontend_url}{redirect_to}")
+    response = RedirectResponse(
+        url=_build_redirect_url(settings.frontend_url, redirect_to)
+    )
     response.set_cookie(
         key="session_id",
         value=session_id,
@@ -71,7 +72,6 @@ async def handle_callback(
         max_age=settings.ttl_sessions,
         secure=not settings.debug,
     )
-
     logger.info(f"Authorized user: {user.display_name}")
     return response
 
@@ -98,3 +98,21 @@ async def handle_logout(
         secure=not settings.debug,
     )
     return response
+
+
+def _is_valid_redirect_path(path: str) -> bool:
+    """Checks if the path is a valid relative path."""
+    parsed = urlsplit(path)
+    return (
+        not parsed.scheme
+        and not parsed.netloc
+        and parsed.path.startswith("/")
+        and not parsed.path.startswith("//")
+    )
+
+
+def _build_redirect_url(url: str, path: str) -> str:
+    """Builds a redirect URL confined to the frontend's origin."""
+    parsed_url = urlsplit(url)
+    parsed_path = urlsplit(path)
+    return urlunsplit((parsed_url.scheme, parsed_url.netloc, parsed_path.path))

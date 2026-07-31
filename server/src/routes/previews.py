@@ -1,10 +1,11 @@
 from typing import Annotated
-from fastapi import APIRouter, Request, Path, Depends
+
+from fastapi import APIRouter, Depends, Path, Request
+
 from core.limiter import limiter
-from services.previews.service import DeezerService
 from services.previews.dependencies import get_deezer_service
 from services.previews.models import IsrcPattern, TrackPreview
-
+from services.previews.service import DeezerService
 
 router = APIRouter()
 

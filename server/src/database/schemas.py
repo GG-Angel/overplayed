@@ -1,7 +1,9 @@
+from datetime import UTC, datetime
+
+from sqlalchemy import DateTime, ForeignKey, String, func
+from sqlalchemy.orm import Mapped, mapped_column
+
 from core.database import Base
-from datetime import datetime, timezone
-from sqlalchemy import String, DateTime, func, ForeignKey
-from sqlalchemy.orm import mapped_column, Mapped
 
 
 class User(Base):
@@ -27,7 +29,7 @@ class SwipeSession(Base):
     tracks_cut: Mapped[int] = mapped_column(nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=datetime.now(timezone.utc),
+        default=datetime.now(UTC),
         server_default=func.now(),
         nullable=False,
     )

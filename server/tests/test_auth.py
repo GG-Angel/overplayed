@@ -1,6 +1,7 @@
-from tests.conftest import BASE_URL
-from fastapi import status
 from aiohttp import ClientSession
+from fastapi import status
+
+from tests.conftest import BASE_URL
 
 
 async def test_login_redirect(session: ClientSession):
@@ -30,9 +31,11 @@ async def test_login_redirect_rejected(session: ClientSession):
 
 
 async def test_unauthorized():
-    async with ClientSession(base_url=BASE_URL) as anon:
-        async with anon.get("/users/me") as response:
-            assert response.status == status.HTTP_401_UNAUTHORIZED
+    async with (
+        ClientSession(base_url=BASE_URL) as anon,
+        anon.get("/users/me") as response,
+    ):
+        assert response.status == status.HTTP_401_UNAUTHORIZED
 
 
 async def test_authorized(session: ClientSession):

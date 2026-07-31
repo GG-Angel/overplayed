@@ -1,9 +1,11 @@
 import asyncio
-from typing import List, Callable, AsyncGenerator, AsyncIterator
+from collections.abc import AsyncGenerator, AsyncIterator, Callable
+
 from loguru import logger
 from spotipy import Spotify
-from services.spotify.utils import spotify_fields
+
 from services.spotify.models import CurrentUser, Playlist, Track
+from services.spotify.utils import spotify_fields
 
 
 class SpotifyClient:
@@ -39,7 +41,7 @@ class SpotifyClient:
         self._log(f"Got playlist {playlist_id}")
         return Playlist(**playlist)
 
-    async def get_user_playlists(self) -> List[Playlist]:
+    async def get_user_playlists(self) -> list[Playlist]:
         """Gets all playlists saved by a user."""
         self._log("Getting user playlists")
         playlists = []
@@ -75,7 +77,7 @@ class SpotifyClient:
                 seen.add(track.id)
                 yield track
 
-    async def remove_playlist_tracks(self, playlist_id: str, uris: List[str]) -> None:
+    async def remove_playlist_tracks(self, playlist_id: str, uris: list[str]) -> None:
         """Removes all occurrences of tracks from a playlist."""
         for offset in range(0, len(uris), self.playlist_tracks_limit):
             self._log(f"Removing tracks from playlist {playlist_id} (offset={offset})")
@@ -86,7 +88,7 @@ class SpotifyClient:
             )
         self._log(f"Removed {len(uris)} tracks from playlist {playlist_id}")
 
-    async def remove_saved_tracks(self, uris: List[str]) -> None:
+    async def remove_saved_tracks(self, uris: list[str]) -> None:
         """Removes all occurrences of tracks from a playlist."""
         for offset in range(0, len(uris), self.edit_saved_tracks_limit):
             self._log(f"Removing saved tracks (offset={offset})")
@@ -96,7 +98,7 @@ class SpotifyClient:
             )
         self._log(f"Removed {len(uris)} saved tracks")
 
-    async def add_playlist_tracks(self, playlist_id: str, uris: List[str]) -> None:
+    async def add_playlist_tracks(self, playlist_id: str, uris: list[str]) -> None:
         """Appends items to an existing playlist."""
         for offset in range(0, len(uris), self.playlist_tracks_limit):
             self._log(f"Adding items to playlist {playlist_id} (offset={offset})")

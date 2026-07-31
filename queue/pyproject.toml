@@ -24,6 +24,16 @@ dev = [
     "ruff>=0.16.0",
 ]
 
+[tool.ruff.lint]
+# BLE001: broad `except Exception` is deliberate here — it keeps the worker loop
+# alive and isolates per-user failures so one bad user cannot abort a batch.
+ignore = ["BLE001"]
+
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI's DI marker is resolved per-request by the framework, not evaluated
+# once at import time, so it is not a real mutable-default hazard.
+extend-immutable-calls = ["fastapi.Depends"]
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 pythonpath = ["app"]
