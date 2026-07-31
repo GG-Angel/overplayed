@@ -27,7 +27,7 @@ const SwipeCardStack = ({
           const isTopCard = i === 0;
           return (
             <SwipeCard
-              className="col-start-1 row-start-1 w-64 sm:w-72 lg:w-84 pt-8"
+              className="col-start-1 row-start-1 w-64 sm:w-72 lg:w-84"
               ref={isTopCard ? topCardRef : undefined}
               key={track.uri}
               track={track}
