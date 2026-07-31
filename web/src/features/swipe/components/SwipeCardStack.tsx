@@ -22,12 +22,12 @@ const SwipeCardStack = ({
 }: SwipeCardStackProps) => {
   return (
     <AnimatePresence>
-      <div className="grid place-items-center touch-none">
+      <div className="grid place-items-end touch-none min-h-88 sm:min-h-98 lg:min-h-112">
         {tracks.map((track, i) => {
           const isTopCard = i === 0;
           return (
             <SwipeCard
-              className="col-start-1 row-start-1 w-64 sm:w-72 lg:w-84"
+              className="col-start-1 row-start-1 w-64 sm:w-72 lg:w-84 pt-8"
               ref={isTopCard ? topCardRef : undefined}
               key={track.uri}
               track={track}
