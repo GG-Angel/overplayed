@@ -162,12 +162,12 @@ const SwipeReviewPage = () => {
           </Card>
         )}
       </div>
-      <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:flex sm:self-end">
-        <Button icon={<Undo2 className="size-4" />} variant="secondary" onClick={navigateToSwipe}>
-          Keep Swiping
-        </Button>
+      <div className="flex flex-col *:flex-1 sm:*:flex-none xs:flex-row-reverse sm:justify-start gap-3">
         <Button icon={<Trash2 className="size-4" />} variant="primary" onClick={navigateToSubmit}>
           Delete Tracks
+        </Button>
+        <Button icon={<Undo2 className="size-4" />} variant="secondary" onClick={navigateToSwipe}>
+          Keep Swiping
         </Button>
       </div>
     </main>
