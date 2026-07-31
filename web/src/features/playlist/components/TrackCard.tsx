@@ -1,4 +1,5 @@
 import Card, { type CardProps } from "@/components/ui/Card";
+import Image from "@/components/ui/Image";
 import type { Track } from "@/lib/types";
 import { cn, extractImageUrl } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
@@ -38,10 +39,10 @@ const TrackCard = ({ track, orientation, className, ...props }: TrackCardProps) 
 
   return (
     <Card className={cn(cardVariants({ orientation }), className)} {...props}>
-      <img
+      <Image
         src={coverUrl}
         className={imageVariants({ orientation })}
-        alt={`${track.name} by ${artistList} - Album Cover for ${track.album.name}`}
+        alt={track.name}
         draggable={false}
       />
       <div className="text-left whitespace-nowrap truncate">

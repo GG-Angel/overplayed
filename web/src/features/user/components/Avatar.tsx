@@ -1,3 +1,4 @@
+import Image from "@/components/ui/Image";
 import type { CurrentUser } from "@/lib/types";
 import { cn, extractImageUrl } from "@/lib/utils";
 import { type ComponentProps } from "react";
@@ -16,10 +17,10 @@ const Avatar = ({ user, className, ...props }: AvatarProps) => {
       )}
       {...props}
     >
-      <img
+      <Image
         src={profilePictureUrl}
-        className="size-full object-cover"
-        alt={`${user.display_name}'s profile picture`}
+        className="size-full object-cover aspect-square"
+        alt="Profile picture"
       />
     </button>
   );

@@ -1,5 +1,6 @@
 import { ArrowUpRight } from "lucide-react";
 import { extractPlaylistCoverUrl, type PlaylistDisplayProps } from "./utils";
+import Image from "@/components/ui/Image";
 
 const PlaylistCard = ({ playlist, onClick }: PlaylistDisplayProps) => {
   const coverUrl = extractPlaylistCoverUrl(playlist);
@@ -7,24 +8,23 @@ const PlaylistCard = ({ playlist, onClick }: PlaylistDisplayProps) => {
     <button
       onClick={() => onClick?.(playlist.id)}
       disabled={playlist.tracks.total <= 0}
-      className="group relative flex snap-start shrink-0 h-32 w-full gap-4 overflow-hidden rounded-xl border-2 border-card-border bg-card px-4 py-3 text-left not-disabled:cursor-pointer disabled:opacity-50"
+      className="group relative flex snap-start h-32 w-full gap-4 overflow-hidden rounded-xl border-2 border-card-border bg-card px-4 py-3 text-left not-disabled:cursor-pointer disabled:opacity-50"
     >
       {/* Blurred backdrop */}
-      <img
+      <Image
         src={coverUrl}
-        aria-hidden="true"
+        alt=""
         draggable={false}
-        loading="lazy"
         className="absolute inset-0 size-full object-cover opacity-15 blur-lg"
       />
       <div className="absolute inset-0 bg-linear-to-t from-black/60 to-black/20 group-hover:to-black/40 transition-colors" />
 
       {/* Cover */}
-      <img
+      <Image
         src={coverUrl}
-        alt={`${playlist.name} cover`}
+        alt={playlist.name}
         loading="lazy"
-        className="z-10 aspect-square h-full shrink-0 rounded-sm object-cover transition-transform"
+        className="z-10 aspect-square h-full rounded-sm object-cover transition-transform"
       />
 
       {/* Text + icon */}
