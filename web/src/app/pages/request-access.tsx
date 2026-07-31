@@ -167,21 +167,34 @@ const RequestAccessPage = () => {
       <Divider />
 
       <form className="flex flex-col gap-6" onSubmit={handleSubmitRequest}>
-        <div className="flex justify-between gap-3">
-          <Input
-            className="flex-1"
-            type="email"
-            label="Spotify account email"
-            placeholder="user@example.com"
-            value={form.email}
-            error={errors.email}
-            disabled={submitMutation.isPending}
-            onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
-            onBlur={validateForm}
-          />
+        <div className="flex flex-col xs:justify-between xs:flex-row gap-6 xs:gap-3">
+          <div className="flex flex-col flex-1 gap-1.5">
+            <Input
+              type="email"
+              label="Spotify account email"
+              placeholder="user@example.com"
+              value={form.email}
+              error={errors.email}
+              disabled={submitMutation.isPending}
+              onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
+              onBlur={validateForm}
+            />
+            <span className="text-sm text-muted">
+              You can find your email{" "}
+              <a
+                href="https://www.spotify.com/account/profile/"
+                className="underline"
+                target="_blank"
+                rel="noopener noreferrer"
+                draggable={false}
+              >
+                here.
+              </a>
+            </span>
+          </div>
           <Button
-            className="h-11 mt-7"
-            icon={<Send className="size-4" />}
+            className="h-11 xs:mt-7"
+            icon={<Send className="size-4 shrink-0" />}
             type="submit"
             size="lg"
             disabled={submitMutation.isPending || !turnstileToken || !form.email}
