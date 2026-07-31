@@ -1,5 +1,5 @@
+from datetime import UTC, datetime
 from urllib.parse import parse_qs, urlparse
-from datetime import datetime, timezone
 
 
 def parse_expiration_timestamp(url: str) -> int:
@@ -11,5 +11,5 @@ def parse_expiration_timestamp(url: str) -> int:
 
 def parse_expires_in(url: str) -> int:
     exp_timestamp = parse_expiration_timestamp(url)
-    expires_at = datetime.fromtimestamp(exp_timestamp, tz=timezone.utc)
-    return int((expires_at - datetime.now(timezone.utc)).total_seconds())
+    expires_at = datetime.fromtimestamp(exp_timestamp, tz=UTC)
+    return int((expires_at - datetime.now(UTC)).total_seconds())

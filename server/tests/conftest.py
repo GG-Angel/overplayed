@@ -7,8 +7,9 @@ API Integration Tests :3
 """
 
 import os
-from aiohttp import ClientSession, ClientTimeout
+
 import pytest
+from aiohttp import ClientSession, ClientTimeout
 
 BASE_URL = "http://127.0.0.1:8080"
 TEST_PLAYLIST_NAME = "Overplayed Testing"

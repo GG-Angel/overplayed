@@ -1,5 +1,6 @@
-from fastapi import Request
 from dataclasses import dataclass
+
+from fastapi import Request
 from services.queue import QueueService, QueueWorker
 from services.turnstile import TurnstileVerifier
 from settings import APP_STATE_KEY

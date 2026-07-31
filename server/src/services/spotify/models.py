@@ -1,4 +1,3 @@
-from typing import Optional, List
 from pydantic import BaseModel
 
 LIKED_SONGS_ID = "liked-songs"
@@ -31,19 +30,19 @@ class Resource(BaseModel):
 
 
 class Image(BaseModel):
-    width: Optional[int]
-    height: Optional[int]
+    width: int | None
+    height: int | None
     url: str
 
 
 class User(Resource):
-    display_name: Optional[str]
+    display_name: str | None
     external_urls: ExternalUrls
 
 
 class CurrentUser(User):
     email: str
-    images: List[Image]
+    images: list[Image]
 
 
 class Playlist(Resource):
@@ -51,8 +50,8 @@ class Playlist(Resource):
         total: int
 
     collaborative: bool
-    description: Optional[str]
-    images: Optional[List[Image]]
+    description: str | None
+    images: list[Image] | None
     name: str
     owner: User
     public: bool
@@ -68,10 +67,10 @@ class Artist(Resource):
 
 class Album(Resource):
     album_type: str
-    images: List[Image]
+    images: list[Image]
     name: str
     release_date: str
-    artists: List[Artist]
+    artists: list[Artist]
     total_tracks: int
     external_urls: ExternalUrls
 
@@ -82,7 +81,7 @@ class Track(Resource):
 
     explicit: bool
     album: Album
-    artists: List[Artist]
+    artists: list[Artist]
     duration_ms: int
     name: str
     is_local: bool
@@ -93,4 +92,4 @@ class Track(Resource):
 class PlaylistPage(BaseModel):
     has_more: bool
     next_offset: int | None
-    tracks: List[Track]
+    tracks: list[Track]

@@ -1,5 +1,6 @@
-from settings import settings
 from spotipy import SpotifyOAuth
+
+from settings import settings
 
 
 def build_spotify_oauth() -> SpotifyOAuth:

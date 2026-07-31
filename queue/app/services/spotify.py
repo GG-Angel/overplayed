@@ -1,10 +1,10 @@
-from loguru import logger
-from cryptography.fernet import Fernet
-from redis.asyncio import Redis
-from pydantic import BaseModel
 from aiohttp import ClientSession
-from errors import SpotifyValidationError, SpotifyTokenError, SpotifyUserManagementError
+from cryptography.fernet import Fernet
+from errors import SpotifyTokenError, SpotifyUserManagementError, SpotifyValidationError
+from loguru import logger
 from models import ActiveUser, NewUser
+from pydantic import BaseModel
+from redis.asyncio import Redis
 
 
 class SpotifyUserValidator:
