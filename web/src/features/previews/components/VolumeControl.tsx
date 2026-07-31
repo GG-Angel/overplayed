@@ -1,4 +1,5 @@
 import { Volume2, VolumeOff } from "lucide-react";
+import { cn } from "@/lib/utils";
 import Card from "@/components/ui/Card";
 import IconButton from "@/components/ui/IconButton";
 
@@ -6,9 +7,15 @@ type VolumeControlProps = {
   volume: number;
   onVolumeChange: (volume: number) => void;
   onMuteToggle: () => void;
+  muteCount: number;
 };
 
-const VolumeControl = ({ volume, onVolumeChange, onMuteToggle }: VolumeControlProps) => {
+const VolumeControl = ({
+  volume,
+  onVolumeChange,
+  onMuteToggle,
+  muteCount,
+}: VolumeControlProps) => {
   const VolumeIcon = volume === 0 ? VolumeOff : Volume2;
 
   return (
@@ -27,11 +34,12 @@ const VolumeControl = ({ volume, onVolumeChange, onMuteToggle }: VolumeControlPr
       </Card>
       <div className="absolute size-16 bottom-0" />
       <IconButton
+        key={`volume-button-${muteCount}`}
         icon={VolumeIcon}
         size="xs"
         variant="neutral"
         onClick={onMuteToggle}
-        className="z-10"
+        className={cn("z-10", muteCount > 0 && "animate-flash")}
       />
     </div>
   );

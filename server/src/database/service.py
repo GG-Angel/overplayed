@@ -1,13 +1,14 @@
 from dataclasses import dataclass
-from datetime import datetime, timezone, timedelta
-from typing import List
-from core.database import get_db
-from sqlalchemy import func, select, distinct
-from database.schemas import SwipeSession, User
-from sqlalchemy.exc import IntegrityError
-from loguru import logger
+from datetime import UTC, datetime, timedelta
+
 from fastapi import Depends
+from loguru import logger
+from sqlalchemy import distinct, func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from core.database import get_db
+from database.schemas import SwipeSession, User
 
 
 @dataclass
@@ -83,13 +84,13 @@ class DatabaseService:
 
     async def get_swipe_leaderboard(
         self, offset: int = 0, limit: int = 10, since: timedelta = timedelta(days=30)
-    ) -> List[LeaderboardEntry]:
+    ) -> list[LeaderboardEntry]:
         total_swipes = func.coalesce(func.sum(SwipeSession.tracks_swiped), 0)
         total_cuts = func.coalesce(func.sum(SwipeSession.tracks_cut), 0)
         result = await self.db.execute(
             select(User, total_swipes, total_cuts)
             .join(SwipeSession, User.id == SwipeSession.user_id)
-            .where(SwipeSession.created_at >= datetime.now(timezone.utc) - since)
+            .where(SwipeSession.created_at >= datetime.now(UTC) - since)
             .group_by(User.id)
             .order_by(total_cuts.desc())
             .offset(offset)

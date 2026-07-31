@@ -1,6 +1,7 @@
-from pydantic.alias_generators import to_camel
-from pydantic import BaseModel, ConfigDict
 from datetime import datetime
+
+from pydantic import BaseModel, ConfigDict
+from pydantic.alias_generators import to_camel
 
 
 class NewUser(BaseModel):

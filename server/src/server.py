@@ -1,17 +1,19 @@
-from core.oauth import build_spotify_oauth
-import uvicorn
 from contextlib import asynccontextmanager
+
+import uvicorn
 from aiohttp import ClientSession
+from fastapi import FastAPI, Response, status
+from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI, Response, status
-from core.limiter import limiter
-from settings import Settings, APP_STATE_KEY
+
 from core.database import build_engine, build_sessionmaker
+from core.limiter import limiter
+from core.oauth import build_spotify_oauth
 from core.redis import build_redis_pool
+from routes import auth, metrics, playlists, previews, users
+from settings import APP_STATE_KEY, Settings
 from state import State
-from routes import auth, users, playlists, previews, metrics
 
 
 def build_app(settings: Settings) -> FastAPI:

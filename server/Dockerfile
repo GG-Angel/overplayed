@@ -1,4 +1,4 @@
-FROM python:3.13-slim
+FROM python:3.14-slim
 
 # Install uv
 COPY --from=ghcr.io/astral-sh/uv:0.12.0 /uv /uvx /bin/
@@ -6,7 +6,7 @@ COPY --from=ghcr.io/astral-sh/uv:0.12.0 /uv /uvx /bin/
 WORKDIR /app
 
 COPY pyproject.toml uv.lock ./
-RUN uv sync --locked --no-cache
+RUN uv sync --locked --no-cache --no-dev
 
 COPY . .
 

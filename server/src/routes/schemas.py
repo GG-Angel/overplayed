@@ -1,5 +1,5 @@
-from typing import List, Optional
 from pydantic import BaseModel, ConfigDict
+
 from database.service import (
     GlobalSwipeAggregates,
     LeaderboardEntry,
@@ -21,21 +21,21 @@ class ExternalUrlsResponse(_Schema):
 
 
 class ImageResponse(_Schema):
-    width: Optional[int]
-    height: Optional[int]
+    width: int | None
+    height: int | None
     url: str
 
 
 class UserResponse(_Schema):
     id: str
     uri: str
-    display_name: Optional[str]
+    display_name: str | None
     external_urls: ExternalUrlsResponse
 
 
 class CurrentUserResponse(UserResponse):
     email: str
-    images: List[ImageResponse]
+    images: list[ImageResponse]
 
 
 class ArtistResponse(_Schema):
@@ -49,10 +49,10 @@ class AlbumResponse(_Schema):
     id: str
     uri: str
     album_type: str
-    images: List[ImageResponse]
+    images: list[ImageResponse]
     name: str
     release_date: str
-    artists: List[ArtistResponse]
+    artists: list[ArtistResponse]
     total_tracks: int
     external_urls: ExternalUrlsResponse
 
@@ -65,7 +65,7 @@ class TrackResponse(_Schema):
     uri: str
     explicit: bool
     album: AlbumResponse
-    artists: List[ArtistResponse]
+    artists: list[ArtistResponse]
     duration_ms: int
     name: str
     is_local: bool
@@ -80,8 +80,8 @@ class PlaylistResponse(_Schema):
     id: str
     uri: str
     collaborative: bool
-    description: Optional[str]
-    images: Optional[List[ImageResponse]]
+    description: str | None
+    images: list[ImageResponse] | None
     name: str
     owner: UserResponse
     public: bool
@@ -93,7 +93,7 @@ class PlaylistResponse(_Schema):
 class PlaylistPageResponse(_Schema):
     has_more: bool
     next_offset: int | None
-    tracks: List[TrackResponse]
+    tracks: list[TrackResponse]
 
 
 class SwipesResponse(_Schema):

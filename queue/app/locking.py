@@ -1,8 +1,10 @@
 from types import TracebackType
+from typing import Self
+
+from errors import QueueLockError
 from loguru import logger
 from redis.asyncio import Redis
 from redis.exceptions import LockError
-from errors import QueueLockError
 
 
 class DistributedLock:
@@ -23,7 +25,7 @@ class DistributedLock:
             blocking_timeout=blocking_timeout,
         )
 
-    async def __aenter__(self) -> "DistributedLock":
+    async def __aenter__(self) -> Self:
         acquired = await self._lock.acquire()
         if not acquired:
             raise QueueLockError(

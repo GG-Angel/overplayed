@@ -1,10 +1,11 @@
-from core.redis import get_redis
+from typing import TypeVar
+
 from fastapi import Depends
-from pydantic import BaseModel
 from loguru import logger
-from typing import Optional, TypeVar
+from pydantic import BaseModel
 from redis.asyncio import Redis
 
+from core.redis import get_redis
 
 M = TypeVar("M", bound=BaseModel)
 
@@ -13,7 +14,7 @@ class RedisClient:
     def __init__(self, redis: Redis):
         self.redis = redis
 
-    async def get(self, key: str) -> Optional[str]:
+    async def get(self, key: str) -> str | None:
         data = await self.redis.get(key)
         if data is None:
             logger.debug(f"MISS: {key}")
@@ -25,7 +26,7 @@ class RedisClient:
         await self.redis.set(key, value, ex=ttl)
         logger.debug(f"CACHED: {key} (ttl={ttl}s)")
 
-    async def hget(self, key: str, field: str) -> Optional[str]:
+    async def hget(self, key: str, field: str) -> str | None:
         data = await self.redis.hget(key, field)  # ty:ignore[invalid-await]
         if data is None:
             logger.debug(f"MISS: {key} (field={field})")
@@ -33,7 +34,7 @@ class RedisClient:
         logger.debug(f"HIT: {key} (field={field})")
         return data
 
-    async def hgetall(self, key: str) -> Optional[dict[str, str]]:
+    async def hgetall(self, key: str) -> dict[str, str] | None:
         async with self.redis.pipeline() as pipe:
             pipe.exists(key)
             pipe.hgetall(key)

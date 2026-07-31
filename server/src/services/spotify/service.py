@@ -1,17 +1,17 @@
 import asyncio
-from services.spotify.utils import build_liked_songs_playlist
-from asyncio import Task, Future, Lock
+from asyncio import Future, Lock, Task
+
 from core.exceptions import NotFoundException, NotReadyException
-from typing import List
-from services.spotify.client import SpotifyClient
 from services.spotify.cache import SpotifyCache
+from services.spotify.client import SpotifyClient
 from services.spotify.models import (
+    LIKED_SONGS_ID,
     CurrentUser,
     Playlist,
     PlaylistPage,
-    LIKED_SONGS_ID,
     Track,
 )
+from services.spotify.utils import build_liked_songs_playlist
 
 
 class SpotifyService:
@@ -37,7 +37,7 @@ class SpotifyService:
         await self.cache.set_user(user)
         return user
 
-    async def get_user_playlists(self) -> List[Playlist]:
+    async def get_user_playlists(self) -> list[Playlist]:
         if cached := await self.cache.get_playlists(self.user_id):
             return cached
 
@@ -85,7 +85,7 @@ class SpotifyService:
         await lock.acquire()
 
         try:
-            page: List[Track] = []
+            page: list[Track] = []
             page_ready: Future[None] = asyncio.Future()
             task = asyncio.create_task(
                 self._fetch_and_cache_playlist_tracks(
@@ -104,7 +104,7 @@ class SpotifyService:
         playlist: Playlist,
         offset: int,
         limit: int,
-        page: List[Track],
+        page: list[Track],
         page_ready: Future[None],
     ) -> None:
         if playlist.id == LIKED_SONGS_ID:
@@ -113,7 +113,7 @@ class SpotifyService:
             tracks = self.spotify.get_playlist_tracks(playlist.id)
 
         try:
-            batch: List[Track] = []
+            batch: list[Track] = []
             current_offset = 0
             async for track in tracks:
                 batch.append(track)
@@ -147,11 +147,11 @@ class SpotifyService:
         await self._invalidate_playlists()
         return new_playlist
 
-    async def add_playlist_tracks(self, playlist_id: str, uris: List[str]) -> None:
+    async def add_playlist_tracks(self, playlist_id: str, uris: list[str]) -> None:
         await self.spotify.add_playlist_tracks(playlist_id, uris)
         await self._invalidate_playlists()
 
-    async def remove_playlist_tracks(self, playlist_id: str, uris: List[str]) -> None:
+    async def remove_playlist_tracks(self, playlist_id: str, uris: list[str]) -> None:
         if playlist_id == LIKED_SONGS_ID:
             await self.spotify.remove_saved_tracks(uris)
         else:
@@ -165,7 +165,7 @@ class SpotifyService:
         return playlist.owner.id == self.user_id or playlist.collaborative
 
     def _build_playlist_page(
-        self, tracks: List[Track], offset: int, limit: int
+        self, tracks: list[Track], offset: int, limit: int
     ) -> PlaylistPage:
         has_more = len(tracks) == limit
         return PlaylistPage(
