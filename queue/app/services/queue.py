@@ -1,14 +1,15 @@
 import asyncio
 import heapq
+from datetime import UTC, datetime, timedelta
 from typing import Literal
-from pydantic import BaseModel
-from datetime import timedelta, datetime, timezone
-from loguru import logger
-from redis.asyncio import Redis
-from models import NewUser, ActiveUser, QueuedUser
-from services.spotify import SpotifyUserManager, SpotifyUserValidator
-from locking import DistributedLock
+
 from errors import SpotifyValidationError
+from locking import DistributedLock
+from loguru import logger
+from models import ActiveUser, NewUser, QueuedUser
+from pydantic import BaseModel
+from redis.asyncio import Redis
+from services.spotify import SpotifyUserManager, SpotifyUserValidator
 
 
 class QueueRepository:
@@ -44,7 +45,7 @@ class QueueRepository:
         entry = QueuedUser(
             email=email,
             retries=0,
-            created_at=datetime.now(timezone.utc),
+            created_at=datetime.now(UTC),
         )
         position = await self._redis.rpush(self._queue_key, entry.model_dump_json())
         logger.debug(f"Queued user: {email} (position: {position})")
@@ -181,7 +182,7 @@ class QueueService:
     async def _estimate_start_time(self, queue_position: int) -> datetime:
         """Estimate the start time for a user based on their position in the queue."""
         active_users = await self._user_manager.get_users()
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
 
         heap = [u.created_at + self._access_duration for u in active_users]
         heap += [now] * max(0, self._user_limit - len(active_users))
@@ -240,7 +241,7 @@ class QueueService:
     async def _prune_expired_users(self) -> UserEvictionResult:
         """Deactivate users whose access duration has expired from the Spotify app."""
         active_users = await self._user_manager.get_users()
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         result = self.UserEvictionResult()
 
         for user in active_users:

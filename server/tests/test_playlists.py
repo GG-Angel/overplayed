@@ -1,7 +1,8 @@
 import pytest
-from fastapi import status
 from aiohttp import ClientSession
-from tests.conftest import BASE_URL, TEST_PLAYLIST_NAME, TEST_PLAYLIST_MIN_TRACKS
+from fastapi import status
+
+from tests.conftest import BASE_URL, TEST_PLAYLIST_MIN_TRACKS, TEST_PLAYLIST_NAME
 
 LIKED_SONGS_ID = "liked-songs"
 FAKE_URI = "spotify:track:4iV5W9uYEdYUVa79Axb7Rh"
@@ -191,13 +192,15 @@ async def test_submit_swipes_exceeds_playlist_total(
 
 
 async def test_submit_swipes_unauthorized(first_playlist_id: str):
-    async with ClientSession(base_url=BASE_URL) as anon:
-        async with anon.post(
+    async with (
+        ClientSession(base_url=BASE_URL) as anon,
+        anon.post(
             f"/playlists/{first_playlist_id}/swipes",
             json={
                 "options": {"backup_enabled": False},
                 "uris": [FAKE_URI],
                 "tracks_swiped": 1,
             },
-        ) as response:
-            assert response.status == status.HTTP_401_UNAUTHORIZED
+        ) as response,
+    ):
+        assert response.status == status.HTTP_401_UNAUTHORIZED
