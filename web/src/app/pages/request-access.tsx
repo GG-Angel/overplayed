@@ -183,7 +183,7 @@ const RequestAccessPage = () => {
               You can find your email{" "}
               <a
                 href="https://www.spotify.com/account/profile/"
-                className="underline"
+                className="underline hover:text-white"
                 target="_blank"
                 rel="noopener noreferrer"
                 draggable={false}
