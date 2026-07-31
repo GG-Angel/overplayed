@@ -1,5 +1,7 @@
-from typing import List, Annotated
+from typing import Annotated
+
 from pydantic import BaseModel, Field, PositiveInt
+
 from services.spotify.models import TrackUriRegex
 
 
@@ -10,5 +12,5 @@ class SwipesFormOptions(BaseModel):
 
 class SwipesForm(BaseModel):
     options: SwipesFormOptions
-    uris: List[Annotated[str, Field(pattern=TrackUriRegex)]] = Field(min_length=1)
+    uris: list[Annotated[str, Field(pattern=TrackUriRegex)]] = Field(min_length=1)
     tracks_swiped: PositiveInt

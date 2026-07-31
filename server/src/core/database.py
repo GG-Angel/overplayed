@@ -1,14 +1,16 @@
-from settings import Settings
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
+
 from fastapi import Depends
-from sqlalchemy.orm import declarative_base
-from state import get_state, State
 from sqlalchemy.ext.asyncio import (
-    create_async_engine,
     AsyncEngine,
     AsyncSession,
     async_sessionmaker,
+    create_async_engine,
 )
+from sqlalchemy.orm import declarative_base
+
+from settings import Settings
+from state import State, get_state
 
 Base = declarative_base()
 

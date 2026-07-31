@@ -1,9 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Request
-from services.queue import QueueService
-from services.turnstile import TurnstileVerifier
-from state import get_queue_service, get_turnstile_verifier
 from core.limiter import limiter
-from errors import QueueLockError, SpotifyValidationError
 from dtos import (
     QueueOverviewResponse,
     QueueSignUpForm,
@@ -11,7 +6,11 @@ from dtos import (
     UserInQueueResponse,
     UserNotInQueueResponse,
 )
-
+from errors import QueueLockError, SpotifyValidationError
+from fastapi import APIRouter, Depends, HTTPException, Request
+from services.queue import QueueService
+from services.turnstile import TurnstileVerifier
+from state import get_queue_service, get_turnstile_verifier
 
 router = APIRouter()
 

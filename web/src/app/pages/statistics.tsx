@@ -1,5 +1,6 @@
 import LoadingState from "@/components/states/LoadingState";
 import Card from "@/components/ui/Card";
+import Image from "@/components/ui/Image";
 import Metric from "@/components/ui/Metric";
 import { useUserSwipeMetrics } from "@/features/metrics/api/get-swipe-metrics";
 import useAuth from "@/features/user/auth/useAuth";
@@ -17,9 +18,10 @@ const StatisticsPage = () => {
     <main className="flex flex-col gap-6 py-2 w-full max-w-4xl self-center">
       <h1 className="text-center">Your Statistics</h1>
       <Card tone="muted" className="flex flex-col xs:flex-row xs:items-center gap-3">
-        <img
-          src={extractImageUrl(user?.images ?? [], "lg")}
-          className="shrink-0 aspect-square object-cover rounded-full size-16"
+        <Image
+          src={extractImageUrl(user.images, "lg")}
+          className="aspect-square object-cover rounded-full size-16"
+          alt="Profile picture"
         />
         <div className="truncate *:truncate">
           <h2>{user.display_name ?? "Unknown"}</h2>

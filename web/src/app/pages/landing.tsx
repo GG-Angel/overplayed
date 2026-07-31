@@ -16,6 +16,7 @@ import { LIKED_SONGS_ID, trackSchema } from "@/lib/types";
 import { useUserPlaylists } from "@/features/playlist/api/get-playlists";
 import { useSwipeLeaderboard } from "@/features/metrics/api/get-swipe-leaderboad";
 import { Key, Scissors } from "lucide-react";
+import Image from "@/components/ui/Image";
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -152,10 +153,10 @@ const LandingPage = () => {
           {leaderboard.length > 0 ? (
             <>
               <p className="text-xs text-center text-muted">Based on tracks cut, last 30 days</p>
-              <table className="text-sm w-full border-separate border-spacing-x-0 border-spacing-y-1.5">
+              <table className="text-xs xs:text-sm w-full border-separate border-spacing-x-0 border-spacing-y-1.5">
                 <thead>
                   <tr className="[&_th]:py-1 [&_th]:px-4">
-                    <th className="text-left">No.</th>
+                    <th className="text-left">Rank</th>
                     <th className="text-left">User</th>
                     <th className="text-center">Swipes</th>
                     <th className="hidden xs:table-cell text-center">Cuts</th>
@@ -174,9 +175,10 @@ const LandingPage = () => {
                       </td>
                       <td className="max-w-0 w-full">
                         <div className="flex items-center gap-2.5">
-                          <img
+                          <Image
                             src={fallbackImageUrl(user.picture_url)}
-                            className="hidden xs:block size-8 aspect-square object-cover rounded-full"
+                            className="size-8 aspect-square object-cover rounded-full"
+                            alt={user.display_name ?? "Unknown user"}
                           />
                           <span className="font-medium hover:underline truncate min-w-0">
                             {user.display_name ?? "Unknown"}
@@ -216,23 +218,27 @@ const LandingPage = () => {
       {playlists &&
         metrics &&
         (() => {
-          const mostTracksPlaylist = playlists
-            .filter((p) => p.id !== LIKED_SONGS_ID)
-            .reduce((prev, curr) => (curr.tracks.total > prev.tracks.total ? curr : prev));
-          const estimatedSkips = Math.round(mostTracksPlaylist.tracks.total * metrics.cut_rate);
+          const filteredPlaylists = playlists.filter((p) => p.id !== LIKED_SONGS_ID);
+          if (filteredPlaylists.length === 0) return null;
+
+          const largestPlaylist = filteredPlaylists.reduce(
+            (prev, curr) => (curr.tracks.total > prev.tracks.total ? curr : prev),
+            playlists[0]
+          );
+
           return (
             <>
               <Divider />
               <p className="text-muted text-center wrap-break-word">
                 Your playlist{" "}
                 <Link
-                  to={`/playlists/${mostTracksPlaylist.id}/swipe`}
+                  to={`/playlists/${largestPlaylist.id}/swipe`}
                   className="text-accent underline"
                 >
-                  {mostTracksPlaylist.name}
+                  {largestPlaylist.name}
                 </Link>{" "}
-                has {formatCount(mostTracksPlaylist.tracks.total)} tracks. You could cut about{" "}
-                {formatCount(estimatedSkips)}.
+                has {formatCount(largestPlaylist.tracks.total)} tracks. You could cut about{" "}
+                {formatCount(Math.round(largestPlaylist.tracks.total * metrics.cut_rate))}.
               </p>
             </>
           );
