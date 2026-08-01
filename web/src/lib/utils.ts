@@ -93,3 +93,11 @@ export function saveToStorage<T>(storage: Storage, key: string, value: T): void 
     console.error(`Failed to save to localStorage for key "${key}": ${value}`);
   }
 }
+
+export function removeFromStorage(storage: Storage, key: string): void {
+  try {
+    storage.removeItem(key);
+  } catch {
+    console.error(`Failed to remove from localStorage for key "${key}"`);
+  }
+}
