@@ -11,12 +11,12 @@ import { kaomojis } from "@/lib/kaomoji";
 import { formatCount, formatDateTime } from "@/lib/utils";
 import { Info, Key, Plus, Send, ThumbsUp, User } from "lucide-react";
 import { useRef, useState, type SubmitEventHandler } from "react";
-import useLocalStorage, { localStorageConfig } from "@/hooks/useLocalStorage";
 import {
   accessRequestFormSchema,
   type QueueAccessRequest,
   type QueueUserStatus,
 } from "@/lib/types";
+import useLocalStorage, { storageKeys } from "@/hooks/useLocalStorage";
 
 const ErrorMessage = ({ message }: { message: string }) => (
   <Card tone="negative" padding="lg" radius="lg" className="flex flex-col gap-2 py-4">
@@ -63,10 +63,9 @@ const RequestAccessPage = () => {
     return urlParams.has("error");
   });
 
-  const [form, setForm] = useLocalStorage<QueueAccessRequest>(
-    localStorageConfig.accessForm.key,
-    localStorageConfig.accessForm.default
-  );
+  const [form, setForm] = useLocalStorage<QueueAccessRequest>(storageKeys.accessForm, {
+    email: "",
+  });
   const [errors, setErrors] = useState<Partial<QueueAccessRequest>>({});
   const [turnstileToken, setTurnstileToken] = useState<string>("");
   const turnstileRef = useRef<TurnstileHandle>(null);
