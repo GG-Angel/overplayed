@@ -12,13 +12,12 @@ import { useSwipeContext } from "@/features/swipe/provider/SwipeContext";
 import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts";
 import { SWIPE_SHORTCUTS } from "@/lib/shortcuts";
 import { Check, Undo } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { saveToStorage } from "@/lib/utils";
+import useDebouncedStorage from "@/hooks/useDebouncedStorage";
 import { storageKeys } from "@/hooks/useLocalStorage";
 
 const MAX_CARD_STACK_HEIGHT = 3; // Maximum number of cards to display in the stack
-const SAVE_SWIPES_INTERVAL = 5; // Save every 5 swipes
 
 const SwipeSongsPage = () => {
   const { session, playlist, shuffle } = useSwipeContext();
@@ -76,15 +75,11 @@ const SwipeSongsPage = () => {
   );
 
   // persist swipes in case the user refreshes or leaves the page
-  useEffect(() => {
-    if (session.swipes.length === 0 || session.swipes.length % SAVE_SWIPES_INTERVAL !== 0) return;
-    saveToStorage(
-      sessionStorage,
-      storageKeys.swipes(playlist.metadata.id, playlist.metadata.snapshot_id),
-      session.swipes
-    );
-    console.log("Saved swipes to session storage.");
-  }, [playlist.metadata.id, playlist.metadata.snapshot_id, session.swipes]);
+  useDebouncedStorage(
+    sessionStorage,
+    storageKeys.swipes(playlist.metadata.id, playlist.metadata.snapshot_id),
+    session.swipes
+  );
 
   if (playlist.tracks.length <= 0) {
     return <ErrorState message="Playlist is Empty" />;
