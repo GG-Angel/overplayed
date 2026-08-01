@@ -224,7 +224,10 @@ const RequestAccessPage = () => {
 
       {/* Info modal */}
       {isInfoModalVisible && (
-        <Modal onClose={() => setIsInfoModalVisible(false)} className="flex flex-col gap-3">
+        <Modal
+          onClose={() => setIsInfoModalVisible(false)}
+          className="flex flex-col gap-3 max-w-2xl"
+        >
           <h2>Why we need your email</h2>
           <p>
             Spotify only lets a few approved accounts use this app at a time. When your turn comes,
@@ -255,7 +258,10 @@ const RequestAccessPage = () => {
 
       {/* Login error modal */}
       {isLoginErrorModalVisible && (
-        <Modal onClose={() => setIsLoginErrorModalVisible(false)} className="flex flex-col gap-3">
+        <Modal
+          onClose={() => setIsLoginErrorModalVisible(false)}
+          className="flex flex-col gap-3 max-w-2xl"
+        >
           <h2>You don't have access yet</h2>
           <p>
             To log in, request access below with your Spotify email. We'll let you in as soon as

@@ -87,7 +87,7 @@ const SwipeProviderInner = ({ playlist }: { playlist: Playlist }) => {
     <SwipeContext.Provider value={contextValue}>
       <Outlet />
       {leaveBlocker.state === "blocked" && (
-        <Modal onClose={() => leaveBlocker.reset()} className="flex flex-col gap-6">
+        <Modal onClose={() => leaveBlocker.reset()} className="flex flex-col gap-6 max-w-2xl">
           <div className="flex flex-col gap-2">
             <h2>Leave without submitting?</h2>
             <p className="text-muted">
