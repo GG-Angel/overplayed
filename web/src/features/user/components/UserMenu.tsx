@@ -11,9 +11,14 @@ import DropdownMenuDivider from "@/components/ui/dropdown/DropdownMenuDivider";
 import DropdownMenuButton from "@/components/ui/dropdown/DropdownMenuButton";
 import { openExternalUrl } from "@/lib/utils";
 import { ChartLine, ExternalLink, LogOut, User } from "lucide-react";
+import useLocalStorage, { localStorageConfig } from "@/hooks/useLocalStorage";
 
 const UserMenu = () => {
   const { user, isLoading, redirectToLogin, logoutMutation } = useAuth();
+  const [hasRequestedAccess] = useLocalStorage<boolean>(
+    localStorageConfig.hasRequestedAccess.key,
+    localStorageConfig.hasRequestedAccess.default
+  );
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -26,12 +31,14 @@ const UserMenu = () => {
     return <Spinner size="sm" />;
   }
 
-  if (!user)
+  if (!user) {
+    if (!hasRequestedAccess) return null;
     return (
       <Button variant="secondary" onClick={() => redirectToLogin(location.pathname)}>
         Log in
       </Button>
     );
+  }
 
   return (
     <Dropdown
