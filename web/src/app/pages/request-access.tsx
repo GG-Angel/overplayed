@@ -11,12 +11,12 @@ import { kaomojis } from "@/lib/kaomoji";
 import { formatCount, formatDateTime } from "@/lib/utils";
 import { Info, Key, Plus, Send, ThumbsUp, User } from "lucide-react";
 import { useRef, useState, type SubmitEventHandler } from "react";
-import useLocalStorage, { localStorageConfig } from "@/hooks/useLocalStorage";
 import {
   accessRequestFormSchema,
   type QueueAccessRequest,
   type QueueUserStatus,
 } from "@/lib/types";
+import useLocalStorage, { storageKeys } from "@/hooks/useLocalStorage";
 
 const ErrorMessage = ({ message }: { message: string }) => (
   <Card tone="negative" padding="lg" radius="lg" className="flex flex-col gap-2 py-4">
@@ -63,10 +63,9 @@ const RequestAccessPage = () => {
     return urlParams.has("error");
   });
 
-  const [form, setForm] = useLocalStorage<QueueAccessRequest>(
-    localStorageConfig.accessForm.key,
-    localStorageConfig.accessForm.default
-  );
+  const [form, setForm] = useLocalStorage<QueueAccessRequest>(storageKeys.accessForm, {
+    email: "",
+  });
   const [errors, setErrors] = useState<Partial<QueueAccessRequest>>({});
   const [turnstileToken, setTurnstileToken] = useState<string>("");
   const turnstileRef = useRef<TurnstileHandle>(null);
@@ -225,7 +224,10 @@ const RequestAccessPage = () => {
 
       {/* Info modal */}
       {isInfoModalVisible && (
-        <Modal onClose={() => setIsInfoModalVisible(false)} className="flex flex-col gap-3">
+        <Modal
+          onClose={() => setIsInfoModalVisible(false)}
+          className="flex flex-col gap-3 max-w-2xl"
+        >
           <h2>Why we need your email</h2>
           <p>
             Spotify only lets a few approved accounts use this app at a time. When your turn comes,
@@ -256,7 +258,10 @@ const RequestAccessPage = () => {
 
       {/* Login error modal */}
       {isLoginErrorModalVisible && (
-        <Modal onClose={() => setIsLoginErrorModalVisible(false)} className="flex flex-col gap-3">
+        <Modal
+          onClose={() => setIsLoginErrorModalVisible(false)}
+          className="flex flex-col gap-3 max-w-2xl"
+        >
           <h2>You don't have access yet</h2>
           <p>
             To log in, request access below with your Spotify email. We'll let you in as soon as

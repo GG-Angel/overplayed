@@ -1,4 +1,3 @@
-import type { QueueAccessRequest } from "@/lib/types";
 import {
   useCallback,
   useMemo,
@@ -7,21 +6,11 @@ import {
   type SetStateAction,
 } from "react";
 
-export const localStorageConfig = {
-  accessForm: {
-    key: "access-request-form",
-    default: {
-      email: "",
-    } satisfies QueueAccessRequest,
-  },
-  hasRequestedAccess: {
-    key: "has-requested-access",
-    default: false,
-  },
-  volume: {
-    key: "volume",
-    default: 0.3,
-  },
+export const storageKeys = {
+  accessForm: "access-request-form",
+  hasRequestedAccess: "has-requested-access",
+  volume: "volume",
+  swipes: (playlistId: string, snapshotId: string) => `swipes-${playlistId}-${snapshotId}`,
 } as const;
 
 type Listener = () => void;

@@ -7,9 +7,9 @@ import WaveformSkeleton from "./WaveformSkeleton";
 import VolumeControl from "./VolumeControl";
 import type { WaveformHandler } from "./Waveform";
 import type { TrackPreview } from "@/lib/types";
-import useLocalStorage, { localStorageConfig } from "@/hooks/useLocalStorage";
 import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts";
 import { PREVIEW_SHORTCUTS } from "@/lib/shortcuts";
+import useLocalStorage, { storageKeys } from "@/hooks/useLocalStorage";
 
 const Waveform = lazy(() => import("./Waveform"));
 
@@ -21,6 +21,8 @@ type PreviewPlayerProps = {
   shortcutsEnabled?: boolean;
 };
 
+const DEFAULT_VOLUME = 0.3;
+
 const AudioPlayer = ({
   preview,
   isLoading,
@@ -30,10 +32,7 @@ const AudioPlayer = ({
 }: PreviewPlayerProps) => {
   const [isReady, setIsReady] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [volume, setVolume] = useLocalStorage<number>(
-    localStorageConfig.volume.key,
-    localStorageConfig.volume.default
-  );
+  const [volume, setVolume] = useLocalStorage<number>(storageKeys.volume, DEFAULT_VOLUME);
   const [muteCount, setMuteCount] = useState(0);
   const waveformRef = useRef<WaveformHandler>(null);
   const showWaveform = isReady && !isLoading && !isError && preview?.url;
@@ -45,7 +44,7 @@ const AudioPlayer = ({
   const handlePause = useCallback(() => setIsPlaying(false), []);
 
   const handleVolumeToggle = useCallback(() => {
-    setVolume((prevVolume) => (prevVolume > 0 ? 0 : 0.25));
+    setVolume((prevVolume) => (prevVolume > 0 ? 0 : DEFAULT_VOLUME));
   }, [setVolume]);
 
   // flash the volume button so the shortcut has visible feedback

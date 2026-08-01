@@ -7,8 +7,8 @@ export type Swipe<T> = {
   decision: SwipeDecision;
 };
 
-const useSwipes = <T>() => {
-  const [swipes, setSwipes] = useState<Swipe<T>[]>([]);
+const useSwipes = <T>(initialSwipes: Swipe<T>[] = []) => {
+  const [swipes, setSwipes] = useState<Swipe<T>[]>(initialSwipes);
 
   const { likes, dislikes } = useMemo(() => {
     const likes: T[] = [];
@@ -23,9 +23,13 @@ const useSwipes = <T>() => {
     setSwipes((prev) => [...prev, swipe]);
   }, []);
 
+  const recordSwipes = useCallback((swipes: Swipe<T>[]) => {
+    setSwipes((prev) => [...prev, ...swipes]);
+  }, []);
+
   const undoSwipe = useCallback(() => setSwipes((prev) => prev.slice(0, -1)), []);
 
-  return { swipes, likes, dislikes, recordSwipe, undoSwipe };
+  return { swipes, likes, dislikes, recordSwipe, recordSwipes, undoSwipe };
 };
 
 export default useSwipes;

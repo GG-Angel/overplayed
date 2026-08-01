@@ -17,7 +17,7 @@ import { useUserPlaylists } from "@/features/playlist/api/get-playlists";
 import { useSwipeLeaderboard } from "@/features/metrics/api/get-swipe-leaderboad";
 import { Key, Scissors } from "lucide-react";
 import Image from "@/components/ui/Image";
-import useLocalStorage, { localStorageConfig } from "@/hooks/useLocalStorage";
+import useLocalStorage, { storageKeys } from "@/hooks/useLocalStorage";
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -27,10 +27,7 @@ const LandingPage = () => {
   const { data: metrics } = useGlobalSwipeMetrics();
   const { data: leaderboard } = useSwipeLeaderboard();
   const { data: playlists } = useUserPlaylists({ enabled: !!auth.user });
-  const [hasRequestedAccess] = useLocalStorage<boolean>(
-    localStorageConfig.hasRequestedAccess.key,
-    localStorageConfig.hasRequestedAccess.default
-  );
+  const [hasRequestedAccess] = useLocalStorage<boolean>(storageKeys.hasRequestedAccess, false);
 
   return (
     <main className="flex flex-col gap-8 w-full max-w-3xl self-center py-8">

@@ -14,8 +14,10 @@ import { SWIPE_SHORTCUTS } from "@/lib/shortcuts";
 import { Check, Undo } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import useDebouncedStorage from "@/hooks/useDebouncedStorage";
+import { storageKeys } from "@/hooks/useLocalStorage";
 
-const MAX_CARD_STACK_HEIGHT = 3;
+const MAX_CARD_STACK_HEIGHT = 3; // Maximum number of cards to display in the stack
 
 const SwipeSongsPage = () => {
   const { session, playlist, shuffle } = useSwipeContext();
@@ -70,6 +72,13 @@ const SwipeSongsPage = () => {
       shuffle: triggerShuffle,
     },
     !isHelpOpen
+  );
+
+  // persist swipes in case the user refreshes or leaves the page
+  useDebouncedStorage(
+    sessionStorage,
+    storageKeys.swipes(playlist.metadata.id, playlist.metadata.snapshot_id),
+    session.swipes
   );
 
   if (playlist.tracks.length <= 0) {
