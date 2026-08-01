@@ -89,9 +89,10 @@ const SwipeProviderInner = ({ playlist }: { playlist: Playlist }) => {
       {leaveBlocker.state === "blocked" && (
         <Modal onClose={() => leaveBlocker.reset()} className="flex flex-col gap-6">
           <div className="flex flex-col gap-2">
-            <h2>Leave without saving?</h2>
+            <h2>Leave without submitting?</h2>
             <p className="text-muted">
-              Your swipes haven't been submitted yet. If you leave now, your progress will be lost.
+              Your swipes haven't been submitted yet. If your playlist changes before you return,
+              you'll lose your progress.
             </p>
           </div>
           <div className="grid grid-cols-2 lg:w-1/2 lg:self-end gap-2">
