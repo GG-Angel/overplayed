@@ -10,6 +10,7 @@ export const storageKeys = {
   accessForm: "access-request-form",
   hasRequestedAccess: "has-requested-access",
   volume: "volume",
+  swipes: (playlistId: string, snapshotId: string) => `swipes-${playlistId}-${snapshotId}`,
 } as const;
 
 type Listener = () => void;

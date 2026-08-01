@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import type { SwipeSubmissionForm, Track } from "@/lib/types";
-import useSwipes from "../hooks/useSwipes";
+import type { Playlist, SwipeSubmissionForm, Track } from "@/lib/types";
+import useSwipes, { type Swipe } from "../hooks/useSwipes";
 import { SwipeContext } from "./SwipeContext";
 import { Outlet, useParams } from "react-router-dom";
 import ErrorState from "@/components/states/ErrorState";
@@ -12,27 +12,44 @@ import useNavBlocker from "@/hooks/useNavBlocker";
 import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
 import { Play, Undo2 } from "lucide-react";
-
-const SwipeProvider = () => {
-  const { playlistId } = useParams();
-  if (!playlistId) return <ErrorState message="No Playlist Provided" />;
-  return <SwipeProviderInner playlistId={playlistId} />;
-};
+import { loadFromStorage } from "@/lib/utils";
+import { storageKeys } from "@/hooks/useLocalStorage";
 
 const initialOptions: SwipeSubmissionForm["options"] = {
   backup_enabled: true,
   remove_from_likes: false,
 };
 
-const SwipeProviderInner = ({ playlistId }: { playlistId: string }) => {
+const SwipeProvider = () => {
+  const { playlistId } = useParams();
+  const playlist = usePlaylist(playlistId);
+
+  if (!playlistId) return <ErrorState message="No Playlist Provided" />;
+
+  if (playlist.isError) {
+    return <ErrorState message="Failed to Load Playlist" />;
+  }
+
+  if (!playlist.isSuccess) {
+    return <LoadingState message="Loading Playlist..." />;
+  }
+
+  return <SwipeProviderInner playlist={playlist.data} />;
+};
+
+const SwipeProviderInner = ({ playlist }: { playlist: Playlist }) => {
   const [options, setOptions] = useState<SwipeSubmissionForm["options"]>(initialOptions);
   const [hasSubmitted, setHasSubmitted] = useState(false);
-  const session = useSwipes<Track>();
-  const playlist = usePlaylist(playlistId);
-  const tracks = usePlaylistTracks(playlistId, session.swipes.length);
+  const savedSwipes = loadFromStorage<Swipe<Track>[]>(
+    sessionStorage,
+    storageKeys.swipes(playlist.id, playlist.snapshot_id),
+    []
+  );
+  const session = useSwipes<Track>(savedSwipes);
+  const tracks = usePlaylistTracks(playlist.id, session.swipes.length);
   const leaveBlocker = useNavBlocker(
     session.dislikes.length > 0 && !hasSubmitted,
-    `/playlists/${playlistId}/swipe`
+    `/playlists/${playlist.id}/swipe`
   );
 
   const loadedTracks = useMemo(
@@ -43,7 +60,7 @@ const SwipeProviderInner = ({ playlistId }: { playlistId: string }) => {
   const order = useTrackOrder(loadedTracks, session.swipes.length);
 
   const contextValue = useMemo(() => {
-    if (!playlist.isSuccess || !tracks.isSuccess) return null;
+    if (!tracks.isSuccess) return null;
     return {
       session,
       options,
@@ -52,18 +69,18 @@ const SwipeProviderInner = ({ playlistId }: { playlistId: string }) => {
       setHasSubmitted,
       shuffle: order.shuffle,
       playlist: {
-        metadata: playlist.data,
+        metadata: playlist,
         tracks: order.tracks,
       },
     };
-  }, [session, options, hasSubmitted, order, playlist.isSuccess, playlist.data, tracks.isSuccess]);
+  }, [tracks.isSuccess, session, options, hasSubmitted, order.shuffle, order.tracks, playlist]);
 
-  if (playlist.isError || tracks.isError) {
-    return <ErrorState message="Failed to Load Playlist" />;
+  if (tracks.isError) {
+    return <ErrorState message="Failed to Load Tracks" />;
   }
 
-  if (!playlist.isSuccess || !tracks.isSuccess) {
-    return <LoadingState message={`Loading ${!playlist.isSuccess ? "playlist" : "tracks"}...`} />;
+  if (!tracks.isSuccess) {
+    return <LoadingState message="Loading tracks..." />;
   }
 
   return (

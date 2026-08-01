@@ -14,6 +14,8 @@ import { SWIPE_SHORTCUTS } from "@/lib/shortcuts";
 import { Check, Undo } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { saveToStorage } from "@/lib/utils";
+import { storageKeys } from "@/hooks/useLocalStorage";
 
 const MAX_CARD_STACK_HEIGHT = 3;
 
@@ -57,6 +59,11 @@ const SwipeSongsPage = () => {
       item: currentTrack,
       decision: direction === "left" ? "dislike" : "like",
     });
+    saveToStorage(
+      sessionStorage,
+      storageKeys.swipes(playlist.metadata.id, playlist.metadata.snapshot_id),
+      session.swipes
+    );
     setIsSwiping(false);
   };
 
