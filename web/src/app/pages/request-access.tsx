@@ -17,7 +17,7 @@ import {
   type QueueAccessRequest,
   type QueueUserStatus,
 } from "@/lib/types";
-import useSyncedStorage from "@/hooks/useSyncedStorage";
+import { useAccessContext } from "@/features/user/provider/AccessContext";
 
 const ErrorMessage = ({ message }: { message: string }) => (
   <Card tone="negative" padding="lg" radius="lg" className="flex flex-col gap-2 py-4">
@@ -68,10 +68,7 @@ const RequestAccessPage = () => {
     loadFromStorage(localStorage, storageKeys.accessForm, { email: "" })
   );
   const [errors, setErrors] = useState<Partial<QueueAccessRequest>>({});
-  const [, setHasRequestedAccess] = useSyncedStorage<boolean>(
-    storageKeys.hasRequestedAccess,
-    false
-  );
+  const { setHasRequestedAccess } = useAccessContext();
   const [turnstileToken, setTurnstileToken] = useState<string>("");
 
   const turnstileRef = useRef<TurnstileHandle>(null);

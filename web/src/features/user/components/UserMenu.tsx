@@ -11,12 +11,11 @@ import DropdownMenuDivider from "@/components/ui/dropdown/DropdownMenuDivider";
 import DropdownMenuButton from "@/components/ui/dropdown/DropdownMenuButton";
 import { openExternalUrl } from "@/lib/utils";
 import { ChartLine, ExternalLink, LogOut, User } from "lucide-react";
-import useSyncedStorage from "@/hooks/useSyncedStorage";
-import { storageKeys } from "@/lib/storage";
+import { useAccessContext } from "../provider/AccessContext";
 
 const UserMenu = () => {
   const { user, isLoading, redirectToLogin, logoutMutation } = useAuth();
-  const [hasRequestedAccess] = useSyncedStorage<boolean>(storageKeys.hasRequestedAccess, false);
+  const { hasRequestedAccess } = useAccessContext();
   const navigate = useNavigate();
   const location = useLocation();
 
