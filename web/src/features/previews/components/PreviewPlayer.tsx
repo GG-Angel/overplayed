@@ -7,14 +7,11 @@ import WaveformSkeleton from "./WaveformSkeleton";
 import VolumeControl from "./VolumeControl";
 import type { WaveformHandler } from "./Waveform";
 import type { TrackPreview } from "@/lib/types";
-import useLocalStorage from "@/hooks/useLocalStorage";
 import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts";
 import { PREVIEW_SHORTCUTS } from "@/lib/shortcuts";
+import useLocalStorage, { storageKeys } from "@/hooks/useLocalStorage";
 
 const Waveform = lazy(() => import("./Waveform"));
-
-const DEFAULT_VOLUME = 0.3;
-const STORED_VOLUME_KEY = "volume";
 
 type PreviewPlayerProps = {
   preview: TrackPreview | null | undefined;
@@ -23,6 +20,8 @@ type PreviewPlayerProps = {
   className?: string;
   shortcutsEnabled?: boolean;
 };
+
+const DEFAULT_VOLUME = 0.3;
 
 const AudioPlayer = ({
   preview,
@@ -33,7 +32,7 @@ const AudioPlayer = ({
 }: PreviewPlayerProps) => {
   const [isReady, setIsReady] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [volume, setVolume] = useLocalStorage(STORED_VOLUME_KEY, DEFAULT_VOLUME);
+  const [volume, setVolume] = useLocalStorage<number>(storageKeys.volume, DEFAULT_VOLUME);
   const [muteCount, setMuteCount] = useState(0);
   const waveformRef = useRef<WaveformHandler>(null);
   const showWaveform = isReady && !isLoading && !isError && preview?.url;

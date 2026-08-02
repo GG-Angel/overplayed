@@ -9,7 +9,6 @@ RUN uv sync --frozen --no-cache --no-dev
 
 COPY . .
 
-# Run as an unprivileged user
 RUN useradd --system --no-create-home appuser && chown -R appuser /app
 USER appuser
 

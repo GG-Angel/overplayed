@@ -115,4 +115,4 @@ def _build_redirect_url(url: str, path: str) -> str:
     """Builds a redirect URL confined to the frontend's origin."""
     parsed_url = urlsplit(url)
     parsed_path = urlsplit(path)
-    return urlunsplit((parsed_url.scheme, parsed_url.netloc, parsed_path.path))
+    return urlunsplit((parsed_url.scheme, parsed_url.netloc, parsed_path.path, "", ""))

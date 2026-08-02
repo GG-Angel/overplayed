@@ -22,7 +22,7 @@ const SwipeCardStack = ({
 }: SwipeCardStackProps) => {
   return (
     <AnimatePresence>
-      <div className="grid place-items-end touch-none min-h-88 sm:min-h-98 lg:min-h-112">
+      <div className="grid place-items-end touch-none">
         {tracks.map((track, i) => {
           const isTopCard = i === 0;
           return (

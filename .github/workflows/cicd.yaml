@@ -65,5 +65,5 @@ jobs:
             cd ~/${{ github.event.repository.name }}
             docker compose pull
             docker compose up -d db
-            docker compose run --rm server uv run --no-cache --no-dev alembic upgrade head
+            docker compose run --rm server .venv/bin/alembic upgrade head
             docker compose up -d --remove-orphans
