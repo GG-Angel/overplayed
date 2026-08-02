@@ -4,8 +4,9 @@ import { Spinner } from "@/components/ui/Spinner";
 import useSubmitSwipes from "@/features/swipe/hooks/useSubmitSwipes";
 import { useSwipeContext } from "@/features/swipe/provider/SwipeContext";
 import useConfetti from "@/hooks/useConfetti";
+import { storageKeys } from "@/hooks/useLocalStorage";
 import { kaomojis } from "@/lib/kaomoji";
-import { openExternalUrl } from "@/lib/utils";
+import { openExternalUrl, removeFromStorage } from "@/lib/utils";
 import { ExternalLink, Home, Play, RotateCcw } from "lucide-react";
 import { useEffect, useEffectEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -34,6 +35,10 @@ const SwipeSubmitPage = () => {
   // prevent leave modal on successful completion
   useEffect(() => {
     if (controller.mutation.isSuccess) {
+      removeFromStorage(
+        sessionStorage,
+        storageKeys.swipes(playlist.metadata.id, playlist.metadata.snapshot_id)
+      );
       setHasSubmitted(true);
     }
   });

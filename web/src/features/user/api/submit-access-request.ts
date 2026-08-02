@@ -3,6 +3,7 @@ import { queryKeys } from "@/lib/query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 import { queueUserStatusSchema, type QueueAccessRequest, type QueueUserStatus } from "@/lib/types";
+import useLocalStorage, { storageKeys } from "@/hooks/useLocalStorage";
 
 const submitAccessRequest = async (form: QueueAccessRequest, turnstileToken: string) => {
   return queueUserStatusSchema.parse(
@@ -12,10 +13,12 @@ const submitAccessRequest = async (form: QueueAccessRequest, turnstileToken: str
 
 export const useSubmitAccessRequest = (form: QueueAccessRequest, turnstileToken: string) => {
   const queryClient = useQueryClient();
+  const [, setHasRequestedAccess] = useLocalStorage<boolean>(storageKeys.hasRequestedAccess, false);
 
   return useMutation<QueueUserStatus, AxiosError<ApiError>>({
     mutationFn: () => submitAccessRequest(form, turnstileToken),
     onSuccess: async () => {
+      setHasRequestedAccess(true);
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.queue() }),
         queryClient.invalidateQueries({ queryKey: queryKeys.userAccess() }),

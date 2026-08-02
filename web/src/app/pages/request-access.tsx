@@ -16,9 +16,7 @@ import {
   type QueueAccessRequest,
   type QueueUserStatus,
 } from "@/lib/types";
-import useLocalStorage from "@/hooks/useLocalStorage";
-
-const STORED_FORM_KEY = "access-request-form";
+import useLocalStorage, { storageKeys } from "@/hooks/useLocalStorage";
 
 const ErrorMessage = ({ message }: { message: string }) => (
   <Card tone="negative" padding="lg" radius="lg" className="flex flex-col gap-2 py-4">
@@ -65,7 +63,9 @@ const RequestAccessPage = () => {
     return urlParams.has("error");
   });
 
-  const [form, setForm] = useLocalStorage<QueueAccessRequest>(STORED_FORM_KEY, { email: "" });
+  const [form, setForm] = useLocalStorage<QueueAccessRequest>(storageKeys.accessForm, {
+    email: "",
+  });
   const [errors, setErrors] = useState<Partial<QueueAccessRequest>>({});
   const [turnstileToken, setTurnstileToken] = useState<string>("");
   const turnstileRef = useRef<TurnstileHandle>(null);
@@ -167,21 +167,34 @@ const RequestAccessPage = () => {
       <Divider />
 
       <form className="flex flex-col gap-6" onSubmit={handleSubmitRequest}>
-        <div className="flex justify-between gap-3">
-          <Input
-            className="flex-1"
-            type="email"
-            label="Spotify account email"
-            placeholder="user@example.com"
-            value={form.email}
-            error={errors.email}
-            disabled={submitMutation.isPending}
-            onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
-            onBlur={validateForm}
-          />
+        <div className="flex flex-col xs:justify-between xs:flex-row gap-6 xs:gap-3">
+          <div className="flex flex-col flex-1 gap-1.5">
+            <Input
+              type="email"
+              label="Spotify account email"
+              placeholder="user@example.com"
+              value={form.email}
+              error={errors.email}
+              disabled={submitMutation.isPending}
+              onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
+              onBlur={validateForm}
+            />
+            <span className="text-sm text-muted">
+              You can find your email{" "}
+              <a
+                href="https://www.spotify.com/account/profile/"
+                className="underline hover:text-white"
+                target="_blank"
+                rel="noopener noreferrer"
+                draggable={false}
+              >
+                here.
+              </a>
+            </span>
+          </div>
           <Button
-            className="h-11 mt-7"
-            icon={<Send className="size-4" />}
+            className="h-11 xs:mt-7"
+            icon={<Send className="size-4 shrink-0" />}
             type="submit"
             size="lg"
             disabled={submitMutation.isPending || !turnstileToken || !form.email}
@@ -211,7 +224,10 @@ const RequestAccessPage = () => {
 
       {/* Info modal */}
       {isInfoModalVisible && (
-        <Modal onClose={() => setIsInfoModalVisible(false)} className="flex flex-col gap-3">
+        <Modal
+          onClose={() => setIsInfoModalVisible(false)}
+          className="flex flex-col gap-3 max-w-2xl"
+        >
           <h2>Why we need your email</h2>
           <p>
             Spotify only lets a few approved accounts use this app at a time. When your turn comes,
@@ -242,7 +258,10 @@ const RequestAccessPage = () => {
 
       {/* Login error modal */}
       {isLoginErrorModalVisible && (
-        <Modal onClose={() => setIsLoginErrorModalVisible(false)} className="flex flex-col gap-3">
+        <Modal
+          onClose={() => setIsLoginErrorModalVisible(false)}
+          className="flex flex-col gap-3 max-w-2xl"
+        >
           <h2>You don't have access yet</h2>
           <p>
             To log in, request access below with your Spotify email. We'll let you in as soon as
