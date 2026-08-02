@@ -11,12 +11,13 @@ import { kaomojis } from "@/lib/kaomoji";
 import { formatCount, formatDateTime } from "@/lib/utils";
 import { Info, Key, Plus, Send, ThumbsUp, User } from "lucide-react";
 import { useRef, useState, type SubmitEventHandler } from "react";
+import { loadFromStorage, saveToStorage, storageKeys } from "@/lib/storage";
 import {
   accessRequestFormSchema,
   type QueueAccessRequest,
   type QueueUserStatus,
 } from "@/lib/types";
-import useLocalStorage, { storageKeys } from "@/hooks/useLocalStorage";
+import { useAccessContext } from "@/features/user/provider/AccessContext";
 
 const ErrorMessage = ({ message }: { message: string }) => (
   <Card tone="negative" padding="lg" radius="lg" className="flex flex-col gap-2 py-4">
@@ -63,13 +64,14 @@ const RequestAccessPage = () => {
     return urlParams.has("error");
   });
 
-  const [form, setForm] = useLocalStorage<QueueAccessRequest>(storageKeys.accessForm, {
-    email: "",
-  });
+  const [form, setForm] = useState<QueueAccessRequest>(() =>
+    loadFromStorage(localStorage, storageKeys.accessForm, { email: "" })
+  );
   const [errors, setErrors] = useState<Partial<QueueAccessRequest>>({});
+  const { setHasRequestedAccess } = useAccessContext();
   const [turnstileToken, setTurnstileToken] = useState<string>("");
-  const turnstileRef = useRef<TurnstileHandle>(null);
 
+  const turnstileRef = useRef<TurnstileHandle>(null);
   const queueStatus = useQueueStatus();
   const submitMutation = useSubmitAccessRequest(form, turnstileToken);
 
@@ -92,6 +94,11 @@ const RequestAccessPage = () => {
       onSettled: () => {
         setTurnstileToken("");
         turnstileRef.current?.reset();
+      },
+      // save form to prefill on next visit
+      onSuccess: () => {
+        saveToStorage(localStorage, storageKeys.accessForm, form);
+        setHasRequestedAccess(true);
       },
     });
   };

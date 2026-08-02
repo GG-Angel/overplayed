@@ -4,7 +4,7 @@ import type { LucideIcon } from "lucide-react";
 import type { ComponentProps } from "react";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center rounded-full border-2 cursor-pointer active:opacity-75 disabled:opacity-25 disabled:pointer-events-none transition-all",
+  "inline-flex items-center justify-center rounded-full border-2 cursor-pointer active:opacity-75 disabled:opacity-25 disabled:pointer-events-none transition-[color,background-color,border-color,opacity]",
   {
     variants: {
       size: { xs: "p-2.5", sm: "p-4", md: "p-4.5" },
