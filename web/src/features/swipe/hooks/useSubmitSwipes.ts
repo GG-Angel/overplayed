@@ -1,24 +1,29 @@
 import { queryKeys } from "@/lib/query";
+import { removeFromStorage, storageKeys } from "@/lib/storage";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 import { useSwipeContext } from "../provider/SwipeContext";
-import { useCallback, useMemo } from "react";
 import { submitSwipes } from "../api/submit-swipes";
 
 const useSubmitSwipes = () => {
   const queryClient = useQueryClient();
-  const { playlist, options, session } = useSwipeContext();
+  const { playlist, options, session, setHasSubmitted } = useSwipeContext();
+  const hasDislikes = session.dislikes.length > 0;
+  const hasStarted = useRef(false);
 
-  const dislikedTracks = useMemo(() => session.dislikes.map((t) => t.uri), [session.dislikes]);
-  const hasDislikes = dislikedTracks.length > 0;
-
-  const submitMutation = useMutation({
+  const mutation = useMutation({
     mutationFn: () =>
       submitSwipes(playlist.metadata.id, {
         options,
-        uris: dislikedTracks,
+        uris: session.dislikes.map((t) => t.uri),
         tracks_swiped: session.swipes.length,
       }),
     onSuccess: async () => {
+      removeFromStorage(
+        sessionStorage,
+        storageKeys.swipes(playlist.metadata.id, playlist.metadata.snapshot_id)
+      );
+      setHasSubmitted(true);
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.playlists() }),
         queryClient.invalidateQueries({ queryKey: queryKeys.metrics() }),
@@ -26,15 +31,17 @@ const useSubmitSwipes = () => {
     },
   });
 
-  const start = useCallback(() => {
-    if (!hasDislikes) return;
-    submitMutation.mutate();
-  }, [submitMutation, hasDislikes]);
+  const { mutate } = mutation;
+  useEffect(() => {
+    if (!hasDislikes || hasStarted.current) return;
+    hasStarted.current = true;
+    mutate();
+  }, [hasDislikes, mutate]);
 
   return {
-    start,
     hasDislikes,
-    mutation: submitMutation,
+    mutation,
+    retry: () => mutate(),
   };
 };
 

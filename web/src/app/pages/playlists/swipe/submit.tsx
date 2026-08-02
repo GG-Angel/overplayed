@@ -4,44 +4,25 @@ import { Spinner } from "@/components/ui/Spinner";
 import useSubmitSwipes from "@/features/swipe/hooks/useSubmitSwipes";
 import { useSwipeContext } from "@/features/swipe/provider/SwipeContext";
 import useConfetti from "@/hooks/useConfetti";
-import { removeFromStorage, storageKeys } from "@/lib/storage";
 import { kaomojis } from "@/lib/kaomoji";
 import { openExternalUrl } from "@/lib/utils";
 import { ExternalLink, Home, Play, RotateCcw } from "lucide-react";
-import { useEffect, useEffectEvent, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const SwipeSubmitPage = () => {
   const navigate = useNavigate();
-  const { playlist, session, setHasSubmitted } = useSwipeContext();
+  const { playlist, session } = useSwipeContext();
   const controller = useSubmitSwipes();
-  const [dislikePercentage] = useState(() =>
-    playlist.metadata.tracks.total > 0
-      ? Math.round((session.dislikes.length / playlist.metadata.tracks.total) * 100)
-      : 0
-  );
 
-  // submit on page load
-  const initialSubmit = useEffectEvent(() => {
-    controller.start();
+  // calculate on mount to maintain previous track count after refetch
+  const [dislikePercentage] = useState(() => {
+    const total = playlist.metadata.tracks.total;
+    return total > 0 ? Math.round((session.dislikes.length / total) * 100) : 0;
   });
-  useEffect(() => {
-    initialSubmit();
-  }, []);
 
   // show confetti on success
   useConfetti({ enabled: controller.mutation.isSuccess });
-
-  // prevent leave modal on successful completion
-  useEffect(() => {
-    if (controller.mutation.isSuccess) {
-      removeFromStorage(
-        sessionStorage,
-        storageKeys.swipes(playlist.metadata.id, playlist.metadata.snapshot_id)
-      );
-      setHasSubmitted(true);
-    }
-  });
 
   const navigateHome = () => navigate("/", { replace: true });
   const navigateToSwipePage = () => navigate("..");
@@ -91,7 +72,7 @@ const SwipeSubmitPage = () => {
             <Button
               icon={<RotateCcw className="size-4" />}
               variant="primary"
-              onClick={controller.start}
+              onClick={controller.retry}
             >
               Try Again
             </Button>
