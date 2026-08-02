@@ -4,9 +4,11 @@ import { useEffect, useImperativeHandle, useRef, type Ref } from "react";
 export type WaveformHandler = {
   play: () => void;
   pause: () => void;
-  playPause: () => void;
+  playPause: () => Promise<void> | undefined;
   isPlaying: () => boolean;
 };
+
+const FALLBACK_HEIGHT = 40;
 
 type WaveformProps = {
   url: string | null | undefined;
@@ -43,7 +45,7 @@ const Waveform = ({
       container: containerRef.current,
       waveColor: "gray",
       progressColor: "#1ed760",
-      height: "auto",
+      height: containerRef.current.clientHeight || FALLBACK_HEIGHT,
       barWidth: 1,
       barGap: 2,
       barRadius: 1,

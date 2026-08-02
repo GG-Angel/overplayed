@@ -15,7 +15,7 @@ import { Check, Undo } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useDebouncedStorage from "@/hooks/useDebouncedStorage";
-import { storageKeys } from "@/hooks/useLocalStorage";
+import { storageKeys } from "@/lib/storage";
 
 const MAX_CARD_STACK_HEIGHT = 3; // Maximum number of cards to display in the stack
 

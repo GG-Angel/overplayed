@@ -11,11 +11,12 @@ import DropdownMenuDivider from "@/components/ui/dropdown/DropdownMenuDivider";
 import DropdownMenuButton from "@/components/ui/dropdown/DropdownMenuButton";
 import { openExternalUrl } from "@/lib/utils";
 import { ChartLine, ExternalLink, LogOut, User } from "lucide-react";
-import useLocalStorage, { storageKeys } from "@/hooks/useLocalStorage";
+import useSyncedStorage from "@/hooks/useSyncedStorage";
+import { storageKeys } from "@/lib/storage";
 
 const UserMenu = () => {
   const { user, isLoading, redirectToLogin, logoutMutation } = useAuth();
-  const [hasRequestedAccess] = useLocalStorage<boolean>(storageKeys.hasRequestedAccess, false);
+  const [hasRequestedAccess] = useSyncedStorage<boolean>(storageKeys.hasRequestedAccess, false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -29,7 +30,10 @@ const UserMenu = () => {
   }
 
   if (!user) {
+    // don't show the login button if the user has never
+    // requested access, to avoid confusion
     if (!hasRequestedAccess) return null;
+
     return (
       <Button variant="secondary" onClick={() => redirectToLogin(location.pathname)}>
         Log in

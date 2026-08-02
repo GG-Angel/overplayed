@@ -1,5 +1,5 @@
+import { saveToStorage } from "@/lib/storage";
 import { useCallback, useEffect, useRef } from "react";
-import { saveToStorage } from "@/lib/utils";
 
 const DEFAULT_DELAY = 500; // quiet period before a pending write is committed
 

@@ -6,13 +6,6 @@ import {
   type SetStateAction,
 } from "react";
 
-export const storageKeys = {
-  accessForm: "access-request-form",
-  hasRequestedAccess: "has-requested-access",
-  volume: "volume",
-  swipes: (playlistId: string, snapshotId: string) => `swipes-${playlistId}-${snapshotId}`,
-} as const;
-
 type Listener = () => void;
 const listeners = new Map<string, Set<Listener>>();
 const snapshots = new Map<string, { raw: string | null; value: unknown }>();
@@ -53,7 +46,7 @@ const subscribe = (key: string) => (listener: Listener) => {
   };
 };
 
-const useLocalStorage = <T>(key: string, initialValue: T) => {
+const useSyncedStorage = <T>(key: string, initialValue: T) => {
   const value = useSyncExternalStore(
     useMemo(() => subscribe(key), [key]),
     () => read(key, initialValue)
@@ -72,4 +65,4 @@ const useLocalStorage = <T>(key: string, initialValue: T) => {
   return [value, setValue] as const;
 };
 
-export default useLocalStorage;
+export default useSyncedStorage;

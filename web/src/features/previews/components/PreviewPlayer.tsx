@@ -9,7 +9,8 @@ import type { WaveformHandler } from "./Waveform";
 import type { TrackPreview } from "@/lib/types";
 import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts";
 import { PREVIEW_SHORTCUTS } from "@/lib/shortcuts";
-import useLocalStorage, { storageKeys } from "@/hooks/useLocalStorage";
+import useDebouncedStorage from "@/hooks/useDebouncedStorage";
+import { loadFromStorage, storageKeys } from "@/lib/storage";
 
 const Waveform = lazy(() => import("./Waveform"));
 
@@ -32,10 +33,14 @@ const AudioPlayer = ({
 }: PreviewPlayerProps) => {
   const [isReady, setIsReady] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [volume, setVolume] = useLocalStorage<number>(storageKeys.volume, DEFAULT_VOLUME);
+  const [volume, setVolume] = useState(() =>
+    loadFromStorage(localStorage, storageKeys.volume, DEFAULT_VOLUME)
+  );
   const [muteCount, setMuteCount] = useState(0);
   const waveformRef = useRef<WaveformHandler>(null);
   const showWaveform = isReady && !isLoading && !isError && preview?.url;
+
+  useDebouncedStorage(localStorage, storageKeys.volume, volume);
 
   const handlePlay = useCallback(() => {
     setIsPlaying(true);
@@ -43,9 +48,17 @@ const AudioPlayer = ({
 
   const handlePause = useCallback(() => setIsPlaying(false), []);
 
+  const handlePlayPause = useCallback(() => {
+    const waveform = waveformRef.current;
+    if (!waveform) return;
+
+    setIsPlaying(!waveform.isPlaying());
+    waveform.playPause()?.catch(() => setIsPlaying(false));
+  }, []);
+
   const handleVolumeToggle = useCallback(() => {
     setVolume((prevVolume) => (prevVolume > 0 ? 0 : DEFAULT_VOLUME));
-  }, [setVolume]);
+  }, []);
 
   // flash the volume button so the shortcut has visible feedback
   const handleMuteShortcut = useCallback(() => {
@@ -57,7 +70,7 @@ const AudioPlayer = ({
   useKeyboardShortcuts(
     PREVIEW_SHORTCUTS,
     {
-      playPause: () => waveformRef.current?.playPause(),
+      playPause: handlePlayPause,
       mute: handleMuteShortcut,
     },
     shortcutsEnabled
@@ -70,7 +83,7 @@ const AudioPlayer = ({
         variant="green"
         icon={isPlaying && preview?.url ? Pause : Play}
         disabled={!isPlaying && !preview?.url}
-        onClick={() => waveformRef.current?.playPause()}
+        onClick={handlePlayPause}
       />
       <div className="relative flex-1 self-stretch">
         <Waveform

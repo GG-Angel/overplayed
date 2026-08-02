@@ -12,8 +12,7 @@ import useNavBlocker from "@/hooks/useNavBlocker";
 import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
 import { Play, Undo2 } from "lucide-react";
-import { loadFromStorage } from "@/lib/utils";
-import { storageKeys } from "@/hooks/useLocalStorage";
+import { loadFromStorage, storageKeys } from "@/lib/storage";
 
 const initialOptions: SwipeSubmissionForm["options"] = {
   backup_enabled: true,
