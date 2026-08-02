@@ -1,28 +1,34 @@
 import { queryKeys } from "@/lib/query";
 import { removeFromStorage, storageKeys } from "@/lib/storage";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef } from "react";
+import type { SwipeSubmissionResponse } from "@/lib/types";
+import {
+  useMutation,
+  useMutationState,
+  useQueryClient,
+  type MutationState,
+} from "@tanstack/react-query";
+import { useEffect, useMemo } from "react";
 import { useSwipeContext } from "../provider/SwipeContext";
 import { submitSwipes } from "../api/submit-swipes";
 
 const useSubmitSwipes = () => {
   const queryClient = useQueryClient();
   const { playlist, options, session, setHasSubmitted } = useSwipeContext();
+  const { id, snapshot_id } = playlist.metadata;
   const hasDislikes = session.dislikes.length > 0;
-  const hasStarted = useRef(false);
 
-  const mutation = useMutation({
+  const mutationKey = useMemo(() => ["submit-swipes", id] as const, [id]);
+
+  const { mutate } = useMutation({
+    mutationKey,
     mutationFn: () =>
-      submitSwipes(playlist.metadata.id, {
+      submitSwipes(id, {
         options,
         uris: session.dislikes.map((t) => t.uri),
         tracks_swiped: session.swipes.length,
       }),
     onSuccess: async () => {
-      removeFromStorage(
-        sessionStorage,
-        storageKeys.swipes(playlist.metadata.id, playlist.metadata.snapshot_id)
-      );
+      removeFromStorage(sessionStorage, storageKeys.swipes(id, snapshot_id));
       setHasSubmitted(true);
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.playlists() }),
@@ -31,16 +37,24 @@ const useSubmitSwipes = () => {
     },
   });
 
-  const { mutate } = mutation;
+  // https://github.com/TanStack/query/issues/5341
+  const submission = useMutationState({
+    filters: { mutationKey, exact: true },
+    select: (mutation) => mutation.state as MutationState<SwipeSubmissionResponse>,
+  }).at(-1);
+
+  // submit on page load
   useEffect(() => {
-    if (!hasDislikes || hasStarted.current) return;
-    hasStarted.current = true;
+    if (!hasDislikes) return;
+    if (queryClient.getMutationCache().find({ mutationKey, exact: true })) return;
     mutate();
-  }, [hasDislikes, mutate]);
+  }, [hasDislikes, mutate, mutationKey, queryClient]);
 
   return {
     hasDislikes,
-    mutation,
+    isError: submission?.status === "error",
+    isSuccess: submission?.status === "success",
+    data: submission?.data,
     retry: () => mutate(),
   };
 };

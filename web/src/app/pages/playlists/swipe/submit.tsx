@@ -22,7 +22,7 @@ const SwipeSubmitPage = () => {
   });
 
   // show confetti on success
-  useConfetti({ enabled: controller.mutation.isSuccess });
+  useConfetti({ enabled: controller.isSuccess });
 
   const navigateHome = () => navigate("/", { replace: true });
   const navigateToSwipePage = () => navigate("..");
@@ -52,7 +52,7 @@ const SwipeSubmitPage = () => {
     );
   }
 
-  if (controller.mutation.isError) {
+  if (controller.isError) {
     return (
       <MessageState
         kaomoji={kaomojis.stressed}
@@ -82,8 +82,8 @@ const SwipeSubmitPage = () => {
     );
   }
 
-  if (controller.mutation.isSuccess) {
-    const backupPlaylist = controller.mutation.data.backup_playlist;
+  if (controller.isSuccess) {
+    const backupPlaylist = controller.data?.backup_playlist;
     return (
       <MessageState
         kaomoji={kaomojis.proud}
