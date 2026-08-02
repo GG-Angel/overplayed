@@ -40,6 +40,7 @@ const AudioPlayer = ({
   const waveformRef = useRef<WaveformHandler>(null);
   const showWaveform = isReady && !isLoading && !isError && preview?.url;
 
+  // persist volume settings
   useDebouncedStorage(localStorage, storageKeys.volume, volume);
 
   const handlePlay = useCallback(() => {
