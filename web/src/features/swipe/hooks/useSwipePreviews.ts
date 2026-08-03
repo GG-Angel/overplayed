@@ -5,10 +5,10 @@ import useAudioPreloader from "@/features/previews/hooks/useAudioPreloader";
 const PRELOAD_RADIUS = 5;
 
 const useSwipePreviews = () => {
-  const { session, playlist } = useSwipeContext();
+  const { session, tracks } = useSwipeContext();
 
   const currentIndex = session.swipes.length;
-  const preloadIsrcs = playlist.tracks
+  const preloadIsrcs = tracks
     .slice(Math.max(0, currentIndex - PRELOAD_RADIUS), currentIndex + PRELOAD_RADIUS)
     .map((track) => track.external_ids.isrc);
 

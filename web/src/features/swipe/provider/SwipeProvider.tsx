@@ -21,68 +21,62 @@ const initialOptions: SwipeSubmissionForm["options"] = {
 const SwipeProvider = () => {
   const { playlistId } = useParams();
   const playlist = usePlaylist(playlistId);
+  const tracks = usePlaylistTracks(playlistId);
 
   if (!playlistId) return <ErrorState message="No Playlist Provided" />;
 
-  if (playlist.isError) {
-    return <ErrorState message="Failed to Load Playlist" />;
-  }
+  if (playlist.isError) return <ErrorState message="Failed to Load Playlist" />;
+  if (tracks.isError) return <ErrorState message="Failed to Load Tracks" />;
 
-  if (!playlist.isSuccess) {
-    return <LoadingState message="Loading Playlist..." />;
-  }
+  if (!playlist.isSuccess) return <LoadingState message="Loading Playlist..." />;
+  if (!tracks.isSuccess) return <LoadingState message="Loading tracks..." />;
 
-  return <SwipeProviderInner playlist={playlist.data} />;
+  return (
+    <SwipeProviderInner
+      playlist={playlist.data}
+      tracks={tracks.data.pages.flatMap((page) => page.tracks)}
+    />
+  );
 };
 
-const SwipeProviderInner = ({ playlist }: { playlist: Playlist }) => {
+const SwipeProviderInner = ({ playlist, tracks }: { playlist: Playlist; tracks: Track[] }) => {
   const [options, setOptions] = useState<SwipeSubmissionForm["options"]>(initialOptions);
   const [hasSubmitted, setHasSubmitted] = useState(false);
-  const savedSwipes = loadFromStorage<Swipe<Track>[]>(
+  const persistedSwipes = loadFromStorage<Swipe<Track>[]>(
     sessionStorage,
     storageKeys.swipes(playlist.id, playlist.snapshot_id),
     []
   );
-  const session = useSwipes<Track>(savedSwipes);
-  const tracks = usePlaylistTracks(playlist.id, session.swipes.length);
-  const leaveBlocker = useNavBlocker(
+  const session = useSwipes<Track>(persistedSwipes);
+  const exitBlocker = useNavBlocker(
     session.dislikes.length > 0 && !hasSubmitted,
     `/playlists/${playlist.id}/swipe`
   );
 
-  const loadedTracks = useMemo(
-    () => tracks.data?.pages.flatMap((p) => p.tracks) ?? [],
-    [tracks.data]
+  const decided = useMemo(
+    () => new Set(session.swipes.map((swipe) => swipe.item.uri)),
+    [session.swipes]
   );
 
+  const upcoming = tracks.filter((track) => !decided.has(track.uri));
+
   const contextValue = useMemo(() => {
-    if (!tracks.isSuccess) return null;
     return {
       session,
       options,
       setOptions,
       hasSubmitted,
       setHasSubmitted,
-      playlist: {
-        metadata: playlist,
-        tracks: loadedTracks,
-      },
+      playlist,
+      tracks: upcoming,
     };
-  }, [tracks.isSuccess, session, options, hasSubmitted, playlist, loadedTracks]);
-
-  if (tracks.isError) {
-    return <ErrorState message="Failed to Load Tracks" />;
-  }
-
-  if (!tracks.isSuccess) {
-    return <LoadingState message="Loading tracks..." />;
-  }
+  }, [hasSubmitted, options, playlist, session, upcoming]);
 
   return (
     <SwipeContext.Provider value={contextValue}>
       <Outlet />
-      {leaveBlocker.state === "blocked" && (
-        <Modal onClose={() => leaveBlocker.reset()} className="flex flex-col gap-6 max-w-2xl">
+      {exitBlocker.state === "blocked" && (
+        <Modal onClose={() => exitBlocker.reset()} className="flex flex-col gap-6 max-w-2xl">
           <div className="flex flex-col gap-2">
             <h2>Leave without submitting?</h2>
             <p className="text-muted">
@@ -94,14 +88,14 @@ const SwipeProviderInner = ({ playlist }: { playlist: Playlist }) => {
             <Button
               icon={<Undo2 className="size-4" />}
               variant="secondary"
-              onClick={() => leaveBlocker.proceed()}
+              onClick={() => exitBlocker.proceed()}
             >
               Leave
             </Button>
             <Button
               icon={<Play className="size-4" />}
               variant="primary"
-              onClick={() => leaveBlocker.reset()}
+              onClick={() => exitBlocker.reset()}
             >
               Stay
             </Button>

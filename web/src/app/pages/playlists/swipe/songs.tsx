@@ -19,7 +19,7 @@ import { storageKeys } from "@/lib/storage";
 const MAX_CARD_STACK_HEIGHT = 3; // Maximum number of cards to display in the stack
 
 const SwipeSongsPage = () => {
-  const { session, playlist } = useSwipeContext();
+  const { session, playlist, tracks } = useSwipeContext();
   const navigate = useNavigate();
   useSwipePreviews();
 
@@ -28,10 +28,10 @@ const SwipeSongsPage = () => {
   const currentSwipeCardRef = useRef<SwipeCardController | null>(null);
 
   const currentIndex = session.swipes.length;
-  const currentTrack = playlist.tracks.at(currentIndex);
+  const currentTrack = tracks.at(currentIndex);
   const currentPreview = useTrackPreviewUrl(currentTrack?.external_ids.isrc);
 
-  const hasReachedEnd = currentIndex >= playlist.metadata.tracks.total;
+  const hasReachedEnd = currentIndex >= playlist.tracks.total;
   const canUndoOrFinish = !isSwiping && currentIndex > 0;
   const canSwipe = !isSwiping && !hasReachedEnd;
 
@@ -67,11 +67,11 @@ const SwipeSongsPage = () => {
   // persist swipes in case the user refreshes or leaves the page
   useDebouncedStorage(
     sessionStorage,
-    storageKeys.swipes(playlist.metadata.id, playlist.metadata.snapshot_id),
+    storageKeys.swipes(playlist.id, playlist.snapshot_id),
     session.swipes
   );
 
-  if (playlist.tracks.length <= 0) {
+  if (playlist.tracks.total <= 0) {
     return <ErrorState message="Playlist is Empty" />;
   }
 
@@ -81,13 +81,13 @@ const SwipeSongsPage = () => {
         className="w-full max-w-3xl"
         likes={session.likes.length}
         dislikes={session.dislikes.length}
-        total={playlist.metadata.tracks.total}
+        total={playlist.tracks.total}
       />
       <div className="flex-1 flex flex-col w-full items-center justify-center gap-6 shrink-0 py-4">
         {!hasReachedEnd ? (
           <SwipeCardStack
             topCardRef={currentSwipeCardRef}
-            tracks={playlist.tracks.slice(currentIndex, currentIndex + MAX_CARD_STACK_HEIGHT)}
+            tracks={tracks.slice(currentIndex, currentIndex + MAX_CARD_STACK_HEIGHT)}
             canSwipe={canSwipe}
             onSwipeStart={() => setIsSwiping(true)}
             onSwipeEnd={recordSwipe}
