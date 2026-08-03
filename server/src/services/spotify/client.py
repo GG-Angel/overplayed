@@ -147,8 +147,7 @@ class SpotifyClient:
         fn_name = getattr(fn, "__name__", repr(fn))
         offset = 0
 
-        # TODO: add limit?
-        while True:
+        while offset < 10000:
             self._log(f"Paginating {fn_name} (offset={offset})")
             response = await self._run(fn, offset=offset, limit=limit, **kwargs)
 

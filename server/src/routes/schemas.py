@@ -90,12 +90,6 @@ class PlaylistResponse(_Schema):
     external_urls: ExternalUrlsResponse
 
 
-class PlaylistPageResponse(_Schema):
-    has_more: bool
-    next_offset: int | None
-    tracks: list[TrackResponse]
-
-
 class SwipesResponse(_Schema):
     backup_playlist: PlaylistResponse | None = None
 

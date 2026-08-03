@@ -1,3 +1,4 @@
+import json
 from secrets import token_urlsafe
 
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
@@ -87,39 +88,19 @@ class SpotifyCache:
         user_id: str,
         playlist_id: str,
         snapshot_id: str,
-        offset: int = 0,
-        limit: int = 100,
     ) -> list[Track] | None:
-        if offset < 0 or limit < 0:
-            raise ValueError("Offset and limit must be positive.")
-
         key = self._build_playlist_tracks_key(user_id, playlist_id, snapshot_id)
-        async with self._client.redis.pipeline() as pipe:
-            pipe.exists(key)
-            pipe.lrange(key, start=offset, end=offset + limit - 1)
-            pipe.expire(key, self._ttl_playlist_tracks)
-            is_cached, tracks, _ = await pipe.execute()
-
-        if not is_cached:
-            logger.debug(f"MISS: {key}")
+        tracks = await self._client.get(key)
+        if tracks is None:
             return None
+        return [Track.model_validate_json(t) for t in json.loads(tracks)]
 
-        logger.debug(f"HIT: {key}")
-        return [Track.model_validate_json(track) for track in tracks]
-
-    async def push_playlist_tracks(
-        self,
-        user_id: str,
-        playlist_id: str,
-        snapshot_id: str,
-        tracks: list[Track],
+    async def set_playlist_tracks(
+        self, user_id: str, playlist_id: str, snapshot_id: str, tracks: list[Track]
     ) -> None:
         key = self._build_playlist_tracks_key(user_id, playlist_id, snapshot_id)
-        async with self._client.redis.pipeline() as pipe:
-            pipe.rpush(key, *[track.model_dump_json() for track in tracks])
-            pipe.expire(key, self._ttl_playlist_tracks)
-            await pipe.execute()
-        logger.debug(f"CACHED: Pushed {len(tracks)} tracks (key={key}, ttl={self._ttl_playlist_tracks})")  # fmt: skip
+        dumped = json.dumps([t.model_dump_json() for t in tracks])
+        await self._client.set(key, dumped, self._ttl_playlist_tracks)
 
     @staticmethod
     def _build_session_key(session_id: str) -> str:
