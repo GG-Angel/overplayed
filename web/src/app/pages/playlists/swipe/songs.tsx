@@ -6,7 +6,6 @@ import type { SwipeCardController, SwipeDirection } from "@/features/swipe/compo
 import SwipeCardStack from "@/features/swipe/components/SwipeCardStack";
 import SwipeProgress from "@/features/swipe/components/SwipeProgress";
 import ShortcutsHelp from "@/features/swipe/components/ShortcutsHelp";
-import ShuffleButton from "@/features/swipe/components/ShuffleButton";
 import useSwipePreviews from "@/features/swipe/hooks/useSwipePreviews";
 import { useSwipeContext } from "@/features/swipe/provider/SwipeContext";
 import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts";
@@ -20,13 +19,12 @@ import { storageKeys } from "@/lib/storage";
 const MAX_CARD_STACK_HEIGHT = 3; // Maximum number of cards to display in the stack
 
 const SwipeSongsPage = () => {
-  const { session, playlist, shuffle } = useSwipeContext();
+  const { session, playlist } = useSwipeContext();
   const navigate = useNavigate();
   useSwipePreviews();
 
   const [isSwiping, setIsSwiping] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
-  const [shuffleCount, setShuffleCount] = useState(0);
   const currentSwipeCardRef = useRef<SwipeCardController | null>(null);
 
   const currentIndex = session.swipes.length;
@@ -36,7 +34,6 @@ const SwipeSongsPage = () => {
   const hasReachedEnd = currentIndex >= playlist.metadata.tracks.total;
   const canUndoOrFinish = !isSwiping && currentIndex > 0;
   const canSwipe = !isSwiping && !hasReachedEnd;
-  const canShuffle = !isSwiping && playlist.tracks.length - currentIndex > 1;
 
   const triggerSwipe = useCallback(
     (direction: SwipeDirection) => {
@@ -46,12 +43,6 @@ const SwipeSongsPage = () => {
     },
     [canSwipe]
   );
-
-  const triggerShuffle = useCallback(() => {
-    if (!canShuffle) return;
-    shuffle();
-    setShuffleCount((prev) => prev + 1);
-  }, [canShuffle, shuffle]);
 
   const recordSwipe = (direction: SwipeDirection) => {
     if (!currentTrack || hasReachedEnd) return;
@@ -69,7 +60,6 @@ const SwipeSongsPage = () => {
       dislike: () => triggerSwipe("left"),
       like: () => triggerSwipe("right"),
       undo: session.undoSwipe,
-      shuffle: triggerShuffle,
     },
     !isHelpOpen
   );
@@ -122,11 +112,6 @@ const SwipeSongsPage = () => {
             canSwipe={canSwipe}
           />
           <div className="flex items-center gap-2">
-            <ShuffleButton
-              onShuffle={triggerShuffle}
-              shuffleCount={shuffleCount}
-              disabled={!canShuffle}
-            />
             <ShortcutsHelp
               open={isHelpOpen}
               onOpen={() => setIsHelpOpen(true)}
