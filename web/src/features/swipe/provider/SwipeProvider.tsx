@@ -7,7 +7,6 @@ import ErrorState from "@/components/states/ErrorState";
 import { usePlaylist } from "@/features/playlist/api/get-playlist";
 import LoadingState from "@/components/states/LoadingState";
 import { usePlaylistTracks } from "@/features/playlist/api/get-playlist-tracks";
-import useTrackOrder from "../hooks/useTrackOrder";
 import useNavBlocker from "@/hooks/useNavBlocker";
 import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
@@ -56,8 +55,6 @@ const SwipeProviderInner = ({ playlist }: { playlist: Playlist }) => {
     [tracks.data]
   );
 
-  const order = useTrackOrder(loadedTracks, session.swipes.length);
-
   const contextValue = useMemo(() => {
     if (!tracks.isSuccess) return null;
     return {
@@ -66,13 +63,12 @@ const SwipeProviderInner = ({ playlist }: { playlist: Playlist }) => {
       setOptions,
       hasSubmitted,
       setHasSubmitted,
-      shuffle: order.shuffle,
       playlist: {
         metadata: playlist,
-        tracks: order.tracks,
+        tracks: loadedTracks,
       },
     };
-  }, [tracks.isSuccess, session, options, hasSubmitted, order.shuffle, order.tracks, playlist]);
+  }, [tracks.isSuccess, session, options, hasSubmitted, playlist, loadedTracks]);
 
   if (tracks.isError) {
     return <ErrorState message="Failed to Load Tracks" />;
