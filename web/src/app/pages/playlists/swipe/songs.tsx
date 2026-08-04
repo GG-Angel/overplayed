@@ -77,7 +77,7 @@ const SwipeSongsPage = () => {
         className="w-full max-w-3xl"
         likes={session.likes.length}
         dislikes={session.dislikes.length}
-        total={tracks.length}
+        total={playlist.tracks.total}
       />
       <div className="flex-1 flex flex-col w-full items-center justify-center gap-6 shrink-0 py-4">
         {!hasReachedEnd ? (
