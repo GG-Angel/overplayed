@@ -1,17 +1,18 @@
+import { fetchStreamedJson } from "@/lib/api";
 import { queryKeys } from "@/lib/query";
-import { type Track } from "@/lib/types";
-import { experimental_streamedQuery, useQuery } from "@tanstack/react-query";
+import { trackSchema, type Track } from "@/lib/types";
+import { experimental_streamedQuery as streamedQuery, useQuery } from "@tanstack/react-query";
 
-const getPlaylistTracks = async (playlistId: string): Promise<AsyncIterable<Track>> => {
-  
+const getPlaylistTracks = (playlistId: string, signal?: AbortSignal): AsyncIterable<Track> => {
+  return fetchStreamedJson(`/playlists/${playlistId}/tracks`, trackSchema, signal);
 };
 
 export const usePlaylistTracks = (playlistId: string | undefined) => {
   return useQuery({
     queryKey: queryKeys.playlistTracks(playlistId!),
     queryFn: () =>
-      experimental_streamedQuery({
-        streamFn: () => getPlaylistTracks(playlistId!),
+      streamedQuery({
+        streamFn: ({ signal }) => getPlaylistTracks(playlistId!, signal),
       }),
     enabled: !!playlistId,
     retry: 3,
