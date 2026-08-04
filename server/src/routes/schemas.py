@@ -13,9 +13,6 @@ class _Schema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-# --- Spotify response schemas ---
-
-
 class ExternalUrlsResponse(_Schema):
     spotify: str
 
@@ -92,9 +89,6 @@ class PlaylistResponse(_Schema):
 
 class SwipesResponse(_Schema):
     backup_playlist: PlaylistResponse | None = None
-
-
-# --- Swipe-metrics response schemas ---
 
 
 class GlobalSwipeMetricsResponse(BaseModel):

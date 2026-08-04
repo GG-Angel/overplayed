@@ -1,27 +1,19 @@
-import api, { buildURLWithQueryParams } from "@/lib/api";
 import { queryKeys } from "@/lib/query";
-import { playlistPageSchema, type PlaylistPage } from "@/lib/types";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { type Track } from "@/lib/types";
+import { experimental_streamedQuery, useQuery } from "@tanstack/react-query";
 
-const getPlaylistTracks = async ({
-  playlistId,
-  offset = 0,
-}: {
-  playlistId: string;
-  offset?: number;
-}): Promise<PlaylistPage> => {
-  return playlistPageSchema.parse(
-    await api.get(buildURLWithQueryParams(`/playlists/${playlistId}/tracks`, { offset }))
-  );
+const getPlaylistTracks = async (playlistId: string): Promise<AsyncIterable<Track>> => {
+  
 };
 
 export const usePlaylistTracks = (playlistId: string | undefined) => {
-  return useInfiniteQuery({
+  return useQuery({
     queryKey: queryKeys.playlistTracks(playlistId!),
-    queryFn: ({ pageParam }) => getPlaylistTracks({ playlistId: playlistId!, offset: pageParam }),
-    getNextPageParam: (lastPage) => lastPage.next_offset,
-    initialPageParam: 0,
-    retry: 3,
+    queryFn: () =>
+      experimental_streamedQuery({
+        streamFn: () => getPlaylistTracks(playlistId!),
+      }),
     enabled: !!playlistId,
+    retry: 3,
   });
 };

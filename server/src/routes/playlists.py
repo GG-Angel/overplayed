@@ -6,7 +6,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, Path, Request
 from core.limiter import limiter
 from routes.schemas import PlaylistResponse, SwipesResponse
 from services.spotify.dependencies import get_spotify_service
-from services.spotify.models import Playlist, PlaylistIdRegex, Track
+from services.spotify.models import Playlist, PlaylistIdRegex
 from services.spotify.service import SpotifyService
 from services.swipe.dependencies import get_swipe_service
 from services.swipe.models import SwipesForm
@@ -34,15 +34,15 @@ async def handle_get_user_playlist(
     return await spotify.get_playlist(playlist_id)
 
 
-@router.get("/{playlist_id}/tracks")
+@router.get("/{playlist_id}/tracks", response_class=StreamingResponse)
 @limiter.limit("30/minute")
 async def handle_get_playlist_tracks(
     request: Request,
     playlist_id: Annotated[str, Path(pattern=PlaylistIdRegex)],
     spotify: SpotifyService = Depends(get_spotify_service),
-) -> AsyncIterable[Track]:
+) -> AsyncIterable[str]:
     async for track in spotify.get_playlist_tracks(playlist_id):
-        yield track
+        yield track.model_dump_json() + "\n"
 
 
 @router.post("/{playlist_id}/swipes")
