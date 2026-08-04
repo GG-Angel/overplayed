@@ -31,12 +31,7 @@ const SwipeProvider = () => {
   if (!playlist.isSuccess) return <LoadingState message="Loading Playlist..." />;
   if (!tracks.isSuccess) return <LoadingState message="Loading tracks..." />;
 
-  return (
-    <SwipeProviderInner
-      playlist={playlist.data}
-      tracks={tracks.data.pages.flatMap((page) => page.tracks)}
-    />
-  );
+  return <SwipeProviderInner playlist={playlist.data} tracks={tracks.data} />;
 };
 
 const SwipeProviderInner = ({ playlist, tracks }: { playlist: Playlist; tracks: Track[] }) => {

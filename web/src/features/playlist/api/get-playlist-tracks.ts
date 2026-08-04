@@ -10,10 +10,9 @@ const getPlaylistTracks = (playlistId: string, signal?: AbortSignal): AsyncItera
 export const usePlaylistTracks = (playlistId: string | undefined) => {
   return useQuery({
     queryKey: queryKeys.playlistTracks(playlistId!),
-    queryFn: () =>
-      streamedQuery({
-        streamFn: ({ signal }) => getPlaylistTracks(playlistId!, signal),
-      }),
+    queryFn: streamedQuery({
+      streamFn: ({ signal }) => getPlaylistTracks(playlistId!, signal),
+    }),
     enabled: !!playlistId,
     retry: 3,
   });
