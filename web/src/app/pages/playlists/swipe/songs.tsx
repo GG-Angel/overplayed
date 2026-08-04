@@ -1,4 +1,3 @@
-import ErrorState from "@/components/states/ErrorState";
 import { useTrackPreviewUrl } from "@/features/previews/api/get-track-preview";
 import AudioPlayer from "@/features/previews/components/PreviewPlayer";
 import SwipeButtons from "@/features/swipe/components/SwipeButtons";
@@ -16,23 +15,24 @@ import { useNavigate } from "react-router-dom";
 import useDebouncedStorage from "@/hooks/useDebouncedStorage";
 import { storageKeys } from "@/lib/storage";
 
-const MAX_CARD_STACK_HEIGHT = 3; // Maximum number of cards to display in the stack
+const MAX_CARD_STACK_HEIGHT = 3; // maximum number of cards to display in the stack
 
 const SwipeSongsPage = () => {
+  const [isSwiping, setIsSwiping] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
   const { session, playlist, tracks } = useSwipeContext();
+  const currentSwipeCardRef = useRef<SwipeCardController | null>(null);
   const navigate = useNavigate();
   useSwipePreviews();
 
-  const [isSwiping, setIsSwiping] = useState(false);
-  const [isHelpOpen, setIsHelpOpen] = useState(false);
-  const currentSwipeCardRef = useRef<SwipeCardController | null>(null);
+  const decidedTrackIds = new Set(session.swipes.map((swipe) => swipe.item.id));
+  const upcomingTracks = tracks.filter((track) => !decidedTrackIds.has(track.id));
 
-  const currentIndex = session.swipes.length;
-  const currentTrack = tracks.at(currentIndex);
-  const currentPreview = useTrackPreviewUrl(currentTrack?.external_ids.isrc);
+  const currentTrack = upcomingTracks[0];
+  const currentPreview = useTrackPreviewUrl(currentTrack.external_ids.isrc);
 
-  const hasReachedEnd = currentIndex >= playlist.tracks.total;
-  const canUndoOrFinish = !isSwiping && currentIndex > 0;
+  const hasReachedEnd = session.swipes.length >= tracks.length;
+  const canUndoOrFinish = !isSwiping && session.swipes.length > 0;
   const canSwipe = !isSwiping && !hasReachedEnd;
 
   const triggerSwipe = useCallback(
@@ -45,7 +45,7 @@ const SwipeSongsPage = () => {
   );
 
   const recordSwipe = (direction: SwipeDirection) => {
-    if (!currentTrack || hasReachedEnd) return;
+    if (hasReachedEnd) return;
     session.recordSwipe({
       item: currentTrack,
       decision: direction === "left" ? "dislike" : "like",
@@ -71,23 +71,19 @@ const SwipeSongsPage = () => {
     session.swipes
   );
 
-  if (playlist.tracks.total <= 0) {
-    return <ErrorState message="Playlist is Empty" />;
-  }
-
   return (
     <main className="flex flex-col items-center gap-4 w-full self-center h-full py-6 overflow-x-hidden overflow-y-auto">
       <SwipeProgress
         className="w-full max-w-3xl"
         likes={session.likes.length}
         dislikes={session.dislikes.length}
-        total={playlist.tracks.total}
+        total={tracks.length}
       />
       <div className="flex-1 flex flex-col w-full items-center justify-center gap-6 shrink-0 py-4">
         {!hasReachedEnd ? (
           <SwipeCardStack
             topCardRef={currentSwipeCardRef}
-            tracks={tracks.slice(currentIndex, currentIndex + MAX_CARD_STACK_HEIGHT)}
+            tracks={upcomingTracks.slice(0, MAX_CARD_STACK_HEIGHT)}
             canSwipe={canSwipe}
             onSwipeStart={() => setIsSwiping(true)}
             onSwipeEnd={recordSwipe}

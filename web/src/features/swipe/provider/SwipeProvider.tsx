@@ -31,6 +31,8 @@ const SwipeProvider = () => {
   if (!playlist.isSuccess) return <LoadingState message="Loading Playlist..." />;
   if (!tracks.isSuccess) return <LoadingState message="Loading tracks..." />;
 
+  if (tracks.data.length === 0) return <ErrorState message="This Playlist is Empty" />;
+
   return <SwipeProviderInner playlist={playlist.data} tracks={tracks.data} />;
 };
 
@@ -48,13 +50,6 @@ const SwipeProviderInner = ({ playlist, tracks }: { playlist: Playlist; tracks: 
     `/playlists/${playlist.id}/swipe`
   );
 
-  const decided = useMemo(
-    () => new Set(session.swipes.map((swipe) => swipe.item.uri)),
-    [session.swipes]
-  );
-
-  const upcoming = tracks.filter((track) => !decided.has(track.uri));
-
   const contextValue = useMemo(() => {
     return {
       session,
@@ -63,9 +58,9 @@ const SwipeProviderInner = ({ playlist, tracks }: { playlist: Playlist; tracks: 
       hasSubmitted,
       setHasSubmitted,
       playlist,
-      tracks: upcoming,
+      tracks,
     };
-  }, [hasSubmitted, options, playlist, session, upcoming]);
+  }, [hasSubmitted, options, playlist, session, tracks]);
 
   return (
     <SwipeContext.Provider value={contextValue}>
