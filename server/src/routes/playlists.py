@@ -34,15 +34,15 @@ async def handle_get_user_playlist(
     return await spotify.get_playlist(playlist_id)
 
 
-@router.get("/{playlist_id}/tracks", response_class=StreamingResponse)
+@router.get("/{playlist_id}/tracks")
 @limiter.limit("30/minute")
 async def handle_get_playlist_tracks(
     request: Request,
     playlist_id: Annotated[str, Path(pattern=PlaylistIdRegex)],
     spotify: SpotifyService = Depends(get_spotify_service),
-) -> AsyncIterable[str]:
+) -> AsyncIterable[Track]:
     async for track in spotify.get_playlist_tracks(playlist_id):
-        yield track.model_dump_json()
+        yield track
 
 
 @router.post("/{playlist_id}/swipes")

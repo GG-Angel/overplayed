@@ -78,8 +78,17 @@ class SpotifyService:
         else:
             tracks = self.spotify.get_playlist_tracks(playlist.id)
 
+        tracklist: list[Track] = []
         async for track in tracks:
+            tracklist.append(track)
             yield track
+
+        await self.cache.set_playlist_tracks(
+            self.user_id,
+            playlist.id,
+            playlist.snapshot_id,
+            tracklist,
+        )
 
     async def create_playlist(self, name: str, description: str) -> Playlist:
         new_playlist = await self.spotify.create_playlist(name, description)
