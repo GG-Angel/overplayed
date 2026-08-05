@@ -11,7 +11,7 @@ from services.spotify.client import SpotifyClient
 from services.spotify.models import SessionInfo, TokenInfo
 from services.spotify.service import SpotifyService
 from settings import Settings
-from state import State, get_oauth, get_settings, get_state
+from state import get_oauth, get_settings
 
 TOKEN_EXPIRY_BUFFER = 120
 
@@ -32,7 +32,6 @@ def get_spotify_cache(
 
 async def get_spotify_service(
     session_id: str | None = Cookie(default=None),
-    state: State = Depends(get_state),
     oauth: SpotifyOAuth = Depends(get_oauth),
     cache: SpotifyCache = Depends(get_spotify_cache),
     settings: Settings = Depends(get_settings),
@@ -53,10 +52,10 @@ async def get_spotify_service(
             playlist_tracks_limit=settings.playlist_tracks_limit,
             get_saved_tracks_limit=settings.get_saved_tracks_limit,
             edit_saved_tracks_limit=settings.edit_saved_tracks_limit,
+            max_pagination_offset=settings.max_pagination_offset,
         ),
         cache=cache,
         user_id=session.user_id,
-        background_tasks=state.background_tasks,
     )
 
 

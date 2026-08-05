@@ -15,6 +15,7 @@ export const buildURLWithQueryParams = (
   return `${url}?${paramsString}`;
 };
 
+/** Streams NDJSON, yielding one batch per read rather than one item per line. */
 export async function* fetchStreamedJson<T>(url: string, schema: ZodType<T>, signal?: AbortSignal) {
   const response = await fetch(`${env.API_BASE_URL}${url}`, {
     headers: { Accept: "application/x-ndjson" },
@@ -27,6 +28,9 @@ export async function* fetchStreamedJson<T>(url: string, schema: ZodType<T>, sig
   }
 
   const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
+  const parseLines = (lines: string[]) =>
+    lines.filter((line) => line.trim()).map((line) => schema.parse(JSON.parse(line)));
+
   let buffer = "";
 
   try {
@@ -34,19 +38,15 @@ export async function* fetchStreamedJson<T>(url: string, schema: ZodType<T>, sig
       const { done, value } = await reader.read();
       if (done) break;
 
-      buffer += value;
+      const lines = (buffer + value).split("\n");
+      buffer = lines.pop() ?? ""; // the last entry is an incomplete line
 
-      let newLineIndex = buffer.indexOf("\n");
-      while (newLineIndex !== -1) {
-        const line = buffer.slice(0, newLineIndex).trim();
-        buffer = buffer.slice(newLineIndex + 1);
-        if (line) yield schema.parse(JSON.parse(line));
-        newLineIndex = buffer.indexOf("\n");
-      }
+      const batch = parseLines(lines);
+      if (batch.length) yield batch;
     }
 
-    const trailing = buffer.trim();
-    if (trailing) yield schema.parse(JSON.parse(trailing));
+    const trailing = parseLines([buffer]);
+    if (trailing.length) yield trailing;
   } finally {
     await reader.cancel();
   }

@@ -1,14 +1,15 @@
-import json
 from secrets import token_urlsafe
 
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from loguru import logger
+from pydantic import TypeAdapter
 
 from cache.client import RedisClient
 from cache.codec import Codec
 from services.spotify.models import CurrentUser, Playlist, SessionInfo, Track
 
 _SESSION_ID_LEN = 32
+_TRACKS = TypeAdapter(list[Track])
 
 
 class SpotifyCache:
@@ -91,15 +92,13 @@ class SpotifyCache:
     ) -> list[Track] | None:
         key = self._build_playlist_tracks_key(user_id, playlist_id, snapshot_id)
         tracks = await self._client.get(key)
-        if tracks is None:
-            return None
-        return [Track.model_validate_json(t) for t in json.loads(tracks)]
+        return _TRACKS.validate_json(tracks) if tracks else None
 
     async def set_playlist_tracks(
         self, user_id: str, playlist_id: str, snapshot_id: str, tracks: list[Track]
     ) -> None:
         key = self._build_playlist_tracks_key(user_id, playlist_id, snapshot_id)
-        dumped = json.dumps([t.model_dump_json() for t in tracks])
+        dumped = _TRACKS.dump_json(tracks).decode()
         await self._client.set(key, dumped, self._ttl_playlist_tracks)
 
     @staticmethod

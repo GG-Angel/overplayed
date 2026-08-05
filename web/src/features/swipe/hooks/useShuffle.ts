@@ -1,28 +1,26 @@
 import { shuffleArray } from "@/lib/utils";
 import { useCallback, useMemo, useState } from "react";
 
+/**
+ * Reorders `items` by a shuffled index list, leaving the first `consumed`
+ * entries in place. Items that arrive after a shuffle keep their natural order
+ * until the next one, so `order` only ever needs to cover the items seen so far.
+ */
 const useShuffle = <T>(items: T[], consumed: number) => {
   const [order, setOrder] = useState<number[]>([]);
 
-  if (order.length !== items.length) {
-    setOrder((prev) => {
-      // remove the indices that become out of bounds when items shrink
-      if (items.length < prev.length) {
-        return prev.filter((index) => index < items.length);
-      }
-
-      // append new indices when items grow
-      const overflow = items.length - prev.length;
-      const offset = prev.length;
-      return [...prev, ...Array.from({ length: overflow }, (_, index) => index + offset)];
-    });
-  }
-
   const shuffle = useCallback(() => {
-    setOrder((prev) => [...prev.slice(0, consumed), ...shuffleArray(prev.slice(consumed))]);
-  }, [consumed]);
+    setOrder((prev) => {
+      // absorb the natural-order tail of items that arrived since the last shuffle
+      const full = [...prev, ...items.slice(prev.length).map((_, index) => prev.length + index)];
+      return [...full.slice(0, consumed), ...shuffleArray(full.slice(consumed))];
+    });
+  }, [consumed, items]);
 
-  const shuffledItems = useMemo(() => order.map((index) => items[index]), [order, items]);
+  const shuffledItems = useMemo(
+    () => [...order.map((index) => items[index]), ...items.slice(order.length)],
+    [order, items]
+  );
 
   return { items: shuffledItems, shuffle };
 };

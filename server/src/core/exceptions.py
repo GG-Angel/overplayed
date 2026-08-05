@@ -19,8 +19,3 @@ class ForbiddenException(HTTPException):
 class BadRequestException(HTTPException):
     def __init__(self, detail: str = "Bad request"):
         super().__init__(status_code=status.HTTP_400_BAD_REQUEST, detail=detail)
-
-
-class NotReadyException(HTTPException):
-    def __init__(self, detail: str = "Not ready"):
-        super().__init__(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=detail)

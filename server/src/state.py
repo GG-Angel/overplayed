@@ -1,5 +1,3 @@
-from asyncio import Lock, Task
-
 from aiohttp import ClientSession
 from fastapi import Depends, Request
 from redis.asyncio import ConnectionPool
@@ -25,8 +23,6 @@ class State:
         self.db_engine = db_engine
         self.db_sessionmaker = db_sessionmaker
         self.redis_pool = redis_pool
-        self.background_tasks: set[Task] = set()
-        self.playlist_locks: dict[tuple[str, str], Lock] = {}
 
 
 def get_state(request: Request) -> State:

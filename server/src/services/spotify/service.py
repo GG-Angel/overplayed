@@ -1,5 +1,4 @@
-from typing import AsyncGenerator
-from asyncio import Task
+from collections.abc import AsyncGenerator
 
 from core.exceptions import NotFoundException
 from services.spotify.cache import SpotifyCache
@@ -19,12 +18,10 @@ class SpotifyService:
         spotify: SpotifyClient,
         cache: SpotifyCache,
         user_id: str,
-        background_tasks: set[Task],
     ):
         self.spotify = spotify
         self.cache = cache
         self.user_id = user_id
-        self.background_tasks = background_tasks
 
     async def get_current_user(self) -> CurrentUser:
         if cached := await self.cache.get_user(self.user_id):

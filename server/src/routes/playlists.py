@@ -1,10 +1,11 @@
-from fastapi.responses import StreamingResponse
-from typing import Annotated, AsyncIterable
+from collections.abc import AsyncIterable
+from typing import Annotated
 
 from fastapi import APIRouter, BackgroundTasks, Depends, Path, Request
+from fastapi.responses import StreamingResponse
 
 from core.limiter import limiter
-from routes.schemas import PlaylistResponse, SwipesResponse
+from routes.schemas import PlaylistResponse, SwipesResponse, TrackResponse
 from services.spotify.dependencies import get_spotify_service
 from services.spotify.models import Playlist, PlaylistIdRegex
 from services.spotify.service import SpotifyService
@@ -13,6 +14,8 @@ from services.swipe.models import SwipesForm
 from services.swipe.service import SwipeService
 
 router = APIRouter()
+
+STREAM_CHUNK_BYTES = 32 * 1024
 
 
 @router.get("", response_model=list[PlaylistResponse])
@@ -42,8 +45,22 @@ async def handle_get_playlist_tracks(
     spotify: SpotifyService = Depends(get_spotify_service),
 ) -> StreamingResponse:
     async def stream_tracks() -> AsyncIterable[str]:
+        """Stream tracks as NDJSON, batched to avoid one send per track."""
+        chunk: list[str] = []
+        chunk_size = 0
+
         async for track in spotify.get_playlist_tracks(playlist_id):
-            yield track.model_dump_json() + "\n"
+            line = TrackResponse.model_validate(track).model_dump_json() + "\n"
+            chunk.append(line)
+            chunk_size += len(line)
+
+            if chunk_size >= STREAM_CHUNK_BYTES:
+                yield "".join(chunk)
+                chunk.clear()
+                chunk_size = 0
+
+        if chunk:
+            yield "".join(chunk)
 
     return StreamingResponse(stream_tracks(), media_type="application/x-ndjson")
 
