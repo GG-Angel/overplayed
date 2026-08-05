@@ -8,13 +8,13 @@ import ShortcutsHelp from "@/features/swipe/components/ShortcutsHelp";
 import { useSwipeContext } from "@/features/swipe/provider/SwipeContext";
 import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts";
 import { SWIPE_SHORTCUTS } from "@/lib/shortcuts";
-import { Check, Undo } from "lucide-react";
+import { Check, Shuffle, Undo } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useDebouncedStorage from "@/hooks/useDebouncedStorage";
 import { storageKeys } from "@/lib/storage";
-import ShuffleButton from "@/features/swipe/components/ShuffleButton";
 import usePreloadSwipePreviews from "@/features/swipe/hooks/usePreloadSwipePreviews";
+import PillButton from "@/components/ui/PillButton";
 
 const MAX_CARD_STACK_HEIGHT = 3; // maximum number of cards to display in the stack
 
@@ -114,11 +114,14 @@ const SwipeSongsPage = () => {
             canSwipe={canSwipe}
           />
           <div className="flex items-center gap-2">
-            <ShuffleButton
-              onShuffle={handleShuffle}
-              shuffleCount={shuffleCount}
+            <PillButton
+              onClick={handleShuffle}
+              icon={Shuffle}
               disabled={!hasLoadedAllTracks}
-            />
+              shortcut={{ key: "shuffle", triggers: shuffleCount }}
+            >
+              Shuffle
+            </PillButton>
             <ShortcutsHelp
               open={isShortcutsModalOpen}
               onOpen={() => setIsShortcutsModalOpen(true)}

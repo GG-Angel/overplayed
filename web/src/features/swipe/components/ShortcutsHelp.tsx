@@ -1,6 +1,7 @@
 import Divider from "@/components/ui/Divider";
 import Kbd from "@/components/ui/Kbd";
 import Modal from "@/components/ui/Modal";
+import PillButton from "@/components/ui/PillButton";
 import {
   formatShortcutKey,
   MODAL_SHORTCUTS,
@@ -26,16 +27,15 @@ type ShortcutsHelpProps = {
 const ShortcutsHelp = ({ open, onOpen, onClose }: ShortcutsHelpProps) => {
   return (
     <>
-      <button
-        type="button"
+      <PillButton
         onClick={onOpen}
         aria-haspopup="dialog"
         aria-expanded={open}
-        className="hidden md:inline-flex items-center gap-1.5 shrink-0 rounded-full border border-faded px-2.5 py-1 text-xs font-medium text-muted cursor-pointer transition-colors hover:text-foreground hover:border-muted"
+        icon={Keyboard}
+        className="hidden md:inline-flex"
       >
-        <Keyboard className="size-3.5 shrink-0" />
         Shortcuts
-      </button>
+      </PillButton>
       {open && (
         <Modal onClose={onClose} className="flex flex-col gap-4 max-w-md">
           <h2 className="flex items-center gap-2">
