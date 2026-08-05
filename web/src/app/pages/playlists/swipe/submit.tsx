@@ -27,24 +27,35 @@ const SwipeSubmitPage = () => {
   const navigateHome = () => navigate("/", { replace: true });
   const navigateToSwipePage = () => navigate("..");
 
-  if (!controller.hasDislikes) {
+  if (controller.isSuccess) {
+    const backupPlaylist = controller.data?.backup_playlist;
     return (
       <MessageState
-        kaomoji={kaomojis.uncertain}
-        title="Invalid Submission"
-        tone="negative"
-        subtitle={<p>You haven't disliked any tracks...</p>}
+        kaomoji={kaomojis.proud}
+        title="Tracks Removed!"
+        tone="positive"
+        subtitle={
+          <>
+            <p>
+              You just cleaned out <span className="text-primary">{dislikePercentage}%</span> of
+              your playlist.
+            </p>
+            <p className="text-sm text-muted">(now you get to skip less)</p>
+          </>
+        }
         actions={
           <>
-            <Button icon={<Home className="size-4" />} variant="secondary" onClick={navigateHome}>
+            {backupPlaylist && (
+              <Button
+                icon={<ExternalLink className="size-4" />}
+                variant="secondary"
+                onClick={() => openExternalUrl(backupPlaylist.external_urls.spotify)}
+              >
+                Open Backup Playlist
+              </Button>
+            )}
+            <Button icon={<Home className="size-4" />} variant="primary" onClick={navigateHome}>
               Return Home
-            </Button>
-            <Button
-              icon={<Play className="size-4" />}
-              variant="primary"
-              onClick={navigateToSwipePage}
-            >
-              Swipe Tracks
             </Button>
           </>
         }
@@ -82,35 +93,24 @@ const SwipeSubmitPage = () => {
     );
   }
 
-  if (controller.isSuccess) {
-    const backupPlaylist = controller.data?.backup_playlist;
+  if (!controller.hasDislikes) {
     return (
       <MessageState
-        kaomoji={kaomojis.proud}
-        title="Tracks Removed!"
-        tone="positive"
-        subtitle={
-          <>
-            <p>
-              You just cleaned out <span className="text-primary">{dislikePercentage}%</span> of
-              your playlist.
-            </p>
-            <p className="text-sm text-muted">(now you get to skip less)</p>
-          </>
-        }
+        kaomoji={kaomojis.uncertain}
+        title="Invalid Submission"
+        tone="neutral"
+        subtitle={<p>You haven't disliked any tracks...</p>}
         actions={
           <>
-            {backupPlaylist && (
-              <Button
-                icon={<ExternalLink className="size-4" />}
-                variant="secondary"
-                onClick={() => openExternalUrl(backupPlaylist.external_urls.spotify)}
-              >
-                Open Backup Playlist
-              </Button>
-            )}
-            <Button icon={<Home className="size-4" />} variant="primary" onClick={navigateHome}>
+            <Button icon={<Home className="size-4" />} variant="secondary" onClick={navigateHome}>
               Return Home
+            </Button>
+            <Button
+              icon={<Play className="size-4" />}
+              variant="primary"
+              onClick={navigateToSwipePage}
+            >
+              Swipe Tracks
             </Button>
           </>
         }

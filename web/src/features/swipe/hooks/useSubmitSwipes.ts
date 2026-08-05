@@ -1,38 +1,38 @@
-import { queryKeys } from "@/lib/query";
-import { removeFromStorage, storageKeys } from "@/lib/storage";
 import type { SwipeSubmissionResponse } from "@/lib/types";
+import { useEffect, useMemo } from "react";
+import { useSwipeContext } from "../provider/SwipeContext";
+import { submitSwipes } from "../api/submit-swipes";
 import {
   useMutation,
   useMutationState,
   useQueryClient,
   type MutationState,
 } from "@tanstack/react-query";
-import { useEffect, useMemo } from "react";
-import { useSwipeContext } from "../provider/SwipeContext";
-import { submitSwipes } from "../api/submit-swipes";
+import { removeFromStorage, storageKeys } from "@/lib/storage";
+import { queryKeys } from "@/lib/query";
 
 const useSubmitSwipes = () => {
   const queryClient = useQueryClient();
   const { playlist, options, session, setHasSubmitted } = useSwipeContext();
-  const { id, snapshot_id } = playlist;
   const hasDislikes = session.dislikes.length > 0;
 
-  const mutationKey = useMemo(() => ["submit-swipes", id] as const, [id]);
+  const mutationKey = useMemo(() => ["submit-swipes", playlist.id] as const, [playlist.id]);
 
   const { mutate } = useMutation({
     mutationKey,
     mutationFn: () =>
-      submitSwipes(id, {
+      submitSwipes(playlist.id, {
         options,
         uris: session.dislikes.map((t) => t.uri),
         tracks_swiped: session.swipes.length,
       }),
+
     onSuccess: async () => {
-      removeFromStorage(sessionStorage, storageKeys.swipes(id, snapshot_id));
       setHasSubmitted(true);
+      removeFromStorage(sessionStorage, storageKeys.swipes(playlist.id, playlist.snapshot_id));
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.playlists() }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.metrics() }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.playlists(), refetchType: "none" }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.metrics(), refetchType: "none" }),
       ]);
     },
   });
