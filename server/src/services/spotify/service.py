@@ -1,4 +1,8 @@
+import asyncio
+from asyncio import Task
 from collections.abc import AsyncGenerator
+
+from loguru import logger
 
 from core.exceptions import NotFoundException
 from services.spotify.cache import SpotifyCache
@@ -9,7 +13,10 @@ from services.spotify.models import (
     Playlist,
     Track,
 )
+from services.spotify.stream import TrackStream, TrackStreamKey
 from services.spotify.utils import build_liked_songs_playlist
+
+TRACK_PUBLISH_BATCH = 100
 
 
 class SpotifyService:
@@ -18,10 +25,14 @@ class SpotifyService:
         spotify: SpotifyClient,
         cache: SpotifyCache,
         user_id: str,
+        background_tasks: set[Task],
+        track_streams: dict[TrackStreamKey, TrackStream],
     ):
         self.spotify = spotify
         self.cache = cache
         self.user_id = user_id
+        self.background_tasks = background_tasks
+        self.track_streams = track_streams
 
     async def get_current_user(self) -> CurrentUser:
         if cached := await self.cache.get_user(self.user_id):
@@ -70,22 +81,66 @@ class SpotifyService:
                 yield track
             return
 
+        async for track in self._follow_track_stream(playlist).follow():
+            yield track
+
+    def _follow_track_stream(self, playlist: Playlist) -> TrackStream:
+        """Returns the fetch already in flight for this playlist, starting one if there isn't one."""
+        key: TrackStreamKey = (self.user_id, playlist.id, playlist.snapshot_id)
+        if (stream := self.track_streams.get(key)) is not None:
+            return stream
+
+        stream = TrackStream()
+        self.track_streams[key] = stream
+
+        # detached from the request, so abandoning the stream still fills the cache
+        task = asyncio.create_task(self._fetch_and_cache_tracks(playlist, stream, key))
+        self.background_tasks.add(task)
+        task.add_done_callback(self.background_tasks.discard)
+        return stream
+
+    async def _fetch_and_cache_tracks(
+        self, playlist: Playlist, stream: TrackStream, key: TrackStreamKey
+    ) -> None:
+        """Fetches and caches tracks to completion, no matter who's listening."""
+        try:
+            try:
+                await self._publish_tracks(playlist, stream)
+            except Exception as error:
+                logger.error(f"Failed to fetch tracks for {playlist.id}: {error}")
+                await stream.close(error)  # tells followers to stop
+                return
+
+            # release followers, then cache
+            await stream.close()
+            await self._cache_tracks(playlist, stream.tracks)
+        finally:
+            self.track_streams.pop(key, None)
+
+    async def _publish_tracks(self, playlist: Playlist, stream: TrackStream) -> None:
         if playlist.id == LIKED_SONGS_ID:
             tracks = self.spotify.get_saved_tracks()
         else:
             tracks = self.spotify.get_playlist_tracks(playlist.id)
 
-        tracklist: list[Track] = []
+        batch: list[Track] = []
         async for track in tracks:
-            tracklist.append(track)
-            yield track
+            batch.append(track)
+            if len(batch) >= TRACK_PUBLISH_BATCH:
+                await stream.publish(batch)
+                batch = []
+        await stream.publish(batch)
 
-        await self.cache.set_playlist_tracks(
-            self.user_id,
-            playlist.id,
-            playlist.snapshot_id,
-            tracklist,
-        )
+    async def _cache_tracks(self, playlist: Playlist, tracks: list[Track]) -> None:
+        try:
+            await self.cache.set_playlist_tracks(
+                self.user_id,
+                playlist.id,
+                playlist.snapshot_id,
+                tracks,
+            )
+        except Exception as error:
+            logger.error(f"Failed to cache tracks for {playlist.id}: {error}")
 
     async def create_playlist(self, name: str, description: str) -> Playlist:
         new_playlist = await self.spotify.create_playlist(name, description)
