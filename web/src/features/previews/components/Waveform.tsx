@@ -20,6 +20,18 @@ const ignoreAbort = (error: unknown) => {
   console.error("Waveform playback failed:", error);
 };
 
+/**
+ * Tears down the media element the way `Player.destroy()` should: dropping the
+ * `src` attribute rather than assigning `""`, which resolves to the page URL
+ * and makes the browser log an invalid-URI failure.
+ */
+const releaseMedia = (media: HTMLAudioElement) => {
+  const src = media.currentSrc || media.src;
+  if (src.startsWith("blob:")) URL.revokeObjectURL(src);
+  media.removeAttribute("src");
+  media.load();
+};
+
 type WaveformProps = {
   url: string | null | undefined;
   waveformRef: Ref<WaveformHandler>;
@@ -51,8 +63,12 @@ const Waveform = ({
   useEffect(() => {
     if (!containerRef.current) return;
 
+    const media = document.createElement("audio");
+    media.preload = "auto";
+
     ws.current = WaveSurfer.create({
       container: containerRef.current,
+      media,
       waveColor: "gray",
       progressColor: "#1ed760",
       height: containerRef.current.clientHeight || FALLBACK_HEIGHT,
@@ -82,6 +98,7 @@ const Waveform = ({
     return () => {
       unsubs.forEach((unsub) => unsub());
       ws.current?.destroy();
+      releaseMedia(media);
     };
   }, []);
 
