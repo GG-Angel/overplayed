@@ -90,16 +90,21 @@ class SpotifyCache:
         playlist_id: str,
         snapshot_id: str,
     ) -> list[Track] | None:
-        key = self._build_playlist_tracks_key(user_id, playlist_id, snapshot_id)
-        tracks = await self._client.get(key)
+        tracks = await self._client.hget(
+            self._build_playlist_tracks_key(user_id),
+            self._build_playlist_snapshot_key(playlist_id, snapshot_id),
+        )
         return _TRACKS.validate_json(tracks) if tracks else None
 
     async def set_playlist_tracks(
         self, user_id: str, playlist_id: str, snapshot_id: str, tracks: list[Track]
     ) -> None:
-        key = self._build_playlist_tracks_key(user_id, playlist_id, snapshot_id)
-        dumped = _TRACKS.dump_json(tracks).decode()
-        await self._client.set(key, dumped, self._ttl_playlist_tracks)
+        await self._client.hset(
+            self._build_playlist_tracks_key(user_id),
+            self._build_playlist_snapshot_key(playlist_id, snapshot_id),
+            _TRACKS.dump_json(tracks).decode(),
+            self._ttl_playlist_tracks,
+        )
 
     @staticmethod
     def _build_session_key(session_id: str) -> str:
@@ -117,13 +122,11 @@ class SpotifyCache:
         return RedisClient.key(SpotifyCache._build_user_key(user_id), "playlists")
 
     @staticmethod
-    def _build_playlist_tracks_key(
-        user_id: str, playlist_id: str, snapshot_id: str
-    ) -> str:
-        """users:{user_id}:playlists:{playlist_id}:tracks:{snapshot_id}"""
-        return RedisClient.key(
-            SpotifyCache._build_playlists_key(user_id),
-            playlist_id,
-            "tracks",
-            snapshot_id,
-        )
+    def _build_playlist_tracks_key(user_id: str) -> str:
+        """users:{user_id}:playlists:tracks"""
+        return RedisClient.key(SpotifyCache._build_playlists_key(user_id), "tracks")
+
+    @staticmethod
+    def _build_playlist_snapshot_key(playlist_id: str, snapshot_id: str) -> str:
+        """playlistId:snapshotId"""
+        return RedisClient.key(playlist_id, snapshot_id)
