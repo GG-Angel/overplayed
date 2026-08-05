@@ -13,6 +13,12 @@ import Button from "@/components/ui/Button";
 import { Play, Undo2 } from "lucide-react";
 import { loadFromStorage, storageKeys } from "@/lib/storage";
 
+type SwipeProviderProps = {
+  playlist: Playlist;
+  tracks: Track[];
+  hasLoadedAllTracks: boolean;
+};
+
 const initialOptions: SwipeSubmissionForm["options"] = {
   backup_enabled: true,
   remove_from_likes: false,
@@ -33,10 +39,16 @@ const SwipeProvider = () => {
 
   if (tracks.data.length === 0) return <ErrorState message="This Playlist is Empty" />;
 
-  return <SwipeProviderInner playlist={playlist.data} tracks={tracks.data} />;
+  return (
+    <SwipeProviderInner
+      playlist={playlist.data}
+      tracks={tracks.data}
+      hasLoadedAllTracks={!tracks.isFetching}
+    />
+  );
 };
 
-const SwipeProviderInner = ({ playlist, tracks }: { playlist: Playlist; tracks: Track[] }) => {
+const SwipeProviderInner = ({ playlist, tracks, hasLoadedAllTracks }: SwipeProviderProps) => {
   const [options, setOptions] = useState<SwipeSubmissionForm["options"]>(initialOptions);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const persistedSwipes = loadFromStorage<Swipe<Track>[]>(
@@ -57,10 +69,11 @@ const SwipeProviderInner = ({ playlist, tracks }: { playlist: Playlist; tracks: 
       setOptions,
       hasSubmitted,
       setHasSubmitted,
+      hasLoadedAllTracks,
       playlist,
       tracks,
     };
-  }, [hasSubmitted, options, playlist, session, tracks]);
+  }, [hasLoadedAllTracks, hasSubmitted, options, playlist, session, tracks]);
 
   return (
     <SwipeContext.Provider value={contextValue}>

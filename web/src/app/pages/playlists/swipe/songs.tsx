@@ -22,7 +22,7 @@ const SwipeSongsPage = () => {
   const [shuffleCount, setShuffleCount] = useState(0);
   const [isSwiping, setIsSwiping] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
-  const { session, playlist, tracks } = useSwipeContext();
+  const { session, playlist, tracks, hasLoadedAllTracks } = useSwipeContext();
   const currentSwipeCardRef = useRef<SwipeCardController | null>(null);
   const navigate = useNavigate();
   useSwipePreviews();
@@ -36,12 +36,11 @@ const SwipeSongsPage = () => {
   const hasReachedEnd = session.swipes.length >= tracks.length;
   const canUndoOrFinish = !isSwiping && session.swipes.length > 0;
   const canSwipe = !isSwiping && !hasReachedEnd;
-  const canShuffle = true;
 
   const handleShuffle = useCallback(() => {
-    if (!canShuffle) return;
+    if (!hasLoadedAllTracks) return;
     setShuffleCount((prev) => prev + 1);
-  }, [canShuffle]);
+  }, [hasLoadedAllTracks]);
 
   const triggerSwipe = useCallback(
     (direction: SwipeDirection) => {
@@ -120,7 +119,7 @@ const SwipeSongsPage = () => {
             <ShuffleButton
               onShuffle={handleShuffle}
               shuffleCount={shuffleCount}
-              disabled={!canShuffle}
+              disabled={!hasLoadedAllTracks}
             />
             <ShortcutsHelp
               open={isHelpOpen}
