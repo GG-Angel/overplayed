@@ -1,6 +1,13 @@
 import useAuth from "@/features/user/auth/useAuth";
 import Metric from "@/components/ui/Metric";
-import { cn, fallbackImageUrl, formatCount, formatPercentage, openExternalUrl } from "@/lib/utils";
+import {
+  cn,
+  fallbackImageUrl,
+  formatCount,
+  formatPercentage,
+  openExternalUrl,
+  shuffleArray,
+} from "@/lib/utils";
 import Button from "@/components/ui/Button";
 import SpotifyIcon from "@/assets/spotify.svg?react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -18,12 +25,15 @@ import { useSwipeLeaderboard } from "@/features/metrics/api/get-swipe-leaderboad
 import { Key, Scissors } from "lucide-react";
 import Image from "@/components/ui/Image";
 import { useAccessContext } from "@/features/user/provider/AccessContext";
+import { useMemo } from "react";
+
+const CAROUSEL_TRACKS = z.array(trackSchema).parse(carouselTracks);
 
 const LandingPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const auth = useAuth();
-  const carousel = useSwipeCarousel(z.array(trackSchema).parse(carouselTracks));
+  const carousel = useSwipeCarousel(useMemo(() => shuffleArray(CAROUSEL_TRACKS), []));
   const { data: metrics } = useGlobalSwipeMetrics();
   const { data: leaderboard } = useSwipeLeaderboard();
   const { data: playlists } = useUserPlaylists({ enabled: !!auth.user });
