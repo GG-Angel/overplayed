@@ -29,15 +29,15 @@ const SwipeSongsPage = () => {
   const navigate = useNavigate();
   useSwipePreviews();
 
-  const decidedTrackIds = new Set(session.swipes.map((swipe) => swipe.item.id));
-  const undecidedTracks = tracks.filter((track) => !decidedTrackIds.has(track.id));
-  const { items: nextTracks, shuffle } = useShuffle<Track>(undecidedTracks, session.swipes.length);
+  const currentIndex = session.swipes.length;
 
-  const currentTrack = nextTracks.at(0);
+  const { items: nextTracks, shuffle } = useShuffle<Track>(tracks, currentIndex);
+
+  const currentTrack = nextTracks.at(currentIndex);
   const currentPreview = useTrackPreviewUrl(currentTrack?.external_ids.isrc);
 
-  const hasReachedEnd = session.swipes.length >= tracks.length;
-  const canUndoOrFinish = !isSwiping && session.swipes.length > 0;
+  const hasReachedEnd = currentIndex >= tracks.length;
+  const canUndoOrFinish = !isSwiping && currentIndex > 0;
   const canSwipe = !isSwiping && !hasReachedEnd;
 
   const handleShuffle = useCallback(() => {
@@ -95,7 +95,7 @@ const SwipeSongsPage = () => {
         {!hasReachedEnd ? (
           <SwipeCardStack
             topCardRef={currentSwipeCardRef}
-            tracks={nextTracks.slice(0, MAX_CARD_STACK_HEIGHT)}
+            tracks={nextTracks.slice(currentIndex, currentIndex + MAX_CARD_STACK_HEIGHT)}
             canSwipe={canSwipe}
             onSwipeStart={() => setIsSwiping(true)}
             onSwipeEnd={recordSwipe}

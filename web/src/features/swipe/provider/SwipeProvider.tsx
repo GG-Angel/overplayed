@@ -62,6 +62,12 @@ const SwipeProviderInner = ({ playlist, tracks, hasLoadedAllTracks }: SwipeProvi
     `/playlists/${playlist.id}/swipe`
   );
 
+  const normalizedTracks = useMemo(() => {
+    const persistedTracks = persistedSwipes.map((swipe) => swipe.item);
+    const persistedTrackIds = new Set(persistedTracks.map((track) => track.id));
+    return [...persistedTracks, ...tracks.filter((track) => !persistedTrackIds.has(track.id))];
+  }, [persistedSwipes, tracks]);
+
   const contextValue = useMemo(() => {
     return {
       session,
@@ -71,9 +77,9 @@ const SwipeProviderInner = ({ playlist, tracks, hasLoadedAllTracks }: SwipeProvi
       setHasSubmitted,
       hasLoadedAllTracks,
       playlist,
-      tracks,
+      tracks: normalizedTracks,
     };
-  }, [hasLoadedAllTracks, hasSubmitted, options, playlist, session, tracks]);
+  }, [normalizedTracks, hasLoadedAllTracks, hasSubmitted, options, playlist, session]);
 
   return (
     <SwipeContext.Provider value={contextValue}>

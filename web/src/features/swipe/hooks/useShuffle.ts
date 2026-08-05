@@ -22,9 +22,7 @@ const useShuffle = <T>(items: T[], consumed: number) => {
     setOrder((prev) => [...prev.slice(0, consumed), ...shuffleArray(prev.slice(consumed))]);
   }, [consumed]);
 
-  const shuffledItems = useMemo(() => {
-    return order.map((index) => items[index]);
-  }, [order, items]);
+  const shuffledItems = useMemo(() => order.map((index) => items[index]), [order, items]);
 
   return { items: shuffledItems, shuffle };
 };
