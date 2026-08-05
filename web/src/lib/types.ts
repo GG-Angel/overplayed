@@ -67,12 +67,6 @@ export const playlistSchema = resourceSchema.extend({
   external_urls: externalUrlsSchema,
 });
 
-export const playlistPageSchema = z.object({
-  has_more: z.boolean(),
-  next_offset: z.number().int().nonnegative().nullable(),
-  tracks: z.array(trackSchema),
-});
-
 export const trackPreviewSchema = z.object({
   isrc: z.string(),
   url: z.url().nullable(),
@@ -135,7 +129,6 @@ export type Album = z.infer<typeof albumSchema>;
 export type Track = z.infer<typeof trackSchema>;
 export type TrackPreview = z.infer<typeof trackPreviewSchema>;
 export type Playlist = z.infer<typeof playlistSchema>;
-export type PlaylistPage = z.infer<typeof playlistPageSchema>;
 export type SwipeSubmissionForm = z.infer<typeof swipeSubmissionFormSchema>;
 export type SwipeSubmissionResponse = z.infer<typeof swipeSubmissionResponseSchema>;
 export type Metrics = z.infer<typeof globalMetricsSchema>;

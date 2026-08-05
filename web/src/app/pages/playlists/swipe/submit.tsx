@@ -17,7 +17,7 @@ const SwipeSubmitPage = () => {
 
   // calculate on mount to maintain previous track count after refetch
   const [dislikePercentage] = useState(() => {
-    const total = playlist.metadata.tracks.total;
+    const total = playlist.tracks.total;
     return total > 0 ? Math.round((session.dislikes.length / total) * 100) : 0;
   });
 

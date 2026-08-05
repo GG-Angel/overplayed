@@ -8,10 +8,12 @@ export type SwipeContextValues = {
   setOptions: Dispatch<SetStateAction<SwipeSubmissionForm["options"]>>;
   hasSubmitted: boolean;
   setHasSubmitted: Dispatch<SetStateAction<boolean>>;
-  playlist: {
-    metadata: Playlist;
-    tracks: Track[];
-  };
+  hasLoadedAllTracks: boolean;
+  currentIndex: number;
+  shuffle: () => void;
+  playlist: Playlist;
+  tracks: Track[];
+  tracksLoaded: number;
 };
 
 export const SwipeContext = createContext<SwipeContextValues | null>(null);

@@ -141,7 +141,7 @@ const SwipeReviewPage = () => {
           </div>
           <Checkbox enabled={options.backup_enabled} onEnabledChange={undefined} />
         </Card>
-        {playlist.metadata.id !== LIKED_SONGS_ID && (
+        {playlist.id !== LIKED_SONGS_ID && (
           <Card
             className="flex justify-between items-center gap-4 pr-6 py-3 cursor-pointer select-none"
             onClick={toggleRemoveFromLikes}

@@ -1,4 +1,3 @@
-import ErrorState from "@/components/states/ErrorState";
 import { useTrackPreviewUrl } from "@/features/previews/api/get-track-preview";
 import AudioPlayer from "@/features/previews/components/PreviewPlayer";
 import SwipeButtons from "@/features/swipe/components/SwipeButtons";
@@ -6,34 +5,41 @@ import type { SwipeCardController, SwipeDirection } from "@/features/swipe/compo
 import SwipeCardStack from "@/features/swipe/components/SwipeCardStack";
 import SwipeProgress from "@/features/swipe/components/SwipeProgress";
 import ShortcutsHelp from "@/features/swipe/components/ShortcutsHelp";
-import useSwipePreviews from "@/features/swipe/hooks/useSwipePreviews";
 import { useSwipeContext } from "@/features/swipe/provider/SwipeContext";
 import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts";
 import { SWIPE_SHORTCUTS } from "@/lib/shortcuts";
-import { Check, Undo } from "lucide-react";
+import { Check, Shuffle, Undo } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useDebouncedStorage from "@/hooks/useDebouncedStorage";
 import { storageKeys } from "@/lib/storage";
+import usePreloadSwipePreviews from "@/features/swipe/hooks/usePreloadSwipePreviews";
+import PillButton from "@/components/ui/PillButton";
+import { Spinner } from "@/components/ui/Spinner";
 
-const MAX_CARD_STACK_HEIGHT = 3; // Maximum number of cards to display in the stack
+const MAX_CARD_STACK_HEIGHT = 3; // maximum number of cards to display in the stack
 
 const SwipeSongsPage = () => {
-  const { session, playlist } = useSwipeContext();
-  const navigate = useNavigate();
-  useSwipePreviews();
-
+  const { session, playlist, tracks, shuffle, currentIndex, hasLoadedAllTracks, tracksLoaded } =
+    useSwipeContext();
+  usePreloadSwipePreviews(tracks, currentIndex);
   const [isSwiping, setIsSwiping] = useState(false);
-  const [isHelpOpen, setIsHelpOpen] = useState(false);
   const currentSwipeCardRef = useRef<SwipeCardController | null>(null);
+  const [shuffleCount, setShuffleCount] = useState(0);
+  const [isShortcutsModalOpen, setIsShortcutsModalOpen] = useState(false);
+  const navigate = useNavigate();
 
-  const currentIndex = session.swipes.length;
-  const currentTrack = playlist.tracks.at(currentIndex);
+  const currentTrack = tracks.at(currentIndex);
   const currentPreview = useTrackPreviewUrl(currentTrack?.external_ids.isrc);
-
-  const hasReachedEnd = currentIndex >= playlist.metadata.tracks.total;
+  const hasReachedEnd = currentIndex >= tracks.length;
   const canUndoOrFinish = !isSwiping && currentIndex > 0;
   const canSwipe = !isSwiping && !hasReachedEnd;
+
+  const handleShuffle = useCallback(() => {
+    if (!hasLoadedAllTracks) return;
+    shuffle();
+    setShuffleCount((prev) => prev + 1);
+  }, [hasLoadedAllTracks, shuffle]);
 
   const triggerSwipe = useCallback(
     (direction: SwipeDirection) => {
@@ -60,20 +66,17 @@ const SwipeSongsPage = () => {
       dislike: () => triggerSwipe("left"),
       like: () => triggerSwipe("right"),
       undo: session.undoSwipe,
+      shuffle: handleShuffle,
     },
-    !isHelpOpen
+    !isShortcutsModalOpen
   );
 
   // persist swipes in case the user refreshes or leaves the page
   useDebouncedStorage(
     sessionStorage,
-    storageKeys.swipes(playlist.metadata.id, playlist.metadata.snapshot_id),
+    storageKeys.swipes(playlist.id, playlist.snapshot_id),
     session.swipes
   );
-
-  if (playlist.tracks.length <= 0) {
-    return <ErrorState message="Playlist is Empty" />;
-  }
 
   return (
     <main className="flex flex-col items-center gap-4 w-full self-center h-full py-6 overflow-x-hidden overflow-y-auto">
@@ -81,13 +84,13 @@ const SwipeSongsPage = () => {
         className="w-full max-w-3xl"
         likes={session.likes.length}
         dislikes={session.dislikes.length}
-        total={playlist.metadata.tracks.total}
+        total={playlist.tracks.total}
       />
       <div className="flex-1 flex flex-col w-full items-center justify-center gap-6 shrink-0 py-4">
         {!hasReachedEnd ? (
           <SwipeCardStack
             topCardRef={currentSwipeCardRef}
-            tracks={playlist.tracks.slice(currentIndex, currentIndex + MAX_CARD_STACK_HEIGHT)}
+            tracks={tracks.slice(currentIndex, currentIndex + MAX_CARD_STACK_HEIGHT)}
             canSwipe={canSwipe}
             onSwipeStart={() => setIsSwiping(true)}
             onSwipeEnd={recordSwipe}
@@ -111,11 +114,26 @@ const SwipeSongsPage = () => {
             canFinish={canUndoOrFinish}
             canSwipe={canSwipe}
           />
-          <div className="flex items-center gap-2">
+          <div className="relative flex justify-center items-center gap-2">
+            <PillButton
+              icon={
+                hasLoadedAllTracks ? (
+                  <Shuffle className="size-3.5 shrink-0" />
+                ) : (
+                  <Spinner size="xs" />
+                )
+              }
+              onClick={handleShuffle}
+              disabled={!hasLoadedAllTracks}
+              shortcut={{ key: "shuffle", triggers: shuffleCount }}
+              shouldPulseWhenDisabled
+            >
+              {hasLoadedAllTracks ? "Shuffle" : `${tracksLoaded} / ${playlist.tracks.total}`}
+            </PillButton>
             <ShortcutsHelp
-              open={isHelpOpen}
-              onOpen={() => setIsHelpOpen(true)}
-              onClose={() => setIsHelpOpen(false)}
+              open={isShortcutsModalOpen}
+              onOpen={() => setIsShortcutsModalOpen(true)}
+              onClose={() => setIsShortcutsModalOpen(false)}
             />
           </div>
         </div>
@@ -125,7 +143,7 @@ const SwipeSongsPage = () => {
         isLoading={currentPreview.isLoading}
         isError={currentPreview.isError}
         className="w-full max-w-3xl"
-        shortcutsEnabled={!isHelpOpen}
+        shortcutsEnabled={!isShortcutsModalOpen}
       />
     </main>
   );

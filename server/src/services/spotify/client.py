@@ -18,6 +18,7 @@ class SpotifyClient:
         playlist_tracks_limit: int,
         get_saved_tracks_limit: int,
         edit_saved_tracks_limit: int,
+        max_pagination_offset: int,
     ):
         self.spotify = spotify
         self.user_id = user_id
@@ -25,6 +26,7 @@ class SpotifyClient:
         self.playlist_tracks_limit = playlist_tracks_limit
         self.get_saved_tracks_limit = get_saved_tracks_limit
         self.edit_saved_tracks_limit = edit_saved_tracks_limit
+        self.max_pagination_offset = max_pagination_offset
 
     async def get_current_user(self) -> CurrentUser:
         """Gets the profile of the current user."""
@@ -147,8 +149,7 @@ class SpotifyClient:
         fn_name = getattr(fn, "__name__", repr(fn))
         offset = 0
 
-        # TODO: add limit?
-        while True:
+        while offset < self.max_pagination_offset:
             self._log(f"Paginating {fn_name} (offset={offset})")
             response = await self._run(fn, offset=offset, limit=limit, **kwargs)
 

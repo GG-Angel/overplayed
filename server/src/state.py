@@ -1,4 +1,4 @@
-from asyncio import Lock, Task
+from asyncio import Task
 
 from aiohttp import ClientSession
 from fastapi import Depends, Request
@@ -6,6 +6,7 @@ from redis.asyncio import ConnectionPool
 from spotipy import SpotifyOAuth
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
+from services.spotify.stream import TrackStream, TrackStreamKey
 from settings import APP_STATE_KEY, Settings
 
 
@@ -25,8 +26,10 @@ class State:
         self.db_engine = db_engine
         self.db_sessionmaker = db_sessionmaker
         self.redis_pool = redis_pool
+
+        # for fetches that outlive the request that started them
         self.background_tasks: set[Task] = set()
-        self.playlist_locks: dict[tuple[str, str], Lock] = {}
+        self.track_streams: dict[TrackStreamKey, TrackStream] = {}
 
 
 def get_state(request: Request) -> State:

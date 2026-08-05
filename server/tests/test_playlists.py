@@ -1,3 +1,5 @@
+import json
+
 import pytest
 from aiohttp import ClientSession
 from fastapi import status
@@ -43,10 +45,8 @@ def testing_playlist_id(playlists: list) -> str:
 async def get_playlist_tracks(session: ClientSession, playlist_id: str) -> list:
     async with session.get(f"/playlists/{playlist_id}/tracks") as response:
         assert response.status == status.HTTP_200_OK
-        page = await response.json()
-        assert isinstance(page, dict)
-        assert isinstance(page.get("tracks"), list)
-    return page["tracks"]
+        body = await response.text()
+    return [json.loads(line) for line in body.splitlines() if line]
 
 
 async def test_get_playlists(session: ClientSession):
@@ -99,15 +99,6 @@ async def test_get_playlist_not_found(session: ClientSession):
 
 async def test_get_playlist_tracks_invalid_id(session: ClientSession):
     async with session.get("/playlists/not-a-valid-id/tracks") as response:
-        assert response.status == status.HTTP_422_UNPROCESSABLE_CONTENT
-
-
-async def test_get_playlist_tracks_negative_offset(
-    session: ClientSession, first_playlist_id: str
-):
-    async with session.get(
-        f"/playlists/{first_playlist_id}/tracks", params={"offset": -1}
-    ) as response:
         assert response.status == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 

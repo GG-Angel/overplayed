@@ -2,12 +2,14 @@ from secrets import token_urlsafe
 
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from loguru import logger
+from pydantic import TypeAdapter
 
 from cache.client import RedisClient
 from cache.codec import Codec
 from services.spotify.models import CurrentUser, Playlist, SessionInfo, Track
 
 _SESSION_ID_LEN = 32
+_TRACKS = TypeAdapter(list[Track])
 
 
 class SpotifyCache:
@@ -87,39 +89,22 @@ class SpotifyCache:
         user_id: str,
         playlist_id: str,
         snapshot_id: str,
-        offset: int = 0,
-        limit: int = 100,
     ) -> list[Track] | None:
-        if offset < 0 or limit < 0:
-            raise ValueError("Offset and limit must be positive.")
+        tracks = await self._client.hget(
+            self._build_playlist_tracks_key(user_id),
+            self._build_playlist_snapshot_key(playlist_id, snapshot_id),
+        )
+        return _TRACKS.validate_json(tracks) if tracks else None
 
-        key = self._build_playlist_tracks_key(user_id, playlist_id, snapshot_id)
-        async with self._client.redis.pipeline() as pipe:
-            pipe.exists(key)
-            pipe.lrange(key, start=offset, end=offset + limit - 1)
-            pipe.expire(key, self._ttl_playlist_tracks)
-            is_cached, tracks, _ = await pipe.execute()
-
-        if not is_cached:
-            logger.debug(f"MISS: {key}")
-            return None
-
-        logger.debug(f"HIT: {key}")
-        return [Track.model_validate_json(track) for track in tracks]
-
-    async def push_playlist_tracks(
-        self,
-        user_id: str,
-        playlist_id: str,
-        snapshot_id: str,
-        tracks: list[Track],
+    async def set_playlist_tracks(
+        self, user_id: str, playlist_id: str, snapshot_id: str, tracks: list[Track]
     ) -> None:
-        key = self._build_playlist_tracks_key(user_id, playlist_id, snapshot_id)
-        async with self._client.redis.pipeline() as pipe:
-            pipe.rpush(key, *[track.model_dump_json() for track in tracks])
-            pipe.expire(key, self._ttl_playlist_tracks)
-            await pipe.execute()
-        logger.debug(f"CACHED: Pushed {len(tracks)} tracks (key={key}, ttl={self._ttl_playlist_tracks})")  # fmt: skip
+        await self._client.hset(
+            self._build_playlist_tracks_key(user_id),
+            self._build_playlist_snapshot_key(playlist_id, snapshot_id),
+            _TRACKS.dump_json(tracks).decode(),
+            self._ttl_playlist_tracks,
+        )
 
     @staticmethod
     def _build_session_key(session_id: str) -> str:
@@ -137,13 +122,11 @@ class SpotifyCache:
         return RedisClient.key(SpotifyCache._build_user_key(user_id), "playlists")
 
     @staticmethod
-    def _build_playlist_tracks_key(
-        user_id: str, playlist_id: str, snapshot_id: str
-    ) -> str:
-        """users:{user_id}:playlists:{playlist_id}:tracks:{snapshot_id}"""
-        return RedisClient.key(
-            SpotifyCache._build_playlists_key(user_id),
-            playlist_id,
-            "tracks",
-            snapshot_id,
-        )
+    def _build_playlist_tracks_key(user_id: str) -> str:
+        """users:{user_id}:playlists:tracks"""
+        return RedisClient.key(SpotifyCache._build_playlists_key(user_id), "tracks")
+
+    @staticmethod
+    def _build_playlist_snapshot_key(playlist_id: str, snapshot_id: str) -> str:
+        """playlistId:snapshotId"""
+        return RedisClient.key(playlist_id, snapshot_id)
