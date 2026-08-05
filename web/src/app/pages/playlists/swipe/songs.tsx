@@ -15,6 +15,8 @@ import { useNavigate } from "react-router-dom";
 import useDebouncedStorage from "@/hooks/useDebouncedStorage";
 import { storageKeys } from "@/lib/storage";
 import ShuffleButton from "@/features/swipe/components/ShuffleButton";
+import useShuffle from "@/features/swipe/hooks/useShuffle";
+import type { Track } from "@/lib/types";
 
 const MAX_CARD_STACK_HEIGHT = 3; // maximum number of cards to display in the stack
 
@@ -28,10 +30,11 @@ const SwipeSongsPage = () => {
   useSwipePreviews();
 
   const decidedTrackIds = new Set(session.swipes.map((swipe) => swipe.item.id));
-  const upcomingTracks = tracks.filter((track) => !decidedTrackIds.has(track.id));
+  const undecidedTracks = tracks.filter((track) => !decidedTrackIds.has(track.id));
+  const { items: nextTracks, shuffle } = useShuffle<Track>(undecidedTracks, session.swipes.length);
 
-  const currentTrack = upcomingTracks[0];
-  const currentPreview = useTrackPreviewUrl(currentTrack.external_ids.isrc);
+  const currentTrack = nextTracks.at(0);
+  const currentPreview = useTrackPreviewUrl(currentTrack?.external_ids.isrc);
 
   const hasReachedEnd = session.swipes.length >= tracks.length;
   const canUndoOrFinish = !isSwiping && session.swipes.length > 0;
@@ -39,8 +42,9 @@ const SwipeSongsPage = () => {
 
   const handleShuffle = useCallback(() => {
     if (!hasLoadedAllTracks) return;
+    shuffle();
     setShuffleCount((prev) => prev + 1);
-  }, [hasLoadedAllTracks]);
+  }, [hasLoadedAllTracks, shuffle]);
 
   const triggerSwipe = useCallback(
     (direction: SwipeDirection) => {
@@ -52,7 +56,7 @@ const SwipeSongsPage = () => {
   );
 
   const recordSwipe = (direction: SwipeDirection) => {
-    if (hasReachedEnd) return;
+    if (!currentTrack || hasReachedEnd) return;
     session.recordSwipe({
       item: currentTrack,
       decision: direction === "left" ? "dislike" : "like",
@@ -91,7 +95,7 @@ const SwipeSongsPage = () => {
         {!hasReachedEnd ? (
           <SwipeCardStack
             topCardRef={currentSwipeCardRef}
-            tracks={upcomingTracks.slice(0, MAX_CARD_STACK_HEIGHT)}
+            tracks={nextTracks.slice(0, MAX_CARD_STACK_HEIGHT)}
             canSwipe={canSwipe}
             onSwipeStart={() => setIsSwiping(true)}
             onSwipeEnd={recordSwipe}

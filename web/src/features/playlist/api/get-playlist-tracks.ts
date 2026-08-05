@@ -14,6 +14,5 @@ export const usePlaylistTracks = (playlistId: string | undefined) => {
       streamFn: ({ signal }) => getPlaylistTracks(playlistId!, signal),
     }),
     enabled: !!playlistId,
-    retry: 3,
   });
 };
