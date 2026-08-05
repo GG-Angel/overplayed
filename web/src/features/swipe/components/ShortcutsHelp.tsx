@@ -31,7 +31,7 @@ const ShortcutsHelp = ({ open, onOpen, onClose }: ShortcutsHelpProps) => {
         onClick={onOpen}
         aria-haspopup="dialog"
         aria-expanded={open}
-        icon={Keyboard}
+        icon={<Keyboard className="size-3.5 shrink-0" />}
         className="hidden md:inline-flex"
       >
         Shortcuts

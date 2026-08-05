@@ -15,11 +15,12 @@ import useDebouncedStorage from "@/hooks/useDebouncedStorage";
 import { storageKeys } from "@/lib/storage";
 import usePreloadSwipePreviews from "@/features/swipe/hooks/usePreloadSwipePreviews";
 import PillButton from "@/components/ui/PillButton";
+import { Spinner } from "@/components/ui/Spinner";
 
 const MAX_CARD_STACK_HEIGHT = 3; // maximum number of cards to display in the stack
 
 const SwipeSongsPage = () => {
-  const { session, playlist, tracks, shuffle, currentIndex, hasLoadedAllTracks } =
+  const { session, playlist, tracks, shuffle, currentIndex, hasLoadedAllTracks, tracksLoaded } =
     useSwipeContext();
   usePreloadSwipePreviews(tracks, currentIndex);
   const [isSwiping, setIsSwiping] = useState(false);
@@ -113,14 +114,21 @@ const SwipeSongsPage = () => {
             canFinish={canUndoOrFinish}
             canSwipe={canSwipe}
           />
-          <div className="flex items-center gap-2">
+          <div className="relative flex justify-center items-center gap-2">
             <PillButton
+              icon={
+                hasLoadedAllTracks ? (
+                  <Shuffle className="size-3.5 shrink-0" />
+                ) : (
+                  <Spinner size="xs" />
+                )
+              }
               onClick={handleShuffle}
-              icon={Shuffle}
               disabled={!hasLoadedAllTracks}
               shortcut={{ key: "shuffle", triggers: shuffleCount }}
+              shouldPulseWhenDisabled
             >
-              Shuffle
+              {hasLoadedAllTracks ? "Shuffle" : `${tracksLoaded} / ${playlist.tracks.total}`}
             </PillButton>
             <ShortcutsHelp
               open={isShortcutsModalOpen}

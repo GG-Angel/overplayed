@@ -5,6 +5,7 @@ import { LoaderCircle, type LucideProps } from "lucide-react";
 const spinnerVariants = cva("animate-spin", {
   variants: {
     size: {
+      xs: "size-3.5",
       sm: "size-4",
       md: "size-8",
       lg: "size-12",

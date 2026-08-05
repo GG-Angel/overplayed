@@ -83,6 +83,7 @@ const SwipeProviderInner = ({ playlist, tracks, hasLoadedAllTracks }: SwipeProvi
         hasLoadedAllTracks,
         playlist,
         tracks: shuffledTracks,
+        tracksLoaded: tracks.length,
       } satisfies SwipeContextValues),
     [
       session,
@@ -93,6 +94,7 @@ const SwipeProviderInner = ({ playlist, tracks, hasLoadedAllTracks }: SwipeProvi
       hasLoadedAllTracks,
       playlist,
       shuffledTracks,
+      tracks.length,
     ]
   );
 

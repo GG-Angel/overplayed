@@ -13,6 +13,7 @@ export type SwipeContextValues = {
   shuffle: () => void;
   playlist: Playlist;
   tracks: Track[];
+  tracksLoaded: number;
 };
 
 export const SwipeContext = createContext<SwipeContextValues | null>(null);
