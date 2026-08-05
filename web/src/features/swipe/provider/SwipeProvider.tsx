@@ -51,16 +51,16 @@ const SwipeProvider = () => {
 const SwipeProviderInner = ({ playlist, tracks, hasLoadedAllTracks }: SwipeProviderProps) => {
   const [options, setOptions] = useState<SwipeSubmissionForm["options"]>(initialOptions);
   const [hasSubmitted, setHasSubmitted] = useState(false);
-  const persistedSwipes = loadFromStorage<Swipe<Track>[]>(
-    sessionStorage,
-    storageKeys.swipes(playlist.id, playlist.snapshot_id),
-    []
+
+  const [persistedSwipes] = useState<Swipe<Track>[]>(
+    loadFromStorage<Swipe<Track>[]>(
+      sessionStorage,
+      storageKeys.swipes(playlist.id, playlist.snapshot_id),
+      []
+    )
   );
+
   const session = useSwipes<Track>(persistedSwipes);
-  const exitBlocker = useNavBlocker(
-    session.dislikes.length > 0 && !hasSubmitted,
-    `/playlists/${playlist.id}/swipe`
-  );
 
   const normalizedTracks = useMemo(() => {
     const persistedTracks = persistedSwipes.map((swipe) => swipe.item);
@@ -68,8 +68,8 @@ const SwipeProviderInner = ({ playlist, tracks, hasLoadedAllTracks }: SwipeProvi
     return [...persistedTracks, ...tracks.filter((track) => !persistedTrackIds.has(track.id))];
   }, [persistedSwipes, tracks]);
 
-  const contextValue = useMemo(() => {
-    return {
+  const contextValue = useMemo(
+    () => ({
       session,
       options,
       setOptions,
@@ -78,8 +78,14 @@ const SwipeProviderInner = ({ playlist, tracks, hasLoadedAllTracks }: SwipeProvi
       hasLoadedAllTracks,
       playlist,
       tracks: normalizedTracks,
-    };
-  }, [normalizedTracks, hasLoadedAllTracks, hasSubmitted, options, playlist, session]);
+    }),
+    [normalizedTracks, hasLoadedAllTracks, hasSubmitted, options, playlist, session]
+  );
+
+  const exitBlocker = useNavBlocker(
+    session.dislikes.length > 0 && !hasSubmitted,
+    `/playlists/${playlist.id}/swipe`
+  );
 
   return (
     <SwipeContext.Provider value={contextValue}>

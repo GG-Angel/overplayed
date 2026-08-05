@@ -27,11 +27,10 @@ const SwipeSongsPage = () => {
   const { session, playlist, tracks, hasLoadedAllTracks } = useSwipeContext();
   const currentSwipeCardRef = useRef<SwipeCardController | null>(null);
   const navigate = useNavigate();
-  useSwipePreviews();
 
   const currentIndex = session.swipes.length;
-
   const { items: nextTracks, shuffle } = useShuffle<Track>(tracks, currentIndex);
+  useSwipePreviews(nextTracks, currentIndex);
 
   const currentTrack = nextTracks.at(currentIndex);
   const currentPreview = useTrackPreviewUrl(currentTrack?.external_ids.isrc);
