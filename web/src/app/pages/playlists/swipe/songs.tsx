@@ -36,10 +36,12 @@ const SwipeSongsPage = () => {
   const hasReachedEnd = session.swipes.length >= tracks.length;
   const canUndoOrFinish = !isSwiping && session.swipes.length > 0;
   const canSwipe = !isSwiping && !hasReachedEnd;
+  const canShuffle = true;
 
   const handleShuffle = useCallback(() => {
+    if (!canShuffle) return;
     setShuffleCount((prev) => prev + 1);
-  }, []);
+  }, [canShuffle]);
 
   const triggerSwipe = useCallback(
     (direction: SwipeDirection) => {
@@ -115,7 +117,11 @@ const SwipeSongsPage = () => {
             canSwipe={canSwipe}
           />
           <div className="flex items-center gap-2">
-            <ShuffleButton onShuffle={handleShuffle} shuffleCount={shuffleCount} />
+            <ShuffleButton
+              onShuffle={handleShuffle}
+              shuffleCount={shuffleCount}
+              disabled={!canShuffle}
+            />
             <ShortcutsHelp
               open={isHelpOpen}
               onOpen={() => setIsHelpOpen(true)}
