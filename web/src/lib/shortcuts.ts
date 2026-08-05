@@ -7,6 +7,7 @@ export const SWIPE_SHORTCUTS = {
   dislike: { keys: ["arrowleft", "a"], label: "Dislike" },
   like: { keys: ["arrowright", "d"], label: "Like" },
   undo: { keys: ["arrowup", "w"], label: "Undo last swipe" },
+  shuffle: { keys: ["s"], label: "Shuffle upcoming tracks" },
 } satisfies Record<string, Shortcut>;
 
 export const PREVIEW_SHORTCUTS = {

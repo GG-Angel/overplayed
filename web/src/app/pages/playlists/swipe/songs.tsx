@@ -14,10 +14,12 @@ import { useCallback, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useDebouncedStorage from "@/hooks/useDebouncedStorage";
 import { storageKeys } from "@/lib/storage";
+import ShuffleButton from "@/features/swipe/components/ShuffleButton";
 
 const MAX_CARD_STACK_HEIGHT = 3; // maximum number of cards to display in the stack
 
 const SwipeSongsPage = () => {
+  const [shuffleCount, setShuffleCount] = useState(0);
   const [isSwiping, setIsSwiping] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const { session, playlist, tracks } = useSwipeContext();
@@ -34,6 +36,10 @@ const SwipeSongsPage = () => {
   const hasReachedEnd = session.swipes.length >= tracks.length;
   const canUndoOrFinish = !isSwiping && session.swipes.length > 0;
   const canSwipe = !isSwiping && !hasReachedEnd;
+
+  const handleShuffle = useCallback(() => {
+    setShuffleCount((prev) => prev + 1);
+  }, []);
 
   const triggerSwipe = useCallback(
     (direction: SwipeDirection) => {
@@ -60,6 +66,7 @@ const SwipeSongsPage = () => {
       dislike: () => triggerSwipe("left"),
       like: () => triggerSwipe("right"),
       undo: session.undoSwipe,
+      shuffle: handleShuffle,
     },
     !isHelpOpen
   );
@@ -108,6 +115,7 @@ const SwipeSongsPage = () => {
             canSwipe={canSwipe}
           />
           <div className="flex items-center gap-2">
+            <ShuffleButton onShuffle={handleShuffle} shuffleCount={shuffleCount} />
             <ShortcutsHelp
               open={isHelpOpen}
               onOpen={() => setIsHelpOpen(true)}
