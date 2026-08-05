@@ -136,7 +136,7 @@ const LandingPage = () => {
 
       {metrics && (
         <div className="flex flex-col gap-3">
-          <h3 className="text-center">Global statistics</h3>
+          <h3 className="text-center">Global stats</h3>
           {(() => {
             const metricsSummary = [
               { label: "Songs swiped", amount: formatCount(metrics.total_swipes) },
