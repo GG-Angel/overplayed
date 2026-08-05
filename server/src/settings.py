@@ -36,6 +36,7 @@ class Settings(BaseSettings):
     playlist_tracks_limit: int = 100
     get_saved_tracks_limit: int = 50
     edit_saved_tracks_limit: int = 40
+    max_pagination_offset: int = 10000  # Spotify rejects offsets beyond this
 
     @property
     def db_url(self) -> str:

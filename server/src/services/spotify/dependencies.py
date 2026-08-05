@@ -53,11 +53,12 @@ async def get_spotify_service(
             playlist_tracks_limit=settings.playlist_tracks_limit,
             get_saved_tracks_limit=settings.get_saved_tracks_limit,
             edit_saved_tracks_limit=settings.edit_saved_tracks_limit,
+            max_pagination_offset=settings.max_pagination_offset,
         ),
         cache=cache,
         user_id=session.user_id,
         background_tasks=state.background_tasks,
-        playlist_locks=state.playlist_locks,
+        track_streams=state.track_streams,
     )
 
 

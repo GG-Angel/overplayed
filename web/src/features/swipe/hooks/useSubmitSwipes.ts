@@ -14,7 +14,7 @@ import { submitSwipes } from "../api/submit-swipes";
 const useSubmitSwipes = () => {
   const queryClient = useQueryClient();
   const { playlist, options, session, setHasSubmitted } = useSwipeContext();
-  const { id, snapshot_id } = playlist.metadata;
+  const { id, snapshot_id } = playlist;
   const hasDislikes = session.dislikes.length > 0;
 
   const mutationKey = useMemo(() => ["submit-swipes", id] as const, [id]);

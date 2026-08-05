@@ -87,9 +87,3 @@ class Track(Resource):
     is_local: bool
     external_urls: ExternalUrls
     external_ids: ExternalIds
-
-
-class PlaylistPage(BaseModel):
-    has_more: bool
-    next_offset: int | None
-    tracks: list[Track]
