@@ -10,6 +10,16 @@ export type WaveformHandler = {
 
 const FALLBACK_HEIGHT = 40;
 
+/**
+ * `destroy()` aborts an in-flight `load()`, and `play()` rejects when the media
+ * is torn down mid-playback. Both happen on unmount, so an abort here is
+ * expected teardown rather than a failure worth reporting.
+ */
+const ignoreAbort = (error: unknown) => {
+  if (error instanceof DOMException && error.name === "AbortError") return;
+  console.error("Waveform playback failed:", error);
+};
+
 type WaveformProps = {
   url: string | null | undefined;
   waveformRef: Ref<WaveformHandler>;
@@ -58,12 +68,12 @@ const Waveform = ({
     const unsubs = [
       ws.current.on("ready", () => {
         ws.current?.setVolume(volumeRef.current);
-        ws.current?.play();
+        ws.current?.play().catch(ignoreAbort);
         callbacks.current.onReady?.();
       }),
       ws.current.on("finish", () => {
         ws.current?.seekTo(0);
-        ws.current?.play();
+        ws.current?.play().catch(ignoreAbort);
       }),
       ws.current.on("play", () => callbacks.current.onPlay?.()),
       ws.current.on("pause", () => callbacks.current.onPause?.()),
@@ -87,13 +97,13 @@ const Waveform = ({
       ws.current.pause();
       return;
     }
-    ws.current.load(url);
+    ws.current.load(url).catch(ignoreAbort);
   }, [url]);
 
   useImperativeHandle(
     waveformRef,
     () => ({
-      play: () => ws.current?.play(),
+      play: () => ws.current?.play().catch(ignoreAbort),
       pause: () => ws.current?.pause(),
       playPause: () => ws.current?.playPause(),
       isPlaying: () => ws.current?.isPlaying() ?? false,
