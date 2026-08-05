@@ -2,9 +2,9 @@ import { shuffleArray } from "@/lib/utils";
 import { useCallback, useMemo, useState } from "react";
 
 /**
- * Reorders `items` by a shuffled index list, leaving the first `consumed`
+ * Reorders items by a shuffled index list, leaving the first consumed
  * entries in place. Items that arrive after a shuffle keep their natural order
- * until the next one, so `order` only ever needs to cover the items seen so far.
+ * until the next shuffle, so order only ever needs to cover the items seen so far.
  */
 const useShuffle = <T>(items: T[], consumed: number) => {
   const [order, setOrder] = useState<number[]>([]);

@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import type { Playlist, SwipeSubmissionForm, Track } from "@/lib/types";
 import useSwipes, { type Swipe } from "../hooks/useSwipes";
-import { SwipeContext } from "./SwipeContext";
+import { SwipeContext, type SwipeContextValues } from "./SwipeContext";
 import { Outlet, useParams } from "react-router-dom";
 import ErrorState from "@/components/states/ErrorState";
 import { usePlaylist } from "@/features/playlist/api/get-playlist";
@@ -12,6 +12,7 @@ import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
 import { Play, Undo2 } from "lucide-react";
 import { loadFromStorage, storageKeys } from "@/lib/storage";
+import useShuffle from "../hooks/useShuffle";
 
 type SwipeProviderProps = {
   playlist: Playlist;
@@ -51,7 +52,6 @@ const SwipeProvider = () => {
 const SwipeProviderInner = ({ playlist, tracks, hasLoadedAllTracks }: SwipeProviderProps) => {
   const [options, setOptions] = useState<SwipeSubmissionForm["options"]>(initialOptions);
   const [hasSubmitted, setHasSubmitted] = useState(false);
-
   const [persistedSwipes] = useState<Swipe<Track>[]>(
     loadFromStorage<Swipe<Track>[]>(
       sessionStorage,
@@ -59,27 +59,41 @@ const SwipeProviderInner = ({ playlist, tracks, hasLoadedAllTracks }: SwipeProvi
       []
     )
   );
-
   const session = useSwipes<Track>(persistedSwipes);
+  const currentIndex = session.swipes.length;
 
-  const normalizedTracks = useMemo(() => {
+  const orderedTracks = useMemo(() => {
     const persistedTracks = persistedSwipes.map((swipe) => swipe.item);
     const persistedTrackIds = new Set(persistedTracks.map((track) => track.id));
     return [...persistedTracks, ...tracks.filter((track) => !persistedTrackIds.has(track.id))];
   }, [persistedSwipes, tracks]);
 
+  const { items: shuffledTracks, shuffle } = useShuffle<Track>(orderedTracks, currentIndex);
+
   const contextValue = useMemo(
-    () => ({
+    () =>
+      ({
+        session,
+        options,
+        setOptions,
+        hasSubmitted,
+        setHasSubmitted,
+        shuffle,
+        currentIndex,
+        hasLoadedAllTracks,
+        playlist,
+        tracks: shuffledTracks,
+      } satisfies SwipeContextValues),
+    [
       session,
       options,
-      setOptions,
       hasSubmitted,
-      setHasSubmitted,
+      shuffle,
+      currentIndex,
       hasLoadedAllTracks,
       playlist,
-      tracks: normalizedTracks,
-    }),
-    [normalizedTracks, hasLoadedAllTracks, hasSubmitted, options, playlist, session]
+      shuffledTracks,
+    ]
   );
 
   const exitBlocker = useNavBlocker(

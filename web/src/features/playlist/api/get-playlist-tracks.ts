@@ -15,8 +15,8 @@ export const usePlaylistTracks = (playlistId: string | undefined) => {
       reducer: (tracks: Track[], batch: Track[]) => tracks.concat(batch),
       initialValue: [] as Track[],
     }),
-    // the reducer already returns a fresh array, so diffing it against the
-    // previous one is pure O(n) waste on every streamed batch
+    // the reducer already returns a fresh array, so
+    // diffing it against the previous one is pointless
     structuralSharing: false,
     enabled: !!playlistId,
   });

@@ -4,7 +4,7 @@ import type { Track } from "@/lib/types";
 
 const PRELOAD_RADIUS = 5;
 
-const useSwipePreviews = (tracks: Track[], index: number) => {
+const usePreloadSwipePreviews = (tracks: Track[], index: number) => {
   const preloadIsrcs = tracks
     .slice(Math.max(0, index - PRELOAD_RADIUS), index + PRELOAD_RADIUS)
     .map((track) => track.external_ids.isrc);
@@ -15,4 +15,4 @@ const useSwipePreviews = (tracks: Track[], index: number) => {
   return useAudioPreloader(previewUrls);
 };
 
-export default useSwipePreviews;
+export default usePreloadSwipePreviews;

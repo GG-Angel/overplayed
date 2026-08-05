@@ -5,7 +5,6 @@ import type { SwipeCardController, SwipeDirection } from "@/features/swipe/compo
 import SwipeCardStack from "@/features/swipe/components/SwipeCardStack";
 import SwipeProgress from "@/features/swipe/components/SwipeProgress";
 import ShortcutsHelp from "@/features/swipe/components/ShortcutsHelp";
-import useSwipePreviews from "@/features/swipe/hooks/useSwipePreviews";
 import { useSwipeContext } from "@/features/swipe/provider/SwipeContext";
 import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts";
 import { SWIPE_SHORTCUTS } from "@/lib/shortcuts";
@@ -15,26 +14,22 @@ import { useNavigate } from "react-router-dom";
 import useDebouncedStorage from "@/hooks/useDebouncedStorage";
 import { storageKeys } from "@/lib/storage";
 import ShuffleButton from "@/features/swipe/components/ShuffleButton";
-import useShuffle from "@/features/swipe/hooks/useShuffle";
-import type { Track } from "@/lib/types";
+import usePreloadSwipePreviews from "@/features/swipe/hooks/usePreloadSwipePreviews";
 
 const MAX_CARD_STACK_HEIGHT = 3; // maximum number of cards to display in the stack
 
 const SwipeSongsPage = () => {
-  const [shuffleCount, setShuffleCount] = useState(0);
+  const { session, playlist, tracks, shuffle, currentIndex, hasLoadedAllTracks } =
+    useSwipeContext();
+  usePreloadSwipePreviews(tracks, currentIndex);
   const [isSwiping, setIsSwiping] = useState(false);
-  const [isHelpOpen, setIsHelpOpen] = useState(false);
-  const { session, playlist, tracks, hasLoadedAllTracks } = useSwipeContext();
   const currentSwipeCardRef = useRef<SwipeCardController | null>(null);
+  const [shuffleCount, setShuffleCount] = useState(0);
+  const [isShortcutsModalOpen, setIsShortcutsModalOpen] = useState(false);
   const navigate = useNavigate();
 
-  const currentIndex = session.swipes.length;
-  const { items: nextTracks, shuffle } = useShuffle<Track>(tracks, currentIndex);
-  useSwipePreviews(nextTracks, currentIndex);
-
-  const currentTrack = nextTracks.at(currentIndex);
+  const currentTrack = tracks.at(currentIndex);
   const currentPreview = useTrackPreviewUrl(currentTrack?.external_ids.isrc);
-
   const hasReachedEnd = currentIndex >= tracks.length;
   const canUndoOrFinish = !isSwiping && currentIndex > 0;
   const canSwipe = !isSwiping && !hasReachedEnd;
@@ -72,7 +67,7 @@ const SwipeSongsPage = () => {
       undo: session.undoSwipe,
       shuffle: handleShuffle,
     },
-    !isHelpOpen
+    !isShortcutsModalOpen
   );
 
   // persist swipes in case the user refreshes or leaves the page
@@ -94,7 +89,7 @@ const SwipeSongsPage = () => {
         {!hasReachedEnd ? (
           <SwipeCardStack
             topCardRef={currentSwipeCardRef}
-            tracks={nextTracks.slice(currentIndex, currentIndex + MAX_CARD_STACK_HEIGHT)}
+            tracks={tracks.slice(currentIndex, currentIndex + MAX_CARD_STACK_HEIGHT)}
             canSwipe={canSwipe}
             onSwipeStart={() => setIsSwiping(true)}
             onSwipeEnd={recordSwipe}
@@ -125,9 +120,9 @@ const SwipeSongsPage = () => {
               disabled={!hasLoadedAllTracks}
             />
             <ShortcutsHelp
-              open={isHelpOpen}
-              onOpen={() => setIsHelpOpen(true)}
-              onClose={() => setIsHelpOpen(false)}
+              open={isShortcutsModalOpen}
+              onOpen={() => setIsShortcutsModalOpen(true)}
+              onClose={() => setIsShortcutsModalOpen(false)}
             />
           </div>
         </div>
@@ -137,7 +132,7 @@ const SwipeSongsPage = () => {
         isLoading={currentPreview.isLoading}
         isError={currentPreview.isError}
         className="w-full max-w-3xl"
-        shortcutsEnabled={!isHelpOpen}
+        shortcutsEnabled={!isShortcutsModalOpen}
       />
     </main>
   );

@@ -9,6 +9,8 @@ export type SwipeContextValues = {
   hasSubmitted: boolean;
   setHasSubmitted: Dispatch<SetStateAction<boolean>>;
   hasLoadedAllTracks: boolean;
+  currentIndex: number;
+  shuffle: () => void;
   playlist: Playlist;
   tracks: Track[];
 };
