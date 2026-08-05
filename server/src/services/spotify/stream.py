@@ -1,4 +1,3 @@
-from loguru import logger
 import asyncio
 from collections.abc import AsyncGenerator
 
