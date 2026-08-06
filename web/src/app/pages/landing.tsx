@@ -26,37 +26,22 @@ import {
   openExternalUrl,
   shuffleArray,
 } from "@/lib/utils";
+import { Spinner } from "@/components/ui/Spinner";
 
 const CAROUSEL_TRACKS = z.array(trackSchema).parse(carouselTracks);
 
-const LandingPage = () => {
+const CallToAction = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const auth = useAuth();
-  const carousel = useSwipeCarousel(useMemo(() => shuffleArray(CAROUSEL_TRACKS), []));
-  const { data: metrics } = useGlobalSwipeMetrics();
-  const { data: leaderboard } = useSwipeLeaderboard();
-  const { data: playlists } = useUserPlaylists({ enabled: !!auth.user });
+  const { user, isLoading, redirectToLogin } = useAuth();
   const { hasRequestedAccess } = useAccessContext();
 
   return (
-    <main className="flex flex-col gap-8 w-full max-w-3xl self-center py-8">
-      <h1 className="text-center">
-        <span className="block">Your playlist is bloated. </span>
-        <span className="block text-muted">
-          <span className="text-primary">Swipe</span> the dead weight away.
-        </span>
-      </h1>
+    <div className="flex flex-col items-center justify-center xs:flex-row gap-3 w-full max-w-xl self-center">
+      {isLoading && <Spinner className="flex items-center h-10" size="sm" />}
 
-      <h3 className="text-center">
-        <span className="xs:block">
-          Tinder for your playlists. Swipe right to keep, left to cut.
-        </span>{" "}
-        <span className="xs:block">Clean up years of saved songs in minutes.</span>
-      </h3>
-
-      <div className="flex flex-col items-center justify-center xs:flex-row gap-3 w-full max-w-xl self-center">
-        {auth.user ? (
+      {!isLoading &&
+        (user ? (
           <Button
             key="view-playlists"
             className="self-center"
@@ -95,13 +80,40 @@ const LandingPage = () => {
               className="w-full"
               size="lg"
               variant="primary"
-              onClick={() => auth.redirectToLogin(location.pathname)}
+              onClick={() => redirectToLogin(location.pathname)}
             >
               Log in with Spotify
             </Button>
           </>
-        )}
-      </div>
+        ))}
+    </div>
+  );
+};
+
+const LandingPage = () => {
+  const { user } = useAuth();
+  const carousel = useSwipeCarousel(useMemo(() => shuffleArray(CAROUSEL_TRACKS), []));
+  const { data: metrics } = useGlobalSwipeMetrics();
+  const { data: leaderboard } = useSwipeLeaderboard();
+  const { data: playlists } = useUserPlaylists({ enabled: !!user });
+
+  return (
+    <main className="flex flex-col gap-8 w-full max-w-3xl self-center py-8">
+      <h1 className="text-center">
+        <span className="block">Your playlist is bloated. </span>
+        <span className="block text-muted">
+          <span className="text-primary">Swipe</span> the dead weight away.
+        </span>
+      </h1>
+
+      <h3 className="text-center">
+        <span className="xs:block">
+          Tinder for your playlists. Swipe right to keep, left to cut.
+        </span>{" "}
+        <span className="xs:block">Clean up years of saved songs in minutes.</span>
+      </h3>
+
+      <CallToAction />
 
       <Card
         className="flex flex-col items-center gap-6 pointer-events-none py-6"

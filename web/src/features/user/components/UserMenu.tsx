@@ -23,7 +23,11 @@ const UserMenu = () => {
   };
 
   if (isLoading) {
-    return <Spinner size="sm" />;
+    return (
+      <div className="flex items-center justify-center size-8">
+        <Spinner size="sm" />
+      </div>
+    );
   }
 
   if (!user) {
