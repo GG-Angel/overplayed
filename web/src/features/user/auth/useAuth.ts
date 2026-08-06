@@ -39,7 +39,9 @@ const useAuth = () => {
   });
 
   const redirectToLogin = (currentPath: string) => {
-    setHasRequestedAccess(true);
+    window.addEventListener("pagehide", () => {
+      setHasRequestedAccess(true);
+    });
     window.location.href = buildURLWithQueryParams(`${env.API_BASE_URL}/auth/login`, {
       redirect_to: currentPath,
     });
