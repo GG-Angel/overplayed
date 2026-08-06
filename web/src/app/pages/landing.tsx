@@ -1,13 +1,5 @@
 import useAuth from "@/features/user/auth/useAuth";
 import Metric from "@/components/ui/Metric";
-import {
-  cn,
-  fallbackImageUrl,
-  formatCount,
-  formatPercentage,
-  openExternalUrl,
-  shuffleArray,
-} from "@/lib/utils";
 import Button from "@/components/ui/Button";
 import SpotifyIcon from "@/assets/spotify.svg?react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -22,42 +14,37 @@ import z from "zod";
 import { LIKED_SONGS_ID, trackSchema } from "@/lib/types";
 import { useUserPlaylists } from "@/features/playlist/api/get-playlists";
 import { useSwipeLeaderboard } from "@/features/metrics/api/get-swipe-leaderboad";
-import { Key, Scissors } from "lucide-react";
+import { Key, Scissors, Undo } from "lucide-react";
 import Image from "@/components/ui/Image";
 import { useAccessContext } from "@/features/user/provider/AccessContext";
 import { useMemo } from "react";
+import {
+  cn,
+  fallbackImageUrl,
+  formatCount,
+  formatPercentage,
+  openExternalUrl,
+  shuffleArray,
+} from "@/lib/utils";
+import { Spinner } from "@/components/ui/Spinner";
+import { motion } from "framer-motion";
 
 const CAROUSEL_TRACKS = z.array(trackSchema).parse(carouselTracks);
 
-const LandingPage = () => {
+const CallToAction = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const auth = useAuth();
-  const carousel = useSwipeCarousel(useMemo(() => shuffleArray(CAROUSEL_TRACKS), []));
-  const { data: metrics } = useGlobalSwipeMetrics();
-  const { data: leaderboard } = useSwipeLeaderboard();
-  const { data: playlists } = useUserPlaylists({ enabled: !!auth.user });
+  const { user, isLoading, redirectToLogin } = useAuth();
   const { hasRequestedAccess } = useAccessContext();
 
   return (
-    <main className="flex flex-col gap-8 w-full max-w-3xl self-center py-8">
-      <h1 className="text-center">
-        <span className="block">Your playlist is bloated. </span>
-        <span className="block text-muted">
-          <span className="text-primary">Swipe</span> the dead weight away.
-        </span>
-      </h1>
+    <div className="flex flex-col-reverse items-center justify-center xs:flex-row gap-3 w-full max-w-xl self-center">
+      {isLoading && <Spinner className="flex items-center h-10" size="sm" />}
 
-      <h3 className="text-center">
-        <span className="xs:block">
-          Tinder for your playlists. Swipe right to keep, left to cut.
-        </span>{" "}
-        <span className="xs:block">Clean up years of saved songs in minutes.</span>
-      </h3>
-
-      <div className="flex flex-col items-center justify-center xs:flex-row gap-3 w-full max-w-xl self-center">
-        {auth.user ? (
+      {!isLoading &&
+        (user ? (
           <Button
+            key="view-playlists"
             className="self-center"
             size="lg"
             icon={<SpotifyIcon className="size-5 shrink-0" />}
@@ -68,27 +55,67 @@ const LandingPage = () => {
         ) : (
           <>
             <Button
-              className={hasRequestedAccess ? "w-full" : "self-center"}
+              key="request-access"
               icon={<Key className="size-5 shrink-0" />}
+              className={cn(
+                "overflow-visible group relative flex items-center",
+                hasRequestedAccess ? "w-full" : "self-center"
+              )}
               size="lg"
-              variant="primary"
+              variant={hasRequestedAccess ? "secondary" : "primary"}
               onClick={() => navigate("/request-access")}
             >
               Request Access
+              <motion.div
+                initial={{ opacity: 0, scale: 0.75, rotate: 4 }}
+                animate={{ opacity: 1, scale: 1, rotate: 3 }}
+                transition={{ delay: 0.6, duration: 0.25 }}
+                hidden={hasRequestedAccess}
+                className="absolute pointer-events-none origin-bottom-left -top-3/5 left-full text-primary/75 hidden xs:flex items-center gap-2"
+              >
+                <Undo className="-rotate-24" />
+                Start here!
+              </motion.div>
             </Button>
             <Button
+              key="log-in"
               hidden={!hasRequestedAccess}
+              icon={<SpotifyIcon className="size-5 shrink-0" />}
               className="w-full"
               size="lg"
-              icon={<SpotifyIcon className="size-5 shrink-0" />}
-              variant="secondary"
-              onClick={() => auth.redirectToLogin(location.pathname)}
+              variant="primary"
+              onClick={() => redirectToLogin(location.pathname)}
             >
               Log in with Spotify
             </Button>
           </>
-        )}
-      </div>
+        ))}
+    </div>
+  );
+};
+
+const LandingPage = () => {
+  const { user } = useAuth();
+  const carousel = useSwipeCarousel(useMemo(() => shuffleArray(CAROUSEL_TRACKS), []));
+  const { data: metrics } = useGlobalSwipeMetrics();
+  const { data: leaderboard } = useSwipeLeaderboard();
+  const { data: playlists } = useUserPlaylists({ enabled: !!user });
+
+  return (
+    <main className="flex flex-col gap-8 w-full max-w-3xl self-center py-8">
+      <h1 className="text-center">
+        <span className="block">Your playlist is bloated.</span>
+        <span className="block text-muted">
+          <span className="text-primary">Swipe</span> the dead weight away.
+        </span>
+      </h1>
+
+      <h3 className="text-center self-center max-w-100 sm:max-w-md">
+        Tinder for your playlists. Swipe right to keep, left to cut. Clean up years of saved songs
+        in minutes.
+      </h3>
+
+      <CallToAction />
 
       <Card
         className="flex flex-col items-center gap-6 pointer-events-none py-6"
