@@ -37,7 +37,7 @@ const CallToAction = () => {
   const { hasRequestedAccess } = useAccessContext();
 
   return (
-    <div className="flex flex-col items-center justify-center xs:flex-row gap-3 w-full max-w-xl self-center">
+    <div className="flex flex-col-reverse items-center justify-center xs:flex-row gap-3 w-full max-w-xl self-center">
       {isLoading && <Spinner className="flex items-center h-10" size="sm" />}
 
       {!isLoading &&
