@@ -58,6 +58,7 @@ const LandingPage = () => {
       <div className="flex flex-col items-center justify-center xs:flex-row gap-3 w-full max-w-xl self-center">
         {auth.user ? (
           <Button
+            key="view-playlists"
             className="self-center"
             size="lg"
             icon={<SpotifyIcon className="size-5 shrink-0" />}
@@ -68,6 +69,7 @@ const LandingPage = () => {
         ) : (
           <>
             <Button
+              key="request-access"
               icon={<Key className="size-5 shrink-0" />}
               className={cn(
                 "overflow-visible group relative flex items-center",
@@ -87,6 +89,7 @@ const LandingPage = () => {
               </div>
             </Button>
             <Button
+              key="log-in"
               hidden={!hasRequestedAccess}
               icon={<SpotifyIcon className="size-5 shrink-0" />}
               className="w-full"
