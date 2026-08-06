@@ -68,8 +68,8 @@ const RequestAccessPage = () => {
     loadFromStorage(localStorage, storageKeys.accessForm, { email: "" })
   );
   const [errors, setErrors] = useState<Partial<QueueAccessRequest>>({});
-  const { setHasRequestedAccess } = useAccessContext();
   const [turnstileToken, setTurnstileToken] = useState<string>("");
+  const { setHasRequestedAccess } = useAccessContext();
 
   const turnstileRef = useRef<TurnstileHandle>(null);
   const queueStatus = useQueueStatus();

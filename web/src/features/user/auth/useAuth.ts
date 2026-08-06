@@ -4,6 +4,7 @@ import { env } from "@/lib/env";
 import { queryKeys } from "@/lib/query";
 import { currentUserSchema } from "@/lib/types";
 import api, { buildURLWithQueryParams } from "@/lib/api";
+import { useAccessContext } from "../provider/AccessContext";
 
 const getUser = async () => {
   try {
@@ -26,6 +27,7 @@ const useUser = () =>
 const useAuth = () => {
   const queryClient = useQueryClient();
   const { data: user, isLoading, isError } = useUser();
+  const { setHasRequestedAccess } = useAccessContext();
 
   const isUnauthorized = user === null;
 
@@ -37,6 +39,7 @@ const useAuth = () => {
   });
 
   const redirectToLogin = (currentPath: string) => {
+    setHasRequestedAccess(true);
     window.location.href = buildURLWithQueryParams(`${env.API_BASE_URL}/auth/login`, {
       redirect_to: currentPath,
     });
