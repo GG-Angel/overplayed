@@ -33,7 +33,7 @@ const useAuth = () => {
 
   const logoutMutation = useMutation({
     mutationFn: logoutUser,
-    onSuccess: () => {
+    onMutate: () => {
       queryClient.clear();
     },
   });
