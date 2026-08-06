@@ -104,7 +104,7 @@ const LandingPage = () => {
   return (
     <main className="flex flex-col gap-8 w-full max-w-3xl self-center py-8">
       <h1 className="text-center">
-        <span className="block">Your playlist is bloated. </span>
+        <span className="block">Your playlist is bloated.</span>
         <span className="block text-muted">
           <span className="text-primary">Swipe</span> the dead weight away.
         </span>
