@@ -1,21 +1,29 @@
 import { loadFromStorage, saveToStorage, storageKeys } from "@/lib/storage";
 import { useMemo, useState, type ReactNode } from "react";
 import { AccessContext } from "./AccessContext";
+import useAuth from "../auth/useAuth";
 
 const AccessProvider = ({ children }: { children?: ReactNode }) => {
-  const [hasRequestedAccess, setHasRequestedAccess] = useState(() =>
+  const { isUnauthorized } = useAuth();
+
+  const [hasInteractedWithAuth, setHasInteractedWithAuth] = useState(() =>
     loadFromStorage(localStorage, storageKeys.hasRequestedAccess, false)
   );
 
+  if (!hasInteractedWithAuth && !isUnauthorized) {
+    saveToStorage(localStorage, storageKeys.hasRequestedAccess, true);
+    setHasInteractedWithAuth(true);
+  }
+
   const contextValue = useMemo(
     () => ({
-      hasRequestedAccess,
+      hasRequestedAccess: hasInteractedWithAuth,
       setHasRequestedAccess: (value: boolean) => {
         saveToStorage(localStorage, storageKeys.hasRequestedAccess, value);
-        setHasRequestedAccess(value);
+        setHasInteractedWithAuth(value);
       },
     }),
-    [hasRequestedAccess]
+    [hasInteractedWithAuth]
   );
 
   return <AccessContext.Provider value={contextValue}>{children}</AccessContext.Provider>;

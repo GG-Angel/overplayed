@@ -1,13 +1,5 @@
 import useAuth from "@/features/user/auth/useAuth";
 import Metric from "@/components/ui/Metric";
-import {
-  cn,
-  fallbackImageUrl,
-  formatCount,
-  formatPercentage,
-  openExternalUrl,
-  shuffleArray,
-} from "@/lib/utils";
 import Button from "@/components/ui/Button";
 import SpotifyIcon from "@/assets/spotify.svg?react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -22,10 +14,18 @@ import z from "zod";
 import { LIKED_SONGS_ID, trackSchema } from "@/lib/types";
 import { useUserPlaylists } from "@/features/playlist/api/get-playlists";
 import { useSwipeLeaderboard } from "@/features/metrics/api/get-swipe-leaderboad";
-import { Key, Scissors } from "lucide-react";
+import { Key, Scissors, Undo } from "lucide-react";
 import Image from "@/components/ui/Image";
 import { useAccessContext } from "@/features/user/provider/AccessContext";
 import { useMemo } from "react";
+import {
+  cn,
+  fallbackImageUrl,
+  formatCount,
+  formatPercentage,
+  openExternalUrl,
+  shuffleArray,
+} from "@/lib/utils";
 
 const CAROUSEL_TRACKS = z.array(trackSchema).parse(carouselTracks);
 
@@ -68,20 +68,30 @@ const LandingPage = () => {
         ) : (
           <>
             <Button
-              className={hasRequestedAccess ? "w-full" : "self-center"}
               icon={<Key className="size-5 shrink-0" />}
+              className={cn(
+                "overflow-visible group relative flex items-center",
+                hasRequestedAccess ? "w-full" : "self-center"
+              )}
               size="lg"
-              variant="primary"
+              variant={hasRequestedAccess ? "secondary" : "primary"}
               onClick={() => navigate("/request-access")}
             >
               Request Access
+              <div
+                hidden={hasRequestedAccess}
+                className="absolute -top-3/5 left-full rotate-3 text-primary/75 hidden xs:flex items-center gap-2"
+              >
+                <Undo className="-rotate-24" />
+                Start here!
+              </div>
             </Button>
             <Button
               hidden={!hasRequestedAccess}
+              icon={<SpotifyIcon className="size-5 shrink-0" />}
               className="w-full"
               size="lg"
-              icon={<SpotifyIcon className="size-5 shrink-0" />}
-              variant="secondary"
+              variant="primary"
               onClick={() => auth.redirectToLogin(location.pathname)}
             >
               Log in with Spotify
