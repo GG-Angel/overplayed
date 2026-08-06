@@ -110,11 +110,9 @@ const LandingPage = () => {
         </span>
       </h1>
 
-      <h3 className="text-center">
-        <span className="xs:block">
-          Tinder for your playlists. Swipe right to keep, left to cut.
-        </span>{" "}
-        <span className="xs:block">Clean up years of saved songs in minutes.</span>
+      <h3 className="text-center self-center max-w-100 sm:max-w-md">
+        Tinder for your playlists. Swipe right to keep, left to cut. Clean up years of saved songs
+        in minutes.
       </h3>
 
       <CallToAction />
