@@ -27,6 +27,7 @@ import {
   shuffleArray,
 } from "@/lib/utils";
 import { Spinner } from "@/components/ui/Spinner";
+import { motion } from "framer-motion";
 
 const CAROUSEL_TRACKS = z.array(trackSchema).parse(carouselTracks);
 
@@ -65,13 +66,16 @@ const CallToAction = () => {
               onClick={() => navigate("/request-access")}
             >
               Request Access
-              <div
+              <motion.div
+                initial={{ opacity: 0, scale: 0.75, rotate: 4 }}
+                animate={{ opacity: 1, scale: 1, rotate: 3 }}
+                transition={{ delay: 0.6, duration: 0.25 }}
                 hidden={hasRequestedAccess}
-                className="absolute -top-3/5 left-full rotate-3 text-primary/75 hidden xs:flex items-center gap-2"
+                className="absolute pointer-events-none origin-bottom-left -top-3/5 left-full text-primary/75 hidden xs:flex items-center gap-2"
               >
                 <Undo className="-rotate-24" />
                 Start here!
-              </div>
+              </motion.div>
             </Button>
             <Button
               key="log-in"
