@@ -6,6 +6,8 @@ export type WaveformHandler = {
   pause: () => void;
   playPause: () => Promise<void> | undefined;
   isPlaying: () => boolean;
+  skipForward: () => void;
+  skipBackward: () => void;
 };
 
 const FALLBACK_HEIGHT = 40;
@@ -102,11 +104,13 @@ const Waveform = ({
     };
   }, []);
 
+  // update volume
   useEffect(() => {
     volumeRef.current = volume;
     ws.current?.setVolume(volume);
   }, [volume]);
 
+  // load audio when the URL changes
   useEffect(() => {
     if (!ws.current) return;
 
@@ -117,6 +121,21 @@ const Waveform = ({
     ws.current.load(url).catch(ignoreAbort);
   }, [url]);
 
+  const skipPlayback = (direction: "forward" | "backward") => {
+    if (!ws.current) return;
+    const current = ws.current.getCurrentTime();
+    const duration = ws.current.getDuration();
+
+    const wrap = (value: number, max: number) => ((value % max) + max) % max;
+
+    const seekPosition =
+      direction === "forward"
+        ? wrap(current + 5, duration) / duration
+        : wrap(current - 5, duration) / duration;
+
+    ws.current.seekTo(seekPosition);
+  };
+
   useImperativeHandle(
     waveformRef,
     () => ({
@@ -124,6 +143,8 @@ const Waveform = ({
       pause: () => ws.current?.pause(),
       playPause: () => ws.current?.playPause(),
       isPlaying: () => ws.current?.isPlaying() ?? false,
+      skipForward: () => skipPlayback("forward"),
+      skipBackward: () => skipPlayback("backward"),
     }),
     []
   );
