@@ -19,7 +19,7 @@ const Metric = ({ amount, label, className, ...props }: MetricProps) => (
 type MetricSkeletonProps = Pick<CardProps, "className" | "tone">;
 
 export const MetricSkeleton = ({ className, ...props }: MetricSkeletonProps) => {
-  return <Card className={cn("animate-pulse", className)} {...props} />;
+  return <Card className={cn("animate-pulse h-23.75", className)} {...props} />;
 };
 
 export default Metric;
