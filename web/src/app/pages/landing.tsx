@@ -114,7 +114,7 @@ const Leaderboard = () => {
 
   if (!leaderboard) {
     return (
-      <div className="flex flex-col gap-1.5 mt-10">
+      <div className="flex flex-col gap-1.5 mt-4">
         {Array.from({ length: LEADERBOARD_ROWS }).map((_, i) => (
           <Card
             key={`leaderboard-row-${i}`}
