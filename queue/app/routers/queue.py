@@ -56,7 +56,7 @@ async def get_user_status(
 
 
 @router.post("")
-@limiter.limit("10/minute")
+@limiter.limit("3/hour")
 async def join_queue(
     request: Request,
     form: QueueSignUpForm,
