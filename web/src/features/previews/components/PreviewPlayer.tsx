@@ -61,18 +61,17 @@ const AudioPlayer = ({
     setVolume((prevVolume) => (prevVolume > 0 ? 0 : DEFAULT_VOLUME));
   }, []);
 
-  // flash the volume button so the shortcut has visible feedback
-  const handleMuteShortcut = useCallback(() => {
-    handleVolumeToggle();
-    setMuteCount((prev) => prev + 1);
-  }, [handleVolumeToggle]);
-
   // handle spacebar keydown to play/pause + mute/unmute the audio
   useKeyboardShortcuts(
     PREVIEW_SHORTCUTS,
     {
       playPause: handlePlayPause,
-      mute: handleMuteShortcut,
+      mute: useCallback(() => {
+        handleVolumeToggle();
+        setMuteCount((prev) => prev + 1); // flashes volume button
+      }, [handleVolumeToggle]),
+      skipForward: useCallback(() => waveformRef.current?.skipForward(), []),
+      skipBackward: useCallback(() => waveformRef.current?.skipBackward(), []),
     },
     shortcutsEnabled
   );

@@ -7,12 +7,14 @@ export const SWIPE_SHORTCUTS = {
   dislike: { keys: ["arrowleft", "a"], label: "Dislike" },
   like: { keys: ["arrowright", "d"], label: "Like" },
   undo: { keys: ["arrowup", "w"], label: "Undo last swipe" },
-  shuffle: { keys: ["s"], label: "Shuffle upcoming tracks" },
+  shuffle: { keys: ["s"], label: "Shuffle tracks" },
 } satisfies Record<string, Shortcut>;
 
 export const PREVIEW_SHORTCUTS = {
   playPause: { keys: [" "], label: "Play / pause preview" },
   mute: { keys: ["m"], label: "Mute / unmute preview" },
+  skipForward: { keys: ["e"], label: "Skip preview forward" },
+  skipBackward: { keys: ["q"], label: "Skip preview backward" },
 } satisfies Record<string, Shortcut>;
 
 export const MODAL_SHORTCUTS = {

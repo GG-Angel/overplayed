@@ -104,7 +104,7 @@ const SelectionPage = () => {
         />
         <Dropdown
           align="right"
-          className="justify-self-end h-full flex items-center"
+          className="justify-self-end h-full flex items-center justify-end w-36 mr-4.5"
           trigger={({ toggle }) => (
             <button
               className="flex shrink-0 items-center gap-3 cursor-pointer font-medium hover:scale-105 active:scale-100 text-muted hover:text-foreground transition-all"
