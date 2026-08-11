@@ -7,6 +7,8 @@ services:
     container_name: overplayed-server
     ports:
       - 8080:8080
+    expose:
+      - "8080"
     depends_on:
       - db
       - redis
@@ -18,7 +20,9 @@ services:
     env_file: queue/.env
     container_name: overplayed-queue
     ports:
-      - 8000:8000
+      - 8000:8080
+    expose:
+      - "8080"
     depends_on:
       - redis
   redis:
@@ -36,9 +40,22 @@ services:
       - POSTGRES_DB
     volumes:
       - postgres-data:/var/lib/postgresql
+  prometheus:
+    image: prom/prometheus
+    container_name: overplayed-prometheus
+    ports:
+      - 9090:9090
+    expose:
+      - "9090"
+    volumes:
+      - ./infra/prometheus:/etc/prometheus/
+      - prometheus-data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
 
 volumes:
   redis-data:
   postgres-data:
+  prometheus-data:
   caddy-data:
   caddy-config:

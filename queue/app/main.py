@@ -19,6 +19,7 @@ from settings import APP_STATE_KEY, settings
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from state import State
+from prometheus_fastapi_instrumentator import Instrumentator
 
 
 @asynccontextmanager
@@ -73,11 +74,14 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+# prometheus
+Instrumentator().instrument(app).expose(app)
 
+# rate limiting
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # ty:ignore[invalid-argument-type]
 
-
+# cors
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[settings.frontend_url],

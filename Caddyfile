@@ -4,6 +4,6 @@ api-overplayed.gaelangel.com {
 }
 
 queue-overplayed.gaelangel.com {
-	reverse_proxy queue:8000
+	reverse_proxy queue:8080
 	tls /etc/ssl/certs/certificate.pem /etc/ssl/private/key.pem
 }

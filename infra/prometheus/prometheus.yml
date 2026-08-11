@@ -1,0 +1,10 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: "overplayed-server"
+    static_configs:
+      - targets: ["server:8080"]
+  - job_name: "overplayed-queue"
+    static_configs:
+      - targets: ["queue:8080"]
