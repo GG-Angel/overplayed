@@ -24,16 +24,16 @@ from prometheus_fastapi_instrumentator import Instrumentator
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    try:
-        http = ClientSession()
-        crypto = Fernet(key=settings.redis_key)
+    http = ClientSession()
+    redis_pool = ConnectionPool.from_url(
+        url=settings.redis_url,
+        decode_responses=True,
+        max_connections=10,
+    )
+    redis = Redis(connection_pool=redis_pool)
 
-        redis_pool = ConnectionPool.from_url(
-            url=settings.redis_url,
-            decode_responses=True,
-            max_connections=10,
-        )
-        redis = Redis(connection_pool=redis_pool)
+    try:
+        crypto = Fernet(key=settings.redis_key)
 
         token_provider = SpotifyTokenProvider(
             http, redis, crypto, settings.spotify_auth_client_id
@@ -66,10 +66,8 @@ async def lifespan(app: FastAPI):
         yield
 
     finally:
-        if http is not None:
-            await http.close()
-        if redis_pool is not None:
-            await redis_pool.aclose()
+        await http.close()
+        await redis_pool.aclose()
 
 
 app = FastAPI(lifespan=lifespan)

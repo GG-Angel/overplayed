@@ -12,6 +12,6 @@ COPY . .
 RUN useradd --system --no-create-home appuser && chown -R appuser /app
 USER appuser
 
-EXPOSE 8000
+EXPOSE 8080
 
-CMD [".venv/bin/fastapi", "run", "app/main.py", "--port", "8000", "--proxy-headers", "--forwarded-allow-ips", "*"]
+CMD [".venv/bin/fastapi", "run", "app/main.py", "--port", "8080", "--proxy-headers", "--forwarded-allow-ips", "*"]
