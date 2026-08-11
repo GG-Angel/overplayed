@@ -89,7 +89,7 @@ app.add_middleware(
 
 @app.get("")
 def handle_healthcheck():
-    return ":o"
+    return "ok!"
 
 
 @app.get("favicon.ico")

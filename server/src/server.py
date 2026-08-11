@@ -6,12 +6,13 @@ from fastapi import FastAPI, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from core.database import build_engine, build_sessionmaker
 from core.limiter import limiter
 from core.oauth import build_spotify_oauth
 from core.redis import build_redis_pool
-from routes import auth, metrics, playlists, previews, users
+from routes import auth, stats, playlists, previews, users
 from settings import APP_STATE_KEY, Settings
 from state import State
 
@@ -33,6 +34,7 @@ def build_app(settings: Settings) -> FastAPI:
                 redis_pool=redis_pool,
                 oauth=oauth,
             )
+
             yield
 
         await db_engine.dispose()
@@ -40,9 +42,14 @@ def build_app(settings: Settings) -> FastAPI:
 
     app = FastAPI(lifespan=lifespan)
 
+    # prometheus metrics
+    Instrumentator().instrument(app).expose(app)
+
+    # rate limiting
     app.state.limiter = limiter
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # ty:ignore[invalid-argument-type]
 
+    # cors
     app.add_middleware(
         CORSMiddleware,
         allow_origins=[settings.frontend_url],
@@ -53,7 +60,7 @@ def build_app(settings: Settings) -> FastAPI:
 
     @app.get("")
     def handle_healthcheck():
-        return ":3"
+        return "ok!"
 
     @app.get("favicon.ico")
     def handle_favicon():
@@ -63,7 +70,7 @@ def build_app(settings: Settings) -> FastAPI:
     app.include_router(users.router, prefix="/users", tags=["users"])
     app.include_router(playlists.router, prefix="/playlists", tags=["playlists"])
     app.include_router(previews.router, prefix="/previews", tags=["previews"])
-    app.include_router(metrics.router, prefix="/metrics", tags=["metrics"])
+    app.include_router(stats.router, prefix="/stats", tags=["stats"])
 
     return app
 

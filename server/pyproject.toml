@@ -12,6 +12,7 @@ dependencies = [
     "cryptography>=48.0.1",
     "fastapi[standard]>=0.140.7",
     "loguru>=0.7.3",
+    "prometheus-fastapi-instrumentator>=8.1.0",
     "pydantic>=2.13.3",
     "pydantic-settings>=2.14.2",
     "redis[hiredis]>=8.0.1",
