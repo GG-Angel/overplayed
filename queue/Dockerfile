@@ -1,4 +1,4 @@
-FROM python:3.14-slim
+FROM python:3.13-slim
 
 COPY --from=ghcr.io/astral-sh/uv:0.12.0 /uv /uvx /bin/
 
@@ -14,4 +14,4 @@ USER appuser
 
 EXPOSE 8080
 
-CMD [".venv/bin/fastapi", "run", "app/main.py", "--port", "8080", "--proxy-headers", "--forwarded-allow-ips", "*"]
+CMD ["uv", "run", "--no-sync", "--no-cache", "fastapi", "run", "app/main.py", "--port", "8080", "--proxy-headers", "--forwarded-allow-ips", "*"]
