@@ -12,6 +12,5 @@ COPY . .
 RUN useradd --system --no-create-home appuser && chown -R appuser /app
 USER appuser
 
-EXPOSE 8080
-
-CMD ["uv", "run", "--no-sync", "--no-cache", "fastapi", "run", "app/main.py", "--port", "8080", "--proxy-headers", "--forwarded-allow-ips", "*"]
+EXPOSE 8080 9090
+CMD ["uv", "run", "--no-sync", "--no-cache", "python", "app/main.py"]
