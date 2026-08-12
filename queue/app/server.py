@@ -1,23 +1,24 @@
-from routes import queue
-from cryptography.fernet import Fernet
-from redis.asyncio import ConnectionPool, Redis
 from contextlib import asynccontextmanager
+
 from aiohttp import ClientSession
+from core.limiter import limiter
+from cryptography.fernet import Fernet
 from fastapi import FastAPI, Response, status
 from fastapi.middleware.cors import CORSMiddleware
-from slowapi import _rate_limit_exceeded_handler
-from slowapi.errors import RateLimitExceeded
-from core.limiter import limiter
-from settings import APP_STATE_KEY, settings
-from state import State
 from locking import DistributedLock
+from redis.asyncio import ConnectionPool, Redis
+from routes import queue
 from services.queue import QueueRepository, QueueService, QueueWorker
-from services.turnstile import TurnstileVerifier
 from services.spotify import (
     SpotifyTokenProvider,
     SpotifyUserManager,
     SpotifyUserValidator,
 )
+from services.turnstile import TurnstileVerifier
+from settings import APP_STATE_KEY, settings
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from state import State
 
 
 @asynccontextmanager

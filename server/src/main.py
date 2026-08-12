@@ -1,7 +1,9 @@
-import uvicorn
 import asyncio
+
+import uvicorn
 from fastapi import FastAPI
 from prometheus_fastapi_instrumentator import Instrumentator
+
 from server import build_app
 
 

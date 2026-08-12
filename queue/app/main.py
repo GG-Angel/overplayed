@@ -1,8 +1,9 @@
-from fastapi import FastAPI
-import uvicorn
 import asyncio
-from server import build_app
+
+import uvicorn
+from fastapi import FastAPI
 from prometheus_fastapi_instrumentator import Instrumentator
+from server import build_app
 
 
 async def main():
