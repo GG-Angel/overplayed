@@ -21,7 +21,7 @@ services:
       - prod
 
   server:
-    image: ggangel/overplayed-server:latest
+    image: GG-Angel/overplayed-server:latest
     platform: linux/amd64
     container_name: overplayed-server
     env_file: server/.env
@@ -34,7 +34,7 @@ services:
       - internal
 
   queue:
-    image: ggangel/overplayed-queue:latest
+    image: GG-Angel/overplayed-queue:latest
     platform: linux/amd64
     env_file: queue/.env
     restart: unless-stopped
