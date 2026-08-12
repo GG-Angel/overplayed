@@ -6,14 +6,14 @@ from prometheus_fastapi_instrumentator import Instrumentator
 
 
 async def main():
-    queue_app = build_app()
+    app = build_app()
     metrics_app = FastAPI()
 
-    Instrumentator().instrument(queue_app).expose(metrics_app)
+    Instrumentator().instrument(app).expose(metrics_app)
 
     configs = [
         uvicorn.Config(
-            queue_app,
+            app,
             host="0.0.0.0",
             port=8080,
             proxy_headers=True,
