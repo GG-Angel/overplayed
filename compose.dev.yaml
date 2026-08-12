@@ -3,33 +3,55 @@ services:
     build:
       context: server
       dockerfile: Dockerfile
-    env_file: server/.env
     container_name: overplayed-server
+    env_file: server/.env
     ports:
       - 8080:8080
-    expose:
-      - "8080"
     depends_on:
-      - db
       - redis
-      - queue
+      - db
+
   queue:
     build:
       context: queue
       dockerfile: Dockerfile
-    env_file: queue/.env
     container_name: overplayed-queue
+    env_file: queue/.env
     ports:
       - 8000:8080
-    expose:
-      - "8080"
     depends_on:
       - redis
 
+  grafana:
+    image: grafana/grafana
+    container_name: overplayed-grafana
+    ports:
+      - 3000:3000
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+    environment:
+      - GF_SECURITY_ADMIN_USER
+      - GF_SECURITY_ADMIN_PASSWORD
+    depends_on:
+      - prometheus
+
+  prometheus:
+    image: prom/prometheus
+    container_name: overplayed-prometheus
+    ports:
+      - 9090:9090
+    volumes:
+      - prometheus-data:/prometheus
+      - ./prometheus:/etc/prometheus/
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+
   redis:
     image: redis:8.8.1-alpine
-    command: redis-server --requirepass ${REDIS_PASSWORD}
     container_name: overplayed-redis
+    command: redis-server --requirepass ${REDIS_PASSWORD}
     volumes:
       - redis-data:/data
 
@@ -42,34 +64,6 @@ services:
       - POSTGRES_DB
     volumes:
       - postgres-data:/var/lib/postgresql
-
-  grafana:
-    image: grafana/grafana
-    container_name: overplayed-grafana
-    ports:
-      - 3000:3000
-    expose:
-      - "3000"
-    volumes:
-      - grafana-data:/var/lib/grafana
-      - ./grafana/provisioning:/etc/grafana/provisioning
-      - ./grafana/dashboards:/var/lib/grafana/dashboards
-    environment:
-      - GF_SECURITY_ADMIN_USER
-      - GF_SECURITY_ADMIN_PASSWORD
-
-  prometheus:
-    image: prom/prometheus
-    container_name: overplayed-prometheus
-    ports:
-      - 9090:9090
-    expose:
-      - "9090"
-    volumes:
-      - prometheus-data:/prometheus
-      - ./prometheus:/etc/prometheus/
-    command:
-      - "--config.file=/etc/prometheus/prometheus.yml"
 
 volumes:
   redis-data:

@@ -7,3 +7,8 @@ queue-overplayed.gaelangel.com {
 	reverse_proxy queue:8080
 	tls /etc/ssl/certs/certificate.pem /etc/ssl/private/key.pem
 }
+
+grafana-overplayed.gaelangel.com {
+	reverse_proxy grafana:3000
+	tls /etc/ssl/certs/certificate.pem /etc/ssl/private/key.pem
+}
