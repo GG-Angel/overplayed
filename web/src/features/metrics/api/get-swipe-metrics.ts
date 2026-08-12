@@ -4,7 +4,7 @@ import { globalMetricsSchema, userMetricsSchema } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 
 const getGlobalSwipeMetrics = async () => {
-  return globalMetricsSchema.parse(await api.get(`/metrics`));
+  return globalMetricsSchema.parse(await api.get(`/stats`));
 };
 
 export const useGlobalSwipeMetrics = () => {
@@ -16,7 +16,7 @@ export const useGlobalSwipeMetrics = () => {
 };
 
 const getUserSwipeMetrics = async () => {
-  return userMetricsSchema.parse(await api.get(`/metrics/me`));
+  return userMetricsSchema.parse(await api.get(`/stats/me`));
 };
 
 export const useUserSwipeMetrics = () => {
