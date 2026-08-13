@@ -6,24 +6,24 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "aiohttp>=3.14.3",
-    "alembic>=1.18.4",
+    "alembic>=1.19.1",
     "asyncpg>=0.31.0",
-    "asyncpg-stubs>=0.31.2",
+    "asyncpg-stubs>=0.31.3",
     "cryptography>=50.0.0",
     "fastapi[standard]>=0.140.7",
     "loguru>=0.7.3",
     "prometheus-fastapi-instrumentator>=8.1.0",
-    "pydantic>=2.13.3",
-    "pydantic-settings>=2.14.2",
+    "pydantic>=2.13.4",
+    "pydantic-settings>=2.15.0",
     "redis[hiredis]>=8.1.0",
-    "slowapi>=0.1.9",
+    "slowapi>=0.1.10",
     "spotipy>=2.26.0",
     "sqlalchemy[asyncio]>=2.0.50",
-    "uvicorn>=0.46.0",
+    "uvicorn>=0.52.1",
 ]
 
 [dependency-groups]
-dev = ["pytest>=9.0.3", "pytest-asyncio>=1.3.0", "ruff>=0.16.0", "ty>=0.0.65"]
+dev = ["pytest>=9.1.1", "pytest-asyncio>=1.4.0", "ruff>=0.16.2", "ty>=0.0.69"]
 
 [tool.ruff.lint]
 ignore = ["BLE001"] # catch on exception
