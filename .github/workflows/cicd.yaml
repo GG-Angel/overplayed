@@ -11,6 +11,7 @@ concurrency:
 
 env:
   REGISTRY: ghcr.io
+  TAILSCALE_HOST: vps
 
 jobs:
   build:
@@ -58,12 +59,24 @@ jobs:
     name: Deploy on Server
     runs-on: ubuntu-latest
     needs: build
-    permissions: {}
+    permissions:
+      id-token: write
     steps:
-      - name: Deploy over SSH
+      - name: Connect to Tailnet
+        uses: tailscale/github-action@780049a30b6ff5c378a9e7b389d15ece7a204888 # v4.1.3
+        with:
+          oauth-client-id: ${{ secrets.TS_FI_CLIENT_ID }}
+          audience: ${{ secrets.TS_AUDIENCE }}
+          tags: tag:ci
+
+      - name: Resolve Tailscale IP
+        id: ts
+        run: echo "ip=$(tailscale ip -4 "$TAILSCALE_HOST")" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy via SSH
         uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         with:
-          host: ${{ secrets.SSH_HOST }}
+          host: ${{ steps.ts.outputs.ip }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.SSH_PRIVATE_KEY_PASSPHRASE }}
