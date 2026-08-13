@@ -50,7 +50,7 @@ class DatabaseService:
         except IntegrityError:
             logger.warning(f"Ignoring swipe session record for user {session.user_id} due to integrity error")  # fmt: skip
 
-    async def get_global_swipe_metrics(self) -> GlobalSwipeAggregates:
+    async def get_global_swipe_stats(self) -> GlobalSwipeAggregates:
         result = await self.db.execute(
             select(
                 func.count(SwipeSession.id),
@@ -67,7 +67,7 @@ class DatabaseService:
             total_cuts=total_cuts,
         )
 
-    async def get_user_swipe_metrics(self, user_id: str) -> UserSwipeAggregates:
+    async def get_user_swipe_stats(self, user_id: str) -> UserSwipeAggregates:
         result = await self.db.execute(
             select(
                 func.coalesce(func.sum(SwipeSession.tracks_swiped), 0),

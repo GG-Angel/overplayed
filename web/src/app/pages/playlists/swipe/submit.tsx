@@ -5,21 +5,14 @@ import useSubmitSwipes from "@/features/swipe/hooks/useSubmitSwipes";
 import { useSwipeContext } from "@/features/swipe/provider/SwipeContext";
 import useConfetti from "@/hooks/useConfetti";
 import { kaomojis } from "@/lib/kaomoji";
-import { openExternalUrl } from "@/lib/utils";
+import { formatPercentage, openExternalUrl } from "@/lib/utils";
 import { ExternalLink, Home, Play, RotateCcw } from "lucide-react";
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const SwipeSubmitPage = () => {
   const navigate = useNavigate();
   const { playlist, session } = useSwipeContext();
   const controller = useSubmitSwipes();
-
-  // calculate on mount to maintain previous track count after refetch
-  const [dislikePercentage] = useState(() => {
-    const total = playlist.tracks.total;
-    return total > 0 ? Math.round((session.dislikes.length / total) * 100) : 0;
-  });
 
   // show confetti on success
   useConfetti({ enabled: controller.isSuccess });
@@ -29,6 +22,9 @@ const SwipeSubmitPage = () => {
 
   if (controller.isSuccess) {
     const backupPlaylist = controller.data?.backup_playlist;
+    const dislikePercentage =
+      playlist.tracks.total > 0 ? session.dislikes.length / playlist.tracks.total : 0;
+
     return (
       <MessageState
         kaomoji={kaomojis.proud}
@@ -37,8 +33,9 @@ const SwipeSubmitPage = () => {
         subtitle={
           <>
             <p>
-              You just cleaned out <span className="text-primary">{dislikePercentage}%</span> of
-              your playlist.
+              You just cleaned out{" "}
+              <span className="text-primary">{formatPercentage(dislikePercentage)}</span> of your
+              playlist.
             </p>
             <p className="text-sm text-muted">(now you get to skip less)</p>
           </>
