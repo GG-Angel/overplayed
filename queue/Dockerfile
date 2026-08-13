@@ -1,4 +1,4 @@
-FROM python:3.14-slim
+FROM python:3.13-slim
 
 COPY --from=ghcr.io/astral-sh/uv:0.12.0 /uv /uvx /bin/
 
@@ -12,6 +12,5 @@ COPY . .
 RUN useradd --system --no-create-home appuser && chown -R appuser /app
 USER appuser
 
-EXPOSE 8000
-
-CMD [".venv/bin/fastapi", "run", "app/main.py", "--port", "8000", "--proxy-headers", "--forwarded-allow-ips", "*"]
+EXPOSE 8080 9090
+CMD ["uv", "run", "--no-sync", "--no-cache", "python", "app/main.py"]

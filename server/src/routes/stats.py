@@ -11,22 +11,20 @@ router = APIRouter()
 
 @router.get("")
 @limiter.limit("120/minute")
-async def get_global_swipe_metrics(
+async def get_global_swipe_stats(
     request: Request,
     db: DatabaseService = Depends(get_database_service),
 ) -> GlobalSwipeMetricsResponse:
-    return GlobalSwipeMetricsResponse.from_aggregates(
-        await db.get_global_swipe_metrics()
-    )
+    return GlobalSwipeMetricsResponse.from_aggregates(await db.get_global_swipe_stats())
 
 
 @router.get("/me")
 @limiter.limit("120/minute")
-async def get_user_swipe_metrics(
+async def get_user_swipe_stats(
     request: Request,
     db: DatabaseService = Depends(get_database_service),
     spotify: SpotifyService = Depends(get_spotify_service),
 ) -> UserSwipeMetricsResponse:
     return UserSwipeMetricsResponse.from_aggregates(
-        await db.get_user_swipe_metrics(user_id=spotify.user_id)
+        await db.get_user_swipe_stats(user_id=spotify.user_id)
     )

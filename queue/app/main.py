@@ -1,100 +1,38 @@
-from contextlib import asynccontextmanager
+import asyncio
 
-from aiohttp import ClientSession
-from core.limiter import limiter
-from cryptography.fernet import Fernet
-from fastapi import FastAPI, Response, status
-from fastapi.middleware.cors import CORSMiddleware
-from locking import DistributedLock
-from redis.asyncio import ConnectionPool, Redis
-from routers import queue
-from services.queue import QueueRepository, QueueService, QueueWorker
-from services.spotify import (
-    SpotifyTokenProvider,
-    SpotifyUserManager,
-    SpotifyUserValidator,
-)
-from services.turnstile import TurnstileVerifier
-from settings import APP_STATE_KEY, settings
-from slowapi import _rate_limit_exceeded_handler
-from slowapi.errors import RateLimitExceeded
-from state import State
+import uvicorn
+from fastapi import FastAPI
+from prometheus_fastapi_instrumentator import Instrumentator
+from server import build_app
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    try:
-        http = ClientSession()
-        crypto = Fernet(key=settings.redis_key)
+async def main():
+    app = build_app()
+    metrics_app = FastAPI()
 
-        redis_pool = ConnectionPool.from_url(
-            url=settings.redis_url,
-            decode_responses=True,
-            max_connections=10,
-        )
-        redis = Redis(connection_pool=redis_pool)
+    Instrumentator().instrument(app).expose(metrics_app)
 
-        token_provider = SpotifyTokenProvider(
-            http, redis, crypto, settings.spotify_auth_client_id
-        )
+    configs = [
+        uvicorn.Config(
+            app,
+            host="0.0.0.0",
+            port=8080,
+            proxy_headers=True,
+            forwarded_allow_ips="*",
+        ),
+        uvicorn.Config(
+            metrics_app,
+            host="0.0.0.0",
+            port=9090,
+            log_level="warning",
+        ),
+    ]
 
-        queue_service = QueueService(
-            SpotifyUserManager(
-                http, redis, token_provider, settings.spotify_app_client_id
-            ),
-            await SpotifyUserValidator.create(http),
-            QueueRepository(redis),
-            DistributedLock(redis, "queue:lock", timeout=45, blocking_timeout=10),
-        )
-
-        queue_worker = QueueWorker(queue_service)
-
-        turnstile_verifier = TurnstileVerifier(
-            http, settings.cloudflare_turnstile_secret
-        )
-
-        app.state[APP_STATE_KEY] = State(
-            queue_service=queue_service,
-            queue_worker=queue_worker,
-            turnstile_verifier=turnstile_verifier,
-        )
-
-        await token_provider.seed_token(settings.spotify_refresh_token)
-        queue_worker.start()
-
-        yield
-
-    finally:
-        if http is not None:
-            await http.close()
-        if redis_pool is not None:
-            await redis_pool.aclose()
+    await asyncio.wait(
+        [asyncio.create_task(uvicorn.Server(config).serve()) for config in configs],
+        return_when=asyncio.FIRST_COMPLETED,
+    )
 
 
-app = FastAPI(lifespan=lifespan)
-
-
-app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # ty:ignore[invalid-argument-type]
-
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[settings.frontend_url],
-    allow_credentials=True,
-    allow_methods=["GET", "POST"],
-    allow_headers=["*"],
-)
-
-
-@app.get("")
-def handle_healthcheck():
-    return ":o"
-
-
-@app.get("favicon.ico")
-def handle_favicon():
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
-
-
-app.include_router(queue.router, prefix="/queue", tags=["queue"])
+if __name__ == "__main__":
+    asyncio.run(main())
