@@ -20,7 +20,7 @@ async def lifespan(app: FastAPI):
     db_engine = build_engine(settings)
     db_sessionmaker = build_sessionmaker(db_engine)
     redis_pool = build_redis_pool(settings)
-    oauth = build_spotify_oauth()
+    oauth = build_spotify_oauth(settings)
 
     async with ClientSession() as session:
         app.state[APP_STATE_KEY] = State(

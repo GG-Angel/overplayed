@@ -9,6 +9,7 @@ from core.exceptions import UnauthorizedException
 from services.spotify.cache import SpotifyCache
 from services.spotify.client import SpotifyClient
 from services.spotify.models import SessionInfo, TokenInfo
+from services.spotify.oauth import OAuthTransactionStore
 from services.spotify.service import SpotifyService
 from settings import Settings
 from state import State, get_oauth, get_settings, get_state
@@ -27,6 +28,17 @@ def get_spotify_cache(
         ttl_users=settings.ttl_users,
         ttl_playlists=settings.ttl_playlists,
         ttl_playlist_tracks=settings.ttl_playlist_tracks,
+    )
+
+
+def get_oauth_transaction_store(
+    redis: RedisClient = Depends(get_redis_client),
+    settings: Settings = Depends(get_settings),
+) -> OAuthTransactionStore:
+    return OAuthTransactionStore(
+        redis=redis,
+        redis_key=settings.redis_key,
+        ttl=settings.ttl_oauth_transactions,
     )
 
 

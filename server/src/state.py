@@ -3,9 +3,9 @@ from asyncio import Task
 from aiohttp import ClientSession
 from fastapi import Depends, Request
 from redis.asyncio import ConnectionPool
-from spotipy import SpotifyOAuth
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
+from core.oauth import SpotifyOAuthPKCE
 from services.spotify.stream import TrackStream, TrackStreamKey
 from settings import APP_STATE_KEY, Settings
 
@@ -15,7 +15,7 @@ class State:
         self,
         settings: Settings,
         session: ClientSession,
-        oauth: SpotifyOAuth,
+        oauth: SpotifyOAuthPKCE,
         db_engine: AsyncEngine,
         db_sessionmaker: async_sessionmaker[AsyncSession],
         redis_pool: ConnectionPool,
@@ -40,7 +40,7 @@ def get_settings(state: State = Depends(get_state)) -> Settings:
     return state.settings
 
 
-def get_oauth(state: State = Depends(get_state)) -> SpotifyOAuth:
+def get_oauth(state: State = Depends(get_state)) -> SpotifyOAuthPKCE:
     return state.oauth
 
 

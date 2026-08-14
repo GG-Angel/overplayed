@@ -26,6 +26,16 @@ class RedisClient:
         logger.debug("Cache hit")
         return data
 
+    async def getdel(self, key: str) -> str | None:
+        data = await self.redis.getdel(key)
+        if data is None:
+            logger.debug("Cache miss")
+            return None
+        if isinstance(data, bytes):
+            data = data.decode()
+        logger.debug("Consumed cached value")
+        return data
+
     async def set(self, key: str, value: str, ttl: int) -> None:
         await self.redis.set(key, value, ex=ttl)
         logger.debug(f"Cached value (ttl={ttl}s)")

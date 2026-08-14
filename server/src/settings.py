@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     redis_password: str = Field(...)
     redis_key: bytes = Field(..., min_length=32, max_length=32)
 
+    ttl_oauth_transactions: int = 60 * 10  # 10 minutes
     ttl_sessions: int = 60 * 60 * 24 * 2  # 2 days
     ttl_users: int = 60 * 60 * 2  # 2 hours
     ttl_playlists: int = 90  # 90 seconds
