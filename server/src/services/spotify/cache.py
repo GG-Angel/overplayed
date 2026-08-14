@@ -49,7 +49,7 @@ class SpotifyCache:
 
     async def end_session(self, session_id: str) -> None:
         await self._client.delete(self._build_session_key(session_id))
-        logger.info(f"Ended session: {session_id}")
+        logger.info("Ended session")
 
     async def get_user(self, user_id: str) -> CurrentUser | None:
         user = await self._client.get(self._build_user_key(user_id))
