@@ -1,7 +1,9 @@
-from settings import settings
+import secrets
+
+import resend
 from redis.asyncio import Redis
 from services.spotify import SpotifyUserValidator
-import secrets
+from settings import settings
 
 EMAIL_TOKENS_KEY = "queue:email_tokens"
 
@@ -15,10 +17,11 @@ class QueueEmailer:
         if not await self._user_validator.user_exists(email):
             return False
 
-        ott, was_set = await self._generate_token(email)
+        token, was_set = await self._generate_token(email)
         if not was_set:
             return False
 
+        await self._send_email(email, token)
         return True
 
     async def _generate_token(self, email: str) -> tuple[str, bool]:
@@ -28,12 +31,12 @@ class QueueEmailer:
         was_set = await self._redis.set(key, token, ex=settings.email_ott_ex, nx=True)
         return token, was_set is True
 
-    async def _send_email(self, email: str, token: str) -> None:
-        r = resend.Emails.send(
+    async def _send_email(self, recipient: str, token: str) -> None:
+        await resend.Emails.send_async(
             {
-                "from": "onboarding@resend.dev",
-                "to": "gaelangel.gga@gmail.com",
+                "from": "onboarding@gaelangel.com",
+                "to": recipient,
                 "subject": "Hello World",
-                "html": "<p>Congrats on sending your <strong>first email</strong>!</p>",
+                "html": f"<p>Congrats on sending your <strong>first email</strong>! Here's your token: {token}</p>",
             }
         )
