@@ -1,3 +1,4 @@
+from services.queue.email import QueueEmailer
 from services.queue.models import (
     ActiveStatus,
     InQueueStatus,
@@ -12,6 +13,7 @@ from services.queue.worker import QueueWorker
 __all__ = [
     "ActiveStatus",
     "InQueueStatus",
+    "QueueEmailer",
     "QueueEntry",
     "QueueRepository",
     "QueueService",

@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from locking import DistributedLock
 from redis.asyncio import ConnectionPool, Redis
 from routes import queue
-from services.queue import QueueRepository, QueueService, QueueWorker
+from services.queue import QueueEmailer, QueueRepository, QueueService, QueueWorker
 from services.spotify import (
     SpotifyTokenProvider,
     SpotifyUserManager,
@@ -33,21 +33,21 @@ async def lifespan(app: FastAPI):
 
     try:
         crypto = Fernet(key=settings.redis_key)
-
         token_provider = SpotifyTokenProvider(
             http, redis, crypto, settings.spotify_auth_client_id
         )
+        user_validator = await SpotifyUserValidator.create(http)
 
         queue_service = QueueService(
             SpotifyUserManager(
                 http, redis, token_provider, settings.spotify_app_client_id
             ),
-            await SpotifyUserValidator.create(http),
+            user_validator,
             QueueRepository(redis),
             DistributedLock(redis, "queue:lock", timeout=45, blocking_timeout=10),
         )
-
         queue_worker = QueueWorker(queue_service)
+        queue_emailer = QueueEmailer(redis, user_validator)
 
         turnstile_verifier = TurnstileVerifier(
             http, settings.cloudflare_turnstile_secret
@@ -56,6 +56,7 @@ async def lifespan(app: FastAPI):
         app.state[APP_STATE_KEY] = State(
             queue_service=queue_service,
             queue_worker=queue_worker,
+            queue_emailer=queue_emailer,
             turnstile_verifier=turnstile_verifier,
         )
 

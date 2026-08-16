@@ -5,10 +5,10 @@ from dtos import (
     UserActiveResponse,
     UserInQueueResponse,
 )
-from fastapi import APIRouter, Depends, HTTPException, Request
-from services.queue import QueueService, UserStatus
+from fastapi import APIRouter, Depends, HTTPException, Request, BackgroundTasks
+from services.queue import QueueService, UserStatus, QueueEmailer
 from services.turnstile import TurnstileVerifier
-from state import get_queue_service, get_turnstile_verifier
+from state import get_queue_service, get_turnstile_verifier, get_queue_emailer
 
 router = APIRouter()
 
@@ -62,7 +62,9 @@ async def get_user_status(
 async def request_access(
     request: Request,
     form: QueueEnrollmentForm,
+    background_tasks: BackgroundTasks,
     service: QueueService = Depends(get_queue_service),
+    emailer: QueueEmailer = Depends(get_queue_emailer),
     turnstile: TurnstileVerifier = Depends(get_turnstile_verifier),
 ):
     await turnstile.validate_request(request, form)
@@ -70,7 +72,7 @@ async def request_access(
     if (user_status := await service.get_user_status(form.email)) is not None:
         return _status_response(form.email, user_status)
 
-    # validate user, return 404 if doesn't exist
-
-    # start task to send email
-    # return {"message": "Request received. If your email is valid, you will receive an email with further instructions."}
+    background_tasks.add_task(emailer.process_user, form.email)
+    return {
+        "message": "Request received. If your email is valid, you will receive an email with further instructions."
+    }
