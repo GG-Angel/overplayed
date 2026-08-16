@@ -47,7 +47,7 @@ async def get_overview(
     )
 
 
-@router.get("/{email}")
+@router.get("/users/{email}")
 @limiter.limit("60/minute")
 async def get_user_status(
     request: Request,
@@ -58,7 +58,7 @@ async def get_user_status(
     return _status_response(email, status)
 
 
-@router.post("")
+@router.post("/requests")
 @limiter.limit("5/hour")
 async def request_access(
     request: Request,
@@ -80,7 +80,7 @@ async def request_access(
     }
 
 
-@router.get("/verify")
+@router.get("/verifications/{token}")
 @limiter.limit("5/hour")
 async def verify_token(
     request: Request,
