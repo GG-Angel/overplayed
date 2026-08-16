@@ -21,6 +21,8 @@ class Settings(BaseSettings):
     cloudflare_turnstile_secret: str = Field(...)
     resend_api_key: str = Field(...)
 
+    email_ott_ex: int = 900
+
     model_config = SettingsConfigDict(
         env_file=".env", extra="ignore", case_sensitive=False
     )

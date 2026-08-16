@@ -12,6 +12,7 @@ dependencies = [
     "prometheus-fastapi-instrumentator>=8.1.0",
     "pydantic-settings>=2.14.2",
     "redis[hiredis]>=8.0.1",
+    "resend>=2.36.0",
     "slowapi>=0.1.9",
 ]
 
