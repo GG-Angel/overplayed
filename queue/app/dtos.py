@@ -4,7 +4,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class QueueSignUpForm(BaseModel):
+class QueueEnrollmentForm(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
     email: str
@@ -29,8 +29,3 @@ class UserInQueueResponse(BaseModel):
     email: str
     position_in_queue: int
     estimated_start_time: datetime
-
-
-class UserNotInQueueResponse(BaseModel):
-    status: Literal["not_in_queue"] = "not_in_queue"
-    email: str

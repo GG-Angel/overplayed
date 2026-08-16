@@ -25,11 +25,7 @@ class ActiveStatus(BaseModel):
     end_time: datetime
 
 
-class NotInQueueStatus(BaseModel):
-    status: Literal["not_in_queue"] = "not_in_queue"
-
-
-UserStatus = InQueueStatus | ActiveStatus | NotInQueueStatus
+UserStatus = InQueueStatus | ActiveStatus
 
 
 class QueueSummary(BaseModel):

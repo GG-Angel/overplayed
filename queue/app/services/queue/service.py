@@ -2,14 +2,12 @@ import heapq
 from datetime import UTC, datetime, timedelta
 from typing import NamedTuple
 
-from errors import SpotifyValidationError
 from locking import DistributedLock
 from loguru import logger
 from models import ActiveUser, NewUser, QueuedUser
 from services.queue.models import (
     ActiveStatus,
     InQueueStatus,
-    NotInQueueStatus,
     QueueSummary,
     UserStatus,
 )
@@ -42,24 +40,23 @@ class QueueService:
         self._retry_limit = 3
         self._access_duration = timedelta(hours=24)
 
-    async def get_user_status(self, email: str) -> UserStatus:
+    async def get_user_status(self, email: str) -> UserStatus | None:
         """Get the status of a user."""
-        entry = await self._queue.get(email)
-        if entry is not None:
+        if (queued_user := await self._queue.get(email)) is not None:
             return InQueueStatus(
-                position=entry.position,
-                user=entry.user,
-                start_time=await self._estimate_start_time(entry.position),
+                position=queued_user.position,
+                user=queued_user.user,
+                start_time=await self._estimate_start_time(queued_user.position),
             )
 
-        active_user = await self._user_manager.get_user(email)
-        if active_user is not None:
+        if (active_user := await self._user_manager.get_user(email)) is not None:
             return ActiveStatus(
                 user=active_user,
                 end_time=active_user.created_at + self._access_duration,
             )
 
-        return NotInQueueStatus()
+        # user is neither in the queue nor active
+        return None
 
     async def get_queue_overview(self) -> QueueSummary:
         """Get an overview of the queue, including active users, queued users, and next available time."""
@@ -92,21 +89,21 @@ class QueueService:
             heapq.heappush(heap, start + self._access_duration)  # have access for 24h
         return start
 
-    async def enqueue_user(self, email: str) -> UserStatus:
-        """Enqueue a new user to the queue."""
-        async with self._lock:
-            if not await self._user_validator.user_exists(email):
-                raise SpotifyValidationError(f"{email} does not exist.")
+    # async def enqueue_user(self, email: str) -> UserStatus:
+    #     """Enqueue a new user to the queue."""
+    #     async with self._lock:
+    #         if not await self._user_validator.user_exists(email):
+    #             raise SpotifyValidationError(f"{email} does not exist.")
 
-            # only enqueue if the user is not already in the queue or active for idempotency
-            already_present = await self._queue.has(
-                email
-            ) or await self._user_manager.has_user(email)
-            if not already_present:
-                await self._queue.push(email)
-                await self._process_queue_locked()
+    #         # only enqueue if the user is not already in the queue or active for idempotency
+    #         already_present = await self._queue.has(
+    #             email
+    #         ) or await self._user_manager.has_user(email)
+    #         if not already_present:
+    #             await self._queue.push(email)
+    #             await self._process_queue_locked()
 
-        return await self.get_user_status(email)
+    #     return await self.get_user_status(email)
 
     async def process_queue(self) -> None:
         """

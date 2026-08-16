@@ -1,4 +1,6 @@
 from aiohttp import ClientSession
+from dtos import QueueEnrollmentForm
+from fastapi import HTTPException, Request
 from loguru import logger
 
 SITEVERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
@@ -11,7 +13,7 @@ class TurnstileVerifier:
         self._http = http
         self._secret = secret
 
-    async def verify(self, token: str, remote_ip: str | None = None) -> bool:
+    async def _verify_token(self, token: str, remote_ip: str | None = None) -> bool:
         """Return True only when Cloudflare reports success for the token."""
         payload = {"secret": self._secret, "response": token}
         if remote_ip:
@@ -31,3 +33,18 @@ class TurnstileVerifier:
             return False
 
         return True
+
+    async def validate_request(
+        self, request: Request, form: QueueEnrollmentForm
+    ) -> None:
+        """Validate the Turnstile token in the request form. Raises HTTPException on failure."""
+        forwarded_for = request.headers.get("x-forwarded-for", "")
+        client_ip = forwarded_for.split(",")[0].strip() or (
+            request.client.host if request.client else None
+        )
+
+        if not await self._verify_token(form.turnstile_token, client_ip):
+            raise HTTPException(
+                status_code=403,
+                detail="Cloudflare verification failed.",
+            )
