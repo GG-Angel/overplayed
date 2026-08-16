@@ -1,3 +1,4 @@
+from settings import settings
 from core.limiter import limiter
 from dtos import (
     QueueEnrollmentForm,
@@ -5,10 +6,10 @@ from dtos import (
     UserActiveResponse,
     UserInQueueResponse,
 )
-from fastapi import APIRouter, Depends, HTTPException, Request, BackgroundTasks
-from services.queue import QueueService, UserStatus, QueueEmailer
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
+from services.queue import QueueEmailer, QueueService, UserStatus
 from services.turnstile import TurnstileVerifier
-from state import get_queue_service, get_turnstile_verifier, get_queue_emailer
+from state import get_queue_emailer, get_queue_service, get_turnstile_verifier
 
 router = APIRouter()
 
@@ -67,7 +68,8 @@ async def request_access(
     emailer: QueueEmailer = Depends(get_queue_emailer),
     turnstile: TurnstileVerifier = Depends(get_turnstile_verifier),
 ):
-    await turnstile.validate_request(request, form)
+    if not settings.debug:
+        await turnstile.validate_request(request, form)
 
     if (user_status := await service.get_user_status(form.email)) is not None:
         return _status_response(form.email, user_status)

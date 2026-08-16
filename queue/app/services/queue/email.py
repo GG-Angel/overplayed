@@ -39,7 +39,7 @@ class QueueEmailer:
         try:
             await resend.Emails.send_async(
                 {
-                    "from": "overplayed@send.gaelangel.com",
+                    "from": "overplayed@mail.gaelangel.com",
                     "to": recipient,
                     "subject": "Hello World",
                     "html": f"<p>Congrats on sending your <strong>first email</strong>! Here's your token: {token}</p>",
