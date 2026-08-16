@@ -78,3 +78,19 @@ async def request_access(
     return {
         "message": "Request received. If your email is valid, you will receive an email with further instructions."
     }
+
+
+@router.get("/verify")
+@limiter.limit("5/hour")
+async def verify_token(
+    request: Request,
+    token: str,
+    service: QueueService = Depends(get_queue_service),
+    emailer: QueueEmailer = Depends(get_queue_emailer),
+):
+    """Verify a one-time token and activate the user if valid."""
+    email = await emailer.get_email_from_token(token)
+    if email is None:
+        raise HTTPException(status_code=400, detail="This token is invalid or expired.")
+
+    return email

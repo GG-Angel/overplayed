@@ -10,8 +10,6 @@ Background task:
 2. If a token already exists for this email, abort (early dedup).
 3. Validate that the Spotify account exists. If no, stop task.
 4. Generate a single-use token. 15 minute expiration. Store in Redis with TTL.
-   - Key: queue_tokens (hashmap)
-     - email -> token
    - Use SETNX: sets only if the token doesn't exist atomically
    - The token must be URL safe.
 5. If a token was set, send an email to the user under the gaelangel.com domain.

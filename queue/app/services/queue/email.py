@@ -29,10 +29,13 @@ class QueueEmailer:
         return True
 
     async def _generate_token(self, email: str) -> tuple[str, bool]:
-        key = f"queue:ott:{email}"
         token = secrets.token_urlsafe(32)
-
-        was_set = await self._redis.set(key, token, ex=settings.email_ott_ex, nx=True)
+        was_set = await self._redis.set(
+            self._build_token_key(token),
+            email,
+            ex=settings.email_ott_ex,
+            nx=True,
+        )
         return token, was_set is True
 
     async def _send_email(self, recipient: str, token: str) -> None:
@@ -48,3 +51,12 @@ class QueueEmailer:
         except Exception:
             logger.exception(f"Failed to send enrollment email to {recipient}")
             raise
+
+    async def get_email_from_token(self, token: str) -> str | None:
+        email = await self._redis.getdel(self._build_token_key(token))
+        if isinstance(email, bytes):
+            email = email.decode("utf-8")
+        return email
+
+    def _build_token_key(self, token: str) -> str:
+        return f"queue:ott:{token}"
