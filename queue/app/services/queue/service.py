@@ -74,36 +74,20 @@ class QueueService:
             next_available_time=next_available_time,
         )
 
-    async def _estimate_start_time(self, queue_position: int) -> datetime:
-        """Estimate the start time for a user based on their position in the queue."""
-        active_users = await self._user_manager.get_users()
-        now = datetime.now(UTC)
+    async def enqueue_user(self, email: str) -> UserStatus:
+        """Add a new user to the queue, process it, and retrieve their status."""
+        if not await self._user_validator.user_exists(email):
+            raise ValueError(f"{email} does not exist.")
 
-        heap = [u.created_at + self._access_duration for u in active_users]
-        heap += [now] * max(0, self._user_limit - len(active_users))
-        heapq.heapify(heap)
+        async with self._lock:
+            await self._queue.push(email)
+            await self._process_queue_locked()
 
-        start = now
-        for _ in range(queue_position):
-            start = max(heapq.heappop(heap), now)  # can't start in the past
-            heapq.heappush(heap, start + self._access_duration)  # have access for 24h
-        return start
+        status = await self.get_user_status(email)
+        if status is None:
+            raise RuntimeError(f"Failed to retrieve status for {email} after enqueue.")
 
-    # async def enqueue_user(self, email: str) -> UserStatus:
-    #     """Enqueue a new user to the queue."""
-    #     async with self._lock:
-    #         if not await self._user_validator.user_exists(email):
-    #             raise SpotifyValidationError(f"{email} does not exist.")
-
-    #         # only enqueue if the user is not already in the queue or active for idempotency
-    #         already_present = await self._queue.has(
-    #             email
-    #         ) or await self._user_manager.has_user(email)
-    #         if not already_present:
-    #             await self._queue.push(email)
-    #             await self._process_queue_locked()
-
-    #     return await self.get_user_status(email)
+        return status
 
     async def process_queue(self) -> None:
         """
@@ -180,3 +164,18 @@ class QueueService:
             await self._queue.retry(user)
             retried.append(user)
         return retried
+
+    async def _estimate_start_time(self, queue_position: int) -> datetime:
+        """Estimate the start time for a user based on their position in the queue."""
+        active_users = await self._user_manager.get_users()
+        now = datetime.now(UTC)
+
+        heap = [u.created_at + self._access_duration for u in active_users]
+        heap += [now] * max(0, self._user_limit - len(active_users))
+        heapq.heapify(heap)
+
+        start = now
+        for _ in range(queue_position):
+            start = max(heapq.heappop(heap), now)  # can't start in the past
+            heapq.heappush(heap, start + self._access_duration)  # have access for 24h
+        return start

@@ -75,6 +75,7 @@ async def request_access(
         return _status_response(form.email, user_status)
 
     background_tasks.add_task(emailer.process_user, form.email)
+    # TODO: make this a redirect response
     return {
         "message": "Request received. If your email is valid, you will receive an email with further instructions."
     }
@@ -93,4 +94,6 @@ async def verify_token(
     if email is None:
         raise HTTPException(status_code=400, detail="This token is invalid or expired.")
 
-    return email
+    # TODO: make this a redirect response
+    user_status = await service.enqueue_user(email)
+    return user_status
