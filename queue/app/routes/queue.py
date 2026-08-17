@@ -1,4 +1,4 @@
-from settings import settings
+from urllib.parse import quote
 from core.limiter import limiter
 from dtos import (
     QueueEnrollmentForm,
@@ -6,44 +6,28 @@ from dtos import (
     UserActiveResponse,
     UserInQueueResponse,
 )
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, status
+from fastapi.responses import RedirectResponse
 from services.queue import QueueEmailer, QueueService, UserStatus
 from services.turnstile import TurnstileVerifier
+from settings import settings
 from state import get_queue_emailer, get_queue_service, get_turnstile_verifier
 
 router = APIRouter()
 
 
-def _status_response(
-    email: str, status: UserStatus | None
-) -> UserActiveResponse | UserInQueueResponse:
-    """Map an internal user status onto its public response DTO."""
-    if status is None:
-        raise HTTPException(status_code=404, detail="User not found.")
-
-    match status.status:
-        case "active":
-            return UserActiveResponse(email=email, estimated_end_time=status.end_time)
-        case "in_queue":
-            return UserInQueueResponse(
-                email=email,
-                position_in_queue=status.position,
-                estimated_start_time=status.start_time,
-            )
-
-
-@router.get("")
+@router.get("/overview")
 @limiter.limit("60/minute")
 async def get_overview(
     request: Request,
     service: QueueService = Depends(get_queue_service),
 ) -> QueueOverviewResponse:
-    summary = await service.get_queue_overview()
+    overview = await service.get_queue_overview()
     return QueueOverviewResponse(
-        num_active=len(summary.active_users),
-        num_queued=len(summary.queued_users),
-        user_limit=summary.user_limit,
-        next_available_time=summary.next_available_time,
+        num_active=len(overview.active_users),
+        num_queued=len(overview.queued_users),
+        user_limit=overview.user_limit,
+        next_available_time=overview.next_available_time,
     )
 
 
@@ -55,10 +39,12 @@ async def get_user_status(
     service: QueueService = Depends(get_queue_service),
 ) -> UserActiveResponse | UserInQueueResponse:
     status = await service.get_user_status(email)
+    if status is None:
+        raise HTTPException(status_code=404)
     return _status_response(email, status)
 
 
-@router.post("/requests")
+@router.post("/requests", status_code=status.HTTP_202_ACCEPTED)
 @limiter.limit("5/hour")
 async def request_access(
     request: Request,
@@ -70,15 +56,8 @@ async def request_access(
 ):
     if not settings.debug:
         await turnstile.validate_request(request, form)
-
-    if (user_status := await service.get_user_status(form.email)) is not None:
-        return _status_response(form.email, user_status)
-
-    background_tasks.add_task(emailer.process_user, form.email)
-    # TODO: make this a redirect response
-    return {
-        "message": "Request received. If your email is valid, you will receive an email with further instructions."
-    }
+    if await service.get_user_status(form.email) is None:
+        background_tasks.add_task(emailer.process_user, form.email)
 
 
 @router.get("/verifications/{token}")
@@ -89,11 +68,32 @@ async def verify_token(
     service: QueueService = Depends(get_queue_service),
     emailer: QueueEmailer = Depends(get_queue_emailer),
 ):
-    """Verify a one-time token and activate the user if valid."""
+    """Verify a one-time token and enqueue the user if valid."""
     email = await emailer.get_email_from_token(token)
     if email is None:
-        raise HTTPException(status_code=400, detail="This token is invalid or expired.")
+        return RedirectResponse(
+            url=f"{settings.frontend_url}/access/invalid",
+            status_code=status.HTTP_302_FOUND,
+        )
 
-    # TODO: make this a redirect response
-    user_status = await service.enqueue_user(email)
-    return user_status
+    await service.enqueue_user(email)
+
+    return RedirectResponse(
+        url=f"{settings.frontend_url}/access/verified?email={quote(email)}",
+        status_code=status.HTTP_302_FOUND,
+    )
+
+
+def _status_response(
+    email: str, status: UserStatus
+) -> UserActiveResponse | UserInQueueResponse:
+    """Map an internal user status onto its public response DTO."""
+    match status.status:
+        case "active":
+            return UserActiveResponse(email=email, estimated_end_time=status.end_time)
+        case "in_queue":
+            return UserInQueueResponse(
+                email=email,
+                position_in_queue=status.position,
+                estimated_start_time=status.start_time,
+            )
