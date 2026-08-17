@@ -6,13 +6,13 @@ from typing import NamedTuple
 from locking import DistributedLock
 from loguru import logger
 from models import ActiveUser, NewUser, QueuedUser
+from services.queue import QueueEmailer, QueueRepository
 from services.queue.models import (
     ActiveStatus,
     InQueueStatus,
     QueueSummary,
     UserStatus,
 )
-from services.queue import QueueEmailer, QueueRepository
 from services.spotify import SpotifyUserManager, SpotifyUserValidator
 
 

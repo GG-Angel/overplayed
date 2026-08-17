@@ -38,16 +38,17 @@ async def lifespan(app: FastAPI):
         )
         user_validator = await SpotifyUserValidator.create(http)
 
+        queue_emailer = QueueEmailer(redis, user_validator)
         queue_service = QueueService(
             SpotifyUserManager(
                 http, redis, token_provider, settings.spotify_app_client_id
             ),
             user_validator,
+            queue_emailer,
             QueueRepository(redis),
             DistributedLock(redis, "queue:lock", timeout=45, blocking_timeout=10),
         )
         queue_worker = QueueWorker(queue_service)
-        queue_emailer = QueueEmailer(redis, user_validator)
 
         turnstile_verifier = TurnstileVerifier(
             http, settings.cloudflare_turnstile_secret

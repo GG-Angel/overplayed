@@ -1,4 +1,5 @@
 from urllib.parse import quote
+
 from core.limiter import limiter
 from dtos import (
     QueueEnrollmentForm,
