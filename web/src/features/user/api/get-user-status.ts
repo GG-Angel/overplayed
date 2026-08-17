@@ -4,16 +4,16 @@ import { queueUserAccessSchema } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import useAuth from "../auth/useAuth";
 
-const getUserAccess = async (email: string) => {
+const getUserStatus = async (email: string) => {
   return queueUserAccessSchema.parse(await queueApi.get(`/queue/${encodeURIComponent(email)}`));
 };
 
-export const useUserAccess = () => {
+export const useUserStatus = () => {
   const { user } = useAuth();
 
   return useQuery({
     queryKey: queryKeys.userAccess(),
-    queryFn: () => getUserAccess(user!.email),
+    queryFn: () => getUserStatus(user!.email),
     enabled: !!user,
     staleTime: 2 * 60 * 1000,
   });

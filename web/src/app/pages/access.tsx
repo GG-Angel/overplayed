@@ -1,61 +1,16 @@
 import Button from "@/components/ui/Button";
-import Card from "@/components/ui/Card";
 import Divider from "@/components/ui/Divider";
 import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
-import { Spinner } from "@/components/ui/Spinner";
 import Turnstile, { type TurnstileHandle } from "@/components/ui/Turnstile";
-import { useQueueStatus } from "@/features/user/api/get-queue-state";
-import { useSubmitAccessRequest } from "@/features/user/api/submit-access-request";
-import { kaomojis } from "@/lib/kaomoji";
+import { useQueueOverview } from "@/features/user/api/get-queue-overview";
+import { useSendAccessRequest } from "@/features/user/api/send-access-request";
 import { formatCount, formatDateTime } from "@/lib/utils";
 import { Info, Key, Plus, Send, ThumbsUp, User } from "lucide-react";
 import { useRef, useState, type SubmitEventHandler } from "react";
 import { loadFromStorage, saveToStorage, storageKeys } from "@/lib/storage";
-import {
-  accessRequestFormSchema,
-  type QueueAccessRequest,
-  type QueueUserStatus,
-} from "@/lib/types";
+import { accessRequestFormSchema, type QueueAccessRequest } from "@/lib/types";
 import { useAccessContext } from "@/features/user/provider/AccessContext";
-
-const ErrorMessage = ({ message }: { message: string }) => (
-  <Card tone="negative" padding="lg" radius="lg" className="flex flex-col gap-2 py-4">
-    {message}
-  </Card>
-);
-
-const AccessResult = ({ data }: { data: QueueUserStatus }) => {
-  const status = data.status;
-
-  if (status === "in_queue") {
-    const { email, position_in_queue, estimated_start_time } = data;
-    return (
-      <Card tone="muted" padding="lg" radius="lg" className="flex flex-col gap-2 py-6">
-        <h2>{email}'s Status</h2>
-        <div className="flex flex-col gap-0.5">
-          <p className="font-medium">
-            You're <span className="text-success">#{position_in_queue}</span> in line.
-          </p>
-          <p className="text-muted">Access opens at {formatDateTime(estimated_start_time)}.</p>
-        </div>
-      </Card>
-    );
-  }
-
-  const { email, estimated_end_time } = data;
-  return (
-    <Card tone="positive" padding="lg" radius="lg" className="flex flex-col gap-2 py-6">
-      <h2>{email}'s Status</h2>
-      <div className="flex flex-col gap-0.5">
-        <p className="font-medium">
-          You're in! <span className="text-success">{kaomojis.working}</span>
-        </p>
-        <p className="brightness-80">You have access until {formatDateTime(estimated_end_time)}.</p>
-      </div>
-    </Card>
-  );
-};
 
 const RequestAccessPage = () => {
   const [isInfoModalVisible, setIsInfoModalVisible] = useState<boolean>(false);
@@ -72,8 +27,8 @@ const RequestAccessPage = () => {
   const { setHasRequestedAccess } = useAccessContext();
 
   const turnstileRef = useRef<TurnstileHandle>(null);
-  const queueStatus = useQueueStatus();
-  const submitMutation = useSubmitAccessRequest(form, turnstileToken);
+  const queueStatus = useQueueOverview();
+  const submitMutation = useSendAccessRequest(form, turnstileToken);
 
   const validateForm = () => {
     const result = accessRequestFormSchema.safeParse(form);
@@ -216,18 +171,6 @@ const RequestAccessPage = () => {
           onError={() => setTurnstileToken("")}
         />
       </form>
-
-      {/* Results */}
-      {submitMutation.isPending && <Spinner className="self-center my-2" />}
-      {submitMutation.isError && (
-        <ErrorMessage
-          message={
-            submitMutation.error.response?.data.detail ??
-            "Failed to submit request. Please try again."
-          }
-        />
-      )}
-      {submitMutation.isSuccess && <AccessResult data={submitMutation.data} />}
 
       {/* Info modal */}
       {isInfoModalVisible && (

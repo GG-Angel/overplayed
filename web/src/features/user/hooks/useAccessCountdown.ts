@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { formatDuration } from "@/lib/utils";
-import { useUserAccess } from "../api/get-user-access";
+import { useUserStatus } from "../api/get-user-status";
 
 // the api hands back an absolute end time, so the countdown is derived
 // locally and only needs to re-render often enough to keep minutes honest
@@ -8,7 +8,7 @@ const TICK_INTERVAL_MS = 30 * 1000; // 30 seconds
 const LOW_TIME_THRESHOLD_MS = 2 * 60 * 60 * 1000; // 2 hours
 
 const useAccessCountdown = () => {
-  const { data: access, isLoading } = useUserAccess();
+  const { data: access, isLoading } = useUserStatus();
   const endTime = access?.status === "active" ? access.estimated_end_time : null;
 
   const [now, setNow] = useState(() => Date.now());

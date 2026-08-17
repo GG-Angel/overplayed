@@ -3,13 +3,13 @@ import { queryKeys } from "@/lib/query";
 import { queueOverviewSchema } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 
-const getQueueStatus = async () => {
-  return queueOverviewSchema.parse(await queueApi.get("/queue"));
+const getQueueOverview = async () => {
+  return queueOverviewSchema.parse(await queueApi.get("/queue/overview"));
 };
 
-export const useQueueStatus = () => {
+export const useQueueOverview = () => {
   return useQuery({
-    queryFn: getQueueStatus,
+    queryFn: getQueueOverview,
     queryKey: queryKeys.queueStatus(),
     staleTime: 2 * 60 * 1000,
   });
