@@ -57,7 +57,7 @@ async def request_access(
     if not settings.debug:
         await turnstile.validate_request(request, form)
     if await service.get_user_status(form.email) is None:
-        background_tasks.add_task(emailer.process_user, form.email)
+        background_tasks.add_task(emailer.onboard_user, form.email)
 
 
 @router.get("/verifications/{token}")
@@ -69,7 +69,7 @@ async def verify_token(
     emailer: QueueEmailer = Depends(get_queue_emailer),
 ):
     """Verify a one-time token and enqueue the user if valid."""
-    email = await emailer.get_email_from_token(token)
+    email = await emailer.resolve_token(token)
     if email is None:
         return RedirectResponse(
             url=f"{settings.frontend_url}/access/invalid",
@@ -77,7 +77,6 @@ async def verify_token(
         )
 
     await service.enqueue_user(email)
-
     return RedirectResponse(
         url=f"{settings.frontend_url}/access/verified?email={quote(email)}",
         status_code=status.HTTP_302_FOUND,

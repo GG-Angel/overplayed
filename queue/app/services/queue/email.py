@@ -14,7 +14,7 @@ class QueueEmailer:
         self._redis = redis
         self._validator = validator
 
-    async def process_user(self, email: str) -> bool:
+    async def onboard_user(self, email: str) -> bool:
         if not await self._validator.user_exists(email):
             logger.info(f"Skipping {email}: no matching Spotify user")
             return False
@@ -24,9 +24,42 @@ class QueueEmailer:
             logger.info(f"Skipping {email}: token already issued and unexpired")
             return False
 
-        await self._send_email(email, token)
-        logger.info(f"Enrollment email sent to {email}")
+        await self._send_verification_email(email, token)
         return True
+
+    async def _send_verification_email(self, email: str, token: str) -> None:
+        try:
+            await resend.Emails.send_async(
+                {
+                    "from": "overplayed@mail.gaelangel.com",
+                    "to": email,
+                    "subject": "Verify your email",
+                    "html": f"<p>Here's your token: {token}</p>",
+                }
+            )
+            logger.info(f"Verification email sent to: {email}")
+        except Exception as e:
+            logger.error(f"Failed to send enrollment email to {email}: {e}")
+
+    async def notify_activation(self, email: str) -> None:
+        try:
+            await resend.Emails.send_async(
+                {
+                    "from": "overplayed@mail.gaelangel.com",
+                    "to": email,
+                    "subject": "You're in!",
+                    "html": "<p>You now have access to the app! Enjoy.</p>",
+                }
+            )
+            logger.info(f"Activation email sent to: {email}")
+        except Exception as e:
+            logger.error(f"Failed to send onboarded email to {email}: {e}")
+
+    async def resolve_token(self, token: str) -> str | None:
+        email = await self._redis.getdel(self._build_token_key(token))
+        if isinstance(email, bytes):
+            email = email.decode("utf-8")
+        return email
 
     async def _generate_token(self, email: str) -> tuple[str, bool]:
         token = secrets.token_urlsafe(32)
@@ -37,26 +70,6 @@ class QueueEmailer:
             nx=True,
         )
         return token, was_set is True
-
-    async def _send_email(self, recipient: str, token: str) -> None:
-        try:
-            await resend.Emails.send_async(
-                {
-                    "from": "overplayed@mail.gaelangel.com",
-                    "to": recipient,
-                    "subject": "Hello World",
-                    "html": f"<p>Congrats on sending your <strong>first email</strong>! Here's your token: {token}</p>",
-                }
-            )
-        except Exception:
-            logger.exception(f"Failed to send enrollment email to {recipient}")
-            raise
-
-    async def get_email_from_token(self, token: str) -> str | None:
-        email = await self._redis.getdel(self._build_token_key(token))
-        if isinstance(email, bytes):
-            email = email.decode("utf-8")
-        return email
 
     def _build_token_key(self, token: str) -> str:
         return f"queue:ott:{token}"

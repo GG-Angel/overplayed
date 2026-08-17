@@ -1,3 +1,4 @@
+import asyncio
 import heapq
 from datetime import UTC, datetime, timedelta
 from typing import NamedTuple
@@ -11,7 +12,7 @@ from services.queue.models import (
     QueueSummary,
     UserStatus,
 )
-from services.queue.repository import QueueRepository
+from services.queue import QueueEmailer, QueueRepository
 from services.spotify import SpotifyUserManager, SpotifyUserValidator
 
 
@@ -29,12 +30,15 @@ class QueueService:
         self,
         user_manager: SpotifyUserManager,
         user_validator: SpotifyUserValidator,
+        emailer: QueueEmailer,
         queue: QueueRepository,
         lock: DistributedLock,
     ):
         self._user_manager = user_manager
         self._user_validator = user_validator
+        self._emailer = emailer
         self._queue = queue
+        self._notification_tasks: set[asyncio.Task[None]] = set()
         self._lock = lock
         self._user_limit = 5
         self._retry_limit = 3
@@ -102,6 +106,8 @@ class QueueService:
         evicted = await self._prune_expired_users()
         activated, rejected = await self._fill_available_slots()
         retried = await self._retry_rejected(rejected)
+
+        self._notify_activations(activated)
 
         logger.success(
             f"Processed queue: evicted {len(evicted)}, "
@@ -179,3 +185,10 @@ class QueueService:
             start = max(heapq.heappop(heap), now)  # can't start in the past
             heapq.heappush(heap, start + self._access_duration)  # have access for 24h
         return start
+
+    def _notify_activations(self, activated: list[ActiveUser]) -> None:
+        """Fires activation emails in the background."""
+        for user in activated:
+            task = asyncio.create_task(self._emailer.notify_activation(user.email))
+            self._notification_tasks.add(task)
+            task.add_done_callback(self._notification_tasks.discard)
