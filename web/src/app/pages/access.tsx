@@ -11,18 +11,6 @@ import { useRef, useState, type SubmitEventHandler } from "react";
 import { loadFromStorage, saveToStorage, storageKeys } from "@/lib/storage";
 import { accessRequestFormSchema, type QueueAccessRequest } from "@/lib/types";
 import { useAccessContext } from "@/features/user/provider/AccessContext";
-import { useUserStatus } from "@/features/user/api/get-user-status";
-
-/**
- * 3. Split Data-Fetching (Container) from LayoutAdopt the Container/Presentational pattern or split components by data readiness.
- * The Problem: A component trying to conditionally render loading spinners, network errors, and multiple layout variations simultaneously.
- * The Fix: Use an outer container component solely responsible for fetching data, catching errors, and determining loading states.
- * Pass resolved, non-null values to a clean inner layout component.
- */
-
-type EmailCollectionModalProps = {
-  onClose: () => void;
-};
 
 const EmailCollectionModal = ({ onClose }: Pick<ModalProps, "onClose">) => {
   return (
@@ -81,6 +69,8 @@ const NoAccessModal = ({ onClose }: Pick<ModalProps, "onClose">) => {
 
 const RequestAccessPage = () => {
   const { setHasRequestedAccess } = useAccessContext();
+  const queueOverview = useQueueOverview();
+
   const [isEmailModalOpen, setIsEmailModalOpen] = useState<boolean>(false);
   const [isNoAccessModalOpen, setIsNoAccessModalOpen] = useState<boolean>(() =>
     new URLSearchParams(window.location.search).has("error")
@@ -93,8 +83,6 @@ const RequestAccessPage = () => {
   );
 
   const turnstileRef = useRef<TurnstileHandle>(null);
-  const queueOverview = useQueueOverview();
-  const userStatus = useUserStatus(form.email);
   const submitRequestMutation = useSendAccessRequest(form, turnstileToken);
 
   const validateForm = () => {
@@ -110,12 +98,12 @@ const RequestAccessPage = () => {
   const handleSubmitRequest: SubmitEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
     if (!validateForm() || !turnstileToken) return;
+
     submitRequestMutation.mutate(undefined, {
       onSettled: () => {
         setTurnstileToken("");
         turnstileRef.current?.reset();
       },
-      // save form to prefill on next visit
       onSuccess: () => {
         saveToStorage(localStorage, storageKeys.accessForm, form);
         setHasRequestedAccess(true);
@@ -236,6 +224,8 @@ const RequestAccessPage = () => {
           onError={() => setTurnstileToken("")}
         />
       </form>
+
+      <div>{submitRequestMutation.data?.status ?? "No request sent yet."}</div>
 
       {isEmailModalOpen && <EmailCollectionModal onClose={() => setIsEmailModalOpen(false)} />}
       {isNoAccessModalOpen && <NoAccessModal onClose={() => setIsNoAccessModalOpen(false)} />}

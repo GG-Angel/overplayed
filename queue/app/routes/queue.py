@@ -6,6 +6,7 @@ from dtos import (
     QueueOverviewResponse,
     UserActiveResponse,
     UserInQueueResponse,
+    ConfirmationSentResponse,
 )
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, status
 from fastapi.responses import RedirectResponse
@@ -54,11 +55,16 @@ async def request_access(
     service: QueueService = Depends(get_queue_service),
     emailer: QueueEmailer = Depends(get_queue_emailer),
     turnstile: TurnstileVerifier = Depends(get_turnstile_verifier),
-):
+) -> ConfirmationSentResponse | UserActiveResponse | UserInQueueResponse:
     if not settings.debug:
         await turnstile.validate_request(request, form)
-    if await service.get_user_status(form.email) is None:
-        background_tasks.add_task(emailer.onboard_user, form.email)
+
+    user_status = await service.get_user_status(form.email)
+    if user_status is not None:
+        return _status_response(form.email, user_status)
+
+    background_tasks.add_task(emailer.onboard_user, form.email)
+    return ConfirmationSentResponse(email=form.email)
 
 
 @router.get("/verifications/{token}")
