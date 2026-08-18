@@ -31,11 +31,15 @@ class QueueEmailer:
         try:
             await resend.Emails.send_async(
                 {
-                    "from": "overplayed@mail.gaelangel.com",
                     "to": email,
-                    "subject": "Verify your email",
-                    "html": f"<p>Here's your token: {token}</p>",
-                }
+                    "template": {
+                        "id": "email-verification",
+                        "variables": {
+                            "email": email,
+                            "verification_url": f"https://queue-overplayed.gaelangel.com/queue/verifications/{token}",
+                        },
+                    },
+                },
             )
             logger.info(f"Verification email sent to: {email}")
         except Exception as e:
@@ -45,10 +49,10 @@ class QueueEmailer:
         try:
             await resend.Emails.send_async(
                 {
-                    "from": "overplayed@mail.gaelangel.com",
                     "to": email,
-                    "subject": "You're in!",
-                    "html": "<p>You now have access to the app! Enjoy.</p>",
+                    "template": {
+                        "id": "onboarded-email",
+                    },
                 }
             )
             logger.info(f"Activation email sent to: {email}")

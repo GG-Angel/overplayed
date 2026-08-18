@@ -11,24 +11,33 @@ import { useRef, useState, type SubmitEventHandler } from "react";
 import { loadFromStorage, saveToStorage, storageKeys } from "@/lib/storage";
 import { accessRequestFormSchema, type QueueAccessRequest } from "@/lib/types";
 import { useAccessContext } from "@/features/user/provider/AccessContext";
+import { useUserStatus } from "@/features/user/api/get-user-status";
+
+/**
+ * 3. Split Data-Fetching (Container) from LayoutAdopt the Container/Presentational pattern or split components by data readiness.
+ * The Problem: A component trying to conditionally render loading spinners, network errors, and multiple layout variations simultaneously.
+ * The Fix: Use an outer container component solely responsible for fetching data, catching errors, and determining loading states.
+ * Pass resolved, non-null values to a clean inner layout component.
+ */
 
 const RequestAccessPage = () => {
+  const { setHasRequestedAccess } = useAccessContext();
   const [isInfoModalVisible, setIsInfoModalVisible] = useState<boolean>(false);
   const [isLoginErrorModalVisible, setIsLoginErrorModalVisible] = useState<boolean>(() => {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.has("error");
   });
 
+  const [turnstileToken, setTurnstileToken] = useState<string>("");
+  const [errors, setErrors] = useState<Partial<QueueAccessRequest>>({});
   const [form, setForm] = useState<QueueAccessRequest>(() =>
     loadFromStorage(localStorage, storageKeys.accessForm, { email: "" })
   );
-  const [errors, setErrors] = useState<Partial<QueueAccessRequest>>({});
-  const [turnstileToken, setTurnstileToken] = useState<string>("");
-  const { setHasRequestedAccess } = useAccessContext();
 
   const turnstileRef = useRef<TurnstileHandle>(null);
-  const queueStatus = useQueueOverview();
-  const submitMutation = useSendAccessRequest(form, turnstileToken);
+  const queueOverview = useQueueOverview();
+  const userStatus = useUserStatus(form.email);
+  const submitRequestMutation = useSendAccessRequest(form, turnstileToken);
 
   const validateForm = () => {
     const result = accessRequestFormSchema.safeParse(form);
@@ -43,9 +52,7 @@ const RequestAccessPage = () => {
   const handleSubmitRequest: SubmitEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
     if (!validateForm() || !turnstileToken) return;
-    submitMutation.mutate(undefined, {
-      // turnstile tokens are single-use; refresh the challenge
-      // so the next submission gets a fresh token
+    submitRequestMutation.mutate(undefined, {
       onSettled: () => {
         setTurnstileToken("");
         turnstileRef.current?.reset();
@@ -82,16 +89,16 @@ const RequestAccessPage = () => {
 
       <div className="flex flex-col gap-3 text-center">
         <h2>Availability</h2>
-        {queueStatus.data ? (
+        {queueOverview.data ? (
           (() => {
-            const total = queueStatus.data.num_active + queueStatus.data.num_queued;
-            const active = Math.min(total, queueStatus.data.user_limit);
-            const empty = Math.max(0, queueStatus.data.user_limit - active);
-            const waiting = Math.max(0, total - queueStatus.data.user_limit);
+            const total = queueOverview.data.num_active + queueOverview.data.num_queued;
+            const active = Math.min(total, queueOverview.data.user_limit);
+            const empty = Math.max(0, queueOverview.data.user_limit - active);
+            const waiting = Math.max(0, total - queueOverview.data.user_limit);
             return (
               <>
                 <div className="flex justify-center items-center gap-0.5 flex-wrap">
-                  {Array.from({ length: queueStatus.data.user_limit }).map((_, i) => (
+                  {Array.from({ length: queueOverview.data.user_limit }).map((_, i) => (
                     <User
                       key={i}
                       className={`size-10 ${i < active ? "text-muted" : "text-success"}`}
@@ -110,10 +117,10 @@ const RequestAccessPage = () => {
                       No slots are available. {formatCount(waiting)}{" "}
                       {waiting == 1 ? "user is" : "users are"} in line.
                     </p>
-                    {queueStatus.data.next_available_time && (
+                    {queueOverview.data.next_available_time && (
                       <p className="text-xs text-muted">
                         Earliest available time:{" "}
-                        {formatDateTime(queueStatus.data.next_available_time)}
+                        {formatDateTime(queueOverview.data.next_available_time)}
                       </p>
                     )}
                   </div>
@@ -137,7 +144,7 @@ const RequestAccessPage = () => {
               placeholder="user@example.com"
               value={form.email}
               error={errors.email}
-              disabled={submitMutation.isPending}
+              disabled={submitRequestMutation.isPending}
               onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
               onBlur={validateForm}
             />
@@ -159,7 +166,7 @@ const RequestAccessPage = () => {
             icon={<Send className="size-4 shrink-0" />}
             type="submit"
             size="lg"
-            disabled={submitMutation.isPending || !turnstileToken || !form.email}
+            disabled={submitRequestMutation.isPending || !turnstileToken || !form.email}
           >
             Send Request
           </Button>

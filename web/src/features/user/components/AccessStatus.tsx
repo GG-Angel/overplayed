@@ -1,17 +1,15 @@
 import DropdownMenuItem from "@/components/ui/dropdown/DropdownMenuItem";
 import { cn } from "@/lib/utils";
-import type { QueueUserAccess } from "@/lib/types";
 import { Hourglass } from "lucide-react";
 import useAccessCountdown from "../hooks/useAccessCountdown";
+import type { QueueUserStatus } from "@/lib/types";
 
-const describeAccess = (access: QueueUserAccess, label: string | null, isExpired: boolean) => {
+const describeAccess = (access: QueueUserStatus, label: string | null, isExpired: boolean) => {
   switch (access.status) {
     case "active":
       return isExpired ? "Access expired" : `Access · ${label} left`;
     case "in_queue":
       return `#${access.position_in_queue} in line`;
-    case "not_in_queue":
-      return "No access";
   }
 };
 
