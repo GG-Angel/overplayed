@@ -22,7 +22,7 @@ const router = createBrowserRouter(
     >
       <Route index Component={LandingPage} />
       <Route
-        path="request-access"
+        path="access"
         lazy={async () => ({
           Component: (await import("./pages/access")).default,
         })}

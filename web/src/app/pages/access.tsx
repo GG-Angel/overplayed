@@ -1,7 +1,7 @@
 import Button from "@/components/ui/Button";
 import Divider from "@/components/ui/Divider";
 import Input from "@/components/ui/Input";
-import Modal from "@/components/ui/Modal";
+import Modal, { type ModalProps } from "@/components/ui/Modal";
 import Turnstile, { type TurnstileHandle } from "@/components/ui/Turnstile";
 import { useQueueOverview } from "@/features/user/api/get-queue-overview";
 import { useSendAccessRequest } from "@/features/user/api/send-access-request";
@@ -20,13 +20,71 @@ import { useUserStatus } from "@/features/user/api/get-user-status";
  * Pass resolved, non-null values to a clean inner layout component.
  */
 
+type EmailCollectionModalProps = {
+  onClose: () => void;
+};
+
+const EmailCollectionModal = ({ onClose }: Pick<ModalProps, "onClose">) => {
+  return (
+    <Modal onClose={onClose} className="flex flex-col gap-3 max-w-2xl">
+      <h2>Why we need your email</h2>
+      <p>
+        Spotify only lets a few approved accounts use this app at a time. When your turn comes, we
+        add your email to Spotify's allowlist so you can log in.
+      </p>
+      <p>Use the exact email on your Spotify account — a mismatch means login will fail.</p>
+      <p className="text-muted text-sm">
+        Your email is used <span className="font-bold">only</span> to grant access.{" "}
+        <a
+          href="https://developer.spotify.com/blog/2026-02-06-update-on-developer-access-and-platform-security"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-accent hover:underline"
+        >
+          Learn more.
+        </a>
+      </p>
+      <Button
+        className="mt-2"
+        icon={<ThumbsUp className="size-4" />}
+        variant="secondary"
+        onClick={onClose}
+      >
+        Understood.
+      </Button>
+    </Modal>
+  );
+};
+
+const NoAccessModal = ({ onClose }: Pick<ModalProps, "onClose">) => {
+  return (
+    <Modal onClose={onClose} className="flex flex-col gap-3 max-w-2xl">
+      <h2>You don't have access yet</h2>
+      <p>
+        To log in, request access below with your Spotify email. We'll let you in as soon as it's
+        your turn.
+      </p>
+      <p className="text-muted text-sm">
+        Already requested? Make sure you're using the exact email on your Spotify account.
+      </p>
+      <Button
+        className="mt-2"
+        icon={<ThumbsUp className="size-4" />}
+        variant="secondary"
+        onClick={onClose}
+      >
+        Understood.
+      </Button>
+    </Modal>
+  );
+};
+
 const RequestAccessPage = () => {
   const { setHasRequestedAccess } = useAccessContext();
-  const [isInfoModalVisible, setIsInfoModalVisible] = useState<boolean>(false);
-  const [isLoginErrorModalVisible, setIsLoginErrorModalVisible] = useState<boolean>(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.has("error");
-  });
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState<boolean>(false);
+  const [isNoAccessModalOpen, setIsNoAccessModalOpen] = useState<boolean>(() =>
+    new URLSearchParams(window.location.search).has("error")
+  );
 
   const [turnstileToken, setTurnstileToken] = useState<string>("");
   const [errors, setErrors] = useState<Partial<QueueAccessRequest>>({});
@@ -78,7 +136,7 @@ const RequestAccessPage = () => {
         </p>
         <p>Join the waitlist and we'll let you in as soon as a spot frees up!</p>
         <button
-          onClick={() => setIsInfoModalVisible(true)}
+          onClick={() => setIsEmailModalOpen(true)}
           className="text-muted text-sm w-fit text-left flex items-center gap-1.5 cursor-pointer hover:underline"
         >
           <Info className="size-3.5" /> Why do you need my email?
@@ -179,64 +237,8 @@ const RequestAccessPage = () => {
         />
       </form>
 
-      {/* Info modal */}
-      {isInfoModalVisible && (
-        <Modal
-          onClose={() => setIsInfoModalVisible(false)}
-          className="flex flex-col gap-3 max-w-2xl"
-        >
-          <h2>Why we need your email</h2>
-          <p>
-            Spotify only lets a few approved accounts use this app at a time. When your turn comes,
-            we add your email to Spotify's allowlist so you can log in.
-          </p>
-          <p>Use the exact email on your Spotify account — a mismatch means login will fail.</p>
-          <p className="text-muted text-sm">
-            Your email is used <span className="font-bold">only</span> to grant access.{" "}
-            <a
-              href="https://developer.spotify.com/blog/2026-02-06-update-on-developer-access-and-platform-security"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-accent hover:underline"
-            >
-              Learn more.
-            </a>
-          </p>
-          <Button
-            className="mt-2"
-            icon={<ThumbsUp className="size-4" />}
-            variant="secondary"
-            onClick={() => setIsInfoModalVisible(false)}
-          >
-            Understood.
-          </Button>
-        </Modal>
-      )}
-
-      {/* Login error modal */}
-      {isLoginErrorModalVisible && (
-        <Modal
-          onClose={() => setIsLoginErrorModalVisible(false)}
-          className="flex flex-col gap-3 max-w-2xl"
-        >
-          <h2>You don't have access yet</h2>
-          <p>
-            To log in, request access below with your Spotify email. We'll let you in as soon as
-            it's your turn.
-          </p>
-          <p className="text-muted text-sm">
-            Already requested? Make sure you're using the exact email on your Spotify account.
-          </p>
-          <Button
-            className="mt-2"
-            icon={<ThumbsUp className="size-4" />}
-            variant="secondary"
-            onClick={() => setIsLoginErrorModalVisible(false)}
-          >
-            Understood.
-          </Button>
-        </Modal>
-      )}
+      {isEmailModalOpen && <EmailCollectionModal onClose={() => setIsEmailModalOpen(false)} />}
+      {isNoAccessModalOpen && <NoAccessModal onClose={() => setIsNoAccessModalOpen(false)} />}
     </main>
   );
 };

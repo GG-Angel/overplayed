@@ -5,7 +5,7 @@ import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts";
 import { MODAL_SHORTCUTS } from "@/lib/shortcuts";
 import { cn } from "@/lib/utils";
 
-type ModalProps = {
+export type ModalProps = {
   onClose: () => void;
   children: ReactNode;
   className?: string;

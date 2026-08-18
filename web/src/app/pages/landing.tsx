@@ -78,7 +78,7 @@ const CallToAction = () => {
               )}
               size="lg"
               variant={hasRequestedAccess ? "secondary" : "primary"}
-              onClick={() => navigate("/request-access")}
+              onClick={() => navigate("/access")}
             >
               Request Access
               <motion.div
