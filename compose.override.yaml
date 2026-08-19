@@ -17,8 +17,6 @@ services:
   grafana:
     environment:
       - GF_SERVER_ROOT_URL=http://localhost:3000
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
 
   prometheus:
     ports:
@@ -27,14 +25,7 @@ services:
   postgres:
     ports:
       - 127.0.0.1:5432:5432
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=admin
 
   redis:
     ports:
       - 127.0.0.1:6379:6379
-    environment:
-      - REDIS_USER=redis
-      - REDIS_PASSWORD=admin
-      - REDIS_KEY=O6tCucr4cOTFMe9FevF1xvu934s+JytZVqtc/F6T8L0= # not used in prod ^v^
