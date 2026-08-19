@@ -1,5 +1,5 @@
 import asyncio
-from urllib.parse import urlencode, urlsplit, urlunsplit
+from urllib.parse import urlsplit, urlunsplit
 
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse, RedirectResponse
@@ -44,8 +44,9 @@ async def handle_callback(
     """Exchanges the OAuth code for an access token and starts a new session."""
 
     def redirect_error() -> RedirectResponse:
-        params = urlencode({"error": "login_failed"})
-        return RedirectResponse(f"{settings.app_frontend_url}/request-access?{params}")
+        return RedirectResponse(
+            f"{settings.app_frontend_url}/access?error=login_failed"
+        )
 
     redirect_to = state or "/"
     if error or not code or not _is_valid_redirect_path(redirect_to):

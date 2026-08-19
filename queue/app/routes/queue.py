@@ -79,13 +79,13 @@ async def verify_token(
     email = await emailer.resolve_token(token)
     if email is None:
         return RedirectResponse(
-            url=f"{settings.app_frontend_url}/access/invalid",
+            url=f"{settings.app_frontend_url}/access?error=invalid_token",
             status_code=status.HTTP_302_FOUND,
         )
 
     await service.enqueue_user(email)
     return RedirectResponse(
-        url=f"{settings.app_frontend_url}/access/verified?email={quote(email)}",
+        url=f"{settings.app_frontend_url}/access?verified={quote(email)}",
         status_code=status.HTTP_302_FOUND,
     )
 
