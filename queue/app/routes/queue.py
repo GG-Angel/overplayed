@@ -2,11 +2,11 @@ from urllib.parse import quote
 
 from core.limiter import limiter
 from dtos import (
+    ConfirmationSentResponse,
     QueueEnrollmentForm,
     QueueOverviewResponse,
     UserActiveResponse,
     UserInQueueResponse,
-    ConfirmationSentResponse,
 )
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, status
 from fastapi.responses import RedirectResponse
