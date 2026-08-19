@@ -6,11 +6,17 @@ import Turnstile, { type TurnstileHandle } from "@/components/ui/Turnstile";
 import { useQueueOverview } from "@/features/user/api/get-queue-overview";
 import { useSendAccessRequest } from "@/features/user/api/send-access-request";
 import { formatCount, formatDateTime } from "@/lib/utils";
-import { Info, Key, Plus, Send, ThumbsUp, User } from "lucide-react";
+import { Check, Clock, Info, Key, Mail, Plus, Send, ThumbsUp, User } from "lucide-react";
 import { useRef, useState, type SubmitEventHandler } from "react";
 import { loadFromStorage, saveToStorage, storageKeys } from "@/lib/storage";
-import { accessRequestFormSchema, type QueueAccessRequest } from "@/lib/types";
+import {
+  accessRequestFormSchema,
+  type QueueAccessRequest,
+  type QueueAccessResponse,
+} from "@/lib/types";
 import { useAccessContext } from "@/features/user/provider/AccessContext";
+import Card from "@/components/ui/Card";
+import { Spinner } from "@/components/ui/Spinner";
 
 const EmailCollectionModal = ({ onClose }: Pick<ModalProps, "onClose">) => {
   return (
@@ -67,19 +73,70 @@ const NoAccessModal = ({ onClose }: Pick<ModalProps, "onClose">) => {
   );
 };
 
+const AccessStatusCard = ({ data }: { data: QueueAccessResponse }) => {
+  const { status, email } = data;
+
+  if (status === "confirmation_sent") {
+    return (
+      <Card tone="muted" padding="lg" radius="lg" className="flex flex-col gap-2 py-6">
+        <h2 className="flex items-center gap-2">
+          <Mail className="shrink-0" /> Check Your Inbox
+        </h2>
+        <div className="flex flex-col gap-0.5">
+          <p className="font-medium">
+            We've sent a verification email to <span className="text-accent">{email}</span>
+          </p>
+          <p>Follow the link in the email to confirm your request.</p>
+        </div>
+        <p className="text-muted text-sm">Don't see it? Check your spam folder.</p>
+      </Card>
+    );
+  }
+
+  if (status === "in_queue") {
+    return (
+      <Card tone="muted" padding="lg" radius="lg" className="flex flex-col gap-2 py-6">
+        <h2 className="flex items-center gap-2">
+          <Clock className="shrink-0" /> Waiting In Queue
+        </h2>
+        <div className="flex flex-col gap-0.5">
+          <p className="font-medium">
+            {email} is <span className="text-success">#{data.position_in_queue}</span> in line.
+          </p>
+          <p className="text-muted">Access opens at {formatDateTime(data.estimated_start_time)}.</p>
+        </div>
+      </Card>
+    );
+  }
+
+  return (
+    <Card tone="positive" padding="lg" radius="lg" className="flex flex-col gap-2 py-6">
+      <h2 className="flex items-center gap-2">
+        <Check className="shrink-0" /> Account Activated
+      </h2>
+      <div className="flex flex-col gap-0.5">
+        <p className="font-medium">{email} is in!</p>
+        <p className="brightness-80">
+          Access is available until {formatDateTime(data.estimated_end_time)}.
+        </p>
+      </div>
+    </Card>
+  );
+};
+
 const RequestAccessPage = () => {
   const { setHasRequestedAccess } = useAccessContext();
   const queueOverview = useQueueOverview();
-
-  const [isEmailModalOpen, setIsEmailModalOpen] = useState<boolean>(false);
-  const [isNoAccessModalOpen, setIsNoAccessModalOpen] = useState<boolean>(() =>
-    new URLSearchParams(window.location.search).has("error")
-  );
 
   const [turnstileToken, setTurnstileToken] = useState<string>("");
   const [errors, setErrors] = useState<Partial<QueueAccessRequest>>({});
   const [form, setForm] = useState<QueueAccessRequest>(() =>
     loadFromStorage(localStorage, storageKeys.accessForm, { email: "" })
+  );
+
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState<boolean>(false);
+  const [isNoAccessModalOpen, setIsNoAccessModalOpen] = useState<boolean>(() =>
+    new URLSearchParams(window.location.search).has("error")
   );
 
   const turnstileRef = useRef<TurnstileHandle>(null);
@@ -98,6 +155,8 @@ const RequestAccessPage = () => {
   const handleSubmitRequest: SubmitEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
     if (!validateForm() || !turnstileToken) return;
+
+    submitRequestMutation.reset();
 
     submitRequestMutation.mutate(undefined, {
       onSettled: () => {
@@ -225,7 +284,19 @@ const RequestAccessPage = () => {
         />
       </form>
 
-      <div>{submitRequestMutation.data?.status ?? "No request sent yet."}</div>
+      {!submitRequestMutation.isIdle && <Divider />}
+      {submitRequestMutation.isPending && (
+        <div className="flex flex-col items-center gap-2 text-muted">
+          <Spinner />
+          <p className="text-sm">Processing request...</p>
+        </div>
+      )}
+      {submitRequestMutation.isError && (
+        <Card tone="negative" padding="lg" radius="lg" className="flex flex-col gap-2 py-4">
+          Failed to send request. Please try again.
+        </Card>
+      )}
+      {submitRequestMutation.isSuccess && <AccessStatusCard data={submitRequestMutation.data} />}
 
       {isEmailModalOpen && <EmailCollectionModal onClose={() => setIsEmailModalOpen(false)} />}
       {isNoAccessModalOpen && <NoAccessModal onClose={() => setIsNoAccessModalOpen(false)} />}
