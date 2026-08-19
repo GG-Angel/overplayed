@@ -6,7 +6,18 @@ import Turnstile, { type TurnstileHandle } from "@/components/ui/Turnstile";
 import { useQueueOverview } from "@/features/user/api/get-queue-overview";
 import { useSendAccessRequest } from "@/features/user/api/send-access-request";
 import { formatCount, formatDateTime } from "@/lib/utils";
-import { Check, Clock, Info, Key, Mail, Plus, Send, ThumbsUp, User } from "lucide-react";
+import {
+  Check,
+  CircleQuestionMark,
+  Clock,
+  Info,
+  Key,
+  Mail,
+  Plus,
+  Send,
+  ThumbsUp,
+  User,
+} from "lucide-react";
 import { useRef, useState, type SubmitEventHandler } from "react";
 import { loadFromStorage, saveToStorage, storageKeys } from "@/lib/storage";
 import {
@@ -18,6 +29,15 @@ import { useAccessContext } from "@/features/user/provider/AccessContext";
 import Card from "@/components/ui/Card";
 import { Spinner } from "@/components/ui/Spinner";
 import { useSearchParams } from "react-router-dom";
+import { useUserStatus } from "@/features/user/api/get-user-status";
+
+const ErrorNotice = ({ message }: { message: string }) => {
+  return (
+    <Card tone="negative" padding="lg" radius="lg" className="flex flex-col gap-2 py-4">
+      {message}
+    </Card>
+  );
+};
 
 type NoticeModalProps = Pick<ModalProps, "onClose" | "children"> & {
   title: string;
@@ -149,20 +169,28 @@ const RequestAccessPage = () => {
   const { setHasRequestedAccess } = useAccessContext();
   const queueOverview = useQueueOverview();
 
+  const [searchParams] = useSearchParams();
   const [turnstileToken, setTurnstileToken] = useState<string>("");
   const [errors, setErrors] = useState<Partial<QueueAccessRequest>>({});
-  const [form, setForm] = useState<QueueAccessRequest>(() =>
-    loadFromStorage(localStorage, storageKeys.accessForm, { email: "" })
+
+  const [form, setForm] = useState<QueueAccessRequest>(() => {
+    if (searchParams.has("email")) {
+      return { email: searchParams.get("email") ?? "" };
+    }
+    return loadFromStorage(localStorage, storageKeys.accessForm, { email: "" });
+  });
+  const [submittedForm, setSubmittedForm] = useState<QueueAccessRequest>(form);
+
+  const [resultSource, setResultSource] = useState<"status" | "request" | null>(() =>
+    form.email ? "status" : null
   );
-
-  const [searchParams] = useSearchParams();
   const authErrorNotice = authErrorNotices[searchParams.get("error") ?? ""];
-
   const [isEmailModalOpen, setIsEmailModalOpen] = useState<boolean>(false);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(true);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(() => !!authErrorNotice);
 
   const turnstileRef = useRef<TurnstileHandle>(null);
   const submitRequestMutation = useSendAccessRequest(form, turnstileToken);
+  const userStatusQuery = useUserStatus(form.email);
 
   const validateForm = () => {
     const result = accessRequestFormSchema.safeParse(form);
@@ -174,11 +202,21 @@ const RequestAccessPage = () => {
     return true;
   };
 
+  const handleCheckStatus = () => {
+    if (!validateForm()) return;
+
+    setSubmittedForm(form);
+    setResultSource("status");
+    submitRequestMutation.reset();
+    userStatusQuery.refetch();
+  };
+
   const handleSubmitRequest: SubmitEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
     if (!validateForm() || !turnstileToken) return;
 
-    submitRequestMutation.reset();
+    setSubmittedForm(form);
+    setResultSource("request");
 
     submitRequestMutation.mutate(undefined, {
       onSettled: () => {
@@ -191,6 +229,23 @@ const RequestAccessPage = () => {
       },
     });
   };
+
+  const results = {
+    request: {
+      isPending: submitRequestMutation.isPending,
+      isError: submitRequestMutation.isError,
+      errorMessage: (email: string) => `Failed to send request for ${email}. Please try again.`,
+      data: submitRequestMutation.data,
+    },
+    status: {
+      isPending: userStatusQuery.isFetching,
+      isError: userStatusQuery.isError,
+      errorMessage: (email: string) => `The account for ${email} is inactive.`,
+      data: userStatusQuery.data,
+    },
+  };
+
+  const result = resultSource ? results[resultSource] : null;
 
   return (
     <main className="flex flex-col gap-6 max-w-xl pt-2 pb-8 self-center">
@@ -262,35 +317,46 @@ const RequestAccessPage = () => {
 
       <Divider />
 
-      <form className="flex flex-col gap-6" onSubmit={handleSubmitRequest}>
-        <div className="flex flex-col xs:justify-between xs:flex-row gap-6 xs:gap-3">
-          <div className="flex flex-col flex-1 gap-1.5">
-            <Input
-              type="email"
-              label="Spotify account email"
-              placeholder="user@example.com"
-              value={form.email}
-              error={errors.email}
-              disabled={submitRequestMutation.isPending}
-              onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
-              onBlur={validateForm}
-            />
-            <span className="text-sm text-muted">
-              You can find your email{" "}
-              <a
-                href="https://www.spotify.com/account/profile/"
-                className="underline hover:text-white"
-                target="_blank"
-                rel="noopener noreferrer"
-                draggable={false}
-              >
-                here.
-              </a>
-            </span>
-          </div>
+      <form className="flex flex-col gap-4" onSubmit={handleSubmitRequest}>
+        <div className="flex flex-col flex-1 gap-1.5">
+          <Input
+            type="email"
+            label="Spotify account email"
+            placeholder="user@example.com"
+            value={form.email}
+            error={errors.email}
+            disabled={submitRequestMutation.isPending}
+            onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
+            onBlur={validateForm}
+          />
+          <span className="text-sm text-muted">
+            You can find your email{" "}
+            <a
+              href="https://www.spotify.com/account/profile/"
+              className="underline hover:text-white"
+              target="_blank"
+              rel="noopener noreferrer"
+              draggable={false}
+            >
+              here.
+            </a>
+          </span>
+        </div>
+        <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3">
           <Button
-            className="h-11 xs:mt-7"
+            icon={<CircleQuestionMark className="size-4 shrink-0" />}
+            className="sm:flex-1"
+            variant="secondary"
+            size="lg"
+            type="button"
+            disabled={submitRequestMutation.isPending || !form.email}
+            onClick={handleCheckStatus}
+          >
+            Check Status
+          </Button>
+          <Button
             icon={<Send className="size-4 shrink-0" />}
+            className="sm:flex-1"
             type="submit"
             size="lg"
             disabled={submitRequestMutation.isPending || !turnstileToken || !form.email}
@@ -298,7 +364,9 @@ const RequestAccessPage = () => {
             Send Request
           </Button>
         </div>
+
         <Turnstile
+          className="mt-2"
           ref={turnstileRef}
           onVerify={setTurnstileToken}
           onExpire={() => setTurnstileToken("")}
@@ -306,19 +374,22 @@ const RequestAccessPage = () => {
         />
       </form>
 
-      {!submitRequestMutation.isIdle && <Divider />}
-      {submitRequestMutation.isPending && (
+      {result && <Divider />}
+
+      {result?.isPending && (
         <div className="flex flex-col items-center gap-2 text-muted">
           <Spinner />
           <p className="text-sm">Processing request...</p>
         </div>
       )}
-      {submitRequestMutation.isError && (
-        <Card tone="negative" padding="lg" radius="lg" className="flex flex-col gap-2 py-4">
-          Failed to send request. Please try again.
-        </Card>
+
+      {!result?.isPending && result?.isError && (
+        <ErrorNotice message={result.errorMessage(submittedForm.email)} />
       )}
-      {submitRequestMutation.isSuccess && <AccessStatusCard data={submitRequestMutation.data} />}
+
+      {!result?.isPending && !result?.isError && result?.data && (
+        <AccessStatusCard data={result.data} />
+      )}
 
       {isEmailModalOpen && <EmailCollectionModal onClose={() => setIsEmailModalOpen(false)} />}
       {isAuthModalOpen && authErrorNotice && (
