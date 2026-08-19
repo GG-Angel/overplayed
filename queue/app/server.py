@@ -30,6 +30,7 @@ async def lifespan(app: FastAPI):
         max_connections=10,
     )
     redis = Redis(connection_pool=redis_pool)
+    worker_started = False
 
     try:
         crypto = Fernet(key=settings.redis_key)
@@ -61,10 +62,13 @@ async def lifespan(app: FastAPI):
 
         await token_provider.seed_token(settings.spotify_refresh_token)
         queue_worker.start()
+        worker_started = True
 
         yield
 
     finally:
+        if worker_started:
+            await queue_worker.stop()
         await http.close()
         await redis_pool.aclose()
 
