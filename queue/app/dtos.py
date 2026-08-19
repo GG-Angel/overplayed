@@ -31,6 +31,6 @@ class UserInQueueResponse(BaseModel):
     estimated_start_time: datetime
 
 
-class ConfirmationSentResponse(BaseModel):
-    status: Literal["confirmation_sent"] = "confirmation_sent"
+class OnboardingResponse(BaseModel):
+    status: Literal["confirmation_sent"] | Literal["confirmation_pending"]
     email: str

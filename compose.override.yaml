@@ -13,6 +13,7 @@ services:
     environment:
       - APP_DEBUG=true
       - APP_FRONTEND_URL=http://127.0.0.1:5173
+      - APP_QUEUE_URL=http://127.0.0.1:8081
 
   grafana:
     environment:

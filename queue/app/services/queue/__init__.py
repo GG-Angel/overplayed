@@ -1,4 +1,4 @@
-from services.queue.email import QueueEmailer
+from services.queue.email import EmailService
 from services.queue.models import (
     ActiveStatus,
     InQueueStatus,

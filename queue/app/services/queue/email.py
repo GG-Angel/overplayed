@@ -3,31 +3,60 @@ import secrets
 import resend
 from loguru import logger
 from redis.asyncio import Redis
-from services.spotify import SpotifyUserValidator
 from settings import settings
 
 EMAIL_TOKENS_KEY = "queue:email_tokens"
 
 
-class QueueEmailer:
-    def __init__(self, redis: Redis, validator: SpotifyUserValidator):
+class EmailService:
+    def __init__(self, redis: Redis):
         self._redis = redis
-        self._validator = validator
 
-    async def onboard_user(self, email: str) -> bool:
-        if not await self._validator.user_exists(email):
-            logger.info(f"Skipping {email}: no matching Spotify user")
+    async def register_user(self, email: str) -> bool:
+        """Register a user by sending a verification email with a one-time token."""
+        normalized_email = self._normalize_email(email)
+
+        token = await self._reserve_token(normalized_email)
+        if token is None:
+            logger.info(f"Skipping {normalized_email}: token already exists")
             return False
 
-        token, was_set = await self._generate_token(email)
-        if not was_set:
-            logger.info(f"Skipping {email}: token already issued and unexpired")
-            return False
-
-        await self._send_verification_email(email, token)
+        await self._send_verification_email(normalized_email, token)
         return True
 
-    async def _send_verification_email(self, email: str, token: str) -> None:
+    async def _reserve_token(self, email: str) -> str | None:
+        """Reserve a one-time token for the given email if one does not already exist."""
+        token = secrets.token_urlsafe(32)
+        already_reserved = await self._redis.set(
+            self._build_email_key(email), token, ex=settings.email_ott_ex, nx=True
+        )
+
+        # a pending token already exists for this email
+        if already_reserved is not True:
+            return None
+
+        await self._redis.set(
+            self._build_token_key(token), email, ex=settings.email_ott_ex
+        )
+        return token
+
+    async def resolve_email_from_token(self, token: str) -> str | None:
+        """Resolve the email associated with a one-time token."""
+        email = await self._redis.getdel(self._build_token_key(token))
+        if email is None:
+            return None
+        if isinstance(email, bytes):
+            email = email.decode("utf-8")
+        await self._redis.delete(self._build_email_key(email))
+        return email
+
+    async def has_pending_token(self, email: str) -> bool:
+        """Check if there is a pending one-time token for the given email."""
+        normalized_email = self._normalize_email(email)
+        return await self._redis.exists(self._build_email_key(normalized_email)) > 0
+
+    async def _send_verification_email(self, email: str, token: str) -> bool:
+        """Send a verification email to the user with a one-time token."""
         try:
             await resend.Emails.send_async(
                 {
@@ -42,10 +71,13 @@ class QueueEmailer:
                 },
             )
             logger.info(f"Verification email sent to: {email}")
+            return True
         except Exception as e:
             logger.error(f"Failed to send enrollment email to {email}: {e}")
+            return False
 
-    async def notify_activation(self, email: str) -> None:
+    async def send_onboarded_email(self, email: str) -> bool:
+        """Send an email to the user indicating they have been onboarded."""
         try:
             await resend.Emails.send_async(
                 {
@@ -57,24 +89,16 @@ class QueueEmailer:
                 }
             )
             logger.info(f"Activation email sent to: {email}")
+            return True
         except Exception as e:
             logger.error(f"Failed to send onboarded email to {email}: {e}")
-
-    async def resolve_token(self, token: str) -> str | None:
-        email = await self._redis.getdel(self._build_token_key(token))
-        if isinstance(email, bytes):
-            email = email.decode("utf-8")
-        return email
-
-    async def _generate_token(self, email: str) -> tuple[str, bool]:
-        token = secrets.token_urlsafe(32)
-        was_set = await self._redis.set(
-            self._build_token_key(token),
-            email,
-            ex=settings.email_ott_ex,
-            nx=True,
-        )
-        return token, was_set is True
+            return False
 
     def _build_token_key(self, token: str) -> str:
-        return f"queue:ott:{token}"
+        return f"queue:one_time_tokens:{token}"
+
+    def _build_email_key(self, email: str) -> str:
+        return f"queue:email_tokens:{email}"
+
+    def _normalize_email(self, email: str) -> str:
+        return email.strip().lower()

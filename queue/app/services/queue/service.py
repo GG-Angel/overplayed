@@ -6,7 +6,7 @@ from typing import NamedTuple
 from locking import DistributedLock
 from loguru import logger
 from models import ActiveUser, NewUser, QueuedUser
-from services.queue import QueueEmailer, QueueRepository
+from services.queue import EmailService, QueueRepository
 from services.queue.models import (
     ActiveStatus,
     InQueueStatus,
@@ -30,7 +30,7 @@ class QueueService:
         self,
         user_manager: SpotifyUserManager,
         user_validator: SpotifyUserValidator,
-        emailer: QueueEmailer,
+        emailer: EmailService,
         queue: QueueRepository,
         lock: DistributedLock,
     ):
@@ -38,7 +38,7 @@ class QueueService:
         self._user_validator = user_validator
         self._emailer = emailer
         self._queue = queue
-        self._notification_tasks: set[asyncio.Task[None]] = set()
+        self._notification_tasks: set[asyncio.Task[bool]] = set()
         self._lock = lock
         self._user_limit = 5
         self._retry_limit = 3
@@ -189,6 +189,6 @@ class QueueService:
     def _notify_activations(self, activated: list[ActiveUser]) -> None:
         """Fires activation emails in the background."""
         for user in activated:
-            task = asyncio.create_task(self._emailer.notify_activation(user.email))
+            task = asyncio.create_task(self._emailer.send_onboarded_email(user.email))
             self._notification_tasks.add(task)
             task.add_done_callback(self._notification_tasks.discard)
