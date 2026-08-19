@@ -1,11 +1,12 @@
 from urllib.parse import quote
+
 from core.limiter import limiter
 from dtos import (
+    OnboardingResponse,
     QueueEnrollmentForm,
     QueueOverviewResponse,
     UserActiveResponse,
     UserInQueueResponse,
-    OnboardingResponse,
 )
 from fastapi import (
     APIRouter,
@@ -13,8 +14,8 @@ from fastapi import (
     Depends,
     HTTPException,
     Request,
-    status,
     Response,
+    status,
 )
 from fastapi.responses import RedirectResponse
 from services.queue import EmailService, QueueService, UserStatus

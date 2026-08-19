@@ -32,5 +32,5 @@ class UserInQueueResponse(BaseModel):
 
 
 class OnboardingResponse(BaseModel):
-    status: Literal["confirmation_sent"] | Literal["confirmation_pending"]
+    status: Literal["confirmation_sent", "confirmation_pending"]
     email: str

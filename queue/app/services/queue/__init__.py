@@ -12,8 +12,8 @@ from services.queue.worker import QueueWorker
 
 __all__ = [
     "ActiveStatus",
+    "EmailService",
     "InQueueStatus",
-    "QueueEmailer",
     "QueueEntry",
     "QueueRepository",
     "QueueService",

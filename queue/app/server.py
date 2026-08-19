@@ -38,7 +38,7 @@ async def lifespan(app: FastAPI):
         )
         user_validator = await SpotifyUserValidator.create(http)
 
-        queue_emailer = EmailService(redis, user_validator)
+        queue_emailer = EmailService(redis)
         queue_service = QueueService(
             SpotifyUserManager(http, redis, token_provider, settings.spotify_client_id),
             user_validator,
