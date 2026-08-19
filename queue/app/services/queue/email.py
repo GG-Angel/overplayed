@@ -52,6 +52,7 @@ class QueueEmailer:
                     "to": email,
                     "template": {
                         "id": "onboarded-email",
+                        "variables": {"email": email},
                     },
                 }
             )

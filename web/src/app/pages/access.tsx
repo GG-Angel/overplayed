@@ -17,11 +17,33 @@ import {
 import { useAccessContext } from "@/features/user/provider/AccessContext";
 import Card from "@/components/ui/Card";
 import { Spinner } from "@/components/ui/Spinner";
+import { useSearchParams } from "react-router-dom";
+
+type NoticeModalProps = Pick<ModalProps, "onClose" | "children"> & {
+  title: string;
+  dismissLabel: string;
+};
+
+const NoticeModal = ({ title, dismissLabel, onClose, children }: NoticeModalProps) => {
+  return (
+    <Modal onClose={onClose} className="flex flex-col gap-3 max-w-2xl">
+      <h2>{title}</h2>
+      {children}
+      <Button
+        className="mt-2"
+        icon={<ThumbsUp className="size-4" />}
+        variant="secondary"
+        onClick={onClose}
+      >
+        {dismissLabel}
+      </Button>
+    </Modal>
+  );
+};
 
 const EmailCollectionModal = ({ onClose }: Pick<ModalProps, "onClose">) => {
   return (
-    <Modal onClose={onClose} className="flex flex-col gap-3 max-w-2xl">
-      <h2>Why we need your email</h2>
+    <NoticeModal title="Why we need your email" dismissLabel="Understood." onClose={onClose}>
       <p>
         Spotify only lets a few approved accounts use this app at a time. When your turn comes, we
         add your email to Spotify's allowlist so you can log in.
@@ -38,39 +60,38 @@ const EmailCollectionModal = ({ onClose }: Pick<ModalProps, "onClose">) => {
           Learn more.
         </a>
       </p>
-      <Button
-        className="mt-2"
-        icon={<ThumbsUp className="size-4" />}
-        variant="secondary"
-        onClick={onClose}
-      >
-        Understood.
-      </Button>
-    </Modal>
+    </NoticeModal>
   );
 };
 
-const NoAccessModal = ({ onClose }: Pick<ModalProps, "onClose">) => {
-  return (
-    <Modal onClose={onClose} className="flex flex-col gap-3 max-w-2xl">
-      <h2>You don't have access yet</h2>
+type AuthErrorNotice = Omit<NoticeModalProps, "onClose">;
+
+const authErrorNotices: Record<string, AuthErrorNotice | undefined> = {
+  no_access: {
+    title: "You don't have access yet",
+    dismissLabel: "Understood.",
+    children: (
+      <>
+        <p>
+          To log in, request access below with your Spotify email. We'll let you in as soon as it's
+          your turn.
+        </p>
+        <p className="text-muted text-sm">
+          Already requested? Make sure you're using the exact email on your Spotify account.
+        </p>
+      </>
+    ),
+  },
+  invalid_token: {
+    title: "This verification link has expired",
+    dismissLabel: "Got it.",
+    children: (
       <p>
-        To log in, request access below with your Spotify email. We'll let you in as soon as it's
-        your turn.
+        Verification links are only valid for 15 minutes. Please request access again, and we'll
+        send you a fresh link.
       </p>
-      <p className="text-muted text-sm">
-        Already requested? Make sure you're using the exact email on your Spotify account.
-      </p>
-      <Button
-        className="mt-2"
-        icon={<ThumbsUp className="size-4" />}
-        variant="secondary"
-        onClick={onClose}
-      >
-        Understood.
-      </Button>
-    </Modal>
-  );
+    ),
+  },
 };
 
 const AccessStatusCard = ({ data }: { data: QueueAccessResponse }) => {
@@ -134,10 +155,11 @@ const RequestAccessPage = () => {
     loadFromStorage(localStorage, storageKeys.accessForm, { email: "" })
   );
 
+  const [searchParams] = useSearchParams();
+  const authErrorNotice = authErrorNotices[searchParams.get("error") ?? ""];
+
   const [isEmailModalOpen, setIsEmailModalOpen] = useState<boolean>(false);
-  const [isNoAccessModalOpen, setIsNoAccessModalOpen] = useState<boolean>(() =>
-    new URLSearchParams(window.location.search).has("error")
-  );
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(true);
 
   const turnstileRef = useRef<TurnstileHandle>(null);
   const submitRequestMutation = useSendAccessRequest(form, turnstileToken);
@@ -299,7 +321,9 @@ const RequestAccessPage = () => {
       {submitRequestMutation.isSuccess && <AccessStatusCard data={submitRequestMutation.data} />}
 
       {isEmailModalOpen && <EmailCollectionModal onClose={() => setIsEmailModalOpen(false)} />}
-      {isNoAccessModalOpen && <NoAccessModal onClose={() => setIsNoAccessModalOpen(false)} />}
+      {isAuthModalOpen && authErrorNotice && (
+        <NoticeModal {...authErrorNotice} onClose={() => setIsAuthModalOpen(false)} />
+      )}
     </main>
   );
 };

@@ -85,7 +85,7 @@ async def verify_token(
 
     await service.enqueue_user(email)
     return RedirectResponse(
-        url=f"{settings.app_frontend_url}/access?verified={quote(email)}",
+        url=f"{settings.app_frontend_url}/access?email={quote(email)}",
         status_code=status.HTTP_302_FOUND,
     )
 

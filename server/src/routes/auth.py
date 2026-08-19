@@ -44,9 +44,7 @@ async def handle_callback(
     """Exchanges the OAuth code for an access token and starts a new session."""
 
     def redirect_error() -> RedirectResponse:
-        return RedirectResponse(
-            f"{settings.app_frontend_url}/access?error=login_failed"
-        )
+        return RedirectResponse(f"{settings.app_frontend_url}/access?error=no_access")
 
     redirect_to = state or "/"
     if error or not code or not _is_valid_redirect_path(redirect_to):
