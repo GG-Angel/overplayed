@@ -11,7 +11,7 @@ const getUserStatus = async (email: string) => {
 
 export const useUserStatus = (email: string | undefined) => {
   return useQuery({
-    queryKey: queryKeys.userAccess(),
+    queryKey: [...queryKeys.userAccess(), email],
     queryFn: () => {
       if (!email) throw new Error("No email provided");
       return getUserStatus(email);
