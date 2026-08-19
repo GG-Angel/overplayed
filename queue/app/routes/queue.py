@@ -56,7 +56,7 @@ async def request_access(
     emailer: QueueEmailer = Depends(get_queue_emailer),
     turnstile: TurnstileVerifier = Depends(get_turnstile_verifier),
 ) -> ConfirmationSentResponse | UserActiveResponse | UserInQueueResponse:
-    if not settings.debug:
+    if not settings.app_debug:
         await turnstile.validate_request(request, form)
 
     user_status = await service.get_user_status(form.email)
@@ -79,13 +79,13 @@ async def verify_token(
     email = await emailer.resolve_token(token)
     if email is None:
         return RedirectResponse(
-            url=f"{settings.frontend_url}/access/invalid",
+            url=f"{settings.app_frontend_url}/access/invalid",
             status_code=status.HTTP_302_FOUND,
         )
 
     await service.enqueue_user(email)
     return RedirectResponse(
-        url=f"{settings.frontend_url}/access/verified?email={quote(email)}",
+        url=f"{settings.app_frontend_url}/access/verified?email={quote(email)}",
         status_code=status.HTTP_302_FOUND,
     )
 

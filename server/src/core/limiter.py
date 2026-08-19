@@ -5,5 +5,5 @@ from settings import settings
 
 limiter = Limiter(
     key_func=get_remote_address,
-    enabled=not settings.debug,
+    enabled=not settings.app_debug,
 )

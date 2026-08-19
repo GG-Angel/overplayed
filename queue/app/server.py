@@ -40,9 +40,7 @@ async def lifespan(app: FastAPI):
 
         queue_emailer = QueueEmailer(redis, user_validator)
         queue_service = QueueService(
-            SpotifyUserManager(
-                http, redis, token_provider, settings.spotify_app_client_id
-            ),
+            SpotifyUserManager(http, redis, token_provider, settings.spotify_client_id),
             user_validator,
             queue_emailer,
             QueueRepository(redis),
@@ -81,7 +79,7 @@ def build_app() -> FastAPI:
     # cors
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[settings.frontend_url],
+        allow_origins=[settings.app_frontend_url],
         allow_credentials=True,
         allow_methods=["GET", "POST", "DELETE"],
         allow_headers=["*"],
