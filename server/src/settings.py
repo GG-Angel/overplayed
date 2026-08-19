@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     redis_host: str = Field(...)
     redis_port: int = Field(...)
     redis_password: str = Field(...)
-    redis_key: bytes = Field(..., min_length=32, max_length=32)
+    redis_key: bytes = Field(..., min_length=44, max_length=44)
 
     # Cache TTLs
     ttl_sessions: int = 60 * 60 * 24 * 2  # 2 days
