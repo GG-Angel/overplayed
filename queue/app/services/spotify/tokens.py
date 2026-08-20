@@ -2,14 +2,8 @@ from aiohttp import ClientSession
 from cryptography.fernet import Fernet
 from errors import SpotifyTokenError
 from loguru import logger
-from pydantic import BaseModel
+from models.spotify import SpotifyTokenResponse
 from redis.asyncio import Redis
-
-
-class Token(BaseModel):
-    access_token: str
-    refresh_token: str
-    expires_in: int
 
 
 class SpotifyTokenProvider:
@@ -65,7 +59,7 @@ class SpotifyTokenProvider:
                 "Failed to renew access token. Please renew your app's Spotify credentials."
             ) from e
 
-    async def _renew_token(self, refresh_token: str) -> Token:
+    async def _renew_token(self, refresh_token: str) -> SpotifyTokenResponse:
         """Renew the access token using the refresh token."""
         async with self._http.post(
             self._token_url,
@@ -76,9 +70,9 @@ class SpotifyTokenProvider:
                 "client_id": self._auth_client_id,
             },
         ) as response:
-            return Token.model_validate(await response.json())
+            return SpotifyTokenResponse.model_validate(await response.json())
 
-    async def _persist_token(self, token: Token) -> None:
+    async def _persist_token(self, token: SpotifyTokenResponse) -> None:
         """Save the access and refresh tokens to Redis."""
         ttl = max(token.expires_in - 60, 1)  # expire early, must stay positive
         await self._redis.set(

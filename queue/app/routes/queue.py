@@ -1,13 +1,6 @@
 from urllib.parse import quote
 
 from core.limiter import limiter
-from dtos import (
-    OnboardingResponse,
-    QueueEnrollmentForm,
-    QueueOverviewResponse,
-    UserActiveResponse,
-    UserInQueueResponse,
-)
 from fastapi import (
     APIRouter,
     BackgroundTasks,
@@ -18,7 +11,14 @@ from fastapi import (
     status,
 )
 from fastapi.responses import RedirectResponse
-from services.queue import EmailService, QueueService, UserStatus
+from models.requests import QueueAccessRequest
+from models.responses import (
+    AccessRequestResponse,
+    ActiveUserStatusResponse,
+    QueuedUserStatusResponse,
+    QueueOverviewResponse,
+)
+from services.queue import EmailService, QueueService, QueueUserStatus
 from services.turnstile import TurnstileVerifier
 from settings import settings
 from state import get_queue_emailer, get_queue_service, get_turnstile_verifier
@@ -47,7 +47,7 @@ async def get_user_status(
     request: Request,
     email: str,
     service: QueueService = Depends(get_queue_service),
-) -> UserActiveResponse | UserInQueueResponse:
+) -> ActiveUserStatusResponse | QueuedUserStatusResponse:
     status = await service.get_user_status(email)
     if status is None:
         raise HTTPException(status_code=404)
@@ -59,12 +59,12 @@ async def get_user_status(
 async def request_access(
     request: Request,
     response: Response,
-    form: QueueEnrollmentForm,
+    form: QueueAccessRequest,
     background_tasks: BackgroundTasks,
     service: QueueService = Depends(get_queue_service),
     emailer: EmailService = Depends(get_queue_emailer),
     turnstile: TurnstileVerifier = Depends(get_turnstile_verifier),
-) -> OnboardingResponse | UserActiveResponse | UserInQueueResponse:
+) -> AccessRequestResponse | ActiveUserStatusResponse | QueuedUserStatusResponse:
     if not settings.app_debug:
         await turnstile.validate_request(request, form)
 
@@ -75,11 +75,11 @@ async def request_access(
 
     if await emailer.has_pending_token(form.email):
         response.status_code = status.HTTP_409_CONFLICT
-        return OnboardingResponse(status="confirmation_pending", email=form.email)
+        return AccessRequestResponse(status="confirmation_pending", email=form.email)
 
     background_tasks.add_task(emailer.register_user, form.email)
     response.status_code = status.HTTP_202_ACCEPTED
-    return OnboardingResponse(status="confirmation_sent", email=form.email)
+    return AccessRequestResponse(status="confirmation_sent", email=form.email)
 
 
 @router.get("/verifications/{token}")
@@ -106,14 +106,16 @@ async def verify_token(
 
 
 def _status_response(
-    email: str, status: UserStatus
-) -> UserActiveResponse | UserInQueueResponse:
+    email: str, status: QueueUserStatus
+) -> ActiveUserStatusResponse | QueuedUserStatusResponse:
     """Map an internal user status onto its public response DTO."""
     match status.status:
         case "active":
-            return UserActiveResponse(email=email, estimated_end_time=status.end_time)
+            return ActiveUserStatusResponse(
+                email=email, estimated_end_time=status.end_time
+            )
         case "in_queue":
-            return UserInQueueResponse(
+            return QueuedUserStatusResponse(
                 email=email,
                 position_in_queue=status.position,
                 estimated_start_time=status.start_time,

@@ -1,14 +1,13 @@
 from aiohttp import ClientSession
 from errors import SpotifyUserManagementError
 from loguru import logger
-from models import ActiveUser, NewUser
-from pydantic import BaseModel
+from models.spotify import (
+    SpotifyUser,
+    SpotifyUserCreationRequest,
+    SpotifyUsersResponse,
+)
 from redis.asyncio import Redis
 from services.spotify.tokens import SpotifyTokenProvider
-
-
-class UsersResponse(BaseModel):
-    users: list[ActiveUser]
 
 
 class SpotifyUserManager:
@@ -25,14 +24,14 @@ class SpotifyUserManager:
         self._app_client_id = app_client_id
         self._users_key = "queue:active_users"
 
-    async def add_user(self, user: NewUser) -> ActiveUser:
+    async def add_user(self, user: SpotifyUserCreationRequest) -> SpotifyUser:
         """Add a new user to the Spotify app."""
         try:
             return await self._activate_user(user)
         except Exception as e:
             raise SpotifyUserManagementError(f"Failed to add user {user.email}.") from e
 
-    async def remove_user(self, user: ActiveUser) -> None:
+    async def remove_user(self, user: SpotifyUser) -> None:
         """Remove a user from the Spotify app."""
         try:
             await self._deactivate_user(user)
@@ -46,32 +45,34 @@ class SpotifyUserManager:
         active_users = await self.get_users()
         return any(user.email == email for user in active_users)
 
-    async def get_user(self, email: str) -> ActiveUser | None:
+    async def get_user(self, email: str) -> SpotifyUser | None:
         """Get the active user with the given email from the Spotify app. Returns None if the user is not active."""
         active_users = await self.get_users()
         return next((user for user in active_users if user.email == email), None)
 
-    async def get_users(self) -> list[ActiveUser]:
+    async def get_users(self) -> list[SpotifyUser]:
         """Get the list of active users for the Spotify app."""
         if cached := await self._redis.get(self._users_key):
-            return UsersResponse.model_validate_json(cached).users
+            return SpotifyUsersResponse.model_validate_json(cached).users
         try:
             return await self._fetch_users()
         except Exception as e:
             raise SpotifyUserManagementError("Failed to fetch active users.") from e
 
-    async def _fetch_users(self) -> list[ActiveUser]:
+    async def _fetch_users(self) -> list[SpotifyUser]:
         """Fetch the list of active users for the Spotify app, bypassing the cache."""
         async with self._http.get(
             self._build_url(),
             headers=await self._build_headers(),
             raise_for_status=True,
         ) as response:
-            table = UsersResponse.model_validate(await response.json())
+            table = SpotifyUsersResponse.model_validate(await response.json())
             await self._redis.set(self._users_key, table.model_dump_json(), ex=300)
             return table.users
 
-    async def _activate_user(self, user: NewUser) -> ActiveUser:
+    async def _activate_user(
+        self, user: SpotifyUserCreationRequest
+    ) -> SpotifyUser:
         """Activate a new user in the Spotify app."""
         async with self._http.post(
             url=self._build_url(write=True),
@@ -79,12 +80,12 @@ class SpotifyUserManager:
             json=user.model_dump(),
             raise_for_status=True,
         ) as response:
-            active_user = ActiveUser.model_validate(await response.json())
+            active_user = SpotifyUser.model_validate(await response.json())
             await self._redis.delete(self._users_key)
             logger.debug(f"Added user: {active_user.email}")
             return active_user
 
-    async def _deactivate_user(self, user: ActiveUser) -> None:
+    async def _deactivate_user(self, user: SpotifyUser) -> None:
         """Deactivate a user in the Spotify app."""
         async with self._http.delete(
             url=f"{self._build_url(write=True)}/id/{user.id}",
