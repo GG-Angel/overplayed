@@ -1,5 +1,6 @@
 import asyncio
 import heapq
+from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
 from typing import NamedTuple
 
@@ -13,8 +14,14 @@ from models.queue import (
     QueueUserStatus,
 )
 from models.spotify import SpotifyUser, SpotifyUserCreationRequest
+from redis.asyncio import Redis
 from services.queue import EmailService, QueueRepository
 from services.spotify import SpotifyUserManager, SpotifyUserValidator
+from settings import settings
+
+
+def utc_now() -> datetime:
+    return datetime.now(UTC)
 
 
 class FillOutcome(NamedTuple):
@@ -38,6 +45,7 @@ class QueueService:
         user_limit: int,
         retry_limit: int,
         user_ttl: int,
+        now_factory: Callable[[], datetime] = utc_now,
     ):
         self._user_manager = user_manager
         self._user_validator = user_validator
@@ -48,6 +56,7 @@ class QueueService:
         self._user_limit = user_limit
         self._retry_limit = retry_limit
         self._access_duration = timedelta(seconds=user_ttl)
+        self._now_factory = now_factory
 
     async def get_user_status(self, email: str) -> QueueUserStatus | None:
         """Get the status of a user."""
@@ -125,7 +134,7 @@ class QueueService:
     async def _prune_expired_users(self) -> list[SpotifyUser]:
         """Deactivate users whose access duration has expired from the Spotify app."""
         active_users = await self._user_manager.get_users()
-        now = datetime.now(UTC)
+        now = self._now_factory()
         evicted: list[SpotifyUser] = []
 
         for user in active_users:
@@ -182,7 +191,7 @@ class QueueService:
     async def _estimate_start_time(self, queue_position: int) -> datetime:
         """Estimate the start time for a user based on their position in the queue."""
         active_users = await self._user_manager.get_users()
-        now = datetime.now(UTC)
+        now = self._now_factory()
 
         heap = [u.created_at + self._access_duration for u in active_users]
         heap += [now] * max(0, self._user_limit - len(active_users))
@@ -200,3 +209,22 @@ class QueueService:
             task = asyncio.create_task(self._emailer.send_onboarded_email(user.email))
             self._notification_tasks.add(task)
             task.add_done_callback(self._notification_tasks.discard)
+
+
+def build_queue_service(
+    user_manager: SpotifyUserManager,
+    user_validator: SpotifyUserValidator,
+    emailer: EmailService,
+    redis: Redis,
+) -> QueueService:
+    """Build a QueueService wired to Redis and the real app settings."""
+    return QueueService(
+        user_manager=user_manager,
+        user_validator=user_validator,
+        emailer=emailer,
+        queue=QueueRepository(redis),
+        lock=DistributedLock(redis, timeout=30, blocking_timeout=10),
+        user_limit=settings.queue_user_limit,
+        retry_limit=settings.queue_retry_limit,
+        user_ttl=settings.ttl_queue_users,
+    )
