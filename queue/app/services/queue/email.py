@@ -1,4 +1,6 @@
 import secrets
+from collections.abc import Callable
+from typing import Any, Protocol
 
 import resend
 from loguru import logger
@@ -6,14 +8,49 @@ from redis.asyncio import Redis
 from settings import settings
 
 
+class EmailSender(Protocol):
+    """Structural interface for a client that can send a templated email."""
+
+    async def send_async(
+        self, *, to: str, template_id: str, variables: dict[str, Any]
+    ) -> Any: ...
+
+
+class ResendEmailSender:
+    """Adapter that sends a templated email through the Resend API."""
+
+    async def send_async(
+        self, *, to: str, template_id: str, variables: dict[str, Any]
+    ) -> Any:
+        return await resend.Emails.send_async(
+            {
+                "to": to,
+                "template": {
+                    "id": template_id,
+                    "variables": variables,
+                },
+            }
+        )
+
+
 class EmailService:
-    def __init__(self, redis: Redis):
+    def __init__(
+        self,
+        redis: Redis,
+        email_sender: EmailSender,
+        token_ttl_seconds: int,
+        verification_url_template: str,
+        token_factory: Callable[[], str],
+    ):
         self._redis = redis
+        self._email_sender = email_sender
+        self._token_ttl_seconds = token_ttl_seconds
+        self._verification_url_template = verification_url_template
+        self._token_factory = token_factory
 
     async def register_user(self, email: str) -> bool:
         """Register a user by sending a verification email with a one-time token."""
         normalized_email = self._normalize_email(email)
-
         token = await self._reserve_token(normalized_email)
         if token is None:
             logger.info(f"Skipping {normalized_email}: token already exists")
@@ -24,9 +61,9 @@ class EmailService:
 
     async def _reserve_token(self, email: str) -> str | None:
         """Reserve a one-time token for the given email if one does not already exist."""
-        token = secrets.token_urlsafe(32)
+        token = self._token_factory()
         already_reserved = await self._redis.set(
-            self._build_email_key(email), token, ex=settings.email_ott_ex, nx=True
+            self._build_email_key(email), token, ex=self._token_ttl_seconds, nx=True
         )
 
         # a pending token already exists for this email
@@ -34,7 +71,7 @@ class EmailService:
             return None
 
         await self._redis.set(
-            self._build_token_key(token), email, ex=settings.email_ott_ex
+            self._build_token_key(token), email, ex=self._token_ttl_seconds
         )
         return token
 
@@ -56,16 +93,14 @@ class EmailService:
     async def _send_verification_email(self, email: str, token: str) -> bool:
         """Send a verification email to the user with a one-time token."""
         try:
-            await resend.Emails.send_async(
-                {
-                    "to": email,
-                    "template": {
-                        "id": "email-verification",
-                        "variables": {
-                            "email": email,
-                            "verification_url": f"https://queue-overplayed.gaelangel.com/queue/verifications/{token}",
-                        },
-                    },
+            await self._email_sender.send_async(
+                to=email,
+                template_id="email-verification",
+                variables={
+                    "email": email,
+                    "verification_url": self._verification_url_template.format(
+                        token=token
+                    ),
                 },
             )
             logger.info(f"Verification email sent to: {email}")
@@ -77,14 +112,10 @@ class EmailService:
     async def send_onboarded_email(self, email: str) -> bool:
         """Send an email to the user indicating they have been onboarded."""
         try:
-            await resend.Emails.send_async(
-                {
-                    "to": email,
-                    "template": {
-                        "id": "onboarded-email",
-                        "variables": {"email": email},
-                    },
-                }
+            await self._email_sender.send_async(
+                to=email,
+                template_id="onboarded-email",
+                variables={"email": email},
             )
             logger.info(f"Activation email sent to: {email}")
             return True
@@ -92,11 +123,25 @@ class EmailService:
             logger.error(f"Failed to send onboarded email to {email}: {e}")
             return False
 
-    def _build_token_key(self, token: str) -> str:
+    @staticmethod
+    def _build_token_key(token: str) -> str:
         return f"queue:one_time_tokens:{token}"
 
-    def _build_email_key(self, email: str) -> str:
+    @staticmethod
+    def _build_email_key(email: str) -> str:
         return f"queue:email_tokens:{email}"
 
-    def _normalize_email(self, email: str) -> str:
+    @staticmethod
+    def _normalize_email(email: str) -> str:
         return email.strip().lower()
+
+
+def build_email_service(redis: Redis) -> EmailService:
+    """Build an EmailService wired to the real Resend client and app settings."""
+    return EmailService(
+        redis=redis,
+        email_sender=ResendEmailSender(),
+        token_ttl_seconds=settings.email_ott_ex,
+        verification_url_template=f"{settings.app_queue_url}/queue/verifications/{{token}}",
+        token_factory=lambda: secrets.token_urlsafe(32),
+    )

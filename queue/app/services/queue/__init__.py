@@ -1,4 +1,4 @@
-from services.queue.email import EmailService
+from services.queue.email import EmailService, build_email_service
 from services.queue.models import (
     ActiveStatus,
     InQueueStatus,
@@ -20,4 +20,5 @@ __all__ = [
     "QueueSummary",
     "QueueWorker",
     "UserStatus",
+    "build_email_service",
 ]

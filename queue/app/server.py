@@ -8,7 +8,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from locking import DistributedLock
 from redis.asyncio import ConnectionPool, Redis
 from routes import queue
-from services.queue import EmailService, QueueRepository, QueueService, QueueWorker
+from services.queue import (
+    QueueRepository,
+    QueueService,
+    QueueWorker,
+    build_email_service,
+)
 from services.spotify import (
     SpotifyTokenProvider,
     SpotifyUserManager,
@@ -38,7 +43,7 @@ async def lifespan(app: FastAPI):
         )
         user_validator = await SpotifyUserValidator.create(http)
 
-        queue_emailer = EmailService(redis)
+        queue_emailer = build_email_service(redis)
         queue_service = QueueService(
             SpotifyUserManager(http, redis, token_provider, settings.spotify_client_id),
             user_validator,
