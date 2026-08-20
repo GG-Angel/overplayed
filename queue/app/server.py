@@ -7,9 +7,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from redis.asyncio import ConnectionPool, Redis
 from routes import queue
 from services.queue import (
-    QueueWorker,
     build_email_service,
+    build_queue_repository,
     build_queue_service,
+    build_queue_worker,
 )
 from services.spotify import (
     build_spotify_token_provider,
@@ -38,13 +39,15 @@ async def lifespan(app: FastAPI):
         user_validator = await build_spotify_user_validator(http)
 
         queue_emailer = build_email_service(redis)
+        queue_repository = build_queue_repository(redis)
         queue_service = build_queue_service(
             build_spotify_user_manager(http, redis, token_provider),
             user_validator,
             queue_emailer,
+            queue_repository,
             redis,
         )
-        queue_worker = QueueWorker(queue_service)
+        queue_worker = build_queue_worker(queue_service)
 
         turnstile_verifier = TurnstileVerifier(
             http, settings.cloudflare_turnstile_secret

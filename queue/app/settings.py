@@ -34,6 +34,7 @@ class Settings(BaseSettings):
     # Queue limits
     queue_user_limit: int = 5
     queue_retry_limit: int = 3
+    queue_poll_interval: int = 60 * 5  # 5 minutes
 
     model_config = SettingsConfigDict(
         env_file=".env",

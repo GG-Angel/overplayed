@@ -1,14 +1,27 @@
 import asyncio
+from collections.abc import Awaitable, Callable
+from typing import Protocol
 
 from loguru import logger
-from services.queue.service import QueueService
+from settings import settings
+
+
+class QueueProcessor(Protocol):
+    async def process_queue(self) -> None: ...
 
 
 class QueueWorker:
-    def __init__(self, queue_service: QueueService):
+    def __init__(
+        self,
+        queue_service: QueueProcessor,
+        *,
+        poll_interval: float,
+        sleep: Callable[[float], Awaitable[None]] = asyncio.sleep,
+    ):
         self._queue_service = queue_service
         self._task: asyncio.Task | None = None
-        self._poll_interval = 300  # 5 minutes
+        self._poll_interval = poll_interval
+        self._sleep = sleep
 
     async def _run(self) -> None:
         logger.info("Started queue worker.")
@@ -19,7 +32,7 @@ class QueueWorker:
             except Exception as e:
                 logger.exception(f"Queue processing cycle failed: {e}.")
             logger.info(f"Processing complete. Sleeping for {self._poll_interval}s...")
-            await asyncio.sleep(self._poll_interval)
+            await self._sleep(self._poll_interval)
 
     def start(self) -> None:
         if self._task is not None:
@@ -37,3 +50,11 @@ class QueueWorker:
         except asyncio.CancelledError:
             pass
         logger.info("Stopped queue worker.")
+
+
+def build_queue_worker(queue_service: QueueProcessor) -> QueueWorker:
+    """Build a QueueWorker for the queue service."""
+    return QueueWorker(
+        queue_service,
+        poll_interval=settings.queue_poll_interval,
+    )
