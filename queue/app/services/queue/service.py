@@ -85,8 +85,11 @@ class QueueService:
             raise ValueError(f"{email} does not exist.")
 
         async with self._lock:
-            await self._queue.push(email)
-            await self._process_queue_locked()
+            if not await self._queue.has(
+                email
+            ) and not await self._user_manager.has_user(email):
+                await self._queue.push(email)
+                await self._process_queue_locked()
 
         status = await self.get_user_status(email)
         if status is None:
@@ -146,9 +149,7 @@ class QueueService:
         rejected: list[QueuedUser] = []
         for user in await self._queue.pop(count=available_slots):
             try:
-                new_user = SpotifyUserCreationRequest(
-                    name=user.email, email=user.email
-                )
+                new_user = SpotifyUserCreationRequest(name=user.email, email=user.email)
                 activated.append(await self._user_manager.add_user(new_user))
                 logger.info(f"Activated user: {user.email}.")
             except Exception as e:
