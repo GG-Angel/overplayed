@@ -7,12 +7,12 @@ import Card from "@/components/ui/Card";
 import Divider from "@/components/ui/Divider";
 import SwipeButtons from "@/features/swipe/components/SwipeButtons";
 import SwipeCardStack from "@/features/swipe/components/SwipeCardStack";
-import { useGlobalSwipeMetrics } from "@/features/metrics/api/get-swipe-metrics";
+import { useGlobalSwipeStats } from "@/features/metrics/api/get-swipe-metrics";
 import useSwipeCarousel from "@/features/swipe/hooks/useSwipeCarousel";
 import carouselTracks from "@/assets/carousel-tracks.json";
 import z from "zod";
 import { LIKED_SONGS_ID, trackSchema } from "@/lib/types";
-import { useUserPlaylists } from "@/features/playlist/api/get-playlists";
+import { usePlaylists } from "@/features/playlist/api/get-playlists";
 import { useSwipeLeaderboard } from "@/features/metrics/api/get-swipe-leaderboad";
 import { Key, Scissors, Undo } from "lucide-react";
 import Image from "@/components/ui/Image";
@@ -193,8 +193,8 @@ const Leaderboard = () => {
 const LandingPage = () => {
   const carousel = useSwipeCarousel(useMemo(() => shuffleArray(CAROUSEL_TRACKS), []));
   const { user } = useAuth();
-  const { data: metrics } = useGlobalSwipeMetrics();
-  const { data: playlists } = useUserPlaylists({ enabled: !!user });
+  const { data: metrics } = useGlobalSwipeStats();
+  const { data: playlists } = usePlaylists({ enabled: !!user });
 
   const metricsDisplayed = [
     { label: "Songs swiped", amount: metrics && formatCount(metrics.total_swipes) },

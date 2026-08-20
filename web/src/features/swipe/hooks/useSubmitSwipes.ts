@@ -1,7 +1,6 @@
 import type { SwipeSubmissionResponse } from "@/lib/types";
 import { useEffect, useMemo } from "react";
 import { useSwipeContext } from "../provider/SwipeContext";
-import { submitSwipes } from "../api/submit-swipes";
 import {
   useMutation,
   useMutationState,
@@ -10,6 +9,7 @@ import {
 } from "@tanstack/react-query";
 import { removeFromStorage, storageKeys } from "@/lib/storage";
 import { queryKeys } from "@/lib/query";
+import { postPlaylistSwipes } from "@/api/api";
 
 const useSubmitSwipes = () => {
   const queryClient = useQueryClient();
@@ -21,7 +21,7 @@ const useSubmitSwipes = () => {
   const { mutate } = useMutation({
     mutationKey,
     mutationFn: () =>
-      submitSwipes(playlist.id, {
+      postPlaylistSwipes(playlist.id, {
         options,
         uris: session.dislikes.map((t) => t.uri),
         tracks_swiped: session.swipes.length,

@@ -1,28 +1,19 @@
-import api from "@/lib/api";
+import { getGlobalSwipeStats as getGlobalSwipeStats, getSwipeStats } from "@/api/api";
 import { queryKeys } from "@/lib/query";
-import { globalMetricsSchema, userMetricsSchema } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 
-const getGlobalSwipeMetrics = async () => {
-  return globalMetricsSchema.parse(await api.get(`/stats`));
-};
-
-export const useGlobalSwipeMetrics = () => {
+export const useGlobalSwipeStats = () => {
   return useQuery({
     queryKey: queryKeys.metricsGlobal(),
-    queryFn: getGlobalSwipeMetrics,
+    queryFn: getGlobalSwipeStats,
     staleTime: 2 * 60 * 1000,
   });
 };
 
-const getUserSwipeMetrics = async () => {
-  return userMetricsSchema.parse(await api.get(`/stats/me`));
-};
-
-export const useUserSwipeMetrics = () => {
+export const useSwipeStats = () => {
   return useQuery({
     queryKey: queryKeys.metricsUser(),
-    queryFn: getUserSwipeMetrics,
+    queryFn: getSwipeStats,
     staleTime: 2 * 60 * 1000,
   });
 };

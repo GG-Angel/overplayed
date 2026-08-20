@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import PlaylistCard from "@/features/playlist/components/PlaylistCard";
 import { useNavigate } from "react-router-dom";
 import LoadingState from "@/components/states/LoadingState";
-import { useUserPlaylists } from "@/features/playlist/api/get-playlists";
+import { usePlaylists } from "@/features/playlist/api/get-playlists";
 import { useCallback, useMemo, useState, type ComponentType } from "react";
 import MessageState from "@/components/states/MessageState";
 import Dropdown from "@/components/ui/dropdown/Dropdown";
@@ -61,7 +61,7 @@ const SelectionPage = () => {
   const [sortKey, setSortKey] = useState<PlaylistSortKey>("tracks");
   const [sortOrder, setSortOrder] = useState<PlaylistSortOrder>("descending");
   const [layout, setLayout] = useState<PlaylistLayout>("card");
-  const { data: playlists, isLoading } = useUserPlaylists();
+  const { data: playlists, isLoading } = usePlaylists();
   const navigate = useNavigate();
 
   const SortIcon = sortOrder === "ascending" ? ArrowUp : ArrowDown;
