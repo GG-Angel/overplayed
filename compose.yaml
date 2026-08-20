@@ -29,7 +29,7 @@ services:
       - internal
 
   grafana:
-    image: grafana/grafana:13.1.3
+    image: grafana/grafana:13.1.4
     container_name: overplayed-grafana
     restart: unless-stopped
     environment:
@@ -61,7 +61,7 @@ services:
       - internal
 
   redis:
-    image: redis:8.8.1-alpine
+    image: redis:8.10.0-alpine
     restart: unless-stopped
     command: redis-server --requirepass ${REDIS_PASSWORD}
     container_name: overplayed-redis
@@ -71,7 +71,7 @@ services:
       - internal
 
   db:
-    image: postgres:18.4-alpine3.24
+    image: postgres:18.6-alpine3.24
     restart: unless-stopped
     container_name: overplayed-db
     environment:
