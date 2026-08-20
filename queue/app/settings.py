@@ -26,8 +26,14 @@ class Settings(BaseSettings):
     cloudflare_turnstile_secret: str = Field(...)
     resend_api_key: str = Field(...)
 
-    # Cache TTLs
-    email_ott_ex: int = 900
+    # TTLs
+    ttl_email_ott: int = 60 * 15  # 15 minutes
+    ttl_spotify_users: int = 60 * 5  # 5 minutes
+    ttl_queue_users: int = 60 * 60 * 24  # 24 hours
+
+    # Queue limits
+    queue_user_limit: int = 5
+    queue_retry_limit: int = 3
 
     model_config = SettingsConfigDict(
         env_file=".env",

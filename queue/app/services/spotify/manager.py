@@ -25,11 +25,13 @@ class SpotifyUserManager:
         redis: Redis,
         tokens: SpotifyAccessTokenProvider,
         app_client_id: str,
+        users_ttl: int,
     ):
         self._http_client = http_client
         self._redis = redis
         self._tokens = tokens
         self._app_client_id = app_client_id
+        self._users_ttl = users_ttl
         self._users_key = "queue:active_users"
 
     async def add_user(self, user: SpotifyUserCreationRequest) -> SpotifyUser:
@@ -75,7 +77,11 @@ class SpotifyUserManager:
             raise_for_status=True,
         ) as response:
             table = SpotifyUsersResponse.model_validate(await response.json())
-            await self._redis.set(self._users_key, table.model_dump_json(), ex=300)
+            await self._redis.set(
+                self._users_key,
+                table.model_dump_json(),
+                ex=self._users_ttl,
+            )
             return table.users
 
     async def _activate_user(self, user: SpotifyUserCreationRequest) -> SpotifyUser:
@@ -121,4 +127,5 @@ def build_spotify_user_manager(
         redis=redis,
         tokens=tokens,
         app_client_id=settings.spotify_client_id,
+        users_ttl=settings.ttl_spotify_users,
     )
