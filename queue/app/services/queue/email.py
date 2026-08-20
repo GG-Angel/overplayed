@@ -5,8 +5,6 @@ from loguru import logger
 from redis.asyncio import Redis
 from settings import settings
 
-EMAIL_TOKENS_KEY = "queue:email_tokens"
-
 
 class EmailService:
     def __init__(self, redis: Redis):
