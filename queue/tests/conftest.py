@@ -1,4 +1,8 @@
 import os
+from collections.abc import AsyncIterator
+
+import pytest
+from fakeredis.aioredis import FakeRedis
 
 TEST_SETTINGS = {
     "APP_FRONTEND_URL": "https://app.example.com",
@@ -17,3 +21,10 @@ TEST_SETTINGS = {
 
 for name, value in TEST_SETTINGS.items():
     os.environ.setdefault(name, value)
+
+
+@pytest.fixture
+async def redis_client() -> AsyncIterator[FakeRedis]:
+    client = FakeRedis(decode_responses=True)
+    yield client
+    await client.aclose()

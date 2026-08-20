@@ -1,18 +1,7 @@
 import asyncio
-from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from types import TracebackType
 from typing import Any
-
-import pytest
-from fakeredis.aioredis import FakeRedis
-
-
-@pytest.fixture
-async def redis_client() -> AsyncIterator[FakeRedis]:
-    client = FakeRedis(decode_responses=True)
-    yield client
-    await client.aclose()
 
 
 @dataclass(frozen=True)
