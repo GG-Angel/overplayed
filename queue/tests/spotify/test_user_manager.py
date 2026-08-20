@@ -17,6 +17,7 @@ ACCESS_TOKEN = "access-token"
 READ_URL = f"https://developer.spotify.com/api/s4d/warp/clients/{APP_CLIENT_ID}/users"
 WRITE_URL = f"https://developer.spotify.com/api/ws4d/warp/clients/{APP_CLIENT_ID}/users"
 USERS_KEY = "queue:active_users"
+USERS_TTL = 300
 
 
 class RecordingTokenProvider:
@@ -49,6 +50,7 @@ def create_manager(
         redis=redis_client,
         tokens=tokens,
         app_client_id=APP_CLIENT_ID,
+        users_ttl=USERS_TTL,
     )
 
 
@@ -94,7 +96,7 @@ async def test_get_users_fetches_and_caches_users(
     cached_users = await redis_client.get(USERS_KEY)
     assert cached_users is not None
     assert SpotifyUsersResponse.model_validate_json(cached_users).users == [user]
-    assert 0 < await redis_client.ttl(USERS_KEY) <= 300
+    assert 0 < await redis_client.ttl(USERS_KEY) <= USERS_TTL
 
 
 async def test_user_lookups_use_active_users(

@@ -34,6 +34,10 @@ class QueueService:
         emailer: EmailService,
         queue: QueueRepository,
         lock: DistributedLock,
+        *,
+        user_limit: int,
+        retry_limit: int,
+        user_ttl: int,
     ):
         self._user_manager = user_manager
         self._user_validator = user_validator
@@ -41,9 +45,9 @@ class QueueService:
         self._queue = queue
         self._notification_tasks: set[asyncio.Task[bool]] = set()
         self._lock = lock
-        self._user_limit = 5
-        self._retry_limit = 3
-        self._access_duration = timedelta(hours=24)
+        self._user_limit = user_limit
+        self._retry_limit = retry_limit
+        self._access_duration = timedelta(seconds=user_ttl)
 
     async def get_user_status(self, email: str) -> QueueUserStatus | None:
         """Get the status of a user."""
