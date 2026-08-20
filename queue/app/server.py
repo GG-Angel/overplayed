@@ -2,7 +2,6 @@ from contextlib import asynccontextmanager
 
 from aiohttp import ClientSession
 from core.limiter import limiter
-from cryptography.fernet import Fernet
 from fastapi import FastAPI, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from locking import DistributedLock
@@ -15,9 +14,9 @@ from services.queue import (
     build_email_service,
 )
 from services.spotify import (
-    SpotifyTokenProvider,
-    SpotifyUserManager,
-    SpotifyUserValidator,
+    build_spotify_token_provider,
+    build_spotify_user_manager,
+    build_spotify_user_validator,
 )
 from services.turnstile import TurnstileVerifier
 from settings import APP_STATE_KEY, settings
@@ -37,15 +36,12 @@ async def lifespan(app: FastAPI):
     redis = Redis(connection_pool=redis_pool)
 
     try:
-        crypto = Fernet(key=settings.redis_key)
-        token_provider = SpotifyTokenProvider(
-            http, redis, crypto, settings.spotify_auth_client_id
-        )
-        user_validator = await SpotifyUserValidator.create(http)
+        token_provider = build_spotify_token_provider(http, redis)
+        user_validator = await build_spotify_user_validator(http)
 
         queue_emailer = build_email_service(redis)
         queue_service = QueueService(
-            SpotifyUserManager(http, redis, token_provider, settings.spotify_client_id),
+            build_spotify_user_manager(http, redis, token_provider),
             user_validator,
             queue_emailer,
             QueueRepository(redis),
