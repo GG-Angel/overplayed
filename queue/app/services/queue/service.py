@@ -215,6 +215,7 @@ def build_queue_service(
     user_manager: SpotifyUserManager,
     user_validator: SpotifyUserValidator,
     emailer: EmailService,
+    queue: QueueRepository,
     redis: Redis,
 ) -> QueueService:
     """Build a QueueService wired to Redis and the real app settings."""
@@ -222,7 +223,7 @@ def build_queue_service(
         user_manager=user_manager,
         user_validator=user_validator,
         emailer=emailer,
-        queue=QueueRepository(redis),
+        queue=queue,
         lock=DistributedLock(redis, timeout=30, blocking_timeout=10),
         user_limit=settings.queue_user_limit,
         retry_limit=settings.queue_retry_limit,
