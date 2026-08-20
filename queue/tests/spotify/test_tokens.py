@@ -50,9 +50,7 @@ async def test_get_token_renews_and_stores_tokens(
     redis_client: FakeRedis,
 ) -> None:
     await redis_client.set("queue:refresh_token", "encrypted:old-refresh-token")
-    http_client = RecordingHttpClient(
-        post_responses=[FakeResponse(token_response())]
-    )
+    http_client = RecordingHttpClient(post_responses=[FakeResponse(token_response())])
     provider = create_provider(http_client, redis_client)
 
     assert await provider.get_token() == "new-access-token"
@@ -104,9 +102,7 @@ async def test_get_token_wraps_renewal_errors(redis_client: FakeRedis) -> None:
 
 
 async def test_seed_token_stores_tokens(redis_client: FakeRedis) -> None:
-    http_client = RecordingHttpClient(
-        post_responses=[FakeResponse(token_response())]
-    )
+    http_client = RecordingHttpClient(post_responses=[FakeResponse(token_response())])
     provider = create_provider(http_client, redis_client)
 
     await provider.seed_token("seed-refresh-token")
