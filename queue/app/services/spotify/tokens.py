@@ -1,9 +1,20 @@
-from aiohttp import ClientSession
+from typing import Protocol
+
 from cryptography.fernet import Fernet
 from errors import SpotifyTokenError
 from loguru import logger
 from models.spotify import SpotifyTokenResponse
 from redis.asyncio import Redis
+from services.spotify.http import SpotifyHttpClient
+from settings import settings
+
+
+class TokenCipher(Protocol):
+    """Structural interface for token encryption."""
+
+    def encrypt(self, data: bytes) -> bytes: ...
+
+    def decrypt(self, token: str | bytes) -> bytes: ...
 
 
 class SpotifyTokenProvider:
@@ -11,9 +22,9 @@ class SpotifyTokenProvider:
 
     def __init__(
         self,
-        http: ClientSession,
+        http: SpotifyHttpClient,
         redis: Redis,
-        crypto: Fernet,
+        crypto: TokenCipher,
         auth_client_id: str,
     ):
         self._http = http
@@ -95,3 +106,16 @@ class SpotifyTokenProvider:
 
     def _decrypt(self, encrypted: str | bytes) -> str:
         return self._crypto.decrypt(encrypted).decode()
+
+
+def build_spotify_token_provider(
+    http: SpotifyHttpClient,
+    redis: Redis,
+) -> SpotifyTokenProvider:
+    """Build a SpotifyTokenProvider wired to real encryption and app settings."""
+    return SpotifyTokenProvider(
+        http=http,
+        redis=redis,
+        crypto=Fernet(settings.redis_key),
+        auth_client_id=settings.spotify_auth_client_id,
+    )

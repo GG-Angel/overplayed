@@ -1,4 +1,5 @@
-from aiohttp import ClientSession
+from typing import Protocol
+
 from errors import SpotifyUserManagementError
 from loguru import logger
 from models.spotify import (
@@ -7,18 +8,25 @@ from models.spotify import (
     SpotifyUsersResponse,
 )
 from redis.asyncio import Redis
-from services.spotify.tokens import SpotifyTokenProvider
+from services.spotify.http import SpotifyHttpClient
+from settings import settings
+
+
+class SpotifyAccessTokenProvider(Protocol):
+    """Structural interface for a Spotify access token provider."""
+
+    async def get_token(self) -> str: ...
 
 
 class SpotifyUserManager:
     def __init__(
         self,
-        http: ClientSession,
+        http_client: SpotifyHttpClient,
         redis: Redis,
-        tokens: SpotifyTokenProvider,
+        tokens: SpotifyAccessTokenProvider,
         app_client_id: str,
     ):
-        self._http = http
+        self._http_client = http_client
         self._redis = redis
         self._tokens = tokens
         self._app_client_id = app_client_id
@@ -61,7 +69,7 @@ class SpotifyUserManager:
 
     async def _fetch_users(self) -> list[SpotifyUser]:
         """Fetch the list of active users for the Spotify app, bypassing the cache."""
-        async with self._http.get(
+        async with self._http_client.get(
             self._build_url(),
             headers=await self._build_headers(),
             raise_for_status=True,
@@ -70,11 +78,9 @@ class SpotifyUserManager:
             await self._redis.set(self._users_key, table.model_dump_json(), ex=300)
             return table.users
 
-    async def _activate_user(
-        self, user: SpotifyUserCreationRequest
-    ) -> SpotifyUser:
+    async def _activate_user(self, user: SpotifyUserCreationRequest) -> SpotifyUser:
         """Activate a new user in the Spotify app."""
-        async with self._http.post(
+        async with self._http_client.post(
             url=self._build_url(write=True),
             headers=await self._build_headers(),
             json=user.model_dump(),
@@ -87,7 +93,7 @@ class SpotifyUserManager:
 
     async def _deactivate_user(self, user: SpotifyUser) -> None:
         """Deactivate a user in the Spotify app."""
-        async with self._http.delete(
+        async with self._http_client.delete(
             url=f"{self._build_url(write=True)}/id/{user.id}",
             headers=await self._build_headers(),
             raise_for_status=True,
@@ -102,3 +108,17 @@ class SpotifyUserManager:
     def _build_url(self, *, write: bool = False) -> str:
         """Build the URL for Spotify's user management API."""
         return f"https://developer.spotify.com/api/{'w' if write else ''}s4d/warp/clients/{self._app_client_id}/users"
+
+
+def build_spotify_user_manager(
+    http: SpotifyHttpClient,
+    redis: Redis,
+    tokens: SpotifyAccessTokenProvider,
+) -> SpotifyUserManager:
+    """Build a SpotifyUserManager wired to the real app settings."""
+    return SpotifyUserManager(
+        http_client=http,
+        redis=redis,
+        tokens=tokens,
+        app_client_id=settings.spotify_client_id,
+    )

@@ -41,4 +41,4 @@ asyncio_mode = "auto"
 pythonpath = ["app"]
 
 [tool.ty.environment]
-root = ["./app"]
+root = ["./app", "./tests"]
