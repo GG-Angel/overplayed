@@ -1,5 +1,5 @@
 import asyncio
-from collections.abc import AsyncIterator, Callable
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
 
@@ -34,13 +34,6 @@ class RecordingEmailSender:
             raise self._error
 
         return object()
-
-
-@pytest.fixture
-async def redis_client() -> AsyncIterator[FakeRedis]:
-    client = FakeRedis(decode_responses=True)
-    yield client
-    await client.aclose()
 
 
 @pytest.fixture

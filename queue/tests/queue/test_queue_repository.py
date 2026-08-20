@@ -1,4 +1,3 @@
-from collections.abc import AsyncIterator
 from datetime import UTC, datetime
 
 import pytest
@@ -7,13 +6,6 @@ from models.queue import QueuedUser, QueuedUserPosition
 from services.queue import QueueRepository, build_queue_repository
 
 NOW = datetime(2026, 1, 2, 12, tzinfo=UTC)
-
-
-@pytest.fixture
-async def redis_client() -> AsyncIterator[FakeRedis]:
-    client = FakeRedis(decode_responses=True)
-    yield client
-    await client.aclose()
 
 
 @pytest.fixture
