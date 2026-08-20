@@ -1,3 +1,4 @@
+import asyncio
 from collections.abc import AsyncIterator, Callable
 from dataclasses import dataclass
 from typing import Any
@@ -26,11 +27,12 @@ class RecordingEmailSender:
     async def send_async(
         self, *, to: str, template_id: str, variables: dict[str, Any]
     ) -> object:
-        self.calls.append(
-            SendCall(to=to, template_id=template_id, variables=variables)
-        )
+        self.calls.append(SendCall(to=to, template_id=template_id, variables=variables))
+        await asyncio.sleep(0)
+
         if self._error is not None:
             raise self._error
+
         return object()
 
 
@@ -75,7 +77,9 @@ async def test_register_user_reserves_token_and_sends_verification_email(
 
     assert registered is True
     assert await redis_client.get("queue:email_tokens:user@example.com") == TOKEN
-    assert await redis_client.get(f"queue:one_time_tokens:{TOKEN}") == "user@example.com"
+    assert (
+        await redis_client.get(f"queue:one_time_tokens:{TOKEN}") == "user@example.com"
+    )
     assert (
         0
         < await redis_client.ttl("queue:email_tokens:user@example.com")
