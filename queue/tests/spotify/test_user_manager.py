@@ -1,4 +1,3 @@
-from collections.abc import AsyncIterator
 from datetime import UTC, datetime
 
 import pytest
@@ -27,13 +26,6 @@ class RecordingTokenProvider:
     async def get_token(self) -> str:
         self.calls += 1
         return ACCESS_TOKEN
-
-
-@pytest.fixture
-async def redis_client() -> AsyncIterator[FakeRedis]:
-    client = FakeRedis(decode_responses=True)
-    yield client
-    await client.aclose()
 
 
 @pytest.fixture
