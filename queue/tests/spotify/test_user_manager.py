@@ -1,7 +1,8 @@
+import asyncio
 from datetime import UTC, datetime
 
 import pytest
-from errors import SpotifyUserManagementError
+from core.errors import SpotifyUserManagementError
 from fakeredis.aioredis import FakeRedis
 from models.spotify import (
     SpotifyUser,
@@ -25,6 +26,7 @@ class RecordingTokenProvider:
         self.calls = 0
 
     async def get_token(self) -> str:
+        await asyncio.sleep(0)
         self.calls += 1
         return ACCESS_TOKEN
 

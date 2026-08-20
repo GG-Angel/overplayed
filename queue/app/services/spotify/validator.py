@@ -1,4 +1,4 @@
-from errors import SpotifyValidationError
+from core.errors import SpotifyValidationError
 from services.spotify.http import SpotifyHttpClient
 
 

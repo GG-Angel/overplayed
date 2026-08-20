@@ -1,6 +1,6 @@
 from typing import Protocol
 
-from errors import SpotifyUserManagementError
+from core.errors import SpotifyUserManagementError
 from loguru import logger
 from models.spotify import (
     SpotifyUser,

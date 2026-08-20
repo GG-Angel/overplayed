@@ -10,6 +10,7 @@ class RecordingQueueProcessor:
         self._failures = failures
 
     async def process_queue(self) -> None:
+        await asyncio.sleep(0)
         self.calls += 1
         if self.calls <= self._failures:
             raise RuntimeError("processing failed")

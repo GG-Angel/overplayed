@@ -1,7 +1,7 @@
 from typing import Protocol
 
+from core.errors import SpotifyTokenError
 from cryptography.fernet import Fernet
-from errors import SpotifyTokenError
 from loguru import logger
 from models.spotify import SpotifyTokenResponse
 from redis.asyncio import Redis

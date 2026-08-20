@@ -4,7 +4,7 @@ from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock
 
 import pytest
-from locking import DistributedLock
+from core.lock import DistributedLock
 from models.queue import (
     ActiveUserStatus,
     QueuedUser,

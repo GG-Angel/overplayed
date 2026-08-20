@@ -4,7 +4,7 @@ from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
 from typing import NamedTuple
 
-from locking import DistributedLock
+from core.lock import DistributedLock
 from loguru import logger
 from models.queue import (
     ActiveUserStatus,
