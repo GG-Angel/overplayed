@@ -1,9 +1,8 @@
 from datetime import UTC, datetime
 
 from loguru import logger
-from models import QueuedUser
+from models.queue import QueuedUser, QueuedUserPosition
 from redis.asyncio import Redis
-from services.queue.models import QueueEntry
 
 
 class QueueRepository:
@@ -46,11 +45,11 @@ class QueueRepository:
         entries = await self._redis.lrange(self._queue_key, 0, -1)
         return [QueuedUser.model_validate_json(entry) for entry in entries]
 
-    async def get(self, email: str) -> QueueEntry | None:
+    async def get(self, email: str) -> QueuedUserPosition | None:
         """Get a queued user by email, or None if they are not queued."""
         for i, user in enumerate(await self.dump()):
             if user.email == email:
-                return QueueEntry(user=user, position=i + 1)
+                return QueuedUserPosition(user=user, position=i + 1)
         return None
 
     async def has(self, email: str) -> bool:

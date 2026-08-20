@@ -5,21 +5,22 @@ from typing import NamedTuple
 
 from locking import DistributedLock
 from loguru import logger
-from models import ActiveUser, NewUser, QueuedUser
-from services.queue import EmailService, QueueRepository
-from services.queue.models import (
-    ActiveStatus,
-    InQueueStatus,
-    QueueSummary,
-    UserStatus,
+from models.queue import (
+    ActiveUserStatus,
+    QueuedUser,
+    QueuedUserStatus,
+    QueueOverview,
+    QueueUserStatus,
 )
+from models.spotify import SpotifyUser, SpotifyUserCreationRequest
+from services.queue import EmailService, QueueRepository
 from services.spotify import SpotifyUserManager, SpotifyUserValidator
 
 
 class FillOutcome(NamedTuple):
     """Users activated from the queue and those rejected during a fill."""
 
-    activated: list[ActiveUser]
+    activated: list[SpotifyUser]
     rejected: list[QueuedUser]
 
 
@@ -44,17 +45,17 @@ class QueueService:
         self._retry_limit = 3
         self._access_duration = timedelta(hours=24)
 
-    async def get_user_status(self, email: str) -> UserStatus | None:
+    async def get_user_status(self, email: str) -> QueueUserStatus | None:
         """Get the status of a user."""
         if (queued_user := await self._queue.get(email)) is not None:
-            return InQueueStatus(
+            return QueuedUserStatus(
                 position=queued_user.position,
                 user=queued_user.user,
                 start_time=await self._estimate_start_time(queued_user.position),
             )
 
         if (active_user := await self._user_manager.get_user(email)) is not None:
-            return ActiveStatus(
+            return ActiveUserStatus(
                 user=active_user,
                 end_time=active_user.created_at + self._access_duration,
             )
@@ -62,7 +63,7 @@ class QueueService:
         # user is neither in the queue nor active
         return None
 
-    async def get_queue_overview(self) -> QueueSummary:
+    async def get_queue_overview(self) -> QueueOverview:
         """Get an overview of the queue, including active users, queued users, and next available time."""
         active_users = await self._user_manager.get_users()
         queued_users = await self._queue.dump()
@@ -71,14 +72,14 @@ class QueueService:
         if len(active_users) >= self._user_limit:
             next_available_time = await self._estimate_start_time(len(queued_users) + 1)
 
-        return QueueSummary(
+        return QueueOverview(
             active_users=active_users,
             queued_users=queued_users,
             user_limit=self._user_limit,
             next_available_time=next_available_time,
         )
 
-    async def enqueue_user(self, email: str) -> UserStatus:
+    async def enqueue_user(self, email: str) -> QueueUserStatus:
         """Add a new user to the queue, process it, and retrieve their status."""
         if not await self._user_validator.user_exists(email):
             raise ValueError(f"{email} does not exist.")
@@ -114,11 +115,11 @@ class QueueService:
             f"admitted {len(activated)}, retrying {len(retried)}."
         )
 
-    async def _prune_expired_users(self) -> list[ActiveUser]:
+    async def _prune_expired_users(self) -> list[SpotifyUser]:
         """Deactivate users whose access duration has expired from the Spotify app."""
         active_users = await self._user_manager.get_users()
         now = datetime.now(UTC)
-        evicted: list[ActiveUser] = []
+        evicted: list[SpotifyUser] = []
 
         for user in active_users:
             if user.created_at + self._access_duration < now:
@@ -141,11 +142,13 @@ class QueueService:
             logger.debug("No available slots to fill.")
             return FillOutcome(activated=[], rejected=[])
 
-        activated: list[ActiveUser] = []
+        activated: list[SpotifyUser] = []
         rejected: list[QueuedUser] = []
         for user in await self._queue.pop(count=available_slots):
             try:
-                new_user = NewUser(name=user.email, email=user.email)
+                new_user = SpotifyUserCreationRequest(
+                    name=user.email, email=user.email
+                )
                 activated.append(await self._user_manager.add_user(new_user))
                 logger.info(f"Activated user: {user.email}.")
             except Exception as e:
@@ -186,7 +189,7 @@ class QueueService:
             heapq.heappush(heap, start + self._access_duration)  # have access for 24h
         return start
 
-    def _notify_activations(self, activated: list[ActiveUser]) -> None:
+    def _notify_activations(self, activated: list[SpotifyUser]) -> None:
         """Fires activation emails in the background."""
         for user in activated:
             task = asyncio.create_task(self._emailer.send_onboarded_email(user.email))
