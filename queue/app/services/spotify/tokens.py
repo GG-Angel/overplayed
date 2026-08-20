@@ -12,9 +12,22 @@ from settings import settings
 class TokenCipher(Protocol):
     """Structural interface for token encryption."""
 
-    def encrypt(self, data: bytes) -> bytes: ...
+    def encrypt(self, data: str) -> str: ...
 
-    def decrypt(self, token: str | bytes) -> bytes: ...
+    def decrypt(self, token: str) -> str: ...
+
+
+class FernetCipher:
+    """A wrapper around Fernet to implement the TokenCipher interface."""
+
+    def __init__(self, key: str):
+        self._fernet = Fernet(key)
+
+    def encrypt(self, data: str) -> str:
+        return self._fernet.encrypt(data.encode()).decode()
+
+    def decrypt(self, token: str) -> str:
+        return self._fernet.decrypt(token).decode()
 
 
 class SpotifyTokenProvider:
@@ -44,11 +57,12 @@ class SpotifyTokenProvider:
         try:
             token = await self._renew_token(refresh_token)
             await self._persist_token(token)
-            logger.success("Seeded refresh token.")
         except Exception as e:
             raise SpotifyTokenError(
                 "Failed to seed refresh token. Please renew your app's Spotify credentials."
             ) from e
+
+        logger.success("Seeded refresh token.")
 
     async def get_token(self) -> str:
         """Get a valid access token for Spotify's user management API."""
@@ -87,10 +101,10 @@ class SpotifyTokenProvider:
         """Save the access and refresh tokens to Redis."""
         ttl = max(token.expires_in - 60, 1)  # expire early, must stay positive
         await self._redis.set(
-            self._access_token_key, self._encrypt(token.access_token), ex=ttl
+            self._access_token_key, self._crypto.encrypt(token.access_token), ex=ttl
         )
         await self._redis.set(
-            self._refresh_token_key, self._encrypt(token.refresh_token)
+            self._refresh_token_key, self._crypto.encrypt(token.refresh_token)
         )
         logger.debug(f"Stored access token (ttl={ttl}s) and refresh token.")
 
@@ -99,13 +113,9 @@ class SpotifyTokenProvider:
         encrypted = await self._redis.get(key)
         if encrypted is None:
             return None
-        return self._decrypt(encrypted)
-
-    def _encrypt(self, plaintext: str) -> str:
-        return self._crypto.encrypt(plaintext.encode()).decode()
-
-    def _decrypt(self, encrypted: str | bytes) -> str:
-        return self._crypto.decrypt(encrypted).decode()
+        if isinstance(encrypted, bytes):
+            encrypted = encrypted.decode()
+        return self._crypto.decrypt(encrypted)
 
 
 def build_spotify_token_provider(
@@ -116,6 +126,6 @@ def build_spotify_token_provider(
     return SpotifyTokenProvider(
         http=http,
         redis=redis,
-        crypto=Fernet(settings.redis_key),
+        crypto=FernetCipher(settings.redis_key),
         auth_client_id=settings.spotify_auth_client_id,
     )

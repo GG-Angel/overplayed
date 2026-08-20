@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     redis_host: str = Field(...)
     redis_port: int = Field(...)
     redis_password: str = Field(...)
-    redis_key: bytes = Field(..., min_length=44, max_length=44)
+    redis_key: str = Field(..., min_length=44, max_length=44)
 
     # Secrets
     cloudflare_turnstile_secret: str = Field(...)
