@@ -4,14 +4,12 @@ from aiohttp import ClientSession
 from core.limiter import limiter
 from fastapi import FastAPI, Response, status
 from fastapi.middleware.cors import CORSMiddleware
-from locking import DistributedLock
 from redis.asyncio import ConnectionPool, Redis
 from routes import queue
 from services.queue import (
-    QueueRepository,
-    QueueService,
     QueueWorker,
     build_email_service,
+    build_queue_service,
 )
 from services.spotify import (
     build_spotify_token_provider,
@@ -40,15 +38,11 @@ async def lifespan(app: FastAPI):
         user_validator = await build_spotify_user_validator(http)
 
         queue_emailer = build_email_service(redis)
-        queue_service = QueueService(
+        queue_service = build_queue_service(
             build_spotify_user_manager(http, redis, token_provider),
             user_validator,
             queue_emailer,
-            QueueRepository(redis),
-            DistributedLock(redis, timeout=30, blocking_timeout=10),
-            user_limit=settings.queue_user_limit,
-            retry_limit=settings.queue_retry_limit,
-            user_ttl=settings.ttl_queue_users,
+            redis,
         )
         queue_worker = QueueWorker(queue_service)
 
