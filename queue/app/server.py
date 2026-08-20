@@ -45,7 +45,7 @@ async def lifespan(app: FastAPI):
             user_validator,
             queue_emailer,
             QueueRepository(redis),
-            DistributedLock(redis, "queue:lock", timeout=45, blocking_timeout=10),
+            DistributedLock(redis, timeout=30, blocking_timeout=10),
             user_limit=settings.queue_user_limit,
             retry_limit=settings.queue_retry_limit,
             user_ttl=settings.ttl_queue_users,
