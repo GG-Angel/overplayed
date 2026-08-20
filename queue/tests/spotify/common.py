@@ -1,3 +1,4 @@
+import asyncio
 from dataclasses import dataclass
 from types import TracebackType
 from typing import Any
@@ -23,9 +24,11 @@ class FakeResponse:
         self._error = error
 
     async def json(self) -> dict[str, object]:
+        await asyncio.sleep(0)
         return self._json_data
 
     async def text(self) -> str:
+        await asyncio.sleep(0)
         return self._text_data
 
 
