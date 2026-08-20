@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "../../utils";
 import type { ComponentProps } from "react";
 
 type KbdProps = ComponentProps<"kbd">;

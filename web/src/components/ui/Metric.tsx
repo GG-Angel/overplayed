@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "../../utils";
 import Card, { type CardProps } from "./Card";
 
 type MetricProps = CardProps & {

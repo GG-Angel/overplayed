@@ -1,5 +1,5 @@
-import { env } from "@/lib/env";
-import { cn } from "@/lib/utils";
+import { env } from "../../env";
+import { cn } from "../../utils";
 import { useEffect, useImperativeHandle, useRef, type Ref } from "react";
 
 const SCRIPT_SRC = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";

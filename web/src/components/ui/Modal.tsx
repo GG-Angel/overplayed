@@ -1,9 +1,8 @@
 import type { ReactNode } from "react";
 import Card from "./Card";
-import useClickOutside from "@/hooks/useClickOutside";
-import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts";
-import { MODAL_SHORTCUTS } from "@/lib/shortcuts";
-import { cn } from "@/lib/utils";
+import { useClickOutside, useKeyboardShortcuts } from "../../hooks";
+import { MODAL_SHORTCUTS } from "../../shortcuts";
+import { cn } from "../../utils";
 
 export type ModalProps = {
   onClose: () => void;

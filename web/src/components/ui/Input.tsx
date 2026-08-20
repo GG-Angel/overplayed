@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "../../utils";
 import { useRef, type ComponentProps } from "react";
 import Card from "./Card";
 import type { LucideIcon } from "lucide-react";

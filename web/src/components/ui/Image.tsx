@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "../../utils";
 import { useState, type ComponentProps } from "react";
 
 type ImageProps = ComponentProps<"img"> & {
