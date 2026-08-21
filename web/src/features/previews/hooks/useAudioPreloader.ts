@@ -1,20 +1,63 @@
 import { useCallback, useEffect, useState } from "react";
-import { AudioPreloader } from "../services/AudioPreloader";
+
+class AudioPreloader {
+  private readonly cache = new Map<string, HTMLAudioElement>();
+
+  setWindow(urls: string[]) {
+    const keep = new Set(urls);
+    for (const [url, audio] of this.cache) {
+      if (keep.has(url)) continue;
+      this.dispose(audio);
+      this.cache.delete(url);
+    }
+
+    for (const url of urls) {
+      if (!this.cache.has(url)) {
+        this.cache.set(url, this.create(url));
+      }
+    }
+  }
+
+  get(url: string): HTMLAudioElement {
+    let audio = this.cache.get(url);
+    if (!audio) {
+      audio = this.create(url);
+      this.cache.set(url, audio);
+    }
+    return audio;
+  }
+
+  destroy() {
+    for (const audio of this.cache.values()) {
+      this.dispose(audio);
+    }
+    this.cache.clear();
+  }
+
+  private create(url: string): HTMLAudioElement {
+    const audio = new Audio();
+    audio.preload = "auto";
+    audio.src = url;
+    audio.load();
+    return audio;
+  }
+
+  private dispose(audio: HTMLAudioElement): void {
+    audio.pause();
+    audio.removeAttribute("src");
+    audio.load();
+  }
+}
 
 const useAudioPreloader = (urls: string[]) => {
   const [preloader] = useState(() => new AudioPreloader());
 
   useEffect(() => {
     preloader.setWindow(urls);
+    return () => preloader.destroy();
   }, [preloader, urls]);
 
-  useEffect(() => {
-    return () => preloader.destroy();
-  }, [preloader]);
-
-  const get = useCallback((url: string) => preloader.get(url), [preloader]);
-
-  return { get };
+  return { get: useCallback((url: string) => preloader.get(url), [preloader]) };
 };
 
 export default useAudioPreloader;
