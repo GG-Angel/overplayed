@@ -9,7 +9,6 @@ import Dropdown from "@/components/ui/dropdown/Dropdown";
 import DropdownMenu from "@/components/ui/dropdown/DropdownMenu";
 import DropdownMenuDivider from "@/components/ui/dropdown/DropdownMenuDivider";
 import DropdownMenuSection from "@/components/ui/dropdown/DropdownMenuSection";
-import { kaomojis } from "@/lib/kaomoji";
 import PlaylistRow from "@/features/playlist/components/PlaylistRow";
 import type { PlaylistDisplayProps } from "@/features/playlist/components/utils";
 import PlaylistCover from "@/features/playlist/components/PlaylistCover";
@@ -25,6 +24,7 @@ import {
   Search,
   type LucideIcon,
 } from "lucide-react";
+import { KAOMOJIS } from "@/constants/constants";
 
 type PlaylistSortKey = "alphabetical" | "tracks";
 type PlaylistSortOrder = "ascending" | "descending";
@@ -159,7 +159,7 @@ const SelectionPage = () => {
         }
 
         if (sortedPlaylists.length <= 0) {
-          return <MessageState kaomoji={kaomojis.uncertain} title="No playlists found" />;
+          return <MessageState kaomoji={KAOMOJIS.uncertain} title="No playlists found" />;
         }
 
         return (

@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import MessageState from "./MessageState";
 import Button from "../ui/Button";
-import { kaomojis } from "@/lib/kaomoji";
 import { Undo2 } from "lucide-react";
+import { KAOMOJIS } from "@/constants/constants";
 
 type ErrorStateProps = {
   message?: string;
@@ -13,7 +13,7 @@ const ErrorState = ({ message = "Unexpected error!" }: ErrorStateProps) => {
 
   return (
     <MessageState
-      kaomoji={kaomojis.stressed}
+      kaomoji={KAOMOJIS.stressed}
       tone="negative"
       title={message}
       actions={

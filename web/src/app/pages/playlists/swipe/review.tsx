@@ -4,11 +4,10 @@ import Card from "@/components/ui/Card";
 import Checkbox from "@/components/ui/Checkbox";
 import Divider from "@/components/ui/Divider";
 import Metric from "@/components/ui/Metric";
-import { LIKED_SONGS_PLAYLIST_ID } from "@/constants/constants";
+import { KAOMOJIS, LIKED_SONGS_PLAYLIST_ID } from "@/constants/constants";
 import TrackCard from "@/features/playlist/components/TrackCard";
 import { useSwipeContext } from "@/features/swipe/provider/SwipeContext";
 import useConfetti from "@/hooks/useConfetti";
-import { kaomojis } from "@/lib/kaomoji";
 import { cn, formatCount, pluralize } from "@/lib/utils";
 import { Home, Play, Trash2, Undo2 } from "lucide-react";
 import { useCallback } from "react";
@@ -37,7 +36,7 @@ const SwipeReviewPage = () => {
   if (session.swipes.length === 0) {
     return (
       <MessageState
-        kaomoji={kaomojis.uncertain}
+        kaomoji={KAOMOJIS.uncertain}
         title="No Tracks Swiped"
         subtitle={<p>You haven't swiped on any tracks...</p>}
         actions={
@@ -57,7 +56,7 @@ const SwipeReviewPage = () => {
   if (session.dislikes.length === 0) {
     return (
       <MessageState
-        kaomoji={kaomojis.proud}
+        kaomoji={KAOMOJIS.proud}
         title="Nothing to Remove!"
         tone="positive"
         subtitle={

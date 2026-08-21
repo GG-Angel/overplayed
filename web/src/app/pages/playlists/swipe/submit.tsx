@@ -1,10 +1,10 @@
 import MessageState from "@/components/states/MessageState";
 import Button from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
+import { KAOMOJIS } from "@/constants/constants";
 import useSubmitSwipes from "@/features/swipe/hooks/useSubmitSwipes";
 import { useSwipeContext } from "@/features/swipe/provider/SwipeContext";
 import useConfetti from "@/hooks/useConfetti";
-import { kaomojis } from "@/lib/kaomoji";
 import { formatPercentage, openExternalUrl } from "@/lib/utils";
 import { ExternalLink, Home, Play, RotateCcw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -27,7 +27,7 @@ const SwipeSubmitPage = () => {
 
     return (
       <MessageState
-        kaomoji={kaomojis.proud}
+        kaomoji={KAOMOJIS.proud}
         title="Tracks Removed!"
         tone="positive"
         subtitle={
@@ -63,7 +63,7 @@ const SwipeSubmitPage = () => {
   if (controller.isError) {
     return (
       <MessageState
-        kaomoji={kaomojis.stressed}
+        kaomoji={KAOMOJIS.stressed}
         title="Submission Failed"
         tone="negative"
         subtitle={
@@ -93,7 +93,7 @@ const SwipeSubmitPage = () => {
   if (!controller.hasDislikes) {
     return (
       <MessageState
-        kaomoji={kaomojis.uncertain}
+        kaomoji={KAOMOJIS.uncertain}
         title="Invalid Submission"
         tone="neutral"
         subtitle={<p>You haven't disliked any tracks...</p>}
@@ -117,7 +117,7 @@ const SwipeSubmitPage = () => {
 
   return (
     <MessageState
-      kaomoji={kaomojis.working}
+      kaomoji={KAOMOJIS.working}
       title="Submitting to Spotify"
       tone="positive"
       subtitle={
