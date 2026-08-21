@@ -1,5 +1,4 @@
 import { cn } from "@/lib/utils";
-import PlaylistCard from "@/features/playlist/components/PlaylistCard";
 import { useNavigate } from "react-router-dom";
 import LoadingState from "@/components/states/LoadingState";
 import { useCallback, useMemo, useState, type ComponentType } from "react";
@@ -8,9 +7,7 @@ import Dropdown from "@/components/ui/dropdown/Dropdown";
 import DropdownMenu from "@/components/ui/dropdown/DropdownMenu";
 import DropdownMenuDivider from "@/components/ui/dropdown/DropdownMenuDivider";
 import DropdownMenuSection from "@/components/ui/dropdown/DropdownMenuSection";
-import PlaylistRow from "@/features/playlist/components/PlaylistRow";
-import type { PlaylistDisplayProps } from "@/features/playlist/components/utils";
-import PlaylistCover from "@/features/playlist/components/PlaylistCover";
+import type { PlaylistDisplayProps } from "@/components/playlist/cover";
 import DropdownMenuButton from "@/components/ui/dropdown/DropdownMenuButton";
 import Input from "@/components/ui/Input";
 import {
@@ -25,6 +22,9 @@ import {
 } from "lucide-react";
 import { KAOMOJIS } from "@/constants/constants";
 import { usePlaylists } from "@/api/queries";
+import PlaylistCard from "@/components/playlist/PlaylistCard";
+import PlaylistCover from "@/components/playlist/PlaylistCover";
+import PlaylistRow from "@/components/playlist/PlaylistRow";
 
 type PlaylistSortKey = "alphabetical" | "tracks";
 type PlaylistSortOrder = "ascending" | "descending";

@@ -1,5 +1,5 @@
 import Image from "@/components/ui/Image";
-import { extractPlaylistCoverUrl, type PlaylistDisplayProps } from "./utils";
+import { extractPlaylistCoverUrl, type PlaylistDisplayProps } from "./cover";
 
 const PlaylistCover = ({ playlist, onClick }: PlaylistDisplayProps) => {
   const coverUrl = extractPlaylistCoverUrl(playlist);

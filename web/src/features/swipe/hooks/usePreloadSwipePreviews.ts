@@ -1,5 +1,5 @@
 import { useTrackPreviews } from "@/api/queries";
-import useAudioPreloader from "@/features/previews/hooks/useAudioPreloader";
+import useAudioPreloader from "@/features/audio/hooks/useAudioPreloader";
 import type { Track } from "@/types/spotify";
 
 const PRELOAD_RADIUS = 5;

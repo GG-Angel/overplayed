@@ -1,5 +1,5 @@
 import { ArrowUpRight } from "lucide-react";
-import type { PlaylistDisplayProps } from "./utils";
+import type { PlaylistDisplayProps } from "./cover";
 
 const PlaylistRow = ({ playlist, onClick }: PlaylistDisplayProps) => {
   return (

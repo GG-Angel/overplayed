@@ -1,4 +1,4 @@
-import AudioPlayer from "@/features/previews/components/PreviewPlayer";
+import AudioPlayer from "@/features/audio/components/PreviewPlayer";
 import SwipeButtons from "@/features/swipe/components/SwipeButtons";
 import type { SwipeCardController, SwipeDirection } from "@/features/swipe/components/SwipeCard";
 import SwipeCardStack from "@/features/swipe/components/SwipeCardStack";

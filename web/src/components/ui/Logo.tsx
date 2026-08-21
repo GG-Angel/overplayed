@@ -1,6 +1,6 @@
 import { SkipForward } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
-import { extractPlaylistCoverUrl } from "@/features/playlist/components/utils";
+import { extractPlaylistCoverUrl } from "@/components/playlist/cover";
 import Image from "./Image";
 import { usePlaylist } from "@/api/queries";
 

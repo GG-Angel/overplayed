@@ -18,7 +18,6 @@ import {
 } from "lucide-react";
 import { useRef, useState, type SubmitEventHandler } from "react";
 import { loadFromStorage, saveToStorage, storageKeys } from "@/lib/storage";
-import { useAccessContext } from "@/features/user/provider/AccessContext";
 import Card from "@/components/ui/Card";
 import { Spinner } from "@/components/ui/Spinner";
 import { useSearchParams } from "react-router-dom";
@@ -29,6 +28,7 @@ import {
 } from "@/types/queue";
 import { useAccessStatus, useQueueStatus } from "@/api/queries";
 import { useRequestAccess } from "@/api/mutations";
+import { useAccessContext } from "@/features/session/provider/AccessContext";
 
 const ErrorNotice = ({ message }: { message: string }) => {
   return (

@@ -2,7 +2,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import ErrorState from "@/components/states/ErrorState";
 import LoadingState from "@/components/states/LoadingState";
-import useAuth from "@/features/user/auth/useAuth";
+import useAuth from "./useAuth";
 
 export const ProtectedRoute = () => {
   const { user, isLoading, isError, isUnauthorized, redirectToLogin } = useAuth();

@@ -1,4 +1,3 @@
-import useAuth from "@/features/user/auth/useAuth";
 import Metric, { MetricSkeleton } from "@/components/ui/Metric";
 import Button from "@/components/ui/Button";
 import SpotifyIcon from "@/assets/spotify.svg?react";
@@ -12,7 +11,6 @@ import carouselTracks from "@/assets/carousel-tracks.json";
 import z from "zod";
 import { Key, Scissors, Undo } from "lucide-react";
 import Image from "@/components/ui/Image";
-import { useAccessContext } from "@/features/user/provider/AccessContext";
 import { useMemo } from "react";
 import {
   cn,
@@ -27,6 +25,8 @@ import { motion } from "framer-motion";
 import { trackSchema } from "@/types/spotify";
 import { LIKED_SONGS_PLAYLIST_ID } from "@/constants/constants";
 import { useCounters, useLeaderboard, usePlaylists } from "@/api/queries";
+import useAuth from "@/features/session/auth/useAuth";
+import { useAccessContext } from "@/features/session/provider/AccessContext";
 
 const CAROUSEL_TRACKS = z.array(trackSchema).parse(carouselTracks);
 const LEADERBOARD_ROWS = 5;

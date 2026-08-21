@@ -7,8 +7,8 @@ import {
 import ErrorState from "@/components/states/ErrorState";
 import LandingPage from "../pages/LandingPage";
 import PageLayout from "@/components/layout/PageLayout";
-import { ProtectedRoute } from "@/features/user/auth/ProtectedRoute";
 import LoadingState from "@/components/states/LoadingState";
+import { ProtectedRoute } from "@/features/session/auth/ProtectedRoute";
 
 const NotFound = <Route path="*" element={<ErrorState message="Page not found" />} />;
 
@@ -36,7 +36,9 @@ const router = createBrowserRouter(
       <Route path="playlists" Component={ProtectedRoute}>
         <Route
           index
-          lazy={async () => ({ Component: (await import("../pages/playlists/PlaylistSelectionPage")).default })}
+          lazy={async () => ({
+            Component: (await import("../pages/playlists/PlaylistSelectionPage")).default,
+          })}
         />
         <Route path=":playlistId">
           <Route
