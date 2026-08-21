@@ -1,7 +1,7 @@
 import MessageState from "@/components/states/MessageState";
 import Button from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
-import { KAOMOJIS } from "@/constants/constants";
+import { KAOMOJIS } from "@/lib/constants";
 import useSubmitSwipes from "@/features/swipe/hooks/useSubmitSwipes";
 import { useSwipeContext } from "@/features/swipe/provider/SwipeContext";
 import useConfetti from "@/hooks/useConfetti";

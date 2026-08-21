@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import MessageState from "./MessageState";
 import Button from "../ui/Button";
 import { Undo2 } from "lucide-react";
-import { KAOMOJIS } from "@/constants/constants";
+import { KAOMOJIS } from "@/lib/constants";
 
 type ErrorStateProps = {
   message?: string;

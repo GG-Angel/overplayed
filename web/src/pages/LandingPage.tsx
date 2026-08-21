@@ -23,7 +23,7 @@ import {
 import { Spinner } from "@/components/ui/Spinner";
 import { motion } from "framer-motion";
 import { trackSchema } from "@/types/spotify";
-import { LIKED_SONGS_PLAYLIST_ID } from "@/constants/constants";
+import { LIKED_SONGS_PLAYLIST_ID } from "@/lib/constants";
 import { useCounters, useLeaderboard, usePlaylists } from "@/api/queries";
 import useAuth from "@/features/session/auth/useAuth";
 import { useAccessContext } from "@/features/session/provider/AccessContext";

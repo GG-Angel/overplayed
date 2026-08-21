@@ -20,7 +20,7 @@ import {
   Search,
   type LucideIcon,
 } from "lucide-react";
-import { KAOMOJIS } from "@/constants/constants";
+import { KAOMOJIS } from "@/lib/constants";
 import { usePlaylists } from "@/api/queries";
 import PlaylistCard from "@/components/playlist/PlaylistCard";
 import PlaylistCover from "@/components/playlist/PlaylistCover";

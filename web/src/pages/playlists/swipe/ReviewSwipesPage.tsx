@@ -5,7 +5,7 @@ import Card from "@/components/ui/Card";
 import Checkbox from "@/components/ui/Checkbox";
 import Divider from "@/components/ui/Divider";
 import Metric from "@/components/ui/Metric";
-import { KAOMOJIS, LIKED_SONGS_PLAYLIST_ID } from "@/constants/constants";
+import { KAOMOJIS, LIKED_SONGS_PLAYLIST_ID } from "@/lib/constants";
 import { useSwipeContext } from "@/features/swipe/provider/SwipeContext";
 import useConfetti from "@/hooks/useConfetti";
 import { cn, formatCount, pluralize } from "@/lib/utils";

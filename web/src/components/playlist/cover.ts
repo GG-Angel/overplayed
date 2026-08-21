@@ -1,4 +1,4 @@
-import { LIKED_SONGS_PLAYLIST_ID } from "@/constants/constants";
+import { LIKED_SONGS_PLAYLIST_ID } from "@/lib/constants";
 import { extractImageUrl } from "@/lib/utils";
 import type { Playlist } from "@/types/spotify";
 
