@@ -13,7 +13,7 @@ import { Home, Play, Trash2, Undo2 } from "lucide-react";
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
-const SwipeReviewPage = () => {
+const ReviewSwipesPage = () => {
   const { playlist, session, options, setOptions } = useSwipeContext();
   const navigate = useNavigate();
 
@@ -173,4 +173,4 @@ const SwipeReviewPage = () => {
   );
 };
 
-export default SwipeReviewPage;
+export default ReviewSwipesPage;

@@ -56,7 +56,7 @@ const LAYOUT_CONFIG: Record<
   },
 };
 
-const SelectionPage = () => {
+const PlaylistSelectionPage = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [sortKey, setSortKey] = useState<PlaylistSortKey>("tracks");
   const [sortOrder, setSortOrder] = useState<PlaylistSortOrder>("descending");
@@ -181,4 +181,4 @@ const SelectionPage = () => {
   );
 };
 
-export default SelectionPage;
+export default PlaylistSelectionPage;

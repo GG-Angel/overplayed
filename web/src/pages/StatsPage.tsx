@@ -6,7 +6,7 @@ import Metric from "@/components/ui/Metric";
 import useAuth from "@/features/user/auth/useAuth";
 import { extractImageUrl, formatCount, formatPercentage } from "@/lib/utils";
 
-const StatisticsPage = () => {
+const StatsPage = () => {
   const { user } = useAuth();
   const { data: metrics } = useUserStats();
 
@@ -47,4 +47,4 @@ const StatisticsPage = () => {
   );
 };
 
-export default StatisticsPage;
+export default StatsPage;

@@ -1,6 +1,6 @@
 import AppLayout from "@/components/layout/AppLayout";
-import { AppProvider } from "./provider";
-import { AppRouter } from "./router";
+import { AppProvider } from "./AppProvider";
+import { AppRouter } from "./AppRouter";
 
 function App() {
   return (
