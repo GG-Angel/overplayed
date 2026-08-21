@@ -1,8 +1,8 @@
 import { SkipForward } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
-import { usePlaylist } from "@/features/playlist/api/get-playlist";
 import { extractPlaylistCoverUrl } from "@/features/playlist/components/utils";
 import Image from "./Image";
+import { usePlaylist } from "@/api/queries";
 
 const LogoPlaylistCrumb = ({ playlistId }: { playlistId: string }) => {
   const { data: playlist } = usePlaylist(playlistId);

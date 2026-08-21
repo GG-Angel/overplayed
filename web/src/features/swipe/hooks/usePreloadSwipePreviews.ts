@@ -1,4 +1,4 @@
-import { useTrackPreviewUrls } from "@/features/previews/api/get-track-preview";
+import { useTrackPreviews } from "@/api/queries";
 import useAudioPreloader from "@/features/previews/hooks/useAudioPreloader";
 import type { Track } from "@/types/spotify";
 
@@ -9,7 +9,7 @@ const usePreloadSwipePreviews = (tracks: Track[], index: number) => {
     .slice(Math.max(0, index - PRELOAD_RADIUS), index + PRELOAD_RADIUS)
     .map((track) => track.external_ids.isrc);
 
-  const previewQueries = useTrackPreviewUrls(preloadIsrcs);
+  const previewQueries = useTrackPreviews(preloadIsrcs);
   const previewUrls = previewQueries.map((q) => q.data?.url).filter((url) => url != null);
 
   return useAudioPreloader(previewUrls);

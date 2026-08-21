@@ -8,7 +8,7 @@ export const userStatsSchema = z.object({
   cut_rate: z.number().nonnegative(),
 });
 
-export const globalUserStatsSchema = z.object({
+export const countersSchema = z.object({
   total_sessions: z.number().int().nonnegative(),
   total_users: z.number().int().nonnegative(),
   total_swipes: z.number().int().nonnegative(),
@@ -17,4 +17,4 @@ export const globalUserStatsSchema = z.object({
 });
 
 export type UserStats = z.infer<typeof userStatsSchema>;
-export type GlobalUserStats = z.infer<typeof globalUserStatsSchema>;
+export type Counters = z.infer<typeof countersSchema>;

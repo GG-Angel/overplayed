@@ -11,15 +11,17 @@ import DropdownMenuDivider from "@/components/ui/dropdown/DropdownMenuDivider";
 import DropdownMenuButton from "@/components/ui/dropdown/DropdownMenuButton";
 import { openExternalUrl } from "@/lib/utils";
 import { ChartLine, ExternalLink, LogOut, User } from "lucide-react";
+import { useLogout } from "@/api/mutations";
 
 const UserMenu = () => {
-  const { user, isLoading, redirectToLogin, logoutMutation } = useAuth();
+  const { user, isLoading, redirectToLogin } = useAuth();
+  const logout = useLogout();
   const navigate = useNavigate();
   const location = useLocation();
 
   const handleLogout = async () => {
     navigate("/");
-    await logoutMutation.mutateAsync();
+    await logout.mutateAsync();
   };
 
   if (isLoading) {

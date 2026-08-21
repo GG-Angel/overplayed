@@ -5,11 +5,12 @@ import {
   queueStatusSchema,
   type AccessRequestForm,
 } from "@/types/queue";
-import { playlistSchema, trackSchema, trackPreviewSchema } from "@/types/spotify";
 import {
-  globalUserStatsSchema as globalSwipeStatsSchema,
-  userStatsSchema as swipeStatsSchema,
-} from "@/types/stats";
+  playlistSchema,
+  trackSchema,
+  trackPreviewSchema,
+  currentUserSchema,
+} from "@/types/spotify";
 import {
   swipesLeaderboardSchema,
   swipesSubmissionResultSchema,
@@ -17,6 +18,7 @@ import {
 } from "@/types/swipes";
 import z, { ZodType } from "zod";
 import { queueApi, serverApi } from "./api-client";
+import { countersSchema, userStatsSchema } from "@/types/stats";
 
 /** Streams NDJSON, yielding one batch per read rather than one item per line. */
 async function* fetchStreamedJson<T>(url: string, schema: ZodType<T>, signal?: AbortSignal) {
@@ -55,6 +57,10 @@ async function* fetchStreamedJson<T>(url: string, schema: ZodType<T>, signal?: A
   }
 }
 
+export const getCurrentUser = async () => {
+  return currentUserSchema.parse(await serverApi.get("/users/me"));
+};
+
 export const getPlaylist = async (playlistId: string) => {
   return playlistSchema.parse(await serverApi.get(`/playlists/${playlistId}`));
 };
@@ -67,19 +73,19 @@ export const getPlaylistTracks = (playlistId: string, signal?: AbortSignal) => {
   return fetchStreamedJson(`/playlists/${playlistId}/tracks`, trackSchema, signal);
 };
 
-export const getTrackPreviewUrl = async (isrc: string) => {
+export const getTrackPreview = async (isrc: string) => {
   return trackPreviewSchema.parse(await serverApi.get(`/previews/${isrc}`));
 };
 
-export const getGlobalSwipeStats = async () => {
-  return globalSwipeStatsSchema.parse(await serverApi.get(`/stats`));
+export const getCounters = async () => {
+  return countersSchema.parse(await serverApi.get(`/stats`));
 };
 
-export const getSwipeStats = async () => {
-  return swipeStatsSchema.parse(await serverApi.get(`/stats/me`));
+export const getUserStats = async () => {
+  return userStatsSchema.parse(await serverApi.get(`/stats/me`));
 };
 
-export const getSwipeLeaderboard = async () => {
+export const getLeaderboard = async () => {
   return swipesLeaderboardSchema.parse(await serverApi.get("/users/leaderboard"));
 };
 
@@ -107,3 +113,5 @@ export const postAccessRequest = async (form: AccessRequestForm, turnstileToken:
     })
   );
 };
+
+export const postLogout = async () => await serverApi.post("/auth/logout");

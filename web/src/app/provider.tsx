@@ -1,7 +1,7 @@
 /// <reference types="vite-plugin-svgr/client" />
 
+import { QUERY_CONFIG } from "@/api/queries";
 import AccessProvider from "@/features/user/provider/AccessProvider";
-import { queryConfig } from "@/lib/query";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useState, type ReactNode } from "react";
@@ -11,7 +11,7 @@ type AppProviderProps = {
 };
 
 export const AppProvider = ({ children }: AppProviderProps) => {
-  const [queryClient] = useState(() => new QueryClient({ defaultOptions: queryConfig }));
+  const [queryClient] = useState(() => new QueryClient({ defaultOptions: QUERY_CONFIG }));
 
   return (
     <QueryClientProvider client={queryClient}>

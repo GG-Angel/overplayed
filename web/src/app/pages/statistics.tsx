@@ -1,14 +1,14 @@
+import { useUserStats } from "@/api/queries";
 import LoadingState from "@/components/states/LoadingState";
 import Card from "@/components/ui/Card";
 import Image from "@/components/ui/Image";
 import Metric from "@/components/ui/Metric";
-import { useSwipeStats } from "@/features/metrics/api/get-swipe-metrics";
 import useAuth from "@/features/user/auth/useAuth";
 import { extractImageUrl, formatCount, formatPercentage } from "@/lib/utils";
 
 const StatisticsPage = () => {
   const { user } = useAuth();
-  const { data: metrics } = useSwipeStats();
+  const { data: metrics } = useUserStats();
 
   if (!user || !metrics) {
     return <LoadingState message="Loading statistics..." />;

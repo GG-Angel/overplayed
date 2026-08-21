@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { formatDuration } from "@/lib/utils";
 import useAuth from "../auth/useAuth";
-import { useAccessStatus } from "../api/get-user-status";
+import { useAccessStatus } from "@/api/queries";
 
 // the api hands back an absolute end time, so the countdown is derived
 // locally and only needs to re-render often enough to keep minutes honest

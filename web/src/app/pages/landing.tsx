@@ -7,12 +7,9 @@ import Card from "@/components/ui/Card";
 import Divider from "@/components/ui/Divider";
 import SwipeButtons from "@/features/swipe/components/SwipeButtons";
 import SwipeCardStack from "@/features/swipe/components/SwipeCardStack";
-import { useGlobalSwipeStats } from "@/features/metrics/api/get-swipe-metrics";
 import useSwipeCarousel from "@/features/swipe/hooks/useSwipeCarousel";
 import carouselTracks from "@/assets/carousel-tracks.json";
 import z from "zod";
-import { usePlaylists } from "@/features/playlist/api/get-playlists";
-import { useSwipeLeaderboard } from "@/features/metrics/api/get-swipe-leaderboad";
 import { Key, Scissors, Undo } from "lucide-react";
 import Image from "@/components/ui/Image";
 import { useAccessContext } from "@/features/user/provider/AccessContext";
@@ -29,6 +26,7 @@ import { Spinner } from "@/components/ui/Spinner";
 import { motion } from "framer-motion";
 import { trackSchema } from "@/types/spotify";
 import { LIKED_SONGS_PLAYLIST_ID } from "@/constants/constants";
+import { useCounters, useLeaderboard, usePlaylists } from "@/api/queries";
 
 const CAROUSEL_TRACKS = z.array(trackSchema).parse(carouselTracks);
 const LEADERBOARD_ROWS = 5;
@@ -111,7 +109,7 @@ const CallToAction = () => {
 };
 
 const Leaderboard = () => {
-  const { data: leaderboard } = useSwipeLeaderboard();
+  const { data: leaderboard } = useLeaderboard();
 
   if (!leaderboard) {
     return (
@@ -193,9 +191,8 @@ const Leaderboard = () => {
 
 const LandingPage = () => {
   const carousel = useSwipeCarousel(useMemo(() => shuffleArray(CAROUSEL_TRACKS), []));
-  const { user } = useAuth();
-  const { data: metrics } = useGlobalSwipeStats();
-  const { data: playlists } = usePlaylists({ enabled: !!user });
+  const { data: metrics } = useCounters();
+  const { data: playlists } = usePlaylists();
 
   const metricsDisplayed = [
     { label: "Songs swiped", amount: metrics && formatCount(metrics.total_swipes) },

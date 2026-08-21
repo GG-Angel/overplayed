@@ -1,4 +1,3 @@
-import { useTrackPreviewUrl } from "@/features/previews/api/get-track-preview";
 import AudioPlayer from "@/features/previews/components/PreviewPlayer";
 import SwipeButtons from "@/features/swipe/components/SwipeButtons";
 import type { SwipeCardController, SwipeDirection } from "@/features/swipe/components/SwipeCard";
@@ -16,6 +15,7 @@ import { storageKeys } from "@/lib/storage";
 import usePreloadSwipePreviews from "@/features/swipe/hooks/usePreloadSwipePreviews";
 import PillButton from "@/components/ui/PillButton";
 import { Spinner } from "@/components/ui/Spinner";
+import { useTrackPreview } from "@/api/queries";
 
 const MAX_CARD_STACK_HEIGHT = 3; // maximum number of cards to display in the stack
 
@@ -30,7 +30,7 @@ const SwipeSongsPage = () => {
   const navigate = useNavigate();
 
   const currentTrack = tracks.at(currentIndex);
-  const currentPreview = useTrackPreviewUrl(currentTrack?.external_ids.isrc);
+  const currentPreview = useTrackPreview(currentTrack?.external_ids.isrc);
   const hasReachedEnd = currentIndex >= tracks.length;
   const canUndoOrFinish = !isSwiping && currentIndex > 0;
   const canSwipe = !isSwiping && !hasReachedEnd;

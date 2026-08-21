@@ -2,7 +2,6 @@ import { cn } from "@/lib/utils";
 import PlaylistCard from "@/features/playlist/components/PlaylistCard";
 import { useNavigate } from "react-router-dom";
 import LoadingState from "@/components/states/LoadingState";
-import { usePlaylists } from "@/features/playlist/api/get-playlists";
 import { useCallback, useMemo, useState, type ComponentType } from "react";
 import MessageState from "@/components/states/MessageState";
 import Dropdown from "@/components/ui/dropdown/Dropdown";
@@ -25,6 +24,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { KAOMOJIS } from "@/constants/constants";
+import { usePlaylists } from "@/api/queries";
 
 type PlaylistSortKey = "alphabetical" | "tracks";
 type PlaylistSortOrder = "ascending" | "descending";

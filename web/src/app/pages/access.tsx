@@ -3,8 +3,6 @@ import Divider from "@/components/ui/Divider";
 import Input from "@/components/ui/Input";
 import Modal, { type ModalProps } from "@/components/ui/Modal";
 import Turnstile, { type TurnstileHandle } from "@/components/ui/Turnstile";
-import { useQueueStatus } from "@/features/user/api/get-queue-overview";
-import { useSendAccessRequest } from "@/features/user/api/send-access-request";
 import { formatCount, formatDateTime } from "@/lib/utils";
 import {
   Check,
@@ -24,12 +22,13 @@ import { useAccessContext } from "@/features/user/provider/AccessContext";
 import Card from "@/components/ui/Card";
 import { Spinner } from "@/components/ui/Spinner";
 import { useSearchParams } from "react-router-dom";
-import { useAccessStatus } from "@/features/user/api/get-user-status";
 import {
   accessRequestFormSchema,
   type AccessRequestForm,
   type AccessRequestResult,
 } from "@/types/queue";
+import { useAccessStatus, useQueueStatus } from "@/api/queries";
+import { useRequestAccess } from "@/api/mutations";
 
 const ErrorNotice = ({ message }: { message: string }) => {
   return (
@@ -188,7 +187,7 @@ const RequestAccessPage = () => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(() => !!authErrorNotice);
 
   const turnstileRef = useRef<TurnstileHandle>(null);
-  const submitRequestMutation = useSendAccessRequest(form, turnstileToken);
+  const submitRequestMutation = useRequestAccess(form, turnstileToken);
   const userStatusQuery = useAccessStatus(form.email);
 
   const validateForm = () => {

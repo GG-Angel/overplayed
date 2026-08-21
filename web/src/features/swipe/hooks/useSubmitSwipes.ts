@@ -7,9 +7,9 @@ import {
   type MutationState,
 } from "@tanstack/react-query";
 import { removeFromStorage, storageKeys } from "@/lib/storage";
-import { queryKeys } from "@/lib/query";
-import { postPlaylistSwipes } from "@/api/api-service";
+import { postPlaylistSwipes } from "@/api/api";
 import type { SwipesSubmissionResult } from "@/types/swipes";
+import { QUERY_KEYS } from "@/api/queries";
 
 const useSubmitSwipes = () => {
   const queryClient = useQueryClient();
@@ -31,8 +31,8 @@ const useSubmitSwipes = () => {
       setHasSubmitted(true);
       removeFromStorage(sessionStorage, storageKeys.swipes(playlist.id, playlist.snapshot_id));
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.playlists(), refetchType: "none" }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.metrics(), refetchType: "none" }),
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.playlists(), refetchType: "none" }),
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.globalStats(), refetchType: "none" }),
       ]);
     },
   });

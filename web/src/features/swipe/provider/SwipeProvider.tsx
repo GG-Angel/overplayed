@@ -3,9 +3,7 @@ import useSwipes, { type Swipe } from "../hooks/useSwipes";
 import { SwipeContext, type SwipeContextValues } from "./SwipeContext";
 import { Outlet, useParams } from "react-router-dom";
 import ErrorState from "@/components/states/ErrorState";
-import { usePlaylist } from "@/features/playlist/api/get-playlist";
 import LoadingState from "@/components/states/LoadingState";
-import { usePlaylistTracks } from "@/features/playlist/api/get-playlist-tracks";
 import useNavBlocker from "@/hooks/useNavBlocker";
 import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
@@ -14,6 +12,7 @@ import { loadFromStorage, storageKeys } from "@/lib/storage";
 import useShuffle from "../hooks/useShuffle";
 import type { SwipesForm } from "@/types/swipes";
 import type { Playlist, Track } from "@/types/spotify";
+import { usePlaylist, usePlaylistTracks } from "@/api/queries";
 
 type SwipeProviderProps = {
   playlist: Playlist;
