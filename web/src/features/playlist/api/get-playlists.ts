@@ -1,4 +1,4 @@
-import { getPlaylists } from "@/api/api";
+import { getPlaylists } from "@/api/api-service";
 import { queryKeys } from "@/lib/query";
 import { useQuery } from "@tanstack/react-query";
 

@@ -1,4 +1,4 @@
-import { getQueueStatus } from "@/api/api";
+import { getQueueStatus } from "@/api/api-service";
 import { queryKeys } from "@/lib/query";
 import { useQuery } from "@tanstack/react-query";
 

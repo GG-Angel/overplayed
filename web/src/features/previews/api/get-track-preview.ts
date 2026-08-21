@@ -1,6 +1,6 @@
 import { queryOptions, useQueries, useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query";
-import { getTrackPreviewUrl } from "@/api/api";
+import { getTrackPreviewUrl } from "@/api/api-service";
 
 const getTrackPreviewUrlQueryOptions = (isrc: string | undefined) => {
   return queryOptions({

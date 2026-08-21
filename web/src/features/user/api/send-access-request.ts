@@ -1,4 +1,4 @@
-import { postAccessRequest } from "@/api/api";
+import { postAccessRequest } from "@/api/api-service";
 import { queryKeys } from "@/lib/query";
 import type { AccessRequestForm } from "@/types/queue";
 import { useMutation, useQueryClient } from "@tanstack/react-query";

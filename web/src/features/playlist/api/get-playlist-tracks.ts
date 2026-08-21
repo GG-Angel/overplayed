@@ -1,4 +1,4 @@
-import { getPlaylistTracks } from "@/api/api";
+import { getPlaylistTracks } from "@/api/api-service";
 import { queryKeys } from "@/lib/query";
 import type { Track } from "@/types/spotify";
 import { experimental_streamedQuery as streamedQuery, useQuery } from "@tanstack/react-query";

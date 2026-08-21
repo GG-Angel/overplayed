@@ -8,7 +8,7 @@ import {
 } from "@tanstack/react-query";
 import { removeFromStorage, storageKeys } from "@/lib/storage";
 import { queryKeys } from "@/lib/query";
-import { postPlaylistSwipes } from "@/api/api";
+import { postPlaylistSwipes } from "@/api/api-service";
 import type { SwipesSubmissionResult } from "@/types/swipes";
 
 const useSubmitSwipes = () => {

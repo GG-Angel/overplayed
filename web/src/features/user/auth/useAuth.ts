@@ -2,20 +2,20 @@ import { isAxiosError } from "axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { env } from "@/lib/env";
 import { queryKeys } from "@/lib/query";
-import api, { buildURLWithQueryParams } from "@/lib/api";
 import { useAccessContext } from "../provider/AccessContext";
 import { currentUserSchema } from "@/types/spotify";
+import { serverApi, buildUrl } from "@/api/api-client";
 
 const getUser = async () => {
   try {
-    return currentUserSchema.parse(await api.get("/users/me"));
+    return currentUserSchema.parse(await serverApi.get("/users/me"));
   } catch (err) {
     if (isAxiosError(err) && err.response?.status === 401) return null;
     throw err;
   }
 };
 
-const logoutUser = async () => await api.post("/auth/logout");
+const logoutUser = async () => await serverApi.post("/auth/logout");
 
 const useUser = () =>
   useQuery({
@@ -42,7 +42,7 @@ const useAuth = () => {
     window.addEventListener("pagehide", () => {
       setHasRequestedAccess(true);
     });
-    window.location.href = buildURLWithQueryParams(`${env.API_BASE_URL}/auth/login`, {
+    window.location.href = buildUrl(`${env.API_BASE_URL}/auth/login`, {
       redirect_to: currentPath,
     });
   };

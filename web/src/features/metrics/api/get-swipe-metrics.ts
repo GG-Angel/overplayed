@@ -1,4 +1,4 @@
-import { getGlobalSwipeStats as getGlobalSwipeStats, getSwipeStats } from "@/api/api";
+import { getGlobalSwipeStats as getGlobalSwipeStats, getSwipeStats } from "@/api/api-service";
 import { queryKeys } from "@/lib/query";
 import { useQuery } from "@tanstack/react-query";
 
