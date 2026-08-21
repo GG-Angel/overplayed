@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { SwipeCardController } from "../components/SwipeCard";
-import { type Track } from "@/lib/types";
 import { wrapSlice } from "@/lib/utils";
+import type { Track } from "@/types/spotify";
 
 const SWIPE_DURATION = 1750;
 const LIKE_CHANCE = 0.5;

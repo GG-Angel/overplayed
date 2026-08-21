@@ -1,6 +1,6 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { type Image } from "./types";
+import type { Image } from "@/types/spotify";
 
 export function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));

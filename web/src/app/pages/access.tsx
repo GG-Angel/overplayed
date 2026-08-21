@@ -20,16 +20,16 @@ import {
 } from "lucide-react";
 import { useRef, useState, type SubmitEventHandler } from "react";
 import { loadFromStorage, saveToStorage, storageKeys } from "@/lib/storage";
-import {
-  accessRequestFormSchema,
-  type QueueAccessRequest,
-  type QueueAccessResponse,
-} from "@/lib/types";
 import { useAccessContext } from "@/features/user/provider/AccessContext";
 import Card from "@/components/ui/Card";
 import { Spinner } from "@/components/ui/Spinner";
 import { useSearchParams } from "react-router-dom";
 import { useAccessStatus } from "@/features/user/api/get-user-status";
+import {
+  accessRequestFormSchema,
+  type AccessRequestForm,
+  type AccessRequestResult,
+} from "@/types/queue";
 
 const ErrorNotice = ({ message }: { message: string }) => {
   return (
@@ -114,7 +114,7 @@ const authErrorNotices: Record<string, AuthErrorNotice | undefined> = {
   },
 };
 
-const AccessStatusCard = ({ data }: { data: QueueAccessResponse }) => {
+const AccessStatusCard = ({ data }: { data: AccessRequestResult }) => {
   const { status, email } = data;
 
   if (status === "confirmation_sent") {
@@ -171,15 +171,14 @@ const RequestAccessPage = () => {
 
   const [searchParams] = useSearchParams();
   const [turnstileToken, setTurnstileToken] = useState<string>("");
-  const [errors, setErrors] = useState<Partial<QueueAccessRequest>>({});
-
-  const [form, setForm] = useState<QueueAccessRequest>(() => {
+  const [errors, setErrors] = useState<Partial<AccessRequestForm>>({});
+  const [form, setForm] = useState<AccessRequestForm>(() => {
     if (searchParams.has("email")) {
       return { email: searchParams.get("email") ?? "" };
     }
     return loadFromStorage(localStorage, storageKeys.accessForm, { email: "" });
   });
-  const [submittedForm, setSubmittedForm] = useState<QueueAccessRequest>(form);
+  const [submittedForm, setSubmittedForm] = useState(form);
 
   const [resultSource, setResultSource] = useState<"status" | "request" | null>(() =>
     form.email ? "status" : null

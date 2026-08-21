@@ -2,9 +2,9 @@ import { isAxiosError } from "axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { env } from "@/lib/env";
 import { queryKeys } from "@/lib/query";
-import { currentUserSchema } from "@/lib/types";
 import api, { buildURLWithQueryParams } from "@/lib/api";
 import { useAccessContext } from "../provider/AccessContext";
+import { currentUserSchema } from "@/types/spotify";
 
 const getUser = async () => {
   try {

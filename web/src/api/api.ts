@@ -1,18 +1,20 @@
 import api, { fetchStreamedJson, queueApi } from "@/lib/api";
 import {
-  leaderboardSchema,
-  globalMetricsSchema,
-  userMetricsSchema,
-  trackSchema,
-  playlistSchema,
-  trackPreviewSchema,
-  type SwipeSubmissionForm,
-  swipeSubmissionResponseSchema,
-  queueOverviewSchema,
-  queueUserStatusSchema,
-  type QueueAccessRequest,
-  queueAccessResponseSchema,
-} from "@/lib/types";
+  accessRequestResultSchema,
+  accessStatusSchema,
+  queueStatusSchema,
+  type AccessRequestForm,
+} from "@/types/queue";
+import { playlistSchema, trackSchema, trackPreviewSchema } from "@/types/spotify";
+import {
+  globalUserStatsSchema as globalSwipeStatsSchema,
+  userStatsSchema as swipeStatsSchema,
+} from "@/types/stats";
+import {
+  swipesLeaderboardSchema,
+  swipesSubmissionResultSchema,
+  type SwipesForm,
+} from "@/types/swipes";
 import z from "zod";
 
 export const getPlaylist = async (playlistId: string) => {
@@ -32,35 +34,35 @@ export const getTrackPreviewUrl = async (isrc: string) => {
 };
 
 export const getGlobalSwipeStats = async () => {
-  return globalMetricsSchema.parse(await api.get(`/stats`));
+  return globalSwipeStatsSchema.parse(await api.get(`/stats`));
 };
 
 export const getSwipeStats = async () => {
-  return userMetricsSchema.parse(await api.get(`/stats/me`));
+  return swipeStatsSchema.parse(await api.get(`/stats/me`));
 };
 
 export const getSwipeLeaderboard = async () => {
-  return leaderboardSchema.parse(await api.get("/users/leaderboard"));
+  return swipesLeaderboardSchema.parse(await api.get("/users/leaderboard"));
 };
 
-export const postPlaylistSwipes = async (playlistId: string, form: SwipeSubmissionForm) => {
-  return swipeSubmissionResponseSchema.parse(
+export const postPlaylistSwipes = async (playlistId: string, form: SwipesForm) => {
+  return swipesSubmissionResultSchema.parse(
     await api.post(`/playlists/${playlistId}/swipes`, form)
   );
 };
 
 export const getQueueStatus = async () => {
-  return queueOverviewSchema.parse(await queueApi.get("/queue/overview"));
+  return queueStatusSchema.parse(await queueApi.get("/queue/overview"));
 };
 
-export const getUserAccessStatus = async (userEmail: string) => {
-  return queueUserStatusSchema.parse(
+export const getAccessStatus = async (userEmail: string) => {
+  return accessStatusSchema.parse(
     await queueApi.get(`/queue/users/${encodeURIComponent(userEmail)}`)
   );
 };
 
-export const postAccessRequest = async (form: QueueAccessRequest, turnstileToken: string) => {
-  return queueAccessResponseSchema.parse(
+export const postAccessRequest = async (form: AccessRequestForm, turnstileToken: string) => {
+  return accessRequestResultSchema.parse(
     await queueApi.post("/queue/requests", {
       ...form,
       "cf-turnstile-response": turnstileToken,

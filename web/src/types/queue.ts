@@ -11,25 +11,25 @@ export const queueStatusSchema = z.object({
   next_available_time: z.iso.datetime().nullable(),
 });
 
-const accessActiveStatusSchema = z.object({
+export const accessActiveStatusSchema = z.object({
   status: z.literal("active"),
   email: z.email(),
   estimated_end_time: z.iso.datetime(),
 });
 
-const accessInQueueSchema = z.object({
+export const accessInQueueSchema = z.object({
   status: z.literal("in_queue"),
   email: z.email(),
   position_in_queue: z.number().int(),
   estimated_start_time: z.iso.datetime(),
 });
 
-const accessConfirmationSentSchema = z.object({
+export const accessConfirmationSentSchema = z.object({
   status: z.literal("confirmation_sent"),
   email: z.email(),
 });
 
-const accessConfirmationPendingSchema = z.object({
+export const accessConfirmationPendingSchema = z.object({
   status: z.literal("confirmation_sent"),
   email: z.email(),
 });

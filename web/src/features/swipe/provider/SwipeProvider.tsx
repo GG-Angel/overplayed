@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import type { Playlist, SwipeSubmissionForm, Track } from "@/lib/types";
 import useSwipes, { type Swipe } from "../hooks/useSwipes";
 import { SwipeContext, type SwipeContextValues } from "./SwipeContext";
 import { Outlet, useParams } from "react-router-dom";
@@ -13,6 +12,8 @@ import Button from "@/components/ui/Button";
 import { Play, Undo2 } from "lucide-react";
 import { loadFromStorage, storageKeys } from "@/lib/storage";
 import useShuffle from "../hooks/useShuffle";
+import type { SwipesForm } from "@/types/swipes";
+import type { Playlist, Track } from "@/types/spotify";
 
 type SwipeProviderProps = {
   playlist: Playlist;
@@ -20,7 +21,7 @@ type SwipeProviderProps = {
   hasLoadedAllTracks: boolean;
 };
 
-const initialOptions: SwipeSubmissionForm["options"] = {
+const initialOptions: SwipesForm["options"] = {
   backup_enabled: true,
   remove_from_likes: false,
 };
@@ -50,7 +51,7 @@ const SwipeProvider = () => {
 };
 
 const SwipeProviderInner = ({ playlist, tracks, hasLoadedAllTracks }: SwipeProviderProps) => {
-  const [options, setOptions] = useState<SwipeSubmissionForm["options"]>(initialOptions);
+  const [options, setOptions] = useState<SwipesForm["options"]>(initialOptions);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [persistedSwipes] = useState<Swipe<Track>[]>(
     loadFromStorage<Swipe<Track>[]>(

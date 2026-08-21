@@ -6,11 +6,11 @@ import IconButton from "@/components/ui/IconButton";
 import WaveformSkeleton from "./WaveformSkeleton";
 import VolumeControl from "./VolumeControl";
 import type { WaveformHandler } from "./Waveform";
-import type { TrackPreview } from "@/lib/types";
 import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts";
 import { PREVIEW_SHORTCUTS } from "@/lib/shortcuts";
 import useDebouncedStorage from "@/hooks/useDebouncedStorage";
 import { loadFromStorage, storageKeys } from "@/lib/storage";
+import type { TrackPreview } from "@/types/spotify";
 
 const Waveform = lazy(() => import("./Waveform"));
 

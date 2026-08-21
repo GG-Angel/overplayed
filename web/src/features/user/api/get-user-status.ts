@@ -1,4 +1,4 @@
-import { getUserAccessStatus as getAccessStatus } from "@/api/api";
+import { getAccessStatus as getAccessStatus } from "@/api/api";
 import { queryKeys } from "@/lib/query";
 import { useQuery } from "@tanstack/react-query";
 

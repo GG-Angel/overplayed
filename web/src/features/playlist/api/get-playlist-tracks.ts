@@ -1,6 +1,6 @@
 import { getPlaylistTracks } from "@/api/api";
 import { queryKeys } from "@/lib/query";
-import { type Track } from "@/lib/types";
+import type { Track } from "@/types/spotify";
 import { experimental_streamedQuery as streamedQuery, useQuery } from "@tanstack/react-query";
 
 export const usePlaylistTracks = (playlistId: string | undefined) => {

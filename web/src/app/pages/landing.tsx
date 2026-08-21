@@ -11,7 +11,6 @@ import { useGlobalSwipeStats } from "@/features/metrics/api/get-swipe-metrics";
 import useSwipeCarousel from "@/features/swipe/hooks/useSwipeCarousel";
 import carouselTracks from "@/assets/carousel-tracks.json";
 import z from "zod";
-import { LIKED_SONGS_ID, trackSchema } from "@/lib/types";
 import { usePlaylists } from "@/features/playlist/api/get-playlists";
 import { useSwipeLeaderboard } from "@/features/metrics/api/get-swipe-leaderboad";
 import { Key, Scissors, Undo } from "lucide-react";
@@ -28,6 +27,8 @@ import {
 } from "@/lib/utils";
 import { Spinner } from "@/components/ui/Spinner";
 import { motion } from "framer-motion";
+import { trackSchema } from "@/types/spotify";
+import { LIKED_SONGS_PLAYLIST_ID } from "@/constants/constants";
 
 const CAROUSEL_TRACKS = z.array(trackSchema).parse(carouselTracks);
 const LEADERBOARD_ROWS = 5;
@@ -203,7 +204,7 @@ const LandingPage = () => {
   ];
 
   const largestPlaylist = playlists
-    ?.filter((p) => p.id !== LIKED_SONGS_ID)
+    ?.filter((p) => p.id !== LIKED_SONGS_PLAYLIST_ID)
     ?.reduce<(typeof playlists)[number] | undefined>((prev, curr) => {
       if (!prev) return curr;
       return curr.tracks.total > prev.tracks.total ? curr : prev;

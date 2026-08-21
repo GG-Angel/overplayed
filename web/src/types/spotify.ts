@@ -1,21 +1,21 @@
 import z from "zod";
 
-const externalUrlsSchema = z.object({
+export const externalUrlsSchema = z.object({
   spotify: z.url(),
 });
 
-const resourceSchema = z.object({
+export const resourceSchema = z.object({
   id: z.string(),
   uri: z.string(),
 });
 
-const imageSchema = z.object({
+export const imageSchema = z.object({
   url: z.url(),
   width: z.number().int().nullable(),
   height: z.number().int().nullable(),
 });
 
-const userSchema = resourceSchema.extend({
+export const userSchema = resourceSchema.extend({
   display_name: z.string().nullable(),
   external_urls: externalUrlsSchema,
 });
@@ -25,12 +25,12 @@ export const currentUserSchema = userSchema.extend({
   images: z.array(imageSchema),
 });
 
-const artistSchema = resourceSchema.extend({
+export const artistSchema = resourceSchema.extend({
   name: z.string(),
   external_urls: externalUrlsSchema,
 });
 
-const albumSchema = resourceSchema.extend({
+export const albumSchema = resourceSchema.extend({
   name: z.string(),
   album_type: z.enum(["album", "single", "compilation"]),
   images: z.array(imageSchema),

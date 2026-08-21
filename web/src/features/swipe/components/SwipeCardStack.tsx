@@ -1,7 +1,7 @@
-import type { Track } from "@/lib/types";
 import { AnimatePresence } from "framer-motion";
 import { type RefObject } from "react";
 import SwipeCard, { type SwipeDirection, type SwipeCardController } from "./SwipeCard";
+import type { Track } from "@/types/spotify";
 
 const STACK_ROTATE_DEGREES = 3;
 

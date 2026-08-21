@@ -1,6 +1,6 @@
 import Image from "@/components/ui/Image";
-import type { CurrentUser } from "@/lib/types";
 import { cn, extractImageUrl } from "@/lib/utils";
+import type { CurrentUser } from "@/types/spotify";
 import { type ComponentProps } from "react";
 
 type AvatarProps = ComponentProps<"button"> & {

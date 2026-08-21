@@ -2,9 +2,9 @@ import DropdownMenuItem from "@/components/ui/dropdown/DropdownMenuItem";
 import { cn } from "@/lib/utils";
 import { Hourglass } from "lucide-react";
 import useAccessCountdown from "../hooks/useAccessCountdown";
-import type { QueueUserStatus } from "@/lib/types";
+import type { AccessStatus } from "@/types/queue";
 
-const describeAccess = (access: QueueUserStatus, label: string | null, isExpired: boolean) => {
+const describeAccess = (access: AccessStatus, label: string | null, isExpired: boolean) => {
   switch (access.status) {
     case "active":
       return isExpired ? "Access expired" : `Access · ${label} left`;
@@ -13,7 +13,7 @@ const describeAccess = (access: QueueUserStatus, label: string | null, isExpired
   }
 };
 
-const AccessStatus = () => {
+const DropdownAccessStatusItem = () => {
   const { access, isLoading, label, isLow, isExpired } = useAccessCountdown();
 
   if (isLoading || !access) return null;
@@ -28,4 +28,4 @@ const AccessStatus = () => {
   );
 };
 
-export default AccessStatus;
+export default DropdownAccessStatusItem;

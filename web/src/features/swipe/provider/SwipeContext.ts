@@ -1,11 +1,12 @@
 import { createContext, useContext, type Dispatch, type SetStateAction } from "react";
 import type useSwipes from "../hooks/useSwipes";
-import type { Playlist, SwipeSubmissionForm, Track } from "@/lib/types";
+import type { SwipesForm } from "@/types/swipes";
+import type { Playlist, Track } from "@/types/spotify";
 
 export type SwipeContextValues = {
   session: ReturnType<typeof useSwipes<Track>>;
-  options: SwipeSubmissionForm["options"];
-  setOptions: Dispatch<SetStateAction<SwipeSubmissionForm["options"]>>;
+  options: SwipesForm["options"];
+  setOptions: Dispatch<SetStateAction<SwipesForm["options"]>>;
   hasSubmitted: boolean;
   setHasSubmitted: Dispatch<SetStateAction<boolean>>;
   hasLoadedAllTracks: boolean;
