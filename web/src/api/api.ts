@@ -45,12 +45,6 @@ export const getSwipeLeaderboard = async () => {
   return swipesLeaderboardSchema.parse(await api.get("/users/leaderboard"));
 };
 
-export const postPlaylistSwipes = async (playlistId: string, form: SwipesForm) => {
-  return swipesSubmissionResultSchema.parse(
-    await api.post(`/playlists/${playlistId}/swipes`, form)
-  );
-};
-
 export const getQueueStatus = async () => {
   return queueStatusSchema.parse(await queueApi.get("/queue/overview"));
 };
@@ -58,6 +52,12 @@ export const getQueueStatus = async () => {
 export const getAccessStatus = async (userEmail: string) => {
   return accessStatusSchema.parse(
     await queueApi.get(`/queue/users/${encodeURIComponent(userEmail)}`)
+  );
+};
+
+export const postPlaylistSwipes = async (playlistId: string, form: SwipesForm) => {
+  return swipesSubmissionResultSchema.parse(
+    await api.post(`/playlists/${playlistId}/swipes`, form)
   );
 };
 
