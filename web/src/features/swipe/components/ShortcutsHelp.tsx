@@ -1,8 +1,8 @@
-import CardHeading from "@/components/ui/CardHeading";
 import Divider from "@/components/ui/Divider";
 import Kbd from "@/components/ui/Kbd";
 import Modal from "@/components/ui/Modal";
-import PillButton from "@/components/ui/PillButton";
+import PillButton from "@/components/ui/buttons/PillButton";
+import CardHeading from "@/components/ui/cards/CardHeading";
 import {
   formatShortcutKey,
   MODAL_SHORTCUTS,

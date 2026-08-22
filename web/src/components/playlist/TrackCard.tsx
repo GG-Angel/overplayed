@@ -1,9 +1,9 @@
-import Card, { type CardProps } from "@/components/ui/Card";
 import Image from "@/components/ui/Image";
 import ExternalLink from "@/components/ui/ExternalLink";
 import { cn, extractImageUrl } from "@/lib/utils";
 import type { Track } from "@/types/spotify";
 import { cva, type VariantProps } from "class-variance-authority";
+import Card, { type CardProps } from "../ui/cards/Card";
 
 const cardVariants = cva("flex gap-3 shrink-0", {
   variants: {

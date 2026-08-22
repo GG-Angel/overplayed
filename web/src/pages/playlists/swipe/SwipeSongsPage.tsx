@@ -13,7 +13,7 @@ import { useNavigate } from "react-router-dom";
 import useDebouncedStorage from "@/hooks/useDebouncedStorage";
 import { storageKeys } from "@/lib/storage";
 import usePreloadTrackAudio from "@/features/audio/hooks/usePreloadTrackAudio";
-import PillButton from "@/components/ui/PillButton";
+import PillButton from "@/components/ui/buttons/PillButton";
 import Page from "@/components/layout/Page";
 import { Spinner } from "@/components/ui/Spinner";
 import { useTrackPreview } from "@/api/queries";

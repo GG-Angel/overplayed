@@ -1,8 +1,7 @@
 import { lazy, useCallback, useRef, useState } from "react";
 import { Pause, Play } from "lucide-react";
 import { cn } from "@/lib/utils";
-import Card from "@/components/ui/Card";
-import IconButton from "@/components/ui/IconButton";
+import IconButton from "@/components/ui/buttons/IconButton";
 import WaveformSkeleton from "./WaveformSkeleton";
 import VolumeControl from "./VolumeControl";
 import type { WaveformHandler } from "./Waveform";
@@ -11,6 +10,7 @@ import { PREVIEW_SHORTCUTS } from "@/lib/shortcuts";
 import useDebouncedStorage from "@/hooks/useDebouncedStorage";
 import { loadFromStorage, storageKeys } from "@/lib/storage";
 import type { TrackPreview } from "@/types/spotify";
+import Card from "@/components/ui/cards/Card";
 
 const Waveform = lazy(() => import("./Waveform"));
 

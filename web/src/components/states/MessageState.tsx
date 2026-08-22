@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
-import Button, { type ButtonProps } from "../ui/Button";
+import Button, { type ButtonProps } from "../ui/buttons/Button";
 import type { IconComponent } from "@/types/icon";
 
 const MESSAGE_TONES = {

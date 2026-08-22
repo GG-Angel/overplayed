@@ -1,9 +1,9 @@
 import TrackCard from "@/components/playlist/TrackCard";
 import MessageState from "@/components/states/MessageState";
-import Button from "@/components/ui/Button";
+import Button from "@/components/ui/buttons/Button";
 import Divider from "@/components/ui/Divider";
-import ToggleCard from "@/components/ui/ToggleCard";
-import Metric from "@/components/ui/Metric";
+import ToggleCard from "@/components/ui/cards/ToggleCard";
+import CounterCard from "@/components/ui/cards/CounterCard";
 import Page from "@/components/layout/Page";
 import { KAOMOJIS, LIKED_SONGS_PLAYLIST_ID } from "@/lib/constants";
 import { useSwipeContext } from "@/features/swipe/provider/SwipeContext";
@@ -71,12 +71,12 @@ const ReviewSwipesPage = () => {
     <Page width="4xl" className="py-2 pb-32">
       <h1 className="text-center">Review Swipes</h1>
       <div className="flex flex-col-reverse sm:flex-row gap-3">
-        <Metric
+        <CounterCard
           amount={formatCount(session.dislikes.length)}
           label={pluralize("Dislike", session.dislikes.length)}
           tone="negative"
         />
-        <Metric
+        <CounterCard
           amount={formatCount(session.likes.length)}
           label={pluralize("Like", session.likes.length)}
           tone="positive"

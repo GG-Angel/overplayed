@@ -1,4 +1,4 @@
-import IconButton from "@/components/ui/IconButton";
+import IconButton from "@/components/ui/buttons/IconButton";
 import { Check, Heart, Undo, X } from "lucide-react";
 
 type SwipeButtonsProps = {

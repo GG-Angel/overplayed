@@ -1,8 +1,7 @@
-import Metric, { MetricSkeleton } from "@/components/ui/Metric";
-import Button from "@/components/ui/Button";
+import CounterCard, { CounterCardSkeleton } from "@/components/ui/cards/CounterCard";
+import Button from "@/components/ui/buttons/Button";
 import SpotifyIcon from "@/assets/spotify.svg?react";
 import { Link, useNavigate } from "react-router-dom";
-import Card from "@/components/ui/Card";
 import Skeleton from "@/components/ui/Skeleton";
 import Page from "@/components/layout/Page";
 import Divider from "@/components/ui/Divider";
@@ -29,6 +28,7 @@ import { LIKED_SONGS_PLAYLIST_ID } from "@/lib/constants";
 import { useCounters, useLeaderboard, usePlaylists } from "@/api/queries";
 import useAuth from "@/features/session/auth/useAuth";
 import { useAuthContext } from "@/features/session/auth/AuthContext";
+import Card from "@/components/ui/cards/Card";
 
 const CAROUSEL_TRACKS = z.array(trackSchema).parse(carouselTracks);
 const LEADERBOARD_ROWS = 5;
@@ -245,7 +245,7 @@ const LandingPage = () => {
         <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-3">
           {metricsDisplayed.map((metric, i) =>
             metric.amount ? (
-              <Metric
+              <CounterCard
                 key={metric.label}
                 label={metric.label}
                 amount={metric.amount}
@@ -253,7 +253,7 @@ const LandingPage = () => {
                 className="first:col-span-1 xs:first:col-span-2 sm:first:col-span-1"
               />
             ) : (
-              <MetricSkeleton key={`metric-skeleton-${i}`} tone="muted" />
+              <CounterCardSkeleton key={`metric-skeleton-${i}`} tone="muted" />
             )
           )}
         </div>

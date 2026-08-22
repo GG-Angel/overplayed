@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import Card, { type CardProps } from "./Card";
+import Card, { type CardProps } from "./cards/Card";
 
 export type SkeletonProps = CardProps;
 

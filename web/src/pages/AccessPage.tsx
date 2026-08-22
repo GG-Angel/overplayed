@@ -1,4 +1,4 @@
-import Button from "@/components/ui/Button";
+import Button from "@/components/ui/buttons/Button";
 import Divider from "@/components/ui/Divider";
 import Input from "@/components/ui/Input";
 import Modal, { type ModalProps } from "@/components/ui/Modal";
@@ -7,8 +7,6 @@ import { formatDateTime } from "@/lib/utils";
 import { Check, CircleQuestionMark, Clock, Info, Key, Mail, Send, ThumbsUp } from "lucide-react";
 import { useRef, useState, type SubmitEventHandler } from "react";
 import { loadFromStorage, saveToStorage, storageKeys } from "@/lib/storage";
-import Card from "@/components/ui/Card";
-import StatusCard from "@/components/ui/StatusCard";
 import AvailabilityMeter from "@/features/session/components/AvailabilityMeter";
 import ExternalLink from "@/components/ui/ExternalLink";
 import Page from "@/components/layout/Page";
@@ -22,6 +20,8 @@ import {
 import { useAccessStatus, useQueueStatus } from "@/api/queries";
 import { useRequestAccess } from "@/api/mutations";
 import { useAuthContext } from "@/features/session/auth/AuthContext";
+import Card from "@/components/ui/cards/Card";
+import StatusCard from "@/components/ui/cards/StatusCard";
 
 const ErrorNotice = ({ message }: { message: string }) => {
   return (

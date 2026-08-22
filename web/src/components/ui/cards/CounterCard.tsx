@@ -1,14 +1,20 @@
 import { cn } from "@/lib/utils";
+import Skeleton from "../Skeleton";
 import Card, { type CardProps } from "./Card";
-import Skeleton from "./Skeleton";
 
-type MetricProps = CardProps & {
+type CounterCardSkeletonProps = Pick<CardProps, "className" | "tone">;
+
+type CounterCardProps = CardProps & {
   amount: number | string;
   label: string;
   className?: string;
 };
 
-const Metric = ({ amount, label, className, ...props }: MetricProps) => (
+export const CounterCardSkeleton = ({ className, ...props }: CounterCardSkeletonProps) => {
+  return <Skeleton className={cn("h-23.75", className)} {...props} />;
+};
+
+const CounterCard = ({ amount, label, className, ...props }: CounterCardProps) => (
   <Card className={cn("flex flex-1 flex-col justify-center items-center", className)} {...props}>
     <p className="text-sm font-medium text-current/60">{label}</p>
     <data className="text-4xl tracking-tight font-semibold" value={amount}>
@@ -17,10 +23,4 @@ const Metric = ({ amount, label, className, ...props }: MetricProps) => (
   </Card>
 );
 
-type MetricSkeletonProps = Pick<CardProps, "className" | "tone">;
-
-export const MetricSkeleton = ({ className, ...props }: MetricSkeletonProps) => {
-  return <Skeleton className={cn("h-23.75", className)} {...props} />;
-};
-
-export default Metric;
+export default CounterCard;

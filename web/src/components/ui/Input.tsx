@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import { useRef, type ComponentProps } from "react";
-import Card from "./Card";
 import type { LucideIcon } from "lucide-react";
+import Card from "./cards/Card";
 
 export type InputProps = ComponentProps<"input"> & {
   label?: string;

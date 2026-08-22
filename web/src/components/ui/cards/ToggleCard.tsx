@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
-import Card, { type CardButtonProps } from "./Card";
-import Checkbox from "./Checkbox";
+import Checkbox from "../Checkbox";
+import type { CardButtonProps } from "./Card";
+import Card from "./Card";
 
 export type ToggleCardProps = Omit<CardButtonProps, "children" | "as" | "onClick"> & {
   title: string;

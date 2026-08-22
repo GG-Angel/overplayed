@@ -6,7 +6,7 @@ import ErrorState from "@/components/states/ErrorState";
 import LoadingState from "@/components/states/LoadingState";
 import useNavBlocker from "@/hooks/useNavBlocker";
 import Modal from "@/components/ui/Modal";
-import Button from "@/components/ui/Button";
+import Button from "@/components/ui/buttons/Button";
 import { Play, Undo2 } from "lucide-react";
 import { loadFromStorage, storageKeys } from "@/lib/storage";
 import useShuffleTracks from "../hooks/useShuffleTracks";

@@ -1,4 +1,4 @@
-import Button from "@/components/ui/Button";
+import Button from "@/components/ui/buttons/Button";
 import useAuth from "../auth/useAuth";
 import Avatar from "./Avatar";
 import DropdownAccessStatusItem from "./AccessStatus";

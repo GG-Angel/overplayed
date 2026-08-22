@@ -1,7 +1,7 @@
 import { Volume2, VolumeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
-import Card from "@/components/ui/Card";
-import IconButton from "@/components/ui/IconButton";
+import IconButton from "@/components/ui/buttons/IconButton";
+import Card from "@/components/ui/cards/Card";
 
 type VolumeControlProps = {
   volume: number;

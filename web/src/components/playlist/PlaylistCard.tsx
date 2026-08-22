@@ -1,11 +1,11 @@
 import { ArrowUpRight } from "lucide-react";
 import Image from "@/components/ui/Image";
-import Card from "@/components/ui/Card";
 import {
   extractPlaylistCoverUrl,
   formatTrackCount,
   type PlaylistDisplayProps,
 } from "@/components/playlist/cover";
+import Card from "../ui/cards/Card";
 
 const PlaylistCard = ({ playlist, onClick }: PlaylistDisplayProps) => {
   const coverUrl = extractPlaylistCoverUrl(playlist);

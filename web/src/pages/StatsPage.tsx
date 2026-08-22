@@ -1,11 +1,11 @@
 import { useUserStats } from "@/api/queries";
 import LoadingState from "@/components/states/LoadingState";
 import Page from "@/components/layout/Page";
-import Card from "@/components/ui/Card";
 import Image from "@/components/ui/Image";
-import Metric from "@/components/ui/Metric";
+import CounterCard from "@/components/ui/cards/CounterCard";
 import useAuth from "@/features/session/auth/useAuth";
 import { extractImageUrl, formatCount, formatPercentage } from "@/lib/utils";
+import Card from "@/components/ui/cards/Card";
 
 const StatsPage = () => {
   const { user } = useAuth();
@@ -30,14 +30,18 @@ const StatsPage = () => {
         </div>
       </Card>
       <div className="flex flex-col gap-3">
-        <Metric label="Total Swipes" amount={formatCount(metrics.num_swipes)} />
+        <CounterCard label="Total Swipes" amount={formatCount(metrics.num_swipes)} />
         <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
-          <Metric label="Total Dislikes" tone="negative" amount={formatCount(metrics.num_cuts)} />
-          <Metric label="Total Likes" tone="positive" amount={formatCount(metrics.num_kept)} />
+          <CounterCard
+            label="Total Dislikes"
+            tone="negative"
+            amount={formatCount(metrics.num_cuts)}
+          />
+          <CounterCard label="Total Likes" tone="positive" amount={formatCount(metrics.num_kept)} />
         </div>
         <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
-          <Metric label="Cut Rate" tone="muted" amount={formatPercentage(metrics.cut_rate)} />
-          <Metric
+          <CounterCard label="Cut Rate" tone="muted" amount={formatPercentage(metrics.cut_rate)} />
+          <CounterCard
             label="Playlists Cleaned"
             tone="muted"
             amount={formatCount(metrics.num_modified)}
