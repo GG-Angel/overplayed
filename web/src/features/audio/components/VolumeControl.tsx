@@ -10,12 +10,7 @@ type VolumeControlProps = {
   muteCount: number;
 };
 
-const VolumeControl = ({
-  volume,
-  onVolumeChange,
-  onMuteToggle,
-  muteCount,
-}: VolumeControlProps) => {
+const VolumeControl = ({ volume, onVolumeChange, onMuteToggle, muteCount }: VolumeControlProps) => {
   const VolumeIcon = volume === 0 ? VolumeOff : Volume2;
 
   return (

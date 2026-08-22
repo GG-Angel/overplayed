@@ -3,6 +3,8 @@ import Button from "@/components/ui/Button";
 import SpotifyIcon from "@/assets/spotify.svg?react";
 import { Link, useNavigate } from "react-router-dom";
 import Card from "@/components/ui/Card";
+import Skeleton from "@/components/ui/Skeleton";
+import Page from "@/components/layout/Page";
 import Divider from "@/components/ui/Divider";
 import SwipeButtons from "@/features/swipe/components/SwipeButtons";
 import SwipeCardStack from "@/features/swipe/components/SwipeCardStack";
@@ -60,7 +62,7 @@ const CallToAction = () => {
             key="view-playlists-btn"
             className="self-center"
             size="lg"
-            icon={<SpotifyIcon className="size-5 shrink-0" />}
+            icon={SpotifyIcon}
             onClick={() => navigate("/playlists")}
           >
             View your playlists
@@ -69,7 +71,7 @@ const CallToAction = () => {
           <>
             <Button
               key="request-access-btn"
-              icon={<Key className="size-5 shrink-0" />}
+              icon={Key}
               className={cn(
                 "overflow-visible group relative flex items-center",
                 hasRequestedAccess ? "w-full" : "self-center"
@@ -93,7 +95,7 @@ const CallToAction = () => {
             <Button
               key="log-in"
               hidden={!hasRequestedAccess}
-              icon={<SpotifyIcon className="size-5 shrink-0" />}
+              icon={SpotifyIcon}
               className="w-full"
               size="lg"
               variant="primary"
@@ -114,12 +116,7 @@ const Leaderboard = () => {
     return (
       <div className="flex flex-col gap-1.5 mt-4">
         {Array.from({ length: LEADERBOARD_ROWS }).map((_, i) => (
-          <Card
-            key={`leaderboard-row-${i}`}
-            tone="muted"
-            radius="sm"
-            className="animate-pulse h-11 w-full"
-          />
+          <Skeleton key={`leaderboard-row-${i}`} tone="muted" radius="sm" className="h-11 w-full" />
         ))}
       </div>
     );
@@ -130,7 +127,7 @@ const Leaderboard = () => {
       <Card
         tone="muted"
         padding="lg"
-        className="flex flex-col items-center gap-1 text-sm text-center mt-3 py-6"
+        className="flex flex-col items-center gap-1 text-sm text-center mt-3"
       >
         <Scissors className="size-6 text-muted" />
         <p className="font-medium">The board's wide open</p>
@@ -207,7 +204,7 @@ const LandingPage = () => {
     }, undefined);
 
   return (
-    <main className="flex flex-col gap-8 w-full max-w-3xl self-center py-8">
+    <Page width="3xl" gap="lg" className="py-8">
       <h1 className="text-center">
         <span className="block">Your playlist is bloated.</span>
         <span className="block text-muted">
@@ -221,7 +218,7 @@ const LandingPage = () => {
       <CallToAction />
 
       <Card
-        className="flex flex-col items-center gap-6 pointer-events-none py-6"
+        className="flex flex-col items-center gap-6 pointer-events-none"
         tone="muted"
         radius="lg"
         padding="lg"
@@ -289,7 +286,7 @@ const LandingPage = () => {
           </p>
         </>
       )}
-    </main>
+    </Page>
   );
 };
 

@@ -17,11 +17,7 @@ const ErrorState = ({ message = "Unexpected error!" }: ErrorStateProps) => {
       tone="negative"
       title={message}
       actions={
-        <Button
-          icon={<Undo2 className="size-4" />}
-          variant="tertiary"
-          onClick={() => navigate("/", { replace: true })}
-        >
+        <Button icon={Undo2} variant="tertiary" onClick={() => navigate("/", { replace: true })}>
           Return Home
         </Button>
       }

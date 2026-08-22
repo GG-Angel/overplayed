@@ -1,6 +1,7 @@
-import { type ComponentProps, type ReactNode } from "react";
+import { type ComponentProps } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
+import type { IconComponent } from "@/types/icon";
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-semibold transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 overflow-hidden",
@@ -24,14 +25,27 @@ const buttonVariants = cva(
   }
 );
 
+const iconVariants = cva("shrink-0", {
+  variants: {
+    size: {
+      sm: "size-3.5",
+      md: "size-4",
+      lg: "size-5",
+    },
+  },
+  defaultVariants: {
+    size: "md",
+  },
+});
+
 type ButtonProps = ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
-    icon?: ReactNode;
+    icon?: IconComponent;
   };
 
-const Button = ({ className, variant, size, icon, children, ...props }: ButtonProps) => (
+const Button = ({ className, variant, size, icon: Icon, children, ...props }: ButtonProps) => (
   <button className={cn(buttonVariants({ variant, size }), className)} {...props}>
-    {icon}
+    {Icon && <Icon className={iconVariants({ size })} />}
     <span>{children}</span>
   </button>
 );

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import LoadingState from "@/components/states/LoadingState";
 import { useCallback, useMemo, useState, type ComponentType } from "react";
 import MessageState from "@/components/states/MessageState";
+import Page from "@/components/layout/Page";
 import Dropdown from "@/components/ui/dropdown/Dropdown";
 import DropdownMenu from "@/components/ui/dropdown/DropdownMenu";
 import DropdownMenuDivider from "@/components/ui/dropdown/DropdownMenuDivider";
@@ -91,7 +92,7 @@ const PlaylistSelectionPage = () => {
   );
 
   return (
-    <main className="flex flex-col h-full gap-6">
+    <Page className="h-full">
       <h1 className="text-center">Select a Playlist</h1>
       <div className="flex items-center justify-between gap-8">
         <Input
@@ -177,7 +178,7 @@ const PlaylistSelectionPage = () => {
           </section>
         );
       })()}
-    </main>
+    </Page>
   );
 };
 

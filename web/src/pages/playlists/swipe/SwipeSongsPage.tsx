@@ -14,6 +14,7 @@ import useDebouncedStorage from "@/hooks/useDebouncedStorage";
 import { storageKeys } from "@/lib/storage";
 import usePreloadTrackAudio from "@/features/audio/hooks/usePreloadTrackAudio";
 import PillButton from "@/components/ui/PillButton";
+import Page from "@/components/layout/Page";
 import { Spinner } from "@/components/ui/Spinner";
 import { useTrackPreview } from "@/api/queries";
 
@@ -79,7 +80,7 @@ const SwipeSongsPage = () => {
   );
 
   return (
-    <main className="flex flex-col items-center gap-4 w-full self-center h-full py-6 overflow-x-hidden overflow-y-auto">
+    <Page gap="sm" className="items-center h-full py-6 overflow-x-hidden overflow-y-auto">
       <SwipeProgress
         className="w-full max-w-3xl"
         likes={session.likes.length}
@@ -145,7 +146,7 @@ const SwipeSongsPage = () => {
         className="w-full max-w-3xl"
         shortcutsEnabled={!isShortcutsModalOpen}
       />
-    </main>
+    </Page>
   );
 };
 

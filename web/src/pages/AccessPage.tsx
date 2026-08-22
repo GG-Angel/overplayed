@@ -19,6 +19,9 @@ import {
 import { useRef, useState, type SubmitEventHandler } from "react";
 import { loadFromStorage, saveToStorage, storageKeys } from "@/lib/storage";
 import Card from "@/components/ui/Card";
+import Skeleton from "@/components/ui/Skeleton";
+import ExternalLink from "@/components/ui/ExternalLink";
+import Page from "@/components/layout/Page";
 import { Spinner } from "@/components/ui/Spinner";
 import { useSearchParams } from "react-router-dom";
 import {
@@ -48,12 +51,7 @@ const NoticeModal = ({ title, dismissLabel, onClose, children }: NoticeModalProp
     <Modal onClose={onClose} className="flex flex-col gap-3 max-w-2xl">
       <h2>{title}</h2>
       {children}
-      <Button
-        className="mt-2"
-        icon={<ThumbsUp className="size-4" />}
-        variant="secondary"
-        onClick={onClose}
-      >
+      <Button className="mt-2" icon={ThumbsUp} variant="secondary" onClick={onClose}>
         {dismissLabel}
       </Button>
     </Modal>
@@ -70,14 +68,12 @@ const EmailCollectionModal = ({ onClose }: Pick<ModalProps, "onClose">) => {
       <p>Use the exact email on your Spotify account — a mismatch means login will fail.</p>
       <p className="text-muted text-sm">
         Your email is used <span className="font-bold">only</span> to grant access.{" "}
-        <a
+        <ExternalLink
           href="https://developer.spotify.com/blog/2026-02-06-update-on-developer-access-and-platform-security"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-accent hover:underline"
+          className="text-accent"
         >
           Learn more.
-        </a>
+        </ExternalLink>
       </p>
     </NoticeModal>
   );
@@ -118,7 +114,7 @@ const AccessStatusCard = ({ data }: { data: AccessRequestResult }) => {
 
   if (status === "confirmation_sent") {
     return (
-      <Card tone="muted" padding="lg" radius="lg" className="flex flex-col gap-2 py-6">
+      <Card tone="muted" padding="lg" radius="lg" className="flex flex-col gap-2">
         <h2 className="flex items-center gap-2">
           <Mail className="shrink-0" /> Check Your Inbox
         </h2>
@@ -135,7 +131,7 @@ const AccessStatusCard = ({ data }: { data: AccessRequestResult }) => {
 
   if (status === "in_queue") {
     return (
-      <Card tone="muted" padding="lg" radius="lg" className="flex flex-col gap-2 py-6">
+      <Card tone="muted" padding="lg" radius="lg" className="flex flex-col gap-2">
         <h2 className="flex items-center gap-2">
           <Clock className="shrink-0" /> Waiting In Queue
         </h2>
@@ -150,7 +146,7 @@ const AccessStatusCard = ({ data }: { data: AccessRequestResult }) => {
   }
 
   return (
-    <Card tone="positive" padding="lg" radius="lg" className="flex flex-col gap-2 py-6">
+    <Card tone="positive" padding="lg" radius="lg" className="flex flex-col gap-2">
       <h2 className="flex items-center gap-2">
         <Check className="shrink-0" /> Account Activated
       </h2>
@@ -246,7 +242,7 @@ const RequestAccessPage = () => {
   const result = resultSource ? results[resultSource] : null;
 
   return (
-    <main className="flex flex-col gap-6 max-w-xl pt-2 pb-8 self-center">
+    <Page width="xl" className="pt-2 pb-8">
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-3">
           <h1>Request Access</h1>
@@ -309,7 +305,7 @@ const RequestAccessPage = () => {
             );
           })()
         ) : (
-          <div className="w-full max-w-sm self-center h-18 bg-card rounded-2xl animate-pulse" />
+          <Skeleton radius="lg" className="w-full max-w-sm self-center h-18" />
         )}
       </div>
 
@@ -329,20 +325,18 @@ const RequestAccessPage = () => {
           />
           <span className="text-sm text-muted">
             You can find your email{" "}
-            <a
+            <ExternalLink
               href="https://www.spotify.com/account/profile/"
               className="underline hover:text-white"
-              target="_blank"
-              rel="noopener noreferrer"
               draggable={false}
             >
               here.
-            </a>
+            </ExternalLink>
           </span>
         </div>
         <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3">
           <Button
-            icon={<CircleQuestionMark className="size-4 shrink-0" />}
+            icon={CircleQuestionMark}
             className="sm:flex-1"
             variant="secondary"
             size="lg"
@@ -353,7 +347,7 @@ const RequestAccessPage = () => {
             Check Status
           </Button>
           <Button
-            icon={<Send className="size-4 shrink-0" />}
+            icon={Send}
             className="sm:flex-1"
             type="submit"
             size="lg"
@@ -393,7 +387,7 @@ const RequestAccessPage = () => {
       {isAuthModalOpen && authErrorNotice && (
         <NoticeModal {...authErrorNotice} onClose={() => setIsAuthModalOpen(false)} />
       )}
-    </main>
+    </Page>
   );
 };
 

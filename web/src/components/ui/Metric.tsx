@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import Card, { type CardProps } from "./Card";
+import Skeleton from "./Skeleton";
 
 type MetricProps = CardProps & {
   amount: number | string;
@@ -19,7 +20,7 @@ const Metric = ({ amount, label, className, ...props }: MetricProps) => (
 type MetricSkeletonProps = Pick<CardProps, "className" | "tone">;
 
 export const MetricSkeleton = ({ className, ...props }: MetricSkeletonProps) => {
-  return <Card className={cn("animate-pulse h-23.75", className)} {...props} />;
+  return <Skeleton className={cn("h-23.75", className)} {...props} />;
 };
 
 export default Metric;

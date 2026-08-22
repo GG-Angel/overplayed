@@ -5,6 +5,7 @@ import Card from "@/components/ui/Card";
 import Checkbox from "@/components/ui/Checkbox";
 import Divider from "@/components/ui/Divider";
 import Metric from "@/components/ui/Metric";
+import Page from "@/components/layout/Page";
 import { KAOMOJIS, LIKED_SONGS_PLAYLIST_ID } from "@/lib/constants";
 import { useSwipeContext } from "@/features/swipe/provider/SwipeContext";
 import useConfetti from "@/hooks/useConfetti";
@@ -41,10 +42,10 @@ const ReviewSwipesPage = () => {
         subtitle={<p>You haven't swiped on any tracks...</p>}
         actions={
           <>
-            <Button icon={<Home className="size-4" />} variant="secondary" onClick={navigateHome}>
+            <Button icon={Home} variant="secondary" onClick={navigateHome}>
               Return Home
             </Button>
-            <Button icon={<Play className="size-4" />} variant="primary" onClick={navigateToSwipe}>
+            <Button icon={Play} variant="primary" onClick={navigateToSwipe}>
               Swipe Tracks
             </Button>
           </>
@@ -67,14 +68,10 @@ const ReviewSwipesPage = () => {
         }
         actions={
           <>
-            <Button
-              icon={<Undo2 className="size-4" />}
-              variant="secondary"
-              onClick={navigateToSwipe}
-            >
+            <Button icon={Undo2} variant="secondary" onClick={navigateToSwipe}>
               Keep Swiping
             </Button>
-            <Button icon={<Home className="size-4" />} variant="primary" onClick={navigateHome}>
+            <Button icon={Home} variant="primary" onClick={navigateHome}>
               Return Home
             </Button>
           </>
@@ -84,7 +81,7 @@ const ReviewSwipesPage = () => {
   }
 
   return (
-    <main className="flex flex-col gap-6 py-2 w-full max-w-4xl self-center pb-32">
+    <Page width="4xl" className="py-2 pb-32">
       <h1 className="text-center">Review Swipes</h1>
       <div className="flex flex-col-reverse sm:flex-row gap-3">
         <Metric
@@ -162,14 +159,14 @@ const ReviewSwipesPage = () => {
         )}
       </div>
       <div className="flex flex-col *:flex-1 sm:*:flex-none xs:flex-row-reverse sm:justify-start gap-3">
-        <Button icon={<Trash2 className="size-4" />} variant="primary" onClick={navigateToSubmit}>
+        <Button icon={Trash2} variant="primary" onClick={navigateToSubmit}>
           Delete Tracks
         </Button>
-        <Button icon={<Undo2 className="size-4" />} variant="secondary" onClick={navigateToSwipe}>
+        <Button icon={Undo2} variant="secondary" onClick={navigateToSwipe}>
           Keep Swiping
         </Button>
       </div>
-    </main>
+    </Page>
   );
 };
 

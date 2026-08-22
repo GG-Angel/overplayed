@@ -21,7 +21,8 @@ const cardVariants = cva("flex overflow-hidden border-2 text-card-foreground sha
       xs: "p-1.5",
       sm: "p-3",
       md: "p-4",
-      lg: "p-8",
+      lg: "px-8 py-6",
+      xl: "p-8",
     },
   },
   defaultVariants: {

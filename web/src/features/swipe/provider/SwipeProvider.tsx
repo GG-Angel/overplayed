@@ -115,18 +115,10 @@ const SwipeProviderInner = ({ playlist, tracks, hasLoadedAllTracks }: SwipeProvi
             </p>
           </div>
           <div className="grid grid-cols-2 lg:w-1/2 lg:self-end gap-2">
-            <Button
-              icon={<Undo2 className="size-4" />}
-              variant="secondary"
-              onClick={() => exitBlocker.proceed()}
-            >
+            <Button icon={Undo2} variant="secondary" onClick={() => exitBlocker.proceed()}>
               Leave
             </Button>
-            <Button
-              icon={<Play className="size-4" />}
-              variant="primary"
-              onClick={() => exitBlocker.reset()}
-            >
+            <Button icon={Play} variant="primary" onClick={() => exitBlocker.reset()}>
               Stay
             </Button>
           </div>

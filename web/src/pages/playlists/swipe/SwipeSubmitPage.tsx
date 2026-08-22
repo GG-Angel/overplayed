@@ -44,14 +44,14 @@ const SwipeSubmitPage = () => {
           <>
             {backupPlaylist && (
               <Button
-                icon={<ExternalLink className="size-4" />}
+                icon={ExternalLink}
                 variant="secondary"
                 onClick={() => openExternalUrl(backupPlaylist.external_urls.spotify)}
               >
                 Open Backup Playlist
               </Button>
             )}
-            <Button icon={<Home className="size-4" />} variant="primary" onClick={navigateHome}>
+            <Button icon={Home} variant="primary" onClick={navigateHome}>
               Return Home
             </Button>
           </>
@@ -74,14 +74,10 @@ const SwipeSubmitPage = () => {
         }
         actions={
           <>
-            <Button icon={<Home className="size-4" />} variant="secondary" onClick={navigateHome}>
+            <Button icon={Home} variant="secondary" onClick={navigateHome}>
               Return Home
             </Button>
-            <Button
-              icon={<RotateCcw className="size-4" />}
-              variant="primary"
-              onClick={controller.retry}
-            >
+            <Button icon={RotateCcw} variant="primary" onClick={controller.retry}>
               Try Again
             </Button>
           </>
@@ -99,14 +95,10 @@ const SwipeSubmitPage = () => {
         subtitle={<p>You haven't disliked any tracks...</p>}
         actions={
           <>
-            <Button icon={<Home className="size-4" />} variant="secondary" onClick={navigateHome}>
+            <Button icon={Home} variant="secondary" onClick={navigateHome}>
               Return Home
             </Button>
-            <Button
-              icon={<Play className="size-4" />}
-              variant="primary"
-              onClick={navigateToSwipePage}
-            >
+            <Button icon={Play} variant="primary" onClick={navigateToSwipePage}>
               Swipe Tracks
             </Button>
           </>

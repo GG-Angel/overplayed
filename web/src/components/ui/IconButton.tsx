@@ -9,7 +9,8 @@ const buttonVariants = cva(
     variants: {
       size: { xs: "p-2.5", sm: "p-4", md: "p-4.5" },
       variant: {
-        neutral: "text-muted border-faded hover:text-foreground hover:border-muted hover:bg-muted/10",
+        neutral:
+          "text-muted border-faded hover:text-foreground hover:border-muted hover:bg-muted/10",
         green: "text-primary border-primary/50 hover:border-primary hover:bg-primary/15",
         red: "text-destructive border-destructive/50 hover:border-destructive hover:bg-destructive/15",
         yellow: "text-amber-400 border-amber-400/50 hover:border-amber-400 hover:bg-amber-400/15",

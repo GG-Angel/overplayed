@@ -1,5 +1,6 @@
 import Card, { type CardProps } from "@/components/ui/Card";
 import Image from "@/components/ui/Image";
+import ExternalLink from "@/components/ui/ExternalLink";
 import { cn, extractImageUrl } from "@/lib/utils";
 import type { Track } from "@/types/spotify";
 import { cva, type VariantProps } from "class-variance-authority";
@@ -46,15 +47,9 @@ const TrackCard = ({ track, orientation, className, ...props }: TrackCardProps) 
         draggable={false}
       />
       <div className="text-left whitespace-nowrap truncate">
-        <a
-          href={track.external_urls.spotify}
-          className="font-medium hover:underline"
-          target="_blank"
-          rel="noopener noreferrer"
-          draggable={false}
-        >
+        <ExternalLink href={track.external_urls.spotify} className="font-medium" draggable={false}>
           {track.name}
-        </a>
+        </ExternalLink>
         <p className="text-muted text-sm truncate">{artistList}</p>
       </div>
     </Card>

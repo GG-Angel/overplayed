@@ -1,5 +1,6 @@
 import { useUserStats } from "@/api/queries";
 import LoadingState from "@/components/states/LoadingState";
+import Page from "@/components/layout/Page";
 import Card from "@/components/ui/Card";
 import Image from "@/components/ui/Image";
 import Metric from "@/components/ui/Metric";
@@ -15,7 +16,7 @@ const StatsPage = () => {
   }
 
   return (
-    <main className="flex flex-col gap-6 py-2 w-full max-w-4xl self-center">
+    <Page width="4xl" className="py-2">
       <h1 className="text-center">Your Statistics</h1>
       <Card tone="muted" className="flex flex-col xs:flex-row xs:items-center gap-3">
         <Image
@@ -43,7 +44,7 @@ const StatsPage = () => {
           />
         </div>
       </div>
-    </main>
+    </Page>
   );
 };
 
