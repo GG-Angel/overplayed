@@ -1,7 +1,7 @@
 import Metric, { MetricSkeleton } from "@/components/ui/Metric";
 import Button from "@/components/ui/Button";
 import SpotifyIcon from "@/assets/spotify.svg?react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Card from "@/components/ui/Card";
 import Divider from "@/components/ui/Divider";
 import SwipeButtons from "@/features/swipe/components/SwipeButtons";
@@ -47,8 +47,7 @@ const STEPS = [
 
 const CallToAction = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { user, isLoading, redirectToLogin } = useAuth();
+  const { user, isLoading, login } = useAuth();
   const { hasRequestedAccess } = useAuthContext();
 
   return (
@@ -98,7 +97,7 @@ const CallToAction = () => {
               className="w-full"
               size="lg"
               variant="primary"
-              onClick={() => redirectToLogin(location.pathname)}
+              onClick={login}
             >
               Log in with Spotify
             </Button>
@@ -228,9 +227,9 @@ const LandingPage = () => {
         padding="lg"
       >
         <SwipeCardStack
-          topCardRef={carousel.topCardRef}
-          tracks={carousel.visibleTracks}
-          onSwipeEnd={carousel.next}
+          topCardRef={carousel.currentCardRef}
+          tracks={carousel.displayedTracks}
+          onSwipeEnd={carousel.moveToNextTrack}
         />
         <SwipeButtons />
       </Card>

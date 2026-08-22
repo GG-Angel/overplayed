@@ -34,13 +34,13 @@ export function formatShortcutKey(key: string): string {
   return KEY_LABELS[key] ?? key.toUpperCase();
 }
 
-export function bindShortcuts<T extends string>(
-  shortcuts: Record<T, Shortcut>,
-  handlers: Record<T, () => void>
+export function bindShortcuts(
+  shortcuts: Record<string, Shortcut>,
+  handlers: Record<string, () => void>
 ): Record<string, () => void> {
   const actions: Record<string, () => void> = {};
 
-  for (const id of Object.keys(shortcuts) as T[]) {
+  for (const id of Object.keys(shortcuts)) {
     for (const key of shortcuts[id].keys) {
       actions[key] = handlers[id];
     }

@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 import { bindShortcuts, type Shortcut } from "@/lib/shortcuts";
 
-const useKeyboardShortcuts = <T extends string>(
-  shortcuts: Record<T, Shortcut>,
-  handlers: Record<T, () => void>,
+const useKeyboardShortcuts = (
+  shortcuts: Record<string, Shortcut>,
+  handlers: Record<string, () => void>,
   enabled = true
 ) => {
   useEffect(() => {

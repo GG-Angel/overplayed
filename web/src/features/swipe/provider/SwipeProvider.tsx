@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import useSwipes, { type Swipe } from "../hooks/useSwipes";
-import { SwipeContext, type SwipeContextValues } from "./SwipeContext";
+import { SwipeContext } from "./SwipeContext";
 import { Outlet, useParams } from "react-router-dom";
 import ErrorState from "@/components/states/ErrorState";
 import LoadingState from "@/components/states/LoadingState";
@@ -71,20 +71,19 @@ const SwipeProviderInner = ({ playlist, tracks, hasLoadedAllTracks }: SwipeProvi
   const { items: shuffledTracks, shuffle } = useShuffle<Track>(orderedTracks, currentIndex);
 
   const contextValue = useMemo(
-    () =>
-      ({
-        session,
-        options,
-        setOptions,
-        hasSubmitted,
-        setHasSubmitted,
-        shuffle,
-        currentIndex,
-        hasLoadedAllTracks,
-        playlist,
-        tracks: shuffledTracks,
-        tracksLoaded: tracks.length,
-      } satisfies SwipeContextValues),
+    () => ({
+      session,
+      options,
+      setOptions,
+      hasSubmitted,
+      setHasSubmitted,
+      shuffle,
+      currentIndex,
+      hasLoadedAllTracks,
+      playlist,
+      tracks: shuffledTracks,
+      tracksLoaded: tracks.length,
+    }),
     [
       session,
       options,
