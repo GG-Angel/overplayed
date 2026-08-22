@@ -30,7 +30,7 @@ let scriptPromise: Promise<void> | null = null;
 
 const loadTurnstile = (): Promise<void> => {
   if (window.turnstile) return Promise.resolve();
-  if (scriptPromise) return scriptPromise;
+  if (scriptPromise !== null) return scriptPromise;
 
   scriptPromise = new Promise<void>((resolve, reject) => {
     const script = document.createElement("script");

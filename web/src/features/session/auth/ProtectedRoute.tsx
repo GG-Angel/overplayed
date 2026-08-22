@@ -1,19 +1,30 @@
 import { Outlet } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import ErrorState from "@/components/states/ErrorState";
 import LoadingState from "@/components/states/LoadingState";
 import useAuth from "./useAuth";
+import { ProtectedContext } from "./ProtectedContext";
 
 export const ProtectedRoute = () => {
-  const { user, isUnauthorized, login } = useAuth();
+  const { user, isError, isLoading, isUnauthorized, login } = useAuth();
+
+  const contextValue = useMemo(() => {
+    if (!user) return null;
+    return { user };
+  }, [user]);
 
   useEffect(() => {
     if (isUnauthorized) login();
   }, [isUnauthorized, login]);
 
-  if (user.isError) return <ErrorState message="Login required" />;
-  if (!user.isSuccess) return <LoadingState message="Verifying user..." />;
+  if (isError) return <ErrorState message="Login required" />;
+  if (isLoading) return <LoadingState message="Verifying user..." />;
   if (isUnauthorized) return <LoadingState message="Redirecting to login..." />;
+  if (!user) return <LoadingState message="Loading user..." />;
 
-  return <Outlet />;
+  return (
+    <ProtectedContext.Provider value={contextValue}>
+      <Outlet />
+    </ProtectedContext.Provider>
+  );
 };

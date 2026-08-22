@@ -8,7 +8,7 @@ export type AccessContextValues = {
 
 export const AuthContext = createContext<AccessContextValues | null>(null);
 
-export const useAuthContext = (): AccessContextValues => {
+export const useAuthContext = () => {
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error(`${useAuthContext.name} must be used inside an ${AuthProvider.name}`);

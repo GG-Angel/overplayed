@@ -2,7 +2,7 @@ import Button from "@/components/ui/Button";
 import Divider from "@/components/ui/Divider";
 import Input from "@/components/ui/Input";
 import Modal, { type ModalProps } from "@/components/ui/Modal";
-import Turnstile, { type TurnstileHandle } from "@/components/ui/Turnstile";
+import Turnstile, { type TurnstileHandle } from "@/features/session/auth/Turnstile";
 import { formatCount, formatDateTime } from "@/lib/utils";
 import {
   Check,
