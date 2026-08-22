@@ -9,7 +9,7 @@ import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
 import { Play, Undo2 } from "lucide-react";
 import { loadFromStorage, storageKeys } from "@/lib/storage";
-import useShuffle from "../hooks/useShuffle";
+import useShuffleTracks from "../hooks/useShuffleTracks";
 import type { SwipesForm } from "@/types/swipes";
 import type { Playlist, Track } from "@/types/spotify";
 import { usePlaylist, usePlaylistTracks } from "@/api/queries";
@@ -68,7 +68,7 @@ const SwipeProviderInner = ({ playlist, tracks, hasLoadedAllTracks }: SwipeProvi
     return [...persistedTracks, ...tracks.filter((track) => !persistedTrackIds.has(track.id))];
   }, [persistedSwipes, tracks]);
 
-  const { items: shuffledTracks, shuffle } = useShuffle<Track>(orderedTracks, currentIndex);
+  const { tracks: shuffledTracks, shuffle } = useShuffleTracks(orderedTracks, currentIndex);
 
   const contextValue = useMemo(
     () => ({
