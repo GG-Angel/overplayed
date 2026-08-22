@@ -26,6 +26,7 @@ import { usePlaylists } from "@/api/queries";
 import PlaylistCard from "@/components/playlist/PlaylistCard";
 import PlaylistCover from "@/components/playlist/PlaylistCover";
 import PlaylistRow from "@/components/playlist/PlaylistRow";
+import type { Playlist } from "@/types/spotify";
 
 type PlaylistSortKey = "alphabetical" | "tracks";
 type PlaylistSortOrder = "ascending" | "descending";
@@ -57,6 +58,36 @@ const LAYOUT_CONFIG: Record<
   },
 };
 
+type PlaylistResultsProps = {
+  isLoading: boolean;
+  playlists: Playlist[];
+  layout: PlaylistLayout;
+  onSelect: (playlistId: string) => void;
+};
+
+const PlaylistResults = ({ isLoading, playlists, layout, onSelect }: PlaylistResultsProps) => {
+  if (isLoading) {
+    return <LoadingState message="Loading playlists..." />;
+  }
+
+  if (playlists.length === 0) {
+    return <MessageState kaomoji={KAOMOJIS.uncertain} title="No playlists found" />;
+  }
+
+  const { component: PlaylistItem, containerClassName } = LAYOUT_CONFIG[layout];
+
+  return (
+    <section className="md:h-full md:min-h-128 md:overflow-y-scroll md:scrollbar-none [&::-webkit-scrollbar]:hidden snap-y pb-32">
+      <div className={containerClassName}>
+        {playlists.map((p) => (
+          <PlaylistItem key={p.id} playlist={p} onClick={onSelect} />
+        ))}
+      </div>
+      <div className="fixed bottom-0 left-0 w-full h-32 pointer-events-none bg-linear-to-t from-background to-transparent hidden md:block z-10" />
+    </section>
+  );
+};
+
 const PlaylistSelectionPage = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [sortKey, setSortKey] = useState<PlaylistSortKey>("tracks");
@@ -66,7 +97,6 @@ const PlaylistSelectionPage = () => {
   const navigate = useNavigate();
 
   const SortIcon = sortOrder === "ascending" ? ArrowUp : ArrowDown;
-  const Playlist = LAYOUT_CONFIG[layout].component;
 
   const searchedPlaylists = useMemo(() => {
     if (!playlists) return [];
@@ -154,30 +184,12 @@ const PlaylistSelectionPage = () => {
           </DropdownMenu>
         </Dropdown>
       </div>
-      {(() => {
-        if (isLoading) {
-          return <LoadingState message="Loading playlists..." />;
-        }
-
-        if (sortedPlaylists.length <= 0) {
-          return <MessageState kaomoji={KAOMOJIS.uncertain} title="No playlists found" />;
-        }
-
-        return (
-          <section className="md:h-full md:min-h-128 md:overflow-y-scroll md:[scrollbar-width:none] [&::-webkit-scrollbar]:hidden snap-y pb-32">
-            <div className={LAYOUT_CONFIG[layout].containerClassName}>
-              {sortedPlaylists.map((p) => (
-                <Playlist
-                  key={p.id}
-                  playlist={p}
-                  onClick={(playlistId) => navigate(`${playlistId}/swipe`)}
-                />
-              ))}
-            </div>
-            <div className="fixed bottom-0 left-0 w-full h-32 pointer-events-none bg-linear-to-t from-background to-transparent hidden md:block z-10" />
-          </section>
-        );
-      })()}
+      <PlaylistResults
+        isLoading={isLoading}
+        playlists={sortedPlaylists}
+        layout={layout}
+        onSelect={(playlistId) => navigate(`${playlistId}/swipe`)}
+      />
     </Page>
   );
 };

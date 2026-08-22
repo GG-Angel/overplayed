@@ -1,9 +1,8 @@
 import TrackCard from "@/components/playlist/TrackCard";
 import MessageState from "@/components/states/MessageState";
 import Button from "@/components/ui/Button";
-import Card from "@/components/ui/Card";
-import Checkbox from "@/components/ui/Checkbox";
 import Divider from "@/components/ui/Divider";
+import ToggleCard from "@/components/ui/ToggleCard";
 import Metric from "@/components/ui/Metric";
 import Page from "@/components/layout/Page";
 import { KAOMOJIS, LIKED_SONGS_PLAYLIST_ID } from "@/lib/constants";
@@ -40,16 +39,10 @@ const ReviewSwipesPage = () => {
         kaomoji={KAOMOJIS.uncertain}
         title="No Tracks Swiped"
         subtitle={<p>You haven't swiped on any tracks...</p>}
-        actions={
-          <>
-            <Button icon={Home} variant="secondary" onClick={navigateHome}>
-              Return Home
-            </Button>
-            <Button icon={Play} variant="primary" onClick={navigateToSwipe}>
-              Swipe Tracks
-            </Button>
-          </>
-        }
+        actions={[
+          { label: "Return Home", icon: Home, variant: "secondary", onClick: navigateHome },
+          { label: "Swipe Tracks", icon: Play, variant: "primary", onClick: navigateToSwipe },
+        ]}
       />
     );
   }
@@ -66,16 +59,10 @@ const ReviewSwipesPage = () => {
             <p className="text-sm text-muted">(your playlist must be really good)</p>
           </>
         }
-        actions={
-          <>
-            <Button icon={Undo2} variant="secondary" onClick={navigateToSwipe}>
-              Keep Swiping
-            </Button>
-            <Button icon={Home} variant="primary" onClick={navigateHome}>
-              Return Home
-            </Button>
-          </>
-        }
+        actions={[
+          { label: "Keep Swiping", icon: Undo2, variant: "secondary", onClick: navigateToSwipe },
+          { label: "Return Home", icon: Home, variant: "primary", onClick: navigateHome },
+        ]}
       />
     );
   }
@@ -123,39 +110,23 @@ const ReviewSwipesPage = () => {
       <Divider />
       <div className="flex flex-col gap-3">
         <h3>Options</h3>
-        <Card
-          className="flex justify-between items-center gap-4 pr-6 py-3 cursor-pointer select-none"
-          onClick={toggleBackup}
-        >
-          <div>
-            <p>Back up removed tracks?</p>
-            {options.backup_enabled ? (
-              <p className="text-sm text-muted">Saves removed tracks to a new playlist.</p>
-            ) : (
-              <p className="text-sm text-destructive">Removed tracks will be lost permanently.</p>
-            )}
-          </div>
-          <Checkbox enabled={options.backup_enabled} onEnabledChange={undefined} />
-        </Card>
+        <ToggleCard
+          title="Back up removed tracks?"
+          enabled={options.backup_enabled}
+          onToggle={toggleBackup}
+          whenEnabled="Saves removed tracks to a new playlist."
+          whenDisabled="Removed tracks will be lost permanently."
+          warnWhen="disabled"
+        />
         {playlist.id !== LIKED_SONGS_PLAYLIST_ID && (
-          <Card
-            className="flex justify-between items-center gap-4 pr-6 py-3 cursor-pointer select-none"
-            onClick={toggleRemoveFromLikes}
-          >
-            <div>
-              <p>Remove from liked songs?</p>
-              {options.remove_from_likes ? (
-                <p className="text-sm text-destructive">
-                  Tracks will also be removed from liked songs.
-                </p>
-              ) : (
-                <p className="text-sm text-muted">
-                  Tracks will only be removed from the current playlist.
-                </p>
-              )}
-            </div>
-            <Checkbox enabled={options.remove_from_likes} onEnabledChange={undefined} />
-          </Card>
+          <ToggleCard
+            title="Remove from liked songs?"
+            enabled={options.remove_from_likes}
+            onToggle={toggleRemoveFromLikes}
+            whenEnabled="Tracks will also be removed from liked songs."
+            whenDisabled="Tracks will only be removed from the current playlist."
+            warnWhen="enabled"
+          />
         )}
       </div>
       <div className="flex flex-col *:flex-1 sm:*:flex-none xs:flex-row-reverse sm:justify-start gap-3">

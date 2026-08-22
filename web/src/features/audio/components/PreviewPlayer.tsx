@@ -40,6 +40,11 @@ const AudioPlayer = ({
   const waveformRef = useRef<WaveformHandler>(null);
   const showWaveform = isReady && !isLoading && !isError && preview?.url;
 
+  let skeletonMessage = "play to listen!";
+  if (isLoading) skeletonMessage = "loading...";
+  else if (isError) skeletonMessage = "failed to load preview :(";
+  else if (!preview?.url) skeletonMessage = "no preview :(";
+
   // persist volume settings
   useDebouncedStorage(localStorage, storageKeys.volume, volume);
 
@@ -98,17 +103,7 @@ const AudioPlayer = ({
         {!showWaveform && (
           <WaveformSkeleton
             className="absolute inset-0 z-10"
-            message={(() => {
-              if (isLoading) {
-                return "loading...";
-              } else if (isError) {
-                return "failed to load preview :(";
-              } else if (!preview?.url) {
-                return "no preview :(";
-              } else {
-                return "play to listen!";
-              }
-            })()}
+            message={skeletonMessage}
             pulse={isLoading}
           />
         )}

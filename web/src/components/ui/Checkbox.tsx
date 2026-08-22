@@ -2,7 +2,7 @@ import { Square, SquareCheckBig } from "lucide-react";
 
 type CheckboxProps = {
   enabled: boolean;
-  onEnabledChange: (() => void) | undefined;
+  onEnabledChange?: () => void;
 };
 
 const Checkbox = ({ enabled, onEnabledChange }: CheckboxProps) => {

@@ -38,7 +38,7 @@ const iconVariants = cva("shrink-0", {
   },
 });
 
-type ButtonProps = ComponentProps<"button"> &
+export type ButtonProps = ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
     icon?: IconComponent;
   };

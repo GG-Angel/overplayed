@@ -1,5 +1,4 @@
 import MessageState from "@/components/states/MessageState";
-import Button from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
 import { KAOMOJIS } from "@/lib/constants";
 import useSubmitSwipes from "@/features/swipe/hooks/useSubmitSwipes";
@@ -40,22 +39,15 @@ const SwipeSubmitPage = () => {
             <p className="text-sm text-muted">(now you get to skip less)</p>
           </>
         }
-        actions={
-          <>
-            {backupPlaylist && (
-              <Button
-                icon={ExternalLink}
-                variant="secondary"
-                onClick={() => openExternalUrl(backupPlaylist.external_urls.spotify)}
-              >
-                Open Backup Playlist
-              </Button>
-            )}
-            <Button icon={Home} variant="primary" onClick={navigateHome}>
-              Return Home
-            </Button>
-          </>
-        }
+        actions={[
+          backupPlaylist && {
+            label: "Open Backup Playlist",
+            icon: ExternalLink,
+            variant: "secondary",
+            onClick: () => openExternalUrl(backupPlaylist.external_urls.spotify),
+          },
+          { label: "Return Home", icon: Home, variant: "primary", onClick: navigateHome },
+        ]}
       />
     );
   }
@@ -72,16 +64,10 @@ const SwipeSubmitPage = () => {
             <p className="text-sm text-muted">We recommend trying again.</p>
           </>
         }
-        actions={
-          <>
-            <Button icon={Home} variant="secondary" onClick={navigateHome}>
-              Return Home
-            </Button>
-            <Button icon={RotateCcw} variant="primary" onClick={controller.retry}>
-              Try Again
-            </Button>
-          </>
-        }
+        actions={[
+          { label: "Return Home", icon: Home, variant: "secondary", onClick: navigateHome },
+          { label: "Try Again", icon: RotateCcw, variant: "primary", onClick: controller.retry },
+        ]}
       />
     );
   }
@@ -93,16 +79,10 @@ const SwipeSubmitPage = () => {
         title="Invalid Submission"
         tone="neutral"
         subtitle={<p>You haven't disliked any tracks...</p>}
-        actions={
-          <>
-            <Button icon={Home} variant="secondary" onClick={navigateHome}>
-              Return Home
-            </Button>
-            <Button icon={Play} variant="primary" onClick={navigateToSwipePage}>
-              Swipe Tracks
-            </Button>
-          </>
-        }
+        actions={[
+          { label: "Return Home", icon: Home, variant: "secondary", onClick: navigateHome },
+          { label: "Swipe Tracks", icon: Play, variant: "primary", onClick: navigateToSwipePage },
+        ]}
       />
     );
   }

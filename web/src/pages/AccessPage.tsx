@@ -3,23 +3,13 @@ import Divider from "@/components/ui/Divider";
 import Input from "@/components/ui/Input";
 import Modal, { type ModalProps } from "@/components/ui/Modal";
 import Turnstile, { type TurnstileHandle } from "@/features/session/auth/Turnstile";
-import { formatCount, formatDateTime } from "@/lib/utils";
-import {
-  Check,
-  CircleQuestionMark,
-  Clock,
-  Info,
-  Key,
-  Mail,
-  Plus,
-  Send,
-  ThumbsUp,
-  User,
-} from "lucide-react";
+import { formatDateTime } from "@/lib/utils";
+import { Check, CircleQuestionMark, Clock, Info, Key, Mail, Send, ThumbsUp } from "lucide-react";
 import { useRef, useState, type SubmitEventHandler } from "react";
 import { loadFromStorage, saveToStorage, storageKeys } from "@/lib/storage";
 import Card from "@/components/ui/Card";
-import Skeleton from "@/components/ui/Skeleton";
+import StatusCard from "@/components/ui/StatusCard";
+import AvailabilityMeter from "@/features/session/components/AvailabilityMeter";
 import ExternalLink from "@/components/ui/ExternalLink";
 import Page from "@/components/layout/Page";
 import { Spinner } from "@/components/ui/Spinner";
@@ -114,10 +104,7 @@ const AccessStatusCard = ({ data }: { data: AccessRequestResult }) => {
 
   if (status === "confirmation_sent") {
     return (
-      <Card tone="muted" padding="lg" radius="lg" className="flex flex-col gap-2">
-        <h2 className="flex items-center gap-2">
-          <Mail className="shrink-0" /> Check Your Inbox
-        </h2>
+      <StatusCard tone="muted" icon={Mail} title="Check Your Inbox">
         <div className="flex flex-col gap-0.5">
           <p className="font-medium">
             We've sent a verification email to <span className="text-accent">{email}</span>
@@ -125,38 +112,32 @@ const AccessStatusCard = ({ data }: { data: AccessRequestResult }) => {
           <p>Follow the link in the email to confirm your request.</p>
         </div>
         <p className="text-muted text-sm">Don't see it? Check your spam folder.</p>
-      </Card>
+      </StatusCard>
     );
   }
 
   if (status === "in_queue") {
     return (
-      <Card tone="muted" padding="lg" radius="lg" className="flex flex-col gap-2">
-        <h2 className="flex items-center gap-2">
-          <Clock className="shrink-0" /> Waiting In Queue
-        </h2>
+      <StatusCard tone="muted" icon={Clock} title="Waiting In Queue">
         <div className="flex flex-col gap-0.5">
           <p className="font-medium">
             {email} is <span className="text-success">#{data.position_in_queue}</span> in line.
           </p>
           <p className="text-muted">Access opens at {formatDateTime(data.estimated_start_time)}.</p>
         </div>
-      </Card>
+      </StatusCard>
     );
   }
 
   return (
-    <Card tone="positive" padding="lg" radius="lg" className="flex flex-col gap-2">
-      <h2 className="flex items-center gap-2">
-        <Check className="shrink-0" /> Account Activated
-      </h2>
+    <StatusCard tone="positive" icon={Check} title="Account Activated">
       <div className="flex flex-col gap-0.5">
         <p className="font-medium">{email} is in!</p>
         <p className="brightness-80">
           Access is available until {formatDateTime(data.estimated_end_time)}.
         </p>
       </div>
-    </Card>
+    </StatusCard>
   );
 };
 
@@ -265,48 +246,7 @@ const RequestAccessPage = () => {
 
       <div className="flex flex-col gap-3 text-center">
         <h2>Availability</h2>
-        {queueOverview.data ? (
-          (() => {
-            const total = queueOverview.data.num_active + queueOverview.data.num_queued;
-            const active = Math.min(total, queueOverview.data.user_limit);
-            const empty = Math.max(0, queueOverview.data.user_limit - active);
-            const waiting = Math.max(0, total - queueOverview.data.user_limit);
-            return (
-              <>
-                <div className="flex justify-center items-center gap-0.5 flex-wrap">
-                  {Array.from({ length: queueOverview.data.user_limit }).map((_, i) => (
-                    <User
-                      key={i}
-                      className={`size-10 ${i < active ? "text-muted" : "text-success"}`}
-                    />
-                  ))}
-                  {waiting > 0 && <Plus className="text-destructive" />}
-                </div>
-                {empty > 0 ? (
-                  <p className="text-sm">
-                    There {empty == 1 ? `is ${empty} slot` : `are ${empty} slots`} available — claim
-                    your spot!
-                  </p>
-                ) : (
-                  <div className="flex flex-col gap-1.5">
-                    <p className="text-sm">
-                      No slots are available. {formatCount(waiting)}{" "}
-                      {waiting == 1 ? "user is" : "users are"} in line.
-                    </p>
-                    {queueOverview.data.next_available_time && (
-                      <p className="text-xs text-muted">
-                        Earliest available time:{" "}
-                        {formatDateTime(queueOverview.data.next_available_time)}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </>
-            );
-          })()
-        ) : (
-          <Skeleton radius="lg" className="w-full max-w-sm self-center h-18" />
-        )}
+        <AvailabilityMeter status={queueOverview.data} />
       </div>
 
       <Divider />
