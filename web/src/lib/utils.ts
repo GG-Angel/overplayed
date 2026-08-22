@@ -65,7 +65,7 @@ export function shuffleArray<T>(arr: T[]): T[] {
   return result;
 }
 
-export function wrapSlice<T>(arr: T[], start: number, end: number): T[] {
+export function sliceArrayWrapped<T>(arr: T[], start: number, end: number): T[] {
   const len = arr.length;
   const actualStart = start % len;
 

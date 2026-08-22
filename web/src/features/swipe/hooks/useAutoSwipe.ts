@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { SwipeCardController } from "../components/SwipeCard";
-import { wrapSlice } from "@/lib/utils";
+import { sliceArrayWrapped } from "@/lib/utils";
 import type { Track } from "@/types/spotify";
 
 const CARD_STACK_HEIGHT = 3;
@@ -11,7 +11,7 @@ const useAutoSwipe = (tracks: Track[]) => {
   const currentCardRef = useRef<SwipeCardController | null>(null);
   const [index, setIndex] = useState<number>(0);
 
-  const displayedTracks = wrapSlice(tracks, index, index + CARD_STACK_HEIGHT);
+  const displayedTracks = sliceArrayWrapped(tracks, index, index + CARD_STACK_HEIGHT);
 
   // auto-cycle through cards
   useEffect(() => {
