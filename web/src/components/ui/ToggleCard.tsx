@@ -1,8 +1,8 @@
 import { cn } from "@/lib/utils";
-import Card, { type CardDivProps } from "./Card";
+import Card, { type CardButtonProps } from "./Card";
 import Checkbox from "./Checkbox";
 
-export type ToggleCardProps = Omit<CardDivProps, "children"> & {
+export type ToggleCardProps = Omit<CardButtonProps, "children" | "as" | "onClick"> & {
   title: string;
   enabled: boolean;
   onToggle: () => void;
@@ -25,6 +25,9 @@ const ToggleCard = ({
 
   return (
     <Card
+      as="button"
+      type="button"
+      aria-pressed={enabled}
       onClick={onToggle}
       className={cn(
         "w-full flex justify-between items-center gap-4 pr-6 py-3 text-left cursor-pointer select-none",
@@ -32,13 +35,12 @@ const ToggleCard = ({
       )}
       {...props}
     >
-      <div>
-        <p>{title}</p>
-        <p className={cn("text-sm", isWarning ? "text-destructive" : "text-muted")}>
+      <span>
+        <span className="block">{title}</span>
+        <span className={cn("block text-sm", isWarning ? "text-destructive" : "text-muted")}>
           {enabled ? whenEnabled : whenDisabled}
-        </p>
-      </div>
-      
+        </span>
+      </span>
       <Checkbox enabled={enabled} />
     </Card>
   );
