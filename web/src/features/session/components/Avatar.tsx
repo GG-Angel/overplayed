@@ -9,6 +9,7 @@ type AvatarProps = ComponentProps<"button"> & {
 
 const Avatar = ({ user, className, ...props }: AvatarProps) => {
   const profilePictureUrl = extractImageUrl(user.images, "sm");
+
   return (
     <button
       className={cn(

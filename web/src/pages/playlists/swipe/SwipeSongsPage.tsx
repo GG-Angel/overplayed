@@ -12,7 +12,7 @@ import { useCallback, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useDebouncedStorage from "@/hooks/useDebouncedStorage";
 import { storageKeys } from "@/lib/storage";
-import usePreloadSwipePreviews from "@/features/swipe/hooks/usePreloadSwipePreviews";
+import usePreloadTrackAudio from "@/features/audio/hooks/usePreloadTrackAudio";
 import PillButton from "@/components/ui/PillButton";
 import { Spinner } from "@/components/ui/Spinner";
 import { useTrackPreview } from "@/api/queries";
@@ -22,7 +22,7 @@ const MAX_CARD_STACK_HEIGHT = 3; // maximum number of cards to display in the st
 const SwipeSongsPage = () => {
   const { session, playlist, tracks, shuffle, currentIndex, hasLoadedAllTracks, tracksLoaded } =
     useSwipeContext();
-  usePreloadSwipePreviews(tracks, currentIndex);
+  usePreloadTrackAudio(tracks, currentIndex);
   const [isSwiping, setIsSwiping] = useState(false);
   const currentSwipeCardRef = useRef<SwipeCardController | null>(null);
   const [shuffleCount, setShuffleCount] = useState(0);

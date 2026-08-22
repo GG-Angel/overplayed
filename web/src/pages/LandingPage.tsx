@@ -6,7 +6,7 @@ import Card from "@/components/ui/Card";
 import Divider from "@/components/ui/Divider";
 import SwipeButtons from "@/features/swipe/components/SwipeButtons";
 import SwipeCardStack from "@/features/swipe/components/SwipeCardStack";
-import useSwipeCarousel from "@/features/swipe/hooks/useSwipeCarousel";
+import useAutoSwipe from "@/features/swipe/hooks/useAutoSwipe";
 import carouselTracks from "@/assets/carousel-tracks.json";
 import z from "zod";
 import { Key, Scissors, Undo } from "lucide-react";
@@ -26,7 +26,7 @@ import { trackSchema } from "@/types/spotify";
 import { LIKED_SONGS_PLAYLIST_ID } from "@/lib/constants";
 import { useCounters, useLeaderboard, usePlaylists } from "@/api/queries";
 import useAuth from "@/features/session/auth/useAuth";
-import { useAccessContext } from "@/features/session/provider/AccessContext";
+import { useAuthContext } from "@/features/session/auth/AuthContext";
 
 const CAROUSEL_TRACKS = z.array(trackSchema).parse(carouselTracks);
 const LEADERBOARD_ROWS = 5;
@@ -49,7 +49,7 @@ const CallToAction = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, isLoading, redirectToLogin } = useAuth();
-  const { hasRequestedAccess } = useAccessContext();
+  const { hasRequestedAccess } = useAuthContext();
 
   return (
     <div className="flex flex-col-reverse items-center justify-center xs:flex-row gap-3 w-full max-w-xl self-center">
@@ -190,7 +190,7 @@ const Leaderboard = () => {
 };
 
 const LandingPage = () => {
-  const carousel = useSwipeCarousel(useMemo(() => shuffleArray(CAROUSEL_TRACKS), []));
+  const carousel = useAutoSwipe(useMemo(() => shuffleArray(CAROUSEL_TRACKS), []));
   const { data: metrics } = useCounters();
   const { data: playlists } = usePlaylists();
 

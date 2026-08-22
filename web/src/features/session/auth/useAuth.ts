@@ -1,30 +1,26 @@
-import { env } from "@/lib/env";
-import { useAccessContext } from "../provider/AccessContext";
-import { buildUrl } from "@/api/api-client";
+import { useAuthContext } from "./AuthContext";
 import { useCurrentUser } from "@/api/queries";
+import { useCallback } from "react";
+import { useLogout } from "@/api/mutations";
+import { LOGIN_URL } from "@/lib/constants";
 
 const useAuth = () => {
-  const { data: user, isLoading, isError } = useCurrentUser();
-  const { setHasRequestedAccess } = useAccessContext();
+  const { data: user, isLoading, isError, isSuccess } = useCurrentUser();
+  const { setHasRequestedAccess } = useAuthContext();
 
-  const isUnauthorized = user === null;
-
-  const redirectToLogin = (currentPath: string) => {
+  const login = useCallback(() => {
     window.addEventListener("pagehide", () => {
       setHasRequestedAccess(true);
     });
-    window.location.href = buildUrl(`${env.API_BASE_URL}/auth/login`, {
-      redirect_to: currentPath,
-    });
-  };
 
-  return {
-    user,
-    isLoading,
-    isError,
-    isUnauthorized,
-    redirectToLogin,
-  };
+    window.location.href = LOGIN_URL;
+  }, [setHasRequestedAccess]);
+
+  const { mutate: logout } = useLogout();
+
+  const isUnauthorized = isSuccess && user === null;
+
+  return { user, isLoading, isError, isUnauthorized, login, logout };
 };
 
 export default useAuth;

@@ -49,15 +49,15 @@ class AudioPreloader {
   }
 }
 
-const useAudioPreloader = (urls: string[]) => {
+const usePreloadAudio = (sourceUrls: string[]) => {
   const [preloader] = useState(() => new AudioPreloader());
 
   useEffect(() => {
-    preloader.setWindow(urls);
+    preloader.setWindow(sourceUrls);
     return () => preloader.destroy();
-  }, [preloader, urls]);
+  }, [preloader, sourceUrls]);
 
   return { get: useCallback((url: string) => preloader.get(url), [preloader]) };
 };
 
-export default useAudioPreloader;
+export default usePreloadAudio;

@@ -37,7 +37,7 @@ const router = createBrowserRouter(
         <Route
           index
           lazy={async () => ({
-            Component: (await import("../pages/playlists/PlaylistSelectionPage")).default,
+            Component: (await import("../pages/PlaylistSelectionPage")).default,
           })}
         />
         <Route path=":playlistId">

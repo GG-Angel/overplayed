@@ -147,5 +147,12 @@ export const useTrackPreview = (isrc: string | undefined) => {
 export const useTrackPreviews = (isrcs: (string | undefined)[]) => {
   return useQueries({
     queries: isrcs.map((isrc) => trackPreviewQueryOptions(isrc)),
+    combine: (results) => ({
+      urls: results
+        .filter((p) => p.isSuccess)
+        .map((p) => p.data.url)
+        .filter((url) => url != null),
+      isLoading: results.some((p) => p.isLoading),
+    }),
   });
 };

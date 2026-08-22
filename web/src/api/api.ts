@@ -19,9 +19,17 @@ import {
 import z, { ZodType } from "zod";
 import { queueApi, serverApi } from "./api-client";
 import { countersSchema, userStatsSchema } from "@/types/stats";
+import { isAxiosError } from "axios";
 
 export const getCurrentUser = async () => {
-  return currentUserSchema.parse(await serverApi.get("/users/me"));
+  try {
+    return currentUserSchema.parse(await serverApi.get("/users/me"));
+  } catch (error) {
+    if (isAxiosError(error) && error.response?.status === 401) {
+      return null;
+    }
+    throw error;
+  }
 };
 
 export const getPlaylist = async (playlistId: string) => {

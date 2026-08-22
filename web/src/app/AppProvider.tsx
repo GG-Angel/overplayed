@@ -1,7 +1,7 @@
 /// <reference types="vite-plugin-svgr/client" />
 
 import { QUERY_CONFIG } from "@/api/queries";
-import AccessProvider from "@/features/session/provider/AccessProvider";
+import AuthProvider from "@/features/session/auth/AuthProvider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useState, type ReactNode } from "react";
@@ -16,7 +16,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
   return (
     <QueryClientProvider client={queryClient}>
       {import.meta.env.DEV && <ReactQueryDevtools />}
-      <AccessProvider>{children}</AccessProvider>
+      <AuthProvider>{children}</AuthProvider>
     </QueryClientProvider>
   );
 };

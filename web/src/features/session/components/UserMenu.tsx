@@ -6,23 +6,21 @@ import { Spinner } from "@/components/ui/Spinner";
 import Dropdown from "@/components/ui/dropdown/Dropdown";
 import DropdownMenu from "@/components/ui/dropdown/DropdownMenu";
 import DropdownMenuItem from "@/components/ui/dropdown/DropdownMenuItem";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import DropdownMenuDivider from "@/components/ui/dropdown/DropdownMenuDivider";
 import DropdownMenuButton from "@/components/ui/dropdown/DropdownMenuButton";
 import { openExternalUrl } from "@/lib/utils";
 import { ChartLine, ExternalLink, LogOut, User } from "lucide-react";
-import { useLogout } from "@/api/mutations";
+import { useCallback } from "react";
 
 const UserMenu = () => {
-  const { user, isLoading, redirectToLogin } = useAuth();
-  const logout = useLogout();
+  const { user, isLoading, login, logout } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(() => {
     navigate("/");
-    await logout.mutateAsync();
-  };
+    logout();
+  }, [logout, navigate]);
 
   if (isLoading) {
     return (
@@ -34,7 +32,7 @@ const UserMenu = () => {
 
   if (!user) {
     return (
-      <Button variant="secondary" onClick={() => redirectToLogin(location.pathname)}>
+      <Button variant="secondary" onClick={login}>
         Log in
       </Button>
     );

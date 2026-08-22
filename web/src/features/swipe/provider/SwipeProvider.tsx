@@ -35,7 +35,7 @@ const SwipeProvider = () => {
   if (playlist.isError) return <ErrorState message="Failed to Load Playlist" />;
   if (tracks.isError) return <ErrorState message="Failed to Load Tracks" />;
 
-  if (!playlist.isSuccess) return <LoadingState message="Loading Playlist..." />;
+  if (!playlist.isSuccess) return <LoadingState message="Loading playlist..." />;
   if (!tracks.isSuccess) return <LoadingState message="Loading tracks..." />;
 
   if (tracks.data.length === 0) return <ErrorState message="This Playlist is Empty" />;

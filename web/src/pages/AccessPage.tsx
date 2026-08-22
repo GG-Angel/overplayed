@@ -28,7 +28,7 @@ import {
 } from "@/types/queue";
 import { useAccessStatus, useQueueStatus } from "@/api/queries";
 import { useRequestAccess } from "@/api/mutations";
-import { useAccessContext } from "@/features/session/provider/AccessContext";
+import { useAuthContext } from "@/features/session/auth/AuthContext";
 
 const ErrorNotice = ({ message }: { message: string }) => {
   return (
@@ -165,7 +165,7 @@ const AccessStatusCard = ({ data }: { data: AccessRequestResult }) => {
 };
 
 const RequestAccessPage = () => {
-  const { setHasRequestedAccess } = useAccessContext();
+  const { setHasRequestedAccess } = useAuthContext();
   const queueOverview = useQueueStatus();
 
   const [searchParams] = useSearchParams();
