@@ -106,7 +106,7 @@ const SwipeCard = ({
       onDragEnd={handleDragEnd}
       className={cn("relative origin-bottom transition-shadow", className)}
     >
-      <TrackCard track={track} />
+      <TrackCard track={track} className="select-none" />
       <SwipeCardDecisionOverlay
         icon={Heart}
         opacity={likeOpacity}

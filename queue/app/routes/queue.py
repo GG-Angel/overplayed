@@ -74,7 +74,7 @@ async def request_access(
         return _status_response(form.email, user_status)
 
     if await emailer.has_pending_token(form.email):
-        response.status_code = status.HTTP_409_CONFLICT
+        response.status_code = status.HTTP_202_ACCEPTED
         return AccessRequestResponse(status="confirmation_pending", email=form.email)
 
     background_tasks.add_task(emailer.register_user, form.email)

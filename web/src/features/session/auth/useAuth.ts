@@ -16,11 +16,11 @@ const useAuth = () => {
     window.location.href = LOGIN_URL;
   }, [setHasRequestedAccess]);
 
-  const { mutate: logout } = useLogout();
+  const { mutate: logout, isPending: isLoggingOut } = useLogout();
 
   const isUnauthorized = isSuccess && user === null;
 
-  return { user, isLoading, isError, isUnauthorized, login, logout };
+  return { user, isLoading, isError, isUnauthorized, login, logout, isLoggingOut };
 };
 
 export default useAuth;

@@ -102,9 +102,13 @@ const authErrorNotices: Record<string, AuthErrorNotice | undefined> = {
 const AccessStatusCard = ({ data }: { data: AccessRequestResult }) => {
   const { status, email } = data;
 
-  if (status === "confirmation_sent") {
+  if (status === "confirmation_sent" || status === "confirmation_pending") {
     return (
-      <StatusCard tone="muted" icon={Mail} title="Check Your Inbox">
+      <StatusCard
+        tone="muted"
+        icon={Mail}
+        title={status === "confirmation_sent" ? "Check Your Inbox" : "Verification Pending"}
+      >
         <div className="flex flex-col gap-0.5">
           <p className="font-medium">
             We've sent a verification email to <span className="text-accent">{email}</span>

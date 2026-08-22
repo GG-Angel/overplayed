@@ -16,7 +16,7 @@ export const useRequestAccess = (form: AccessRequestForm, turnstileToken: string
     mutationKey: MUTATION_KEYS.requestAccess(),
     mutationFn: () => postAccessRequest(form, turnstileToken),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.queueStatus() });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.queueStatus(), refetchType: "none" });
     },
   });
 };
@@ -43,8 +43,8 @@ export const useLogout = () => {
   return useMutation({
     mutationKey: MUTATION_KEYS.logout(),
     mutationFn: postLogout,
-    onMutate: () => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.user(), refetchType: "none" });
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.user() });
     },
   });
 };

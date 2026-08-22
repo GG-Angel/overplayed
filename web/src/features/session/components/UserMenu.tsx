@@ -14,7 +14,7 @@ import { ChartLine, ExternalLink, LogOut, User } from "lucide-react";
 import { useCallback } from "react";
 
 const UserMenu = () => {
-  const { user, isLoading, login, logout } = useAuth();
+  const { user, isLoading, login, logout, isLoggingOut } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = useCallback(() => {
@@ -37,6 +37,8 @@ const UserMenu = () => {
       </Button>
     );
   }
+
+  const LogOutButtonIcon = isLoggingOut ? Spinner : LogOut;
 
   return (
     <Dropdown
@@ -62,7 +64,7 @@ const UserMenu = () => {
         </DropdownMenuButton>
         <DropdownMenuDivider />
         <DropdownMenuButton onClick={handleLogout} className="text-destructive">
-          <LogOut className="size-4.5" />
+          <LogOutButtonIcon className="size-4.5" />
           Log out
         </DropdownMenuButton>
       </DropdownMenu>

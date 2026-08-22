@@ -30,7 +30,7 @@ export const accessConfirmationSentSchema = z.object({
 });
 
 export const accessConfirmationPendingSchema = z.object({
-  status: z.literal("confirmation_sent"),
+  status: z.literal("confirmation_pending"),
   email: z.email(),
 });
 
