@@ -1,8 +1,8 @@
 import { cn } from "@/lib/utils";
-import Card, { type CardProps } from "./Card";
+import Card, { type CardDivProps } from "./Card";
 import Checkbox from "./Checkbox";
 
-export type ToggleCardProps = Omit<CardProps, "children"> & {
+export type ToggleCardProps = Omit<CardDivProps, "children"> & {
   title: string;
   enabled: boolean;
   onToggle: () => void;
@@ -25,11 +25,11 @@ const ToggleCard = ({
 
   return (
     <Card
+      onClick={onToggle}
       className={cn(
-        "flex justify-between items-center gap-4 pr-6 py-3 cursor-pointer select-none",
+        "w-full flex justify-between items-center gap-4 pr-6 py-3 text-left cursor-pointer select-none",
         className
       )}
-      onClick={onToggle}
       {...props}
     >
       <div>
@@ -38,6 +38,7 @@ const ToggleCard = ({
           {enabled ? whenEnabled : whenDisabled}
         </p>
       </div>
+      
       <Checkbox enabled={enabled} />
     </Card>
   );

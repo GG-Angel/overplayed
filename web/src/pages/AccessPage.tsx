@@ -235,6 +235,7 @@ const RequestAccessPage = () => {
         </p>
         <p>Join the waitlist and we'll let you in as soon as a spot frees up!</p>
         <button
+          type="button"
           onClick={() => setIsEmailModalOpen(true)}
           className="text-muted text-sm w-fit text-left flex items-center gap-1.5 cursor-pointer hover:underline"
         >
@@ -265,11 +266,7 @@ const RequestAccessPage = () => {
           />
           <span className="text-sm text-muted">
             You can find your email{" "}
-            <ExternalLink
-              href="https://www.spotify.com/account/profile/"
-              className="underline hover:text-white"
-              draggable={false}
-            >
+            <ExternalLink href="https://www.spotify.com/account/profile/" draggable={false}>
               here.
             </ExternalLink>
           </span>

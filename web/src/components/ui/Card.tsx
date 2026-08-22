@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
-import type { ComponentProps } from "react";
+import type { ComponentProps, ElementType } from "react";
 
 const cardVariants = cva("flex overflow-hidden border-2 text-card-foreground shadow-md", {
   variants: {
@@ -32,13 +32,23 @@ const cardVariants = cva("flex overflow-hidden border-2 text-card-foreground sha
   },
 });
 
-export type CardProps = ComponentProps<"div"> & VariantProps<typeof cardVariants>;
+type CardVariants = VariantProps<typeof cardVariants>;
 
-const Card = ({ className, tone, radius, padding, children, ...props }: CardProps) => {
+export type CardDivProps = CardVariants & {
+  as?: "div";
+  type?: never;
+  disabled?: never;
+} & ComponentProps<"div">;
+export type CardButtonProps = CardVariants & { as: "button" } & ComponentProps<"button">;
+export type CardProps = CardDivProps | CardButtonProps;
+
+const Card = ({ as = "div", className, tone, radius, padding, children, ...props }: CardProps) => {
+  const Component = as as ElementType;
+
   return (
-    <div className={cn(cardVariants({ tone, radius, padding }), className)} {...props}>
+    <Component className={cn(cardVariants({ tone, radius, padding }), className)} {...props}>
       {children}
-    </div>
+    </Component>
   );
 };
 

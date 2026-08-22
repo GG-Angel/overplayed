@@ -1,5 +1,5 @@
 import { LIKED_SONGS_COVER_URL, LIKED_SONGS_PLAYLIST_ID } from "@/lib/constants";
-import { extractImageUrl } from "@/lib/utils";
+import { extractImageUrl, pluralize } from "@/lib/utils";
 import type { Playlist } from "@/types/spotify";
 
 export type PlaylistDisplayProps = {
@@ -11,4 +11,9 @@ export const extractPlaylistCoverUrl = (playlist: Playlist) => {
   return playlist.id === LIKED_SONGS_PLAYLIST_ID
     ? LIKED_SONGS_COVER_URL
     : extractImageUrl(playlist.images ?? [], "lg");
+};
+
+export const formatTrackCount = (playlist: Playlist) => {
+  const { total } = playlist.tracks;
+  return `${total} ${pluralize("track", total)}`;
 };

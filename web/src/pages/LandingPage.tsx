@@ -137,9 +137,9 @@ const Leaderboard = () => {
   }
 
   return (
-    <table className="text-xs xs:text-sm w-full border-separate border-spacing-x-0 border-spacing-y-1.5">
+    <table className="leaderboard">
       <thead>
-        <tr className="[&_th]:py-1 [&_th]:px-4">
+        <tr>
           <th className="text-left">Rank</th>
           <th className="text-left">User</th>
           <th className="text-center">Swipes</th>
@@ -149,14 +149,8 @@ const Leaderboard = () => {
       </thead>
       <tbody>
         {leaderboard.slice(0, LEADERBOARD_ROWS).map(({ user, metrics }, index) => (
-          <tr
-            key={user.id}
-            className="group cursor-pointer [&_td]:group-hover:bg-card [&_td]:group-hover:border-card-border [&_td]:bg-card/40 [&_td]:border-card-border/40 [&_td]:py-1 [&_td]:px-4 [&_td]:border-y-2"
-            onClick={() => openExternalUrl(user.spotify_url)}
-          >
-            <td className={cn("rounded-l-lg border-l-2", index === 0 && "text-accent")}>
-              #{index + 1}
-            </td>
+          <tr key={user.id} onClick={() => openExternalUrl(user.spotify_url)}>
+            <td className={cn(index === 0 && "text-accent")}>#{index + 1}</td>
             <td className="max-w-0 w-full">
               <div className="flex items-center gap-2.5">
                 <Image
@@ -169,13 +163,11 @@ const Leaderboard = () => {
                 </span>
               </div>
             </td>
-            <td className="rounded-r-lg border-r-2 xs:rounded-r-none xs:border-r-0 text-center">
-              {formatCount(metrics.total_swipes)}
-            </td>
-            <td className="hidden xs:table-cell rounded-r-lg border-r-2 sm:rounded-r-none sm:border-r-0 text-center">
+            <td className="cap-xs text-center">{formatCount(metrics.total_swipes)}</td>
+            <td className="cap-sm hidden xs:table-cell text-center">
               {formatCount(metrics.total_cuts)}
             </td>
-            <td className="hidden sm:table-cell rounded-r-lg border-r-2 text-center">
+            <td className="hidden sm:table-cell text-center">
               {formatPercentage(metrics.cut_rate)}
             </td>
           </tr>

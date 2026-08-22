@@ -91,10 +91,54 @@
   .heading-1 {
     @apply text-5xl tracking-tighter font-bold;
   }
+
   .heading-2 {
     @apply text-xl tracking-tight font-semibold;
   }
+
   .heading-3 {
     @apply text-lg tracking-tight font-medium;
+  }
+
+  .leaderboard {
+    @apply w-full border-separate border-spacing-x-0 border-spacing-y-1.5 text-xs xs:text-sm;
+  }
+
+  .leaderboard th {
+    @apply px-4 py-1;
+  }
+
+  .leaderboard td {
+    @apply border-y-2 border-card-border/40 bg-card/40 px-4 py-1;
+  }
+
+  .leaderboard tbody tr {
+    @apply cursor-pointer;
+  }
+
+  .leaderboard tbody tr:hover td {
+    @apply border-card-border bg-card;
+  }
+
+  .leaderboard td:first-child {
+    @apply rounded-l-lg border-l-2;
+  }
+
+  .leaderboard td:last-child,
+  .leaderboard td.cap-xs,
+  .leaderboard td.cap-sm {
+    @apply rounded-r-lg border-r-2;
+  }
+
+  @media (width >= 30rem) {
+    .leaderboard td.cap-xs {
+      @apply rounded-r-none border-r-0;
+    }
+  }
+
+  @media (width >= 40rem) {
+    .leaderboard td.cap-sm {
+      @apply rounded-r-none border-r-0;
+    }
   }
 }

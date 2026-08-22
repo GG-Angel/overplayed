@@ -1,5 +1,5 @@
 import { ArrowUpRight } from "lucide-react";
-import type { PlaylistDisplayProps } from "./cover";
+import { formatTrackCount, type PlaylistDisplayProps } from "./cover";
 
 const PlaylistRow = ({ playlist, onClick }: PlaylistDisplayProps) => {
   return (
@@ -11,7 +11,7 @@ const PlaylistRow = ({ playlist, onClick }: PlaylistDisplayProps) => {
     >
       <span className="truncate font-semibold">{playlist.name}</span>
       <div className="flex items-center gap-4">
-        <span className="text-muted">{playlist.tracks.total} tracks</span>
+        <span className="text-muted">{formatTrackCount(playlist)}</span>
         <ArrowUpRight className="transition-colors text-accent" />
       </div>
     </button>
