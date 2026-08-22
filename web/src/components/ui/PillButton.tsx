@@ -21,6 +21,7 @@ const PillButton = ({
 }: PillButtonProps) => {
   return (
     <button
+      type="button"
       key={shortcut && `${shortcut.key}-${shortcut.triggers}`}
       className={cn(
         "inline-flex gap-1.5 items-center shrink-0 rounded-full border border-faded px-2.5 py-1 text-xs font-medium text-muted cursor-pointer transition-colors hover:text-foreground hover:border-muted disabled:opacity-25 disabled:pointer-events-none",

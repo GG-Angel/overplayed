@@ -44,7 +44,7 @@ type ButtonProps = ComponentProps<"button"> &
   };
 
 const Button = ({ className, variant, size, icon: Icon, children, ...props }: ButtonProps) => (
-  <button className={cn(buttonVariants({ variant, size }), className)} {...props}>
+  <button type="button" className={cn(buttonVariants({ variant, size }), className)} {...props}>
     {Icon && <Icon className={iconVariants({ size })} />}
     <span>{children}</span>
   </button>

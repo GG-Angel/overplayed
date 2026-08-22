@@ -7,6 +7,7 @@ const PlaylistCard = ({ playlist, onClick }: PlaylistDisplayProps) => {
 
   return (
     <button
+      type="button"
       onClick={() => onClick?.(playlist.id)}
       disabled={playlist.tracks.total <= 0}
       className="group relative flex snap-start h-32 w-full gap-4 overflow-hidden rounded-xl border-2 border-card-border bg-card px-4 py-3 text-left not-disabled:cursor-pointer disabled:opacity-50"

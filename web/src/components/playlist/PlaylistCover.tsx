@@ -6,6 +6,7 @@ const PlaylistCover = ({ playlist, onClick }: PlaylistDisplayProps) => {
 
   return (
     <button
+      type="button"
       onClick={() => onClick?.(playlist.id)}
       disabled={playlist.tracks.total <= 0}
       className="relative group overflow-hidden cursor-pointer disabled:opacity-50 disabled:pointer-events-none w-full aspect-square snap-start *:rounded-2xl *:border-4 *:border-card-border"

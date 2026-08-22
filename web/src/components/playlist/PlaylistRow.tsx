@@ -3,7 +3,7 @@ import type { PlaylistDisplayProps } from "./cover";
 
 const PlaylistRow = ({ playlist, onClick }: PlaylistDisplayProps) => {
   return (
-    <button
+    <button type="button"
       onClick={() => onClick?.(playlist.id)}
       disabled={playlist.tracks.total <= 0}
       className="flex items-center justify-between shrink-0 snap-start group hover:bg-card px-1.5 py-1 gap-4 rounded-sm text-nowrap not-disabled:cursor-pointer disabled:opacity-50"

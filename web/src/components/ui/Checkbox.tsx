@@ -8,7 +8,7 @@ type CheckboxProps = {
 const Checkbox = ({ enabled, onEnabledChange }: CheckboxProps) => {
   const Icon = enabled ? SquareCheckBig : Square;
   return (
-    <button onClick={onEnabledChange} className="cursor-pointer text-primary">
+    <button type="button" onClick={onEnabledChange} className="cursor-pointer text-primary">
       <Icon />
     </button>
   );
