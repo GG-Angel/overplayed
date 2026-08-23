@@ -154,7 +154,10 @@ const RequestAccessPage = () => {
           />
           <span className="text-sm text-muted">
             You can find your email{" "}
-            <ExternalLink href="https://www.spotify.com/account/profile/" draggable={false}>
+            <ExternalLink
+              href="https://www.spotify.com/account/profile/"
+              className="text-accent"
+            >
               here.
             </ExternalLink>
           </span>

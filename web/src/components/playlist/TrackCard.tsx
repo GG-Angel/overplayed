@@ -36,7 +36,6 @@ type TrackCardProps = CardProps &
 
 const TrackCard = ({ track, orientation, className, ...props }: TrackCardProps) => {
   const coverUrl = extractImageUrl(track.album.images, orientation === "horizontal" ? "sm" : "lg");
-  const artistList = track.artists.map((t) => t.name).join(" · ");
 
   return (
     <Card className={cn(cardVariants({ orientation }), className)} tabIndex={-1} {...props}>
@@ -50,7 +49,14 @@ const TrackCard = ({ track, orientation, className, ...props }: TrackCardProps) 
         <ExternalLink href={track.external_urls.spotify} className="font-medium" draggable={false}>
           {track.name}
         </ExternalLink>
-        <p className="text-muted text-sm truncate">{artistList}</p>
+        <p className="text-muted text-sm truncate">
+          {track.artists.map((a, index) => (
+            <span key={a.id}>
+              {index > 0 && " · "}
+              <ExternalLink href={a.external_urls.spotify}>{a.name}</ExternalLink>
+            </span>
+          ))}
+        </p>
       </div>
     </Card>
   );
