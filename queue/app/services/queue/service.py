@@ -1,4 +1,3 @@
-from fastapi import HTTPException
 import asyncio
 import heapq
 from collections.abc import Callable
@@ -6,14 +5,15 @@ from datetime import UTC, datetime, timedelta
 from typing import NamedTuple
 
 from core.lock import DistributedLock
+from fastapi import HTTPException
 from loguru import logger
 from models.queue import (
     ActiveUserStatus,
+    PendingUserStatus,
     QueuedUser,
     QueuedUserStatus,
     QueueOverview,
     QueueUserStatus,
-    PendingUserStatus,
 )
 from models.spotify import SpotifyUser, SpotifyUserCreationRequest
 from redis.asyncio import Redis
@@ -113,6 +113,14 @@ class QueueService:
         """Validate that a user exists in Spotify's system."""
         if not await self._user_validator.user_exists(email):
             raise HTTPException(status_code=400, detail=f"{email} does not exist.")
+
+    async def verify_and_enqueue_user(self, token: str) -> str:
+        """Verify a one-time token and enqueue the user if valid."""
+        email = await self._emailer.resolve_email_from_token(token)
+        if email is None:
+            raise HTTPException(status_code=400, detail="Invalid or expired token.")
+        await self.enqueue_user(email)
+        return email
 
     async def process_queue(self) -> None:
         """

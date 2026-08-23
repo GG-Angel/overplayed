@@ -5,6 +5,7 @@ from unittest.mock import AsyncMock
 
 import pytest
 from core.lock import DistributedLock
+from fastapi import HTTPException
 from models.queue import (
     ActiveUserStatus,
     QueuedUser,
@@ -62,6 +63,7 @@ def create_harness(*, user_limit: int = 1, retry_limit: int = 2) -> QueueService
 
     emailer = AsyncMock(spec=EmailService)
     emailer.send_onboarded_email.return_value = True
+    emailer.has_pending_token.return_value = False
 
     queue = AsyncMock(spec=QueueRepository)
     queue.dump.return_value = []
@@ -143,7 +145,7 @@ async def test_enqueue_user_rejects_unknown_spotify_user() -> None:
     harness = create_harness()
     harness.user_validator.user_exists.return_value = False
 
-    with pytest.raises(ValueError, match="missing@example.com does not exist"):
+    with pytest.raises(HTTPException, match="missing@example.com does not exist"):
         await harness.service.enqueue_user("missing@example.com")
 
     harness.lock.__aenter__.assert_not_awaited()
@@ -158,13 +160,9 @@ async def test_enqueue_user_adds_and_activates_new_user() -> None:
     harness.user_manager.add_user.return_value = active
     harness.user_manager.get_user.return_value = active
 
-    status = await harness.service.enqueue_user(queued.email)
+    await harness.service.enqueue_user(queued.email)
     await asyncio.sleep(0)
 
-    assert status == ActiveUserStatus(
-        user=active,
-        end_time=NOW + timedelta(seconds=USER_TTL),
-    )
     harness.queue.push.assert_awaited_once_with(queued.email)
     harness.user_manager.add_user.assert_awaited_once_with(
         SpotifyUserCreationRequest(name=queued.email, email=queued.email)

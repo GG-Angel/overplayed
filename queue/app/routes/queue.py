@@ -1,26 +1,20 @@
 from urllib.parse import quote
 
 from core.limiter import limiter
-from fastapi import (
-    APIRouter,
-    Depends,
-    HTTPException,
-    Request,
-    status,
-)
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from models.requests import AccessRequest
 from models.responses import (
-    ConfirmationPendingResponse,
+    AccessStatusResponse,
     ActiveUserStatusResponse,
+    ConfirmationPendingResponse,
     QueuedUserStatusResponse,
     QueueOverviewResponse,
-    AccessStatusResponse,
 )
-from services.queue import EmailService, QueueService, QueueUserStatus
+from services.queue import QueueService
 from services.turnstile import TurnstileVerifier
 from settings import settings
-from state import get_queue_emailer, get_queue_service, get_turnstile_verifier
+from state import get_queue_service, get_turnstile_verifier
 
 router = APIRouter()
 
@@ -48,9 +42,24 @@ async def get_user_status(
     service: QueueService = Depends(get_queue_service),
 ) -> AccessStatusResponse:
     status = await service.get_user_status(email)
-    if status is not None:
-        return _map_status_response(email, status)
-    raise HTTPException(status_code=404, detail=f"User {email} not registered.")
+    if status is None:
+        raise HTTPException(status_code=404, detail=f"User {email} not registered.")
+    match status.status:
+        case "active":
+            return ActiveUserStatusResponse(
+                email=email, estimated_end_time=status.end_time
+            )
+        case "in_queue":
+            return QueuedUserStatusResponse(
+                email=email,
+                position_in_queue=status.position,
+                estimated_start_time=status.start_time,
+            )
+        case "confirmation_pending":
+            return ConfirmationPendingResponse(
+                status="confirmation_pending",
+                email=email,
+            )
 
 
 @router.post("/requests")
@@ -71,37 +80,14 @@ async def verify_token(
     request: Request,
     token: str,
     service: QueueService = Depends(get_queue_service),
-    emailer: EmailService = Depends(get_queue_emailer),
 ):
     """Verify a one-time token and enqueue the user if valid."""
-    email = await emailer.resolve_email_from_token(token)
-    if email is None:
+    try:
+        email = await service.verify_and_enqueue_user(token)
         return RedirectResponse(
-            url=f"{settings.app_frontend_url}/access?error=invalid_token",
-            status_code=status.HTTP_302_FOUND,
+            url=f"{settings.app_frontend_url}/access?email={quote(email)}"
         )
-
-    await service.enqueue_user(email)
-    return RedirectResponse(
-        url=f"{settings.app_frontend_url}/access?email={quote(email)}",
-        status_code=status.HTTP_302_FOUND,
-    )
-
-
-def _map_status_response(email: str, status: QueueUserStatus) -> AccessStatusResponse:
-    match status.status:
-        case "active":
-            return ActiveUserStatusResponse(
-                email=email, estimated_end_time=status.end_time
-            )
-        case "in_queue":
-            return QueuedUserStatusResponse(
-                email=email,
-                position_in_queue=status.position,
-                estimated_start_time=status.start_time,
-            )
-        case "confirmation_pending":
-            return ConfirmationPendingResponse(
-                status="confirmation_pending",
-                email=email,
-            )
+    except Exception:
+        return RedirectResponse(
+            url=f"{settings.app_frontend_url}/access?error=invalid_token"
+        )

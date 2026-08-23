@@ -56,7 +56,6 @@ async def lifespan(app: FastAPI):
         app.state[APP_STATE_KEY] = State(
             queue_service=queue_service,
             queue_worker=queue_worker,
-            queue_emailer=queue_emailer,
             turnstile_verifier=turnstile_verifier,
         )
 
