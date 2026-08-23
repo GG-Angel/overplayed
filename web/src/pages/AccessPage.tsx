@@ -169,7 +169,7 @@ const RequestAccessPage = () => {
 
   const turnstileRef = useRef<TurnstileHandle>(null);
   const submitRequestMutation = useRequestAccess(form, turnstileToken);
-  const userStatusQuery = useAccessStatus(form.email);
+  const userStatusQuery = useAccessStatus(submittedForm.email);
 
   const validateForm = () => {
     const result = accessRequestFormSchema.safeParse(form);
@@ -183,11 +183,9 @@ const RequestAccessPage = () => {
 
   const handleCheckStatus = () => {
     if (!validateForm()) return;
-
     setSubmittedForm(form);
     setResultSource("status");
     submitRequestMutation.reset();
-    userStatusQuery.refetch();
   };
 
   const handleSubmitRequest: SubmitEventHandler<HTMLFormElement> = (e) => {

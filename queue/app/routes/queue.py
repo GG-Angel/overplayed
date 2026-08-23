@@ -47,6 +47,7 @@ async def get_user_status(
     request: Request,
     email: str,
     service: QueueService = Depends(get_queue_service),
+    emailer: EmailService = Depends(get_queue_emailer),
 ) -> ActiveUserStatusResponse | QueuedUserStatusResponse:
     status = await service.get_user_status(email)
     if status is None:

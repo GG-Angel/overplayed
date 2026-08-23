@@ -65,9 +65,16 @@ export const getQueueStatus = async () => {
 };
 
 export const getAccessStatus = async (userEmail: string) => {
-  return accessStatusSchema.parse(
-    await queueApi.get(`/queue/users/${encodeURIComponent(userEmail)}`)
-  );
+  try {
+    return accessStatusSchema.parse(
+      await queueApi.get(`/queue/users/${encodeURIComponent(userEmail)}`)
+    );
+  } catch (error) {
+    if (isAxiosError(error) && error.response?.status === 404) {
+      return null;
+    }
+    throw error;
+  }
 };
 
 export const postPlaylistSwipes = async (playlistId: string, form: SwipesForm) => {

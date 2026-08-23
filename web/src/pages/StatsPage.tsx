@@ -3,17 +3,17 @@ import LoadingState from "@/components/states/LoadingState";
 import Page from "@/components/layout/Page";
 import Image from "@/components/ui/Image";
 import CounterCard from "@/components/ui/cards/CounterCard";
-import useAuth from "@/features/session/auth/useAuth";
 import { extractImageUrl, formatCount, formatPercentage } from "@/lib/utils";
 import Card from "@/components/ui/cards/Card";
+import { useProtectedContext } from "@/features/session/auth/ProtectedContext";
+import ErrorState from "@/components/states/ErrorState";
 
 const StatsPage = () => {
-  const { user } = useAuth();
-  const { data: metrics } = useUserStats();
+  const { user } = useProtectedContext();
+  const { data: metrics, isSuccess, isLoading } = useUserStats();
 
-  if (!user || !metrics) {
-    return <LoadingState message="Loading statistics..." />;
-  }
+  if (isLoading) return <LoadingState message="Loading statistics..." />;
+  if (!isSuccess) return <ErrorState message="Failed to Load Stats" />;
 
   return (
     <Page width="4xl" className="py-2">
