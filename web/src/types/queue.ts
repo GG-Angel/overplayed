@@ -5,9 +5,10 @@ export const accessRequestFormSchema = z.object({
 });
 
 export const queueStatusSchema = z.object({
-  num_active: z.number().min(0),
-  num_queued: z.number().min(0),
-  user_limit: z.number().min(0),
+  total_slots: z.number().min(0),
+  filled_slots: z.number().min(0),
+  open_slots: z.number().min(0),
+  num_waiting: z.number().min(0),
   next_available_time: z.iso.datetime().nullable(),
 });
 

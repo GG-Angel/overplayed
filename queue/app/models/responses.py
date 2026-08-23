@@ -5,9 +5,10 @@ from pydantic import BaseModel
 
 
 class QueueOverviewResponse(BaseModel):
-    num_active: int
-    num_queued: int
-    user_limit: int
+    total_slots: int
+    filled_slots: int
+    open_slots: int
+    num_waiting: int
     next_available_time: datetime | None
 
 

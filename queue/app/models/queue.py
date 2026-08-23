@@ -46,3 +46,20 @@ class QueueOverview(BaseModel):
     queued_users: list[QueuedUser]
     user_limit: int
     next_available_time: datetime | None
+
+    @property
+    def filled_slots(self) -> int:
+        """Slots that are spoken for, counting anyone already waiting on one."""
+        claimed = len(self.active_users) + len(self.queued_users)
+        return min(claimed, self.user_limit)
+
+    @property
+    def open_slots(self) -> int:
+        """Slots a new user could claim right now."""
+        return self.user_limit - self.filled_slots
+
+    @property
+    def num_waiting(self) -> int:
+        """Users waiting on a slot that does not exist yet."""
+        claimed = len(self.active_users) + len(self.queued_users)
+        return max(0, claimed - self.user_limit)

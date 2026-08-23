@@ -36,9 +36,10 @@ async def get_overview(
 ) -> QueueOverviewResponse:
     overview = await service.get_queue_overview()
     return QueueOverviewResponse(
-        num_active=len(overview.active_users),
-        num_queued=len(overview.queued_users),
-        user_limit=overview.user_limit,
+        total_slots=overview.user_limit,
+        filled_slots=overview.filled_slots,
+        open_slots=overview.open_slots,
+        num_waiting=overview.num_waiting,
         next_available_time=overview.next_available_time,
     )
 

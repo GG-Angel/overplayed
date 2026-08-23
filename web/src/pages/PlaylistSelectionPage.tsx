@@ -138,6 +138,7 @@ const PlaylistSelectionPage = () => {
           className="justify-self-end h-full flex items-center justify-end xs:w-36 mr-4.5"
           trigger={({ toggle }) => (
             <button
+              type="button"
               className="flex shrink-0 items-center gap-3 cursor-pointer font-medium hover:scale-105 active:scale-100 text-muted hover:text-foreground transition-all"
               onClick={toggle}
             >
@@ -169,6 +170,7 @@ const PlaylistSelectionPage = () => {
                 const isSelected = option === layout;
                 return (
                   <button
+                    type="button"
                     key={option}
                     className={cn(
                       "flex justify-center text-muted p-1 rounded-sm cursor-pointer hover:bg-card",
