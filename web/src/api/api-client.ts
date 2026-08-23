@@ -1,5 +1,11 @@
 import { env } from "@/lib/env";
-import axios, { type InternalAxiosRequestConfig } from "axios";
+import axios, { isAxiosError, type InternalAxiosRequestConfig } from "axios";
+
+export const getErrorDetail = (error: unknown): string | null => {
+  if (!isAxiosError<{ detail?: unknown }>(error)) return null;
+  const detail = error.response?.data?.detail;
+  return typeof detail === "string" ? detail : null;
+};
 
 export const buildUrl = (url: string, params?: Record<string, string>): string => {
   if (!params) return url;

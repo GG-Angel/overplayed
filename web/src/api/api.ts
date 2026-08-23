@@ -1,10 +1,5 @@
 import { env } from "@/lib/env";
-import {
-  accessRequestResultSchema,
-  accessStatusSchema,
-  queueStatusSchema,
-  type AccessRequestForm,
-} from "@/types/queue";
+import { accessStatusSchema, queueStatusSchema, type AccessRequestForm } from "@/types/queue";
 import {
   playlistSchema,
   trackSchema,
@@ -84,12 +79,10 @@ export const postPlaylistSwipes = async (playlistId: string, form: SwipesForm) =
 };
 
 export const postAccessRequest = async (form: AccessRequestForm, turnstileToken: string) => {
-  return accessRequestResultSchema.parse(
-    await queueApi.post("/queue/requests", {
-      ...form,
-      "cf-turnstile-response": turnstileToken,
-    })
-  );
+  await queueApi.post("/queue/requests", {
+    ...form,
+    "cf-turnstile-response": turnstileToken,
+  });
 };
 
 export const postLogout = async () => await serverApi.post("/auth/logout");

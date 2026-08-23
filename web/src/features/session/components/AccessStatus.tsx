@@ -10,6 +10,8 @@ const describeAccess = (access: AccessStatus, label: string | null, isExpired: b
       return isExpired ? "Access expired" : `Access · ${label} left`;
     case "in_queue":
       return `#${access.position_in_queue} in line`;
+    case "confirmation_pending":
+      return "Awaiting confirmation";
   }
 };
 

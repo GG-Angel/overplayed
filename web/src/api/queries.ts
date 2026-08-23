@@ -4,6 +4,7 @@ import {
   experimental_streamedQuery as streamedQuery,
   queryOptions,
   useQueries,
+  useQueryClient,
 } from "@tanstack/react-query";
 import {
   getAccessStatus,
@@ -99,6 +100,12 @@ export const useAccessStatus = (email: string | undefined) =>
     },
     enabled: Boolean(email),
   });
+
+export const useRefreshAccessStatus = () => {
+  const queryClient = useQueryClient();
+  return (email: string) =>
+    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.queueAccessStatus(email) });
+};
 
 export const useQueueStatus = () => {
   return useQuery({

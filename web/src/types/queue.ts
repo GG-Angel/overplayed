@@ -24,11 +24,6 @@ export const accessInQueueSchema = z.object({
   estimated_start_time: z.iso.datetime(),
 });
 
-export const accessConfirmationSentSchema = z.object({
-  status: z.literal("confirmation_sent"),
-  email: z.email(),
-});
-
 export const accessConfirmationPendingSchema = z.object({
   status: z.literal("confirmation_pending"),
   email: z.email(),
@@ -37,15 +32,9 @@ export const accessConfirmationPendingSchema = z.object({
 export const accessStatusSchema = z.discriminatedUnion("status", [
   accessActiveStatusSchema,
   accessInQueueSchema,
-]);
-
-export const accessRequestResultSchema = z.discriminatedUnion("status", [
-  accessConfirmationSentSchema,
   accessConfirmationPendingSchema,
-  accessStatusSchema,
 ]);
 
 export type QueueStatus = z.infer<typeof queueStatusSchema>;
 export type AccessStatus = z.infer<typeof accessStatusSchema>;
 export type AccessRequestForm = z.infer<typeof accessRequestFormSchema>;
-export type AccessRequestResult = z.infer<typeof accessRequestResultSchema>;

@@ -10,13 +10,20 @@ export const MUTATION_KEYS = {
   logout: () => ["logout"] as const,
 } as const;
 
-export const useRequestAccess = (form: AccessRequestForm, turnstileToken: string) => {
+export type AccessRequestVariables = {
+  form: AccessRequestForm;
+  turnstileToken: string;
+};
+
+export const useRequestAccess = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationKey: MUTATION_KEYS.requestAccess(),
-    mutationFn: () => postAccessRequest(form, turnstileToken),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.queueStatus(), refetchType: "none" });
+    mutationFn: ({ form, turnstileToken }: AccessRequestVariables) =>
+      postAccessRequest(form, turnstileToken),
+    onSuccess: (_data, { form }) => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.queueStatus() });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.queueAccessStatus(form.email) });
     },
   });
 };
@@ -31,7 +38,6 @@ export const useSubmitSwipes = (playlistId: string, form: SwipesForm) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.globalStats() });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.globalLeaderboard() });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.globalCounters() });
-
       // avoid immediate refetch to maintain pre-submission playlist info
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.playlists(), refetchType: "none" });
     },
