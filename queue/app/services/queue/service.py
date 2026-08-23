@@ -4,8 +4,8 @@ from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
 from typing import NamedTuple
 
+from core.errors import InvalidTokenError, UnknownUserError
 from core.lock import DistributedLock
-from fastapi import HTTPException
 from loguru import logger
 from models.queue import (
     ActiveUserStatus,
@@ -112,13 +112,13 @@ class QueueService:
     async def _validate_user_exists(self, email: str) -> None:
         """Validate that a user exists in Spotify's system."""
         if not await self._user_validator.user_exists(email):
-            raise HTTPException(status_code=400, detail=f"{email} does not exist.")
+            raise UnknownUserError(f"{email} does not exist.")
 
     async def verify_and_enqueue_user(self, token: str) -> str:
         """Verify a one-time token and enqueue the user if valid."""
         email = await self._emailer.resolve_email_from_token(token)
         if email is None:
-            raise HTTPException(status_code=400, detail="Invalid or expired token.")
+            raise InvalidTokenError("Invalid or expired token.")
         await self.enqueue_user(email)
         return email
 

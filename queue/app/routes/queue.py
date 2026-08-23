@@ -1,8 +1,10 @@
-from urllib.parse import quote
+from urllib.parse import urlencode
 
+from core.errors import InvalidTokenError, UnknownUserError
 from core.limiter import limiter
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
+from loguru import logger
 from models.requests import AccessRequest
 from models.responses import (
     AccessStatusResponse,
@@ -17,6 +19,13 @@ from settings import settings
 from state import get_queue_service, get_turnstile_verifier
 
 router = APIRouter()
+
+
+def access_redirect(**params: str) -> RedirectResponse:
+    """Redirect to the frontend access page with the given query parameters."""
+    return RedirectResponse(
+        url=f"{settings.app_frontend_url}/access?{urlencode(params)}"
+    )
 
 
 @router.get("/overview")
@@ -43,7 +52,7 @@ async def get_user_status(
 ) -> AccessStatusResponse:
     status = await service.get_user_status(email)
     if status is None:
-        raise HTTPException(status_code=404, detail=f"User {email} not registered.")
+        raise HTTPException(status_code=404, detail=f"{email} has not been registered.")
     match status.status:
         case "active":
             return ActiveUserStatusResponse(
@@ -71,7 +80,13 @@ async def request_access(
     turnstile: TurnstileVerifier = Depends(get_turnstile_verifier),
 ) -> None:
     await turnstile.validate_request(request, form)
-    await service.register_user(form.email)
+    try:
+        await service.register_user(form.email)
+    except UnknownUserError as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Spotify user with email {form.email} does not exist.",
+        ) from e
 
 
 @router.get("/verifications/{token}")
@@ -84,10 +99,13 @@ async def verify_token(
     """Verify a one-time token and enqueue the user if valid."""
     try:
         email = await service.verify_and_enqueue_user(token)
-        return RedirectResponse(
-            url=f"{settings.app_frontend_url}/access?email={quote(email)}"
-        )
-    except Exception:
-        return RedirectResponse(
-            url=f"{settings.app_frontend_url}/access?error=invalid_token"
-        )
+    except InvalidTokenError as e:
+        logger.info(f"Rejected verification token: {e}")
+        return access_redirect(error="invalid_token")
+    except UnknownUserError as e:
+        logger.info(f"Rejected verified user: {e}")
+        return access_redirect(error="unknown_user")
+    except Exception as e:
+        logger.error(f"Failed to verify token: {e}")
+        return access_redirect(error="verification_failed")
+    return access_redirect(email=email)

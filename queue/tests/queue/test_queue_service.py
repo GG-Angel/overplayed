@@ -4,8 +4,8 @@ from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock
 
 import pytest
+from core.errors import UnknownUserError
 from core.lock import DistributedLock
-from fastapi import HTTPException
 from models.queue import (
     ActiveUserStatus,
     QueuedUser,
@@ -145,7 +145,7 @@ async def test_enqueue_user_rejects_unknown_spotify_user() -> None:
     harness = create_harness()
     harness.user_validator.user_exists.return_value = False
 
-    with pytest.raises(HTTPException, match="missing@example.com does not exist"):
+    with pytest.raises(UnknownUserError, match="missing@example.com does not exist"):
         await harness.service.enqueue_user("missing@example.com")
 
     harness.lock.__aenter__.assert_not_awaited()
