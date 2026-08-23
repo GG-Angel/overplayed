@@ -133,7 +133,6 @@ class LeaderboardResponse(BaseModel):
     class User(_Schema):
         id: str
         display_name: str | None
-        spotify_url: str
         picture_url: str | None
 
     class Metrics(BaseModel):

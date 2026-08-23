@@ -112,10 +112,6 @@
     @apply border-y-2 border-card-border/40 bg-card/40 px-4 py-1;
   }
 
-  .leaderboard tbody tr {
-    @apply cursor-pointer;
-  }
-
   .leaderboard tbody tr:hover td {
     @apply border-card-border bg-card;
   }

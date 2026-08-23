@@ -13,14 +13,7 @@ import z from "zod";
 import { Key, Scissors, Undo } from "lucide-react";
 import Image from "@/components/ui/Image";
 import { useMemo } from "react";
-import {
-  cn,
-  fallbackImageUrl,
-  formatCount,
-  formatPercentage,
-  openExternalUrl,
-  shuffleArray,
-} from "@/lib/utils";
+import { cn, fallbackImageUrl, formatCount, formatPercentage, shuffleArray } from "@/lib/utils";
 import { Spinner } from "@/components/ui/Spinner";
 import { motion } from "framer-motion";
 import { trackSchema } from "@/types/spotify";
@@ -149,7 +142,7 @@ const Leaderboard = () => {
       </thead>
       <tbody>
         {leaderboard.slice(0, LEADERBOARD_ROWS).map(({ user, metrics }, index) => (
-          <tr key={user.id} onClick={() => openExternalUrl(user.spotify_url)}>
+          <tr key={user.id}>
             <td className={cn(index === 0 && "text-accent")}>#{index + 1}</td>
             <td className="max-w-0 w-full">
               <div className="flex items-center gap-2.5">
@@ -158,7 +151,7 @@ const Leaderboard = () => {
                   className="size-8 aspect-square object-cover rounded-full"
                   alt={user.display_name ?? "Unknown user"}
                 />
-                <span className="font-medium hover:underline truncate min-w-0">
+                <span className="font-medium truncate min-w-0">
                   {user.display_name ?? "Unknown"}
                 </span>
               </div>

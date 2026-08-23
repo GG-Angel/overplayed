@@ -19,7 +19,6 @@ export const swipesLeaderboardSchema = z.array(
     user: z.object({
       id: z.string(),
       display_name: z.string().nullable(),
-      spotify_url: z.string(),
       picture_url: z.string().nullable(),
     }),
     metrics: z.object({
