@@ -79,10 +79,10 @@ const CallToAction = () => {
                 animate={{ opacity: 1, scale: 1, rotate: 3 }}
                 transition={{ delay: 0.6, duration: 0.25 }}
                 hidden={hasRequestedAccess}
-                className="absolute pointer-events-none origin-bottom-left -top-3/5 left-full text-primary/75 hidden xs:flex items-center gap-2"
+                className="absolute text-xs sm:text-sm pointer-events-none origin-bottom-left -top-3/5 left-full text-primary/75 hidden xs:flex items-center gap-2"
               >
                 <Undo className="-rotate-24" />
-                Start here!
+                New? Start here!
               </motion.div>
             </Button>
             <Button
