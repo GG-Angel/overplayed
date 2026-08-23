@@ -142,6 +142,6 @@ def build_email_service(redis: Redis) -> EmailService:
         redis=redis,
         email_sender=ResendEmailSender(),
         token_ttl_seconds=settings.ttl_email_ott,
-        verification_url_template=f"{settings.app_queue_url}/queue/verifications/{{token}}",
+        verification_url_template=f"{settings.app_api_url}/queue/verifications/{{token}}",
         token_factory=lambda: secrets.token_urlsafe(32),
     )

@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     # App settings
     app_debug: bool = False
     app_frontend_url: str = Field(...)
-    app_queue_url: str = Field(...)
+    app_api_url: str = Field(...)
 
     # Spotify settings
     spotify_client_id: str = Field(...)

@@ -5,8 +5,8 @@ import pytest
 from fakeredis.aioredis import FakeRedis
 
 TEST_SETTINGS = {
-    "APP_FRONTEND_URL": "https://app.example.com",
-    "APP_QUEUE_URL": "https://queue.example.com",
+    "APP_FRONTEND_URL": "https://overplayed.example.com",
+    "APP_API_URL": "https://api-overplayed.example.com",
     "SPOTIFY_CLIENT_ID": "spotify-client",
     "SPOTIFY_AUTH_CLIENT_ID": "spotify-auth-client",
     "SPOTIFY_REFRESH_TOKEN": "spotify-refresh-token",

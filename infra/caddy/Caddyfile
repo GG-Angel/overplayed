@@ -1,0 +1,13 @@
+:8080 {
+	handle /api/* {
+		reverse_proxy server:8080
+	}
+
+	handle /queue/* {
+		reverse_proxy queue:8080
+	}
+
+	handle {
+		respond "Not Found" 404
+	}
+}

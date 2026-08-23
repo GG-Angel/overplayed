@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 
 from aiohttp import ClientSession
-from fastapi import FastAPI, Response, status
+from fastapi import FastAPI, Response, status, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -54,18 +54,22 @@ def build_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    app.include_router(auth.router, prefix="/auth", tags=["auth"])
-    app.include_router(users.router, prefix="/users", tags=["users"])
-    app.include_router(playlists.router, prefix="/playlists", tags=["playlists"])
-    app.include_router(previews.router, prefix="/previews", tags=["previews"])
-    app.include_router(stats.router, prefix="/stats", tags=["stats"])
+    root = APIRouter(prefix="/api")
 
-    @app.get("/")
+    root.include_router(auth.router, prefix="/auth", tags=["auth"])
+    root.include_router(users.router, prefix="/users", tags=["users"])
+    root.include_router(playlists.router, prefix="/playlists", tags=["playlists"])
+    root.include_router(previews.router, prefix="/previews", tags=["previews"])
+    root.include_router(stats.router, prefix="/stats", tags=["stats"])
+
+    @root.get("/health")
     def handle_healthcheck():
         return "ok!"
 
-    @app.get("/favicon.ico")
+    @root.get("/favicon.ico")
     def handle_favicon():
         return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+    app.include_router(root)
 
     return app

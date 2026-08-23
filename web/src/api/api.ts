@@ -12,13 +12,13 @@ import {
   type SwipesForm,
 } from "@/types/swipes";
 import z, { ZodType } from "zod";
-import { queueApi, serverApi } from "./api-client";
 import { countersSchema, userStatsSchema } from "@/types/stats";
 import { isAxiosError } from "axios";
+import { api } from "./api-client";
 
 export const getCurrentUser = async () => {
   try {
-    return currentUserSchema.parse(await serverApi.get("/users/me"));
+    return currentUserSchema.parse(await api.get("/api/users/me"));
   } catch (error) {
     if (isAxiosError(error) && error.response?.status === 401) {
       return null;
@@ -28,42 +28,48 @@ export const getCurrentUser = async () => {
 };
 
 export const getPlaylist = async (playlistId: string) => {
-  return playlistSchema.parse(await serverApi.get(`/playlists/${playlistId}`));
+  return playlistSchema.parse(await api.get(`/api/playlists/${playlistId}`));
 };
 
 export const getPlaylists = async () => {
-  return z.array(playlistSchema).parse(await serverApi.get("/playlists"));
+  return z.array(playlistSchema).parse(await api.get("/api/playlists"));
 };
 
 export const getPlaylistTracks = (playlistId: string, signal?: AbortSignal) => {
-  return fetchStreamedJson(`/playlists/${playlistId}/tracks`, trackSchema, signal);
+  return fetchStreamedJson(`/api/playlists/${playlistId}/tracks`, trackSchema, signal);
 };
 
 export const getTrackPreview = async (isrc: string) => {
-  return trackPreviewSchema.parse(await serverApi.get(`/previews/${isrc}`));
+  return trackPreviewSchema.parse(await api.get(`/api/previews/${isrc}`));
 };
 
 export const getCounters = async () => {
-  return countersSchema.parse(await serverApi.get(`/stats`));
+  return countersSchema.parse(await api.get(`/api/stats`));
 };
 
 export const getUserStats = async () => {
-  return userStatsSchema.parse(await serverApi.get(`/stats/me`));
+  return userStatsSchema.parse(await api.get(`/api/stats/me`));
 };
 
 export const getLeaderboard = async () => {
-  return swipesLeaderboardSchema.parse(await serverApi.get("/users/leaderboard"));
+  return swipesLeaderboardSchema.parse(await api.get("/api/users/leaderboard"));
 };
 
+export const postPlaylistSwipes = async (playlistId: string, form: SwipesForm) => {
+  return swipesSubmissionResultSchema.parse(
+    await api.post(`/api/playlists/${playlistId}/swipes`, form)
+  );
+};
+
+export const postLogout = async () => await api.post("/api/auth/logout");
+
 export const getQueueStatus = async () => {
-  return queueStatusSchema.parse(await queueApi.get("/queue/overview"));
+  return queueStatusSchema.parse(await api.get("/queue/overview"));
 };
 
 export const getAccessStatus = async (userEmail: string) => {
   try {
-    return accessStatusSchema.parse(
-      await queueApi.get(`/queue/users/${encodeURIComponent(userEmail)}`)
-    );
+    return accessStatusSchema.parse(await api.get(`/queue/users/${encodeURIComponent(userEmail)}`));
   } catch (error) {
     if (isAxiosError(error) && error.response?.status === 404) {
       return null;
@@ -72,20 +78,12 @@ export const getAccessStatus = async (userEmail: string) => {
   }
 };
 
-export const postPlaylistSwipes = async (playlistId: string, form: SwipesForm) => {
-  return swipesSubmissionResultSchema.parse(
-    await serverApi.post(`/playlists/${playlistId}/swipes`, form)
-  );
-};
-
 export const postAccessRequest = async (form: AccessRequestForm, turnstileToken: string) => {
-  await queueApi.post("/queue/requests", {
+  await api.post("/queue/requests", {
     ...form,
     "cf-turnstile-response": turnstileToken,
   });
 };
-
-export const postLogout = async () => await serverApi.post("/auth/logout");
 
 // --- Helpers ---
 

@@ -70,7 +70,7 @@ const ReviewSwipesPage = () => {
   return (
     <Page width="4xl" className="py-2 pb-32">
       <h1 className="text-center">Review Swipes</h1>
-      <div className="flex flex-col-reverse sm:flex-row gap-3">
+      <div className="flex flex-col sm:flex-row gap-3">
         <CounterCard
           amount={formatCount(session.dislikes.length)}
           label={pluralize("Dislike", session.dislikes.length)}

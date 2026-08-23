@@ -26,5 +26,4 @@ function createApiClient(baseUrl: string) {
   return client;
 }
 
-export const serverApi = createApiClient(env.API_BASE_URL);
-export const queueApi = createApiClient(env.QUEUE_BASE_URL);
+export const api = createApiClient(env.API_BASE_URL);
