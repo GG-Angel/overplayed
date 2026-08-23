@@ -19,6 +19,10 @@ class QueuedUserPosition(BaseModel):
     position: int
 
 
+class PendingUserStatus(BaseModel):
+    status: Literal["confirmation_pending"] = "confirmation_pending"
+
+
 class QueuedUserStatus(BaseModel):
     status: Literal["in_queue"] = "in_queue"
     position: int
@@ -32,7 +36,7 @@ class ActiveUserStatus(BaseModel):
     end_time: datetime
 
 
-QueueUserStatus = QueuedUserStatus | ActiveUserStatus
+QueueUserStatus = QueuedUserStatus | ActiveUserStatus | PendingUserStatus
 
 
 class QueueOverview(BaseModel):

@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 import asyncio
 import heapq
 from collections.abc import Callable
@@ -12,6 +13,7 @@ from models.queue import (
     QueuedUserStatus,
     QueueOverview,
     QueueUserStatus,
+    PendingUserStatus,
 )
 from models.spotify import SpotifyUser, SpotifyUserCreationRequest
 from redis.asyncio import Redis
@@ -60,28 +62,27 @@ class QueueService:
 
     async def get_user_status(self, email: str) -> QueueUserStatus | None:
         """Get the status of a user."""
+        if await self._emailer.has_pending_token(email):
+            return PendingUserStatus()
         if (queued_user := await self._queue.get(email)) is not None:
             return QueuedUserStatus(
                 position=queued_user.position,
                 user=queued_user.user,
                 start_time=await self._estimate_start_time(queued_user.position),
             )
-
         if (active_user := await self._user_manager.get_user(email)) is not None:
             return ActiveUserStatus(
                 user=active_user,
                 end_time=active_user.created_at + self._access_duration,
             )
-
-        # user is neither in the queue nor active
         return None
 
     async def get_queue_overview(self) -> QueueOverview:
         """Get an overview of the queue, including active users, queued users, and next available time."""
         active_users = await self._user_manager.get_users()
         queued_users = await self._queue.dump()
-
         next_available_time = None
+
         if len(active_users) >= self._user_limit:
             next_available_time = await self._estimate_start_time(len(queued_users) + 1)
 
@@ -92,23 +93,26 @@ class QueueService:
             next_available_time=next_available_time,
         )
 
-    async def enqueue_user(self, email: str) -> QueueUserStatus:
-        """Add a new user to the queue, process it, and retrieve their status."""
-        if not await self._user_validator.user_exists(email):
-            raise ValueError(f"{email} does not exist.")
-
+    async def enqueue_user(self, email: str) -> None:
+        """Add a new user to the queue and process it."""
+        await self._validate_user_exists(email)
         async with self._lock:
-            if not await self._queue.has(
-                email
-            ) and not await self._user_manager.has_user(email):
+            is_in_queue = await self._queue.has(email)
+            is_active = await self._user_manager.has_user(email)
+            if not is_in_queue and not is_active:
                 await self._queue.push(email)
                 await self._process_queue_locked()
 
-        status = await self.get_user_status(email)
-        if status is None:
-            raise RuntimeError(f"Failed to retrieve status for {email} after enqueue.")
+    async def register_user(self, email: str) -> None:
+        """Register a user by sending a verification email with a one-time token."""
+        await self._validate_user_exists(email)
+        if await self.get_user_status(email) is None:
+            await self._emailer.register_user(email)
 
-        return status
+    async def _validate_user_exists(self, email: str) -> None:
+        """Validate that a user exists in Spotify's system."""
+        if not await self._user_validator.user_exists(email):
+            raise HTTPException(status_code=400, detail=f"{email} does not exist.")
 
     async def process_queue(self) -> None:
         """

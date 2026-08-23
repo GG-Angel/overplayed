@@ -1,7 +1,7 @@
 from aiohttp import ClientSession
 from fastapi import HTTPException, Request
 from loguru import logger
-from models.requests import QueueAccessRequest
+from models.requests import AccessRequest
 
 SITEVERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
 
@@ -34,9 +34,7 @@ class TurnstileVerifier:
 
         return True
 
-    async def validate_request(
-        self, request: Request, form: QueueAccessRequest
-    ) -> None:
+    async def validate_request(self, request: Request, form: AccessRequest) -> None:
         """Validate the Turnstile token in the request form. Raises HTTPException on failure."""
         forwarded_for = request.headers.get("x-forwarded-for", "")
         client_ip = forwarded_for.split(",")[0].strip() or (

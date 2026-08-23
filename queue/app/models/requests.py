@@ -1,7 +1,7 @@
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class QueueAccessRequest(BaseModel):
+class AccessRequest(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
     email: str

@@ -24,6 +24,11 @@ class QueuedUserStatusResponse(BaseModel):
     estimated_start_time: datetime
 
 
-class AccessRequestResponse(BaseModel):
-    status: Literal["confirmation_sent", "confirmation_pending"]
+class ConfirmationPendingResponse(BaseModel):
+    status: Literal["confirmation_pending"] = "confirmation_pending"
     email: str
+
+
+AccessStatusResponse = (
+    ConfirmationPendingResponse | ActiveUserStatusResponse | QueuedUserStatusResponse
+)

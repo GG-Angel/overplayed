@@ -3,20 +3,19 @@ from urllib.parse import quote
 from core.limiter import limiter
 from fastapi import (
     APIRouter,
-    BackgroundTasks,
     Depends,
     HTTPException,
     Request,
-    Response,
     status,
 )
 from fastapi.responses import RedirectResponse
-from models.requests import QueueAccessRequest
+from models.requests import AccessRequest
 from models.responses import (
-    AccessRequestResponse,
+    ConfirmationPendingResponse,
     ActiveUserStatusResponse,
     QueuedUserStatusResponse,
     QueueOverviewResponse,
+    AccessStatusResponse,
 )
 from services.queue import EmailService, QueueService, QueueUserStatus
 from services.turnstile import TurnstileVerifier
@@ -47,40 +46,23 @@ async def get_user_status(
     request: Request,
     email: str,
     service: QueueService = Depends(get_queue_service),
-    emailer: EmailService = Depends(get_queue_emailer),
-) -> ActiveUserStatusResponse | QueuedUserStatusResponse:
+) -> AccessStatusResponse:
     status = await service.get_user_status(email)
-    if status is None:
-        raise HTTPException(status_code=404)
-    return _status_response(email, status)
+    if status is not None:
+        return _map_status_response(email, status)
+    raise HTTPException(status_code=404, detail=f"User {email} not registered.")
 
 
 @router.post("/requests")
 @limiter.limit("5/hour")
 async def request_access(
     request: Request,
-    response: Response,
-    form: QueueAccessRequest,
-    background_tasks: BackgroundTasks,
+    form: AccessRequest,
     service: QueueService = Depends(get_queue_service),
-    emailer: EmailService = Depends(get_queue_emailer),
     turnstile: TurnstileVerifier = Depends(get_turnstile_verifier),
-) -> AccessRequestResponse | ActiveUserStatusResponse | QueuedUserStatusResponse:
-    if not settings.app_debug:
-        await turnstile.validate_request(request, form)
-
-    user_status = await service.get_user_status(form.email)
-    if user_status is not None:
-        response.status_code = status.HTTP_200_OK
-        return _status_response(form.email, user_status)
-
-    if await emailer.has_pending_token(form.email):
-        response.status_code = status.HTTP_202_ACCEPTED
-        return AccessRequestResponse(status="confirmation_pending", email=form.email)
-
-    background_tasks.add_task(emailer.register_user, form.email)
-    response.status_code = status.HTTP_202_ACCEPTED
-    return AccessRequestResponse(status="confirmation_sent", email=form.email)
+) -> None:
+    await turnstile.validate_request(request, form)
+    await service.register_user(form.email)
 
 
 @router.get("/verifications/{token}")
@@ -106,10 +88,7 @@ async def verify_token(
     )
 
 
-def _status_response(
-    email: str, status: QueueUserStatus
-) -> ActiveUserStatusResponse | QueuedUserStatusResponse:
-    """Map an internal user status onto its public response DTO."""
+def _map_status_response(email: str, status: QueueUserStatus) -> AccessStatusResponse:
     match status.status:
         case "active":
             return ActiveUserStatusResponse(
@@ -120,4 +99,9 @@ def _status_response(
                 email=email,
                 position_in_queue=status.position,
                 estimated_start_time=status.start_time,
+            )
+        case "confirmation_pending":
+            return ConfirmationPendingResponse(
+                status="confirmation_pending",
+                email=email,
             )
