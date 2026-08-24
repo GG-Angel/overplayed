@@ -6,6 +6,6 @@
 
 ## Needs
 
-- Consolidate queue and server apis under one subdomain.
 - Invalidate cache from queue to server when user loses access.
-- Clean up frontend.
+- Write unit tests for the server.
+- Test in CI.
