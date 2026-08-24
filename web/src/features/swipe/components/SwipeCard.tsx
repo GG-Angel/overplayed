@@ -1,10 +1,10 @@
 import { Heart, X } from "lucide-react";
-import type { Track } from "@/lib/types";
 import { animate, motion, useMotionValue, useTransform } from "framer-motion";
 import { useCallback, useEffect, useImperativeHandle, type Ref } from "react";
 import { cn } from "@/lib/utils";
-import TrackCard from "@/features/playlist/components/TrackCard";
 import SwipeCardDecisionOverlay from "./SwipeCardDecisionOverlay";
+import type { Track } from "@/types/spotify";
+import TrackCard from "@/components/playlist/TrackCard";
 
 const OPACITY_DISTANCE = 200;
 const OVERLAY_DISTANCE = 80;
@@ -106,7 +106,7 @@ const SwipeCard = ({
       onDragEnd={handleDragEnd}
       className={cn("relative origin-bottom transition-shadow", className)}
     >
-      <TrackCard track={track} />
+      <TrackCard track={track} className="select-none" />
       <SwipeCardDecisionOverlay
         icon={Heart}
         opacity={likeOpacity}

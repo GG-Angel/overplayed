@@ -1,12 +1,27 @@
 services:
+  caddy:
+    image: caddy:2.11.4-alpine
+    restart: unless-stopped
+    container_name: overplayed-caddy
+    ports:
+      - 127.0.0.1:8080:8080
+    volumes:
+      - ./infra/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - server
+      - queue
+    networks:
+      - external
+      - internal
+
   server:
     image: ghcr.io/gg-angel/overplayed-server:latest
     platform: linux/amd64
     container_name: overplayed-server
     env_file: .env
     restart: unless-stopped
-    ports:
-      - 127.0.0.1:8080:8080
     depends_on:
       - redis
       - postgres
@@ -20,8 +35,6 @@ services:
     container_name: overplayed-queue
     env_file: .env
     restart: unless-stopped
-    ports:
-      - 127.0.0.1:8081:8080
     depends_on:
       - redis
     networks:

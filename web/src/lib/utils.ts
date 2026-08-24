@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { type Image } from "./types";
+import type { Image } from "@/types/spotify";
+import { PLACEHOLDER_IMAGE_URL } from "./constants";
 
 export function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));
@@ -11,7 +12,7 @@ export function openExternalUrl(url: string): void {
 }
 
 export function fallbackImageUrl(url: string | null | undefined): string {
-  return url ?? "/placeholder.webp";
+  return url ?? PLACEHOLDER_IMAGE_URL;
 }
 
 export function extractImageUrl(images: Image[], size: "sm" | "lg"): string {
@@ -64,7 +65,7 @@ export function shuffleArray<T>(arr: T[]): T[] {
   return result;
 }
 
-export function wrapSlice<T>(arr: T[], start: number, end: number): T[] {
+export function sliceArrayWrapped<T>(arr: T[], start: number, end: number): T[] {
   const len = arr.length;
   const actualStart = start % len;
 

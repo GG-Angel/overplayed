@@ -1,7 +1,8 @@
 import Divider from "@/components/ui/Divider";
 import Kbd from "@/components/ui/Kbd";
 import Modal from "@/components/ui/Modal";
-import PillButton from "@/components/ui/PillButton";
+import PillButton from "@/components/ui/buttons/PillButton";
+import CardHeading from "@/components/ui/cards/CardHeading";
 import {
   formatShortcutKey,
   MODAL_SHORTCUTS,
@@ -38,9 +39,7 @@ const ShortcutsHelp = ({ open, onOpen, onClose }: ShortcutsHelpProps) => {
       </PillButton>
       {open && (
         <Modal onClose={onClose} className="flex flex-col gap-4 max-w-md">
-          <h2 className="flex items-center gap-2">
-            <Keyboard className="shrink-0" /> Keyboard Shortcuts
-          </h2>
+          <CardHeading icon={Keyboard}>Keyboard Shortcuts</CardHeading>
           <Divider />
           <dl className="grid grid-cols-[1fr_auto] items-center gap-x-6 gap-y-2">
             {SHORTCUT_LIST.map(({ keys, label }) => (

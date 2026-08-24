@@ -1,29 +1,31 @@
-from urllib.parse import quote
+from urllib.parse import urlencode
 
+from core.errors import InvalidTokenError, UnknownUserError
 from core.limiter import limiter
-from fastapi import (
-    APIRouter,
-    BackgroundTasks,
-    Depends,
-    HTTPException,
-    Request,
-    Response,
-    status,
-)
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
-from models.requests import QueueAccessRequest
+from loguru import logger
+from models.requests import AccessRequest
 from models.responses import (
-    AccessRequestResponse,
+    AccessStatusResponse,
     ActiveUserStatusResponse,
+    ConfirmationPendingResponse,
     QueuedUserStatusResponse,
     QueueOverviewResponse,
 )
-from services.queue import EmailService, QueueService, QueueUserStatus
+from services.queue import QueueService
 from services.turnstile import TurnstileVerifier
 from settings import settings
-from state import get_queue_emailer, get_queue_service, get_turnstile_verifier
+from state import get_queue_service, get_turnstile_verifier
 
 router = APIRouter()
+
+
+def access_redirect(**params: str) -> RedirectResponse:
+    """Redirect to the frontend access page with the given query parameters."""
+    return RedirectResponse(
+        url=f"{settings.app_frontend_url}/access?{urlencode(params)}"
+    )
 
 
 @router.get("/overview")
@@ -34,9 +36,10 @@ async def get_overview(
 ) -> QueueOverviewResponse:
     overview = await service.get_queue_overview()
     return QueueOverviewResponse(
-        num_active=len(overview.active_users),
-        num_queued=len(overview.queued_users),
-        user_limit=overview.user_limit,
+        total_slots=overview.user_limit,
+        filled_slots=overview.filled_slots,
+        open_slots=overview.open_slots,
+        num_waiting=overview.num_waiting,
         next_available_time=overview.next_available_time,
     )
 
@@ -47,68 +50,10 @@ async def get_user_status(
     request: Request,
     email: str,
     service: QueueService = Depends(get_queue_service),
-) -> ActiveUserStatusResponse | QueuedUserStatusResponse:
+) -> AccessStatusResponse:
     status = await service.get_user_status(email)
     if status is None:
-        raise HTTPException(status_code=404)
-    return _status_response(email, status)
-
-
-@router.post("/requests")
-@limiter.limit("5/hour")
-async def request_access(
-    request: Request,
-    response: Response,
-    form: QueueAccessRequest,
-    background_tasks: BackgroundTasks,
-    service: QueueService = Depends(get_queue_service),
-    emailer: EmailService = Depends(get_queue_emailer),
-    turnstile: TurnstileVerifier = Depends(get_turnstile_verifier),
-) -> AccessRequestResponse | ActiveUserStatusResponse | QueuedUserStatusResponse:
-    if not settings.app_debug:
-        await turnstile.validate_request(request, form)
-
-    user_status = await service.get_user_status(form.email)
-    if user_status is not None:
-        response.status_code = status.HTTP_200_OK
-        return _status_response(form.email, user_status)
-
-    if await emailer.has_pending_token(form.email):
-        response.status_code = status.HTTP_409_CONFLICT
-        return AccessRequestResponse(status="confirmation_pending", email=form.email)
-
-    background_tasks.add_task(emailer.register_user, form.email)
-    response.status_code = status.HTTP_202_ACCEPTED
-    return AccessRequestResponse(status="confirmation_sent", email=form.email)
-
-
-@router.get("/verifications/{token}")
-@limiter.limit("5/hour")
-async def verify_token(
-    request: Request,
-    token: str,
-    service: QueueService = Depends(get_queue_service),
-    emailer: EmailService = Depends(get_queue_emailer),
-):
-    """Verify a one-time token and enqueue the user if valid."""
-    email = await emailer.resolve_email_from_token(token)
-    if email is None:
-        return RedirectResponse(
-            url=f"{settings.app_frontend_url}/access?error=invalid_token",
-            status_code=status.HTTP_302_FOUND,
-        )
-
-    await service.enqueue_user(email)
-    return RedirectResponse(
-        url=f"{settings.app_frontend_url}/access?email={quote(email)}",
-        status_code=status.HTTP_302_FOUND,
-    )
-
-
-def _status_response(
-    email: str, status: QueueUserStatus
-) -> ActiveUserStatusResponse | QueuedUserStatusResponse:
-    """Map an internal user status onto its public response DTO."""
+        raise HTTPException(status_code=404, detail=f"{email} has not been registered.")
     match status.status:
         case "active":
             return ActiveUserStatusResponse(
@@ -120,3 +65,48 @@ def _status_response(
                 position_in_queue=status.position,
                 estimated_start_time=status.start_time,
             )
+        case "confirmation_pending":
+            return ConfirmationPendingResponse(
+                status="confirmation_pending",
+                email=email,
+            )
+
+
+@router.post("/requests")
+@limiter.limit("5/hour")
+async def request_access(
+    request: Request,
+    form: AccessRequest,
+    service: QueueService = Depends(get_queue_service),
+    turnstile: TurnstileVerifier = Depends(get_turnstile_verifier),
+) -> None:
+    await turnstile.validate_request(request, form)
+    try:
+        await service.register_user(form.email)
+    except UnknownUserError as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Spotify user with email {form.email} does not exist.",
+        ) from e
+
+
+@router.get("/verifications/{token}")
+@limiter.limit("5/hour")
+async def verify_token(
+    request: Request,
+    token: str,
+    service: QueueService = Depends(get_queue_service),
+):
+    """Verify a one-time token and enqueue the user if valid."""
+    try:
+        email = await service.verify_and_enqueue_user(token)
+    except InvalidTokenError as e:
+        logger.info(f"Rejected verification token: {e}")
+        return access_redirect(error="invalid_token")
+    except UnknownUserError as e:
+        logger.info(f"Rejected verified user: {e}")
+        return access_redirect(error="unknown_user")
+    except Exception as e:
+        logger.error(f"Failed to verify token: {e}")
+        return access_redirect(error="verification_failed")
+    return access_redirect(email=email)

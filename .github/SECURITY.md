@@ -23,8 +23,7 @@ once it's published.
 In scope:
 
 - The Overplayed web client
-- `api-overplayed.gaelangel.com` (API)
-- `queue-overplayed.gaelangel.com` (queue service)
+- `api-overplayed.gaelangel.com` (API at `/api`, queue service at `/queue`)
 - Source code in this repository, including CI/CD workflows and deployment configuration
 
 Out of scope:

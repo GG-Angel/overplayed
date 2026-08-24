@@ -2,16 +2,11 @@ import { Square, SquareCheckBig } from "lucide-react";
 
 type CheckboxProps = {
   enabled: boolean;
-  onEnabledChange: (() => void) | undefined;
 };
 
-const Checkbox = ({ enabled, onEnabledChange }: CheckboxProps) => {
-  const Icon = enabled ? SquareCheckBig : Square;
-  return (
-    <button onClick={onEnabledChange} className="cursor-pointer text-primary">
-      <Icon />
-    </button>
-  );
+const Checkbox = ({ enabled }: CheckboxProps) => {
+  const CheckboxIcon = enabled ? SquareCheckBig : Square;
+  return <CheckboxIcon className="shrink-0 text-primary" aria-hidden />;
 };
 
 export default Checkbox;

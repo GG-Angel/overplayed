@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 
 from aiohttp import ClientSession
 from core.limiter import limiter
-from fastapi import FastAPI, Response, status
+from fastapi import APIRouter, FastAPI, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from redis.asyncio import ConnectionPool, Redis
 from routes import queue
@@ -56,7 +56,6 @@ async def lifespan(app: FastAPI):
         app.state[APP_STATE_KEY] = State(
             queue_service=queue_service,
             queue_worker=queue_worker,
-            queue_emailer=queue_emailer,
             turnstile_verifier=turnstile_verifier,
         )
 
@@ -86,14 +85,18 @@ def build_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    app.include_router(queue.router, prefix="/queue", tags=["queue"])
+    root = APIRouter(prefix="/queue")
 
-    @app.get("/")
+    root.include_router(queue.router, tags=["queue"])
+
+    @root.get("/health")
     def handle_healthcheck():
         return "ok!"
 
-    @app.get("/favicon.ico")
+    @root.get("/favicon.ico")
     def handle_favicon():
         return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+    app.include_router(root)
 
     return app

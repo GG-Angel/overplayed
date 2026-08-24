@@ -3,7 +3,6 @@ import z from "zod";
 const createEnv = () => {
   const EnvSchema = z.object({
     API_BASE_URL: z.url(),
-    QUEUE_BASE_URL: z.url(),
     CLOUDFLARE_SITE_KEY: z.string().min(1),
   });
 

@@ -16,7 +16,7 @@ def build_spotify_oauth() -> SpotifyOAuth:
     return SpotifyOAuth(
         client_id=settings.spotify_client_id,
         client_secret=settings.spotify_client_secret,
-        redirect_uri=settings.app_callback_url,
+        redirect_uri=f"{settings.app_api_url}/api/auth/callback",
         scope=settings.spotify_scope,
         cache_handler=NoOpCacheHandler(),
     )

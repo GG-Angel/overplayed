@@ -4,6 +4,7 @@ from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock
 
 import pytest
+from core.errors import UnknownUserError
 from core.lock import DistributedLock
 from models.queue import (
     ActiveUserStatus,
@@ -62,6 +63,7 @@ def create_harness(*, user_limit: int = 1, retry_limit: int = 2) -> QueueService
 
     emailer = AsyncMock(spec=EmailService)
     emailer.send_onboarded_email.return_value = True
+    emailer.has_pending_token.return_value = False
 
     queue = AsyncMock(spec=QueueRepository)
     queue.dump.return_value = []
@@ -139,11 +141,41 @@ async def test_get_queue_overview_estimates_next_available_time() -> None:
     assert overview.next_available_time == NOW + timedelta(minutes=90)
 
 
+async def test_get_queue_overview_counts_slots_when_full() -> None:
+    harness = create_harness(user_limit=2)
+    harness.user_manager.get_users.return_value = [
+        spotify_user("active@example.com"),
+        spotify_user("other@example.com"),
+    ]
+    harness.queue.dump.return_value = [
+        queued_user("queued@example.com"),
+        queued_user("later@example.com"),
+    ]
+
+    overview = await harness.service.get_queue_overview()
+
+    assert overview.filled_slots == 2
+    assert overview.open_slots == 0
+    assert overview.num_waiting == 2
+
+
+async def test_get_queue_overview_counts_slots_when_open() -> None:
+    harness = create_harness(user_limit=3)
+    harness.user_manager.get_users.return_value = [spotify_user("active@example.com")]
+
+    overview = await harness.service.get_queue_overview()
+
+    assert overview.filled_slots == 1
+    assert overview.open_slots == 2
+    assert overview.num_waiting == 0
+    assert overview.next_available_time is None
+
+
 async def test_enqueue_user_rejects_unknown_spotify_user() -> None:
     harness = create_harness()
     harness.user_validator.user_exists.return_value = False
 
-    with pytest.raises(ValueError, match="missing@example.com does not exist"):
+    with pytest.raises(UnknownUserError, match="missing@example.com does not exist"):
         await harness.service.enqueue_user("missing@example.com")
 
     harness.lock.__aenter__.assert_not_awaited()
@@ -158,13 +190,9 @@ async def test_enqueue_user_adds_and_activates_new_user() -> None:
     harness.user_manager.add_user.return_value = active
     harness.user_manager.get_user.return_value = active
 
-    status = await harness.service.enqueue_user(queued.email)
+    await harness.service.enqueue_user(queued.email)
     await asyncio.sleep(0)
 
-    assert status == ActiveUserStatus(
-        user=active,
-        end_time=NOW + timedelta(seconds=USER_TTL),
-    )
     harness.queue.push.assert_awaited_once_with(queued.email)
     harness.user_manager.add_user.assert_awaited_once_with(
         SpotifyUserCreationRequest(name=queued.email, email=queued.email)

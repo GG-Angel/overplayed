@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import Card from "../Card";
 import { cn } from "@/lib/utils";
+import Card from "../cards/Card";
 
 type DropdownMenuProps = {
   children: ReactNode;

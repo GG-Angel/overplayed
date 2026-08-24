@@ -1,6 +1,6 @@
+import AccessPill from "@/features/session/components/AccessPill";
+import UserMenu from "@/features/session/components/UserMenu";
 import Logo from "../ui/Logo";
-import UserMenu from "@/features/user/components/UserMenu";
-import AccessPill from "@/features/user/components/AccessPill";
 
 const Navbar = () => {
   return (
