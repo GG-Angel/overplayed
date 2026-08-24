@@ -61,7 +61,7 @@
   }
 
   #root {
-    @apply max-w-none box-border w-screen;
+    @apply box-border w-screen;
     padding-inline: max(1rem, calc((100vw - 72rem) / 2));
   }
 
