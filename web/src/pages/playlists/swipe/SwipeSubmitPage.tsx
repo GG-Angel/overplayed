@@ -1,26 +1,43 @@
 import MessageState from "@/components/states/MessageState";
 import { Spinner } from "@/components/ui/Spinner";
 import { KAOMOJIS } from "@/lib/constants";
-import useSubmitSwipes from "@/features/swipe/hooks/useSubmitSwipes";
 import { useSwipeContext } from "@/features/swipe/provider/SwipeContext";
 import useConfetti from "@/hooks/useConfetti";
+import { removeFromStorage, storageKeys } from "@/lib/storage";
 import { formatPercentage, openExternalUrl } from "@/lib/utils";
 import { ExternalLink, Home, Play, RotateCcw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useSubmitSwipes } from "@/api/mutations";
+import { useEffect } from "react";
 
 const SwipeSubmitPage = () => {
   const navigate = useNavigate();
-  const { playlist, session } = useSwipeContext();
-  const controller = useSubmitSwipes();
+  const { playlist, session, options, setHasSubmitted } = useSwipeContext();
+  const { mutate, isSuccess, isError, data } = useSubmitSwipes(playlist.id, {
+    options,
+    uris: session.dislikes.map((t) => t.uri),
+    tracks_swiped: session.swipes.length,
+  });
 
   // show confetti on success
-  useConfetti({ enabled: controller.isSuccess });
+  useConfetti({ enabled: isSuccess });
+
+  // submit swipes on page load
+  useEffect(() => {
+    mutate();
+  }, []);
+
+  useEffect(() => {
+    if (!isSuccess) return;
+    setHasSubmitted(true);
+    removeFromStorage(sessionStorage, storageKeys.swipes(playlist.id, playlist.snapshot_id));
+  }, [isSuccess, playlist.id, playlist.snapshot_id, setHasSubmitted]);
 
   const navigateHome = () => navigate("/", { replace: true });
   const navigateToSwipePage = () => navigate("..");
 
-  if (controller.isSuccess) {
-    const backupPlaylist = controller.data?.backup_playlist;
+  if (isSuccess) {
+    const backupPlaylist = data.backup_playlist;
     const dislikePercentage =
       playlist.tracks.total > 0 ? session.dislikes.length / playlist.tracks.total : 0;
 
@@ -52,7 +69,7 @@ const SwipeSubmitPage = () => {
     );
   }
 
-  if (controller.isError) {
+  if (isError) {
     return (
       <MessageState
         kaomoji={KAOMOJIS.stressed}
@@ -66,13 +83,13 @@ const SwipeSubmitPage = () => {
         }
         actions={[
           { label: "Return Home", icon: Home, variant: "secondary", onClick: navigateHome },
-          { label: "Try Again", icon: RotateCcw, variant: "primary", onClick: controller.retry },
+          { label: "Try Again", icon: RotateCcw, variant: "primary", onClick: mutate },
         ]}
       />
     );
   }
 
-  if (!controller.hasDislikes) {
+  if (session.dislikes.length === 0) {
     return (
       <MessageState
         kaomoji={KAOMOJIS.uncertain}
