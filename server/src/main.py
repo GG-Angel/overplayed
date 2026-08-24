@@ -1,3 +1,4 @@
+import logging
 import asyncio
 
 import uvicorn
@@ -25,9 +26,12 @@ async def main():
             metrics_app,
             host="0.0.0.0",
             port=9090,
-            log_level="warning",
         ),
     ]
+
+    logging.getLogger("uvicorn.access").addFilter(
+        lambda record: "/metrics" not in record.getMessage()
+    )
 
     await asyncio.wait(
         [asyncio.create_task(uvicorn.Server(config).serve()) for config in configs],
