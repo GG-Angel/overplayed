@@ -1,5 +1,5 @@
 import asyncio
-from urllib.parse import urlencode, urlsplit, urlunsplit
+from urllib.parse import urlsplit, urlunsplit
 
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse, RedirectResponse
@@ -44,8 +44,7 @@ async def handle_callback(
     """Exchanges the OAuth code for an access token and starts a new session."""
 
     def redirect_error() -> RedirectResponse:
-        params = urlencode({"error": "login_failed"})
-        return RedirectResponse(f"{settings.frontend_url}/request-access?{params}")
+        return RedirectResponse(f"{settings.app_frontend_url}/access?error=no_access")
 
     redirect_to = state or "/"
     if error or not code or not _is_valid_redirect_path(redirect_to):
@@ -62,7 +61,7 @@ async def handle_callback(
         return redirect_error()
 
     response = RedirectResponse(
-        url=_build_redirect_url(settings.frontend_url, redirect_to)
+        url=_build_redirect_url(settings.app_frontend_url, redirect_to)
     )
     response.set_cookie(
         key="session_id",
@@ -70,7 +69,7 @@ async def handle_callback(
         httponly=True,
         samesite="lax",
         max_age=settings.ttl_sessions,
-        secure=not settings.debug,
+        secure=not settings.app_debug,
     )
     logger.info(f"Authorized user: {user.display_name}")
     return response
@@ -95,7 +94,7 @@ async def handle_logout(
         key="session_id",
         httponly=True,
         samesite="lax",
-        secure=not settings.debug,
+        secure=not settings.app_debug,
     )
     return response
 

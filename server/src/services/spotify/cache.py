@@ -1,6 +1,6 @@
 from secrets import token_urlsafe
 
-from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+from cryptography.fernet import Fernet
 from loguru import logger
 from pydantic import TypeAdapter
 
@@ -24,7 +24,7 @@ class SpotifyCache:
         ttl_playlist_tracks: int,
     ):
         self._client = redis
-        self._codec = Codec(AESGCM(redis_key))
+        self._codec = Codec(Fernet(redis_key))
         self._ttl_sessions = ttl_sessions
         self._ttl_users = ttl_users
         self._ttl_playlists = ttl_playlists

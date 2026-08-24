@@ -1,7 +1,7 @@
 from types import TracebackType
 from typing import Self
 
-from errors import QueueLockError
+from core.errors import QueueLockError
 from loguru import logger
 from redis.asyncio import Redis
 from redis.exceptions import LockError
@@ -13,14 +13,13 @@ class DistributedLock:
     def __init__(
         self,
         redis: Redis,
-        name: str,
         *,
         timeout: float = 45,
-        blocking_timeout: float | None = 10,
+        blocking_timeout: float = 10,
     ):
-        self._name = name
+        self._key = "queue:lock"
         self._lock = redis.lock(
-            name,
+            self._key,
             timeout=timeout,
             blocking_timeout=blocking_timeout,
         )
@@ -29,7 +28,7 @@ class DistributedLock:
         acquired = await self._lock.acquire()
         if not acquired:
             raise QueueLockError(
-                f"Could not acquire lock '{self._name}' in time; try again."
+                f"Could not acquire lock '{self._key}' in time; try again."
             )
         return self
 
@@ -42,4 +41,4 @@ class DistributedLock:
         try:
             await self._lock.release()
         except LockError:
-            logger.warning(f"Lock '{self._name}' was already released or expired.")
+            logger.warning(f"Lock '{self._key}' was already released or expired.")

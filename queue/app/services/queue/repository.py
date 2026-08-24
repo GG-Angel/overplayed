@@ -1,24 +1,33 @@
+from collections.abc import Callable
 from datetime import UTC, datetime
 
 from loguru import logger
-from models import QueuedUser
+from models.queue import QueuedUser, QueuedUserPosition
 from redis.asyncio import Redis
-from services.queue.models import QueueEntry
+
+
+def utc_now() -> datetime:
+    return datetime.now(UTC)
 
 
 class QueueRepository:
     """Repository for managing the queue of users in Redis."""
 
-    def __init__(self, redis: Redis):
+    def __init__(
+        self,
+        redis: Redis,
+        now_factory: Callable[[], datetime] = utc_now,
+    ):
         self._redis = redis
         self._queue_key = "queue:queued_users"
+        self._now_factory = now_factory
 
     async def push(self, email: str) -> int:
         """Push a new user to the back of the queue and return their position."""
         entry = QueuedUser(
             email=email,
             retries=0,
-            created_at=datetime.now(UTC),
+            created_at=self._now_factory(),
         )
         position = await self._redis.rpush(self._queue_key, entry.model_dump_json())
         logger.debug(f"Queued user: {email} (position: {position})")
@@ -46,11 +55,11 @@ class QueueRepository:
         entries = await self._redis.lrange(self._queue_key, 0, -1)
         return [QueuedUser.model_validate_json(entry) for entry in entries]
 
-    async def get(self, email: str) -> QueueEntry | None:
+    async def get(self, email: str) -> QueuedUserPosition | None:
         """Get a queued user by email, or None if they are not queued."""
         for i, user in enumerate(await self.dump()):
             if user.email == email:
-                return QueueEntry(user=user, position=i + 1)
+                return QueuedUserPosition(user=user, position=i + 1)
         return None
 
     async def has(self, email: str) -> bool:
@@ -60,3 +69,8 @@ class QueueRepository:
     async def size(self) -> int:
         """Get the size of the queue."""
         return await self._redis.llen(self._queue_key)
+
+
+def build_queue_repository(redis: Redis) -> QueueRepository:
+    """Build a QueueRepository backed by Redis."""
+    return QueueRepository(redis)

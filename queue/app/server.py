@@ -2,17 +2,20 @@ from contextlib import asynccontextmanager
 
 from aiohttp import ClientSession
 from core.limiter import limiter
-from cryptography.fernet import Fernet
 from fastapi import FastAPI, Response, status
 from fastapi.middleware.cors import CORSMiddleware
-from locking import DistributedLock
 from redis.asyncio import ConnectionPool, Redis
 from routes import queue
-from services.queue import QueueRepository, QueueService, QueueWorker
+from services.queue import (
+    build_email_service,
+    build_queue_repository,
+    build_queue_service,
+    build_queue_worker,
+)
 from services.spotify import (
-    SpotifyTokenProvider,
-    SpotifyUserManager,
-    SpotifyUserValidator,
+    build_spotify_token_provider,
+    build_spotify_user_manager,
+    build_spotify_user_validator,
 )
 from services.turnstile import TurnstileVerifier
 from settings import APP_STATE_KEY, settings
@@ -32,22 +35,19 @@ async def lifespan(app: FastAPI):
     redis = Redis(connection_pool=redis_pool)
 
     try:
-        crypto = Fernet(key=settings.redis_key)
+        token_provider = build_spotify_token_provider(http, redis)
+        user_validator = await build_spotify_user_validator(http)
 
-        token_provider = SpotifyTokenProvider(
-            http, redis, crypto, settings.spotify_auth_client_id
+        queue_emailer = build_email_service(redis)
+        queue_repository = build_queue_repository(redis)
+        queue_service = build_queue_service(
+            build_spotify_user_manager(http, redis, token_provider),
+            user_validator,
+            queue_emailer,
+            queue_repository,
+            redis,
         )
-
-        queue_service = QueueService(
-            SpotifyUserManager(
-                http, redis, token_provider, settings.spotify_app_client_id
-            ),
-            await SpotifyUserValidator.create(http),
-            QueueRepository(redis),
-            DistributedLock(redis, "queue:lock", timeout=45, blocking_timeout=10),
-        )
-
-        queue_worker = QueueWorker(queue_service)
+        queue_worker = build_queue_worker(queue_service)
 
         turnstile_verifier = TurnstileVerifier(
             http, settings.cloudflare_turnstile_secret
@@ -56,6 +56,7 @@ async def lifespan(app: FastAPI):
         app.state[APP_STATE_KEY] = State(
             queue_service=queue_service,
             queue_worker=queue_worker,
+            queue_emailer=queue_emailer,
             turnstile_verifier=turnstile_verifier,
         )
 
@@ -79,7 +80,7 @@ def build_app() -> FastAPI:
     # cors
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[settings.frontend_url],
+        allow_origins=[settings.app_frontend_url],
         allow_credentials=True,
         allow_methods=["GET", "POST", "DELETE"],
         allow_headers=["*"],

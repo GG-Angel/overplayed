@@ -160,8 +160,8 @@ const queueUserInQueueSchema = z.object({
   estimated_start_time: z.iso.datetime(),
 });
 
-const queueUserNotInQueueSchema = z.object({
-  status: z.literal("not_in_queue"),
+const confirmationSentSchema = z.object({
+  status: z.literal("confirmation_sent"),
   email: z.email(),
 });
 
@@ -170,13 +170,12 @@ export const queueUserStatusSchema = z.discriminatedUnion("status", [
   queueUserInQueueSchema,
 ]);
 
-export const queueUserAccessSchema = z.discriminatedUnion("status", [
-  queueUserActiveSchema,
-  queueUserInQueueSchema,
-  queueUserNotInQueueSchema,
+export const queueAccessResponseSchema = z.discriminatedUnion("status", [
+  confirmationSentSchema,
+  queueUserStatusSchema,
 ]);
 
 export type QueueAccessRequest = z.infer<typeof accessRequestFormSchema>;
 export type QueueOverview = z.infer<typeof queueOverviewSchema>;
 export type QueueUserStatus = z.infer<typeof queueUserStatusSchema>;
-export type QueueUserAccess = z.infer<typeof queueUserAccessSchema>;
+export type QueueAccessResponse = z.infer<typeof queueAccessResponseSchema>;

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from fastapi import Request
-from services.queue import QueueService, QueueWorker
+from services.queue import EmailService, QueueService, QueueWorker
 from services.turnstile import TurnstileVerifier
 from settings import APP_STATE_KEY
 
@@ -10,6 +10,7 @@ from settings import APP_STATE_KEY
 class State:
     queue_service: QueueService
     queue_worker: QueueWorker
+    queue_emailer: EmailService
     turnstile_verifier: TurnstileVerifier
 
 
@@ -26,3 +27,8 @@ def get_queue_service(request: Request) -> QueueService:
 def get_turnstile_verifier(request: Request) -> TurnstileVerifier:
     """Get the Turnstile verifier from the application state."""
     return get_state(request).turnstile_verifier
+
+
+def get_queue_emailer(request: Request) -> EmailService:
+    """Get the queue emailer from the application state."""
+    return get_state(request).queue_emailer

@@ -5,24 +5,41 @@ APP_STATE_KEY = "APP_STATE"
 
 
 class Settings(BaseSettings):
-    debug: bool = False
+    # App settings
+    app_debug: bool = False
+    app_frontend_url: str = Field(...)
+    app_queue_url: str = Field(...)
 
-    frontend_url: str = Field(...)
-
-    spotify_app_client_id: str = Field(...)
+    # Spotify settings
+    spotify_client_id: str = Field(...)
     spotify_auth_client_id: str = Field(...)
     spotify_refresh_token: str = Field(...)
 
+    # Redis settings
     redis_user: str = Field(...)
     redis_host: str = Field(...)
     redis_port: int = Field(...)
     redis_password: str = Field(...)
-    redis_key: bytes = Field(..., min_length=44, max_length=44)
+    redis_key: str = Field(..., min_length=44, max_length=44)
 
+    # Secrets
     cloudflare_turnstile_secret: str = Field(...)
+    resend_api_key: str = Field(...)
+
+    # TTLs
+    ttl_email_ott: int = 60 * 15  # 15 minutes
+    ttl_spotify_users: int = 60 * 5  # 5 minutes
+    ttl_queue_users: int = 60 * 60 * 24  # 24 hours
+
+    # Queue limits
+    queue_user_limit: int = 5
+    queue_retry_limit: int = 3
+    queue_poll_interval: int = 60 * 5  # 5 minutes
 
     model_config = SettingsConfigDict(
-        env_file=".env", extra="ignore", case_sensitive=False
+        env_file=".env",
+        extra="ignore",
+        case_sensitive=False,
     )
 
     @property

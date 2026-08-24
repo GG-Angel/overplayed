@@ -1,22 +1,16 @@
-from aiohttp import ClientSession
-from errors import SpotifyValidationError
+from core.errors import SpotifyValidationError
+from services.spotify.http import SpotifyHttpClient
 
 
 class SpotifyUserValidator:
     """A class to validate if a Spotify user exists by checking their email address."""
 
-    def __init__(self, http: ClientSession, signup_form_key: str):
-        self._http = http
+    def __init__(self, http_client: SpotifyHttpClient, signup_form_key: str):
+        self._http = http_client
         self._signup_form_key = signup_form_key
 
-    @classmethod
-    async def create(cls, http: ClientSession) -> "SpotifyUserValidator":
-        """Create an instance of SpotifyUserValidator with a valid signup form key."""
-        signup_form_key = await cls.get_signup_form_key(http)
-        return cls(http, signup_form_key)
-
     @staticmethod
-    async def get_signup_form_key(http: ClientSession) -> str:
+    async def get_signup_form_key(http: SpotifyHttpClient) -> str:
         """Fetch the signup form key from Spotify's signup page."""
         async with http.get("https://www.spotify.com/us/signup") as response:
             text = await response.text()
@@ -58,3 +52,14 @@ class SpotifyUserValidator:
             # if we haven't retried yet, refresh the signup form key and try again
             self._signup_form_key = await self.get_signup_form_key(self._http)
             return await self.user_exists(email, _retried=True)
+
+
+async def build_spotify_user_validator(
+    http_client: SpotifyHttpClient,
+) -> SpotifyUserValidator:
+    """Build a SpotifyUserValidator with a current signup form key."""
+    signup_form_key = await SpotifyUserValidator.get_signup_form_key(http_client)
+    return SpotifyUserValidator(
+        http_client=http_client,
+        signup_form_key=signup_form_key,
+    )

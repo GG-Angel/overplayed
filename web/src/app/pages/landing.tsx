@@ -59,7 +59,7 @@ const CallToAction = () => {
       {!isLoading &&
         (user ? (
           <Button
-            key="view-playlists"
+            key="view-playlists-btn"
             className="self-center"
             size="lg"
             icon={<SpotifyIcon className="size-5 shrink-0" />}
@@ -70,7 +70,7 @@ const CallToAction = () => {
         ) : (
           <>
             <Button
-              key="request-access"
+              key="request-access-btn"
               icon={<Key className="size-5 shrink-0" />}
               className={cn(
                 "overflow-visible group relative flex items-center",
@@ -78,7 +78,7 @@ const CallToAction = () => {
               )}
               size="lg"
               variant={hasRequestedAccess ? "secondary" : "primary"}
-              onClick={() => navigate("/request-access")}
+              onClick={() => navigate("/access")}
             >
               Request Access
               <motion.div

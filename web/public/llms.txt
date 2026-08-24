@@ -7,7 +7,7 @@ Overplayed is a React single-page app that lets you log in with Spotify, pick an
 ## Pages
 
 - [Landing](https://overplayed.gaelangel.com/): Product overview, live swipe demo, three-step explanation, and global swipe statistics.
-- [Request access](https://overplayed.gaelangel.com/request-access): Form to request an invite (protected by Cloudflare Turnstile) before logging in with Spotify.
+- [Request access](https://overplayed.gaelangel.com/access): Form to request an invite (protected by Cloudflare Turnstile) before logging in with Spotify.
 - [Statistics](https://overplayed.gaelangel.com/statistics): Personal swipe metrics for the logged-in user (auth required).
 - [Playlists](https://overplayed.gaelangel.com/playlists): Select a Spotify playlist to clean up (auth required).
 - [Swipe](https://overplayed.gaelangel.com/playlists/:playlistId/swipe): Swipe through a playlist's tracks with 30-second audio previews (auth required).

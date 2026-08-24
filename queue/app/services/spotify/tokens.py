@@ -1,15 +1,33 @@
-from aiohttp import ClientSession
+from typing import Protocol
+
+from core.errors import SpotifyTokenError
 from cryptography.fernet import Fernet
-from errors import SpotifyTokenError
 from loguru import logger
-from pydantic import BaseModel
+from models.spotify import SpotifyTokenResponse
 from redis.asyncio import Redis
+from services.spotify.http import SpotifyHttpClient
+from settings import settings
 
 
-class Token(BaseModel):
-    access_token: str
-    refresh_token: str
-    expires_in: int
+class TokenCipher(Protocol):
+    """Structural interface for token encryption."""
+
+    def encrypt(self, data: str) -> str: ...
+
+    def decrypt(self, token: str) -> str: ...
+
+
+class FernetCipher:
+    """A wrapper around Fernet to implement the TokenCipher interface."""
+
+    def __init__(self, key: str):
+        self._fernet = Fernet(key)
+
+    def encrypt(self, data: str) -> str:
+        return self._fernet.encrypt(data.encode()).decode()
+
+    def decrypt(self, token: str) -> str:
+        return self._fernet.decrypt(token).decode()
 
 
 class SpotifyTokenProvider:
@@ -17,9 +35,9 @@ class SpotifyTokenProvider:
 
     def __init__(
         self,
-        http: ClientSession,
+        http: SpotifyHttpClient,
         redis: Redis,
-        crypto: Fernet,
+        crypto: TokenCipher,
         auth_client_id: str,
     ):
         self._http = http
@@ -39,11 +57,12 @@ class SpotifyTokenProvider:
         try:
             token = await self._renew_token(refresh_token)
             await self._persist_token(token)
-            logger.success("Seeded refresh token.")
         except Exception as e:
             raise SpotifyTokenError(
                 "Failed to seed refresh token. Please renew your app's Spotify credentials."
             ) from e
+
+        logger.success("Seeded refresh token.")
 
     async def get_token(self) -> str:
         """Get a valid access token for Spotify's user management API."""
@@ -65,7 +84,7 @@ class SpotifyTokenProvider:
                 "Failed to renew access token. Please renew your app's Spotify credentials."
             ) from e
 
-    async def _renew_token(self, refresh_token: str) -> Token:
+    async def _renew_token(self, refresh_token: str) -> SpotifyTokenResponse:
         """Renew the access token using the refresh token."""
         async with self._http.post(
             self._token_url,
@@ -76,16 +95,16 @@ class SpotifyTokenProvider:
                 "client_id": self._auth_client_id,
             },
         ) as response:
-            return Token.model_validate(await response.json())
+            return SpotifyTokenResponse.model_validate(await response.json())
 
-    async def _persist_token(self, token: Token) -> None:
+    async def _persist_token(self, token: SpotifyTokenResponse) -> None:
         """Save the access and refresh tokens to Redis."""
         ttl = max(token.expires_in - 60, 1)  # expire early, must stay positive
         await self._redis.set(
-            self._access_token_key, self._encrypt(token.access_token), ex=ttl
+            self._access_token_key, self._crypto.encrypt(token.access_token), ex=ttl
         )
         await self._redis.set(
-            self._refresh_token_key, self._encrypt(token.refresh_token)
+            self._refresh_token_key, self._crypto.encrypt(token.refresh_token)
         )
         logger.debug(f"Stored access token (ttl={ttl}s) and refresh token.")
 
@@ -94,10 +113,19 @@ class SpotifyTokenProvider:
         encrypted = await self._redis.get(key)
         if encrypted is None:
             return None
-        return self._decrypt(encrypted)
+        if isinstance(encrypted, bytes):
+            encrypted = encrypted.decode()
+        return self._crypto.decrypt(encrypted)
 
-    def _encrypt(self, plaintext: str) -> str:
-        return self._crypto.encrypt(plaintext.encode()).decode()
 
-    def _decrypt(self, encrypted: str | bytes) -> str:
-        return self._crypto.decrypt(encrypted).decode()
+def build_spotify_token_provider(
+    http: SpotifyHttpClient,
+    redis: Redis,
+) -> SpotifyTokenProvider:
+    """Build a SpotifyTokenProvider wired to real encryption and app settings."""
+    return SpotifyTokenProvider(
+        http=http,
+        redis=redis,
+        crypto=FernetCipher(settings.redis_key),
+        auth_client_id=settings.spotify_auth_client_id,
+    )

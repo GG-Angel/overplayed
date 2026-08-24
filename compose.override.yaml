@@ -2,10 +2,18 @@ services:
   server:
     build:
       context: ./server
+    environment:
+      - APP_DEBUG=true
+      - APP_FRONTEND_URL=http://127.0.0.1:5173
+      - APP_CALLBACK_URL=http://127.0.0.1:8080/auth/callback
 
   queue:
     build:
       context: ./queue
+    environment:
+      - APP_DEBUG=true
+      - APP_FRONTEND_URL=http://127.0.0.1:5173
+      - APP_QUEUE_URL=http://127.0.0.1:8081
 
   grafana:
     environment:
@@ -15,7 +23,7 @@ services:
     ports:
       - 127.0.0.1:9090:9090
 
-  db:
+  postgres:
     ports:
       - 127.0.0.1:5432:5432
 

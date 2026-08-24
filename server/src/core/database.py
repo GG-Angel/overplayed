@@ -16,7 +16,7 @@ Base = declarative_base()
 
 
 def build_engine(settings: Settings) -> AsyncEngine:
-    return create_async_engine(settings.db_url, echo=False, future=True)
+    return create_async_engine(settings.postgres_url, echo=False, future=True)
 
 
 def build_sessionmaker(engine: AsyncEngine) -> async_sessionmaker[AsyncSession]:
