@@ -11,9 +11,10 @@ import DropdownMenuDivider from "@/components/ui/dropdown/DropdownMenuDivider";
 import DropdownMenuButton from "@/components/ui/dropdown/DropdownMenuButton";
 import { openExternalUrl } from "@/lib/utils";
 import { ChartLine, ExternalLink, LogOut, User } from "lucide-react";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 const UserMenu = () => {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const { user, isLoading, login, logout, isLoggingOut } = useAuth();
   const navigate = useNavigate();
 
@@ -42,7 +43,9 @@ const UserMenu = () => {
 
   return (
     <Dropdown
-      trigger={({ toggle }) => <Avatar user={user} onClick={toggle} />}
+      trigger={<Avatar user={user} onClick={() => setIsDropdownOpen((prev) => !prev)} />}
+      open={isDropdownOpen}
+      setOpen={setIsDropdownOpen}
       align="right"
       className="h-8"
     >

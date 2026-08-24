@@ -1,21 +1,29 @@
 import useClickOutside from "@/hooks/useClickOutside";
 import { cn } from "@/lib/utils";
-import { useState, type ReactNode } from "react";
+import { type Dispatch, type ReactNode, type SetStateAction } from "react";
 
 type DropdownProps = {
-  trigger: (props: { open: boolean; toggle: () => void }) => ReactNode;
+  open: boolean;
+  setOpen: Dispatch<SetStateAction<boolean>>;
+  trigger: ReactNode;
   children: ReactNode;
   align?: "left" | "right";
   className?: string;
 };
 
-const Dropdown = ({ trigger, children, className, align = "left" }: DropdownProps) => {
-  const [open, setOpen] = useState(false);
+const Dropdown = ({
+  open,
+  setOpen,
+  trigger,
+  children,
+  className,
+  align = "left",
+}: DropdownProps) => {
   const ref = useClickOutside<HTMLDivElement>(() => setOpen(false), open);
 
   return (
     <div ref={ref} className={cn("relative inline-block", className)}>
-      {trigger({ open, toggle: () => setOpen((o) => !o) })}
+      {trigger}
       {open && (
         <div className="absolute top-[calc(100%+8px)] z-50" style={{ [align]: 0 }}>
           {children}

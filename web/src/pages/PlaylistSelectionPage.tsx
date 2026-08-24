@@ -93,6 +93,7 @@ const PlaylistSelectionPage = () => {
   const [sortKey, setSortKey] = useState<PlaylistSortKey>("tracks");
   const [sortOrder, setSortOrder] = useState<PlaylistSortOrder>("descending");
   const [layout, setLayout] = useState<PlaylistLayout>("card");
+  const [isLayoutDropdownOpen, setIsLayoutDropdownOpen] = useState(false);
   const { data: playlists, isLoading } = usePlaylists();
   const navigate = useNavigate();
 
@@ -136,16 +137,18 @@ const PlaylistSelectionPage = () => {
         <Dropdown
           align="right"
           className="justify-self-end h-full flex items-center justify-end xs:w-36 mr-4.5"
-          trigger={({ toggle }) => (
+          open={isLayoutDropdownOpen}
+          setOpen={setIsLayoutDropdownOpen}
+          trigger={
             <button
               type="button"
               className="flex shrink-0 items-center gap-3 cursor-pointer font-medium hover:scale-105 active:scale-100 text-muted hover:text-foreground transition-all"
-              onClick={toggle}
+              onClick={() => setIsLayoutDropdownOpen((prev) => !prev)}
             >
               <span className="hidden xs:block">{SORT_CONFIG[sortKey].label}</span>
               <List />
             </button>
-          )}
+          }
         >
           <DropdownMenu className="w-64">
             <DropdownMenuSection label="Sort by" />
