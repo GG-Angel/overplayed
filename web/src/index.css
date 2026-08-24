@@ -56,12 +56,13 @@
 
 @layer base {
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-background text-foreground font-sans antialiased overflow-x-hidden;
     -webkit-tap-highlight-color: transparent;
   }
 
   #root {
-    @apply max-w-6xl mx-auto px-4;
+    @apply max-w-none box-border w-screen;
+    padding-inline: max(1rem, calc((100vw - 72rem) / 2));
   }
 
   :focus-visible {
