@@ -2,6 +2,7 @@ import { createContext, useContext, type Dispatch, type SetStateAction } from "r
 import type useSwipes from "../hooks/useSwipes";
 import type { SwipesForm } from "@/types/swipes";
 import type { Playlist, Track } from "@/types/spotify";
+import SwipeProvider from "./SwipeProvider";
 
 export type SwipeContextValues = {
   session: ReturnType<typeof useSwipes<Track>>;
@@ -21,6 +22,8 @@ export const SwipeContext = createContext<SwipeContextValues | null>(null);
 
 export const useSwipeContext = (): SwipeContextValues => {
   const context = useContext(SwipeContext);
-  if (!context) throw new Error("useSwipeContext must be used inside a SwipeProvider");
+  if (!context) {
+    throw new Error(`${useSwipeContext.name} must be used inside a ${SwipeProvider.name}`);
+  }
   return context;
 };

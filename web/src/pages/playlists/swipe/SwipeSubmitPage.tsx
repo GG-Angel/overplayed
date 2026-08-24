@@ -19,13 +19,12 @@ const SwipeSubmitPage = () => {
     tracks_swiped: session.swipes.length,
   });
 
-  // show confetti on success
-  useConfetti({ enabled: isSuccess });
-
   // submit swipes on page load
   useEffect(() => {
     mutate();
   }, []);
+
+  useConfetti({ enabled: isSuccess });
 
   useEffect(() => {
     if (!isSuccess) return;
