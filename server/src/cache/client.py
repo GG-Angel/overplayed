@@ -62,6 +62,23 @@ class RedisClient:
             await pipe.execute()
         logger.debug(f"Cached {len(mapping)} hash entries (ttl={ttl}s)")
 
+    async def sadd(self, key: str, value: str, ttl: int) -> None:
+        await self.redis.sadd(key, value)
+        await self.redis.expire(key, ttl)
+        logger.debug(f"Cached set value (ttl={ttl}s)")
+
+    async def smembers(self, key: str) -> list[str] | None:
+        members = await self.redis.smembers(key)
+        if not members:
+            logger.debug("Cache set miss")
+            return None
+        logger.debug(f"Cache set hit (n={len(members)})")
+        return [m.decode() if isinstance(m, bytes) else m for m in members]
+
+    async def srem(self, key: str, value: str) -> None:
+        await self.redis.srem(key, value)
+        logger.debug("Removed value from cached set")
+
     async def delete(self, *keys: str) -> None:
         await self.redis.delete(*keys)
         logger.debug(f"Deleted {len(keys)} cached value(s)")
