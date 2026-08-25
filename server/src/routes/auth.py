@@ -87,7 +87,9 @@ async def handle_logout(
     """Revoke the session token and delete the cookie on the client."""
     try:
         user = await service.get_current_user()
-        await cache.end_session(session_id, user.email)
+        await cache.end_session(
+            session_id=session_id, user_id=user.id, email=user.email
+        )
     except Exception as e:
         logger.error(f"Failed to log out user: {e}")
         raise HTTPException(detail="Failed to log out.", status_code=500)

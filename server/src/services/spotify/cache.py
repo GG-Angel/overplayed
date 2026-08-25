@@ -52,8 +52,14 @@ class SpotifyCache:
         session = await self._client.get(self._build_session_key_from_id(session_id))
         return self._codec.model(SessionInfo).decrypt(session) if session else None
 
-    async def end_session(self, session_id: str, email: str) -> None:
-        await self._client.delete(self._build_session_key_from_id(session_id))
+    async def end_session(self, session_id: str, user_id: str, email: str) -> None:
+        keys_to_delete = [
+            self._build_session_key_from_id(session_id),
+            self._build_user_key(user_id),
+            self._build_playlists_key(user_id),
+            self._build_playlist_tracks_key(user_id),
+        ]
+        await self._client.delete(*keys_to_delete)
         await self._client.srem(self._build_session_key_from_email(email), session_id)
         logger.info(f"Ended session for email: {email}")
 
