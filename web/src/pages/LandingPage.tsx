@@ -191,7 +191,7 @@ const LandingPage = () => {
   return (
     <Page width="3xl" gap="lg" className="py-8">
       <h1 className="text-center">
-        <span className="block">Your playlist is bloated.</span>
+        <span className="block">Your playlist is bloated.</span>{" "}
         <span className="block text-muted">
           <span className="text-primary">Swipe</span> the dead weight away.
         </span>
