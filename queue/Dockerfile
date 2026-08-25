@@ -7,7 +7,7 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-cache --no-dev
 
-COPY . .
+COPY app ./app
 
 RUN useradd --system --no-create-home appuser && chown -R appuser /app
 USER appuser
