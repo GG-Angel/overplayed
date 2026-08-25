@@ -6,7 +6,6 @@ from urllib.parse import urlsplit, urlunsplit
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse, RedirectResponse
 from loguru import logger
-from redis.asyncio import RedisError
 from spotipy import Spotify, SpotifyOAuth
 
 from core.limiter import limiter
@@ -89,7 +88,8 @@ async def handle_logout(
     try:
         user = await service.get_current_user()
         await cache.end_session(session_id, user.email)
-    except RedisError:
+    except Exception as e:
+        logger.error(f"Failed to log out user: {e}")
         raise HTTPException(detail="Failed to log out.", status_code=500)
 
     response = JSONResponse({"detail": "Logged out successfully."}, status_code=200)
