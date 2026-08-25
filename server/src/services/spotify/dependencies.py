@@ -8,7 +8,7 @@ from cache.client import RedisClient, get_redis_client
 from core.exceptions import UnauthorizedException
 from services.spotify.cache import SpotifyCache
 from services.spotify.client import SpotifyClient
-from services.spotify.models import SessionInfo, TokenInfo
+from services.spotify.models import CurrentUser, SessionInfo, TokenInfo
 from services.spotify.service import SpotifyService
 from settings import Settings
 from state import State, get_oauth, get_settings, get_state
@@ -40,14 +40,24 @@ async def get_spotify_service(
     if not session_id or not (session := await cache.get_session(session_id)):
         raise UnauthorizedException()
 
+    spotify = None
     if _is_token_expired(session.expires_at):
         new_token = await _refresh_token(oauth, session)
-        session = SessionInfo(user_id=session.user_id, **new_token.model_dump())
+        spotify = Spotify(auth=new_token.access_token)
+        user = CurrentUser(**await asyncio.to_thread(spotify.current_user))
+        session = SessionInfo(
+            user_id=session.user_id,
+            email=user.email,
+            **new_token.model_dump(),
+        )
         await cache.set_session(session_id, session)
+
+    if spotify is None:
+        spotify = Spotify(auth=session.access_token)
 
     return SpotifyService(
         spotify=SpotifyClient(
-            spotify=Spotify(auth=session.access_token),
+            spotify=spotify,
             user_id=session.user_id,
             playlist_limit=settings.playlist_limit,
             playlist_tracks_limit=settings.playlist_tracks_limit,

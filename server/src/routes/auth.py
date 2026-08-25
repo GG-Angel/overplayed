@@ -55,7 +55,9 @@ async def handle_callback(
         spotify = Spotify(auth=token_info.access_token)
         user = CurrentUser(**await asyncio.to_thread(spotify.current_user))
 
-        session_info = SessionInfo(user_id=user.id, **token_info.model_dump())
+        session_info = SessionInfo(
+            user_id=user.id, email=user.email, **token_info.model_dump()
+        )
         session_id = await cache.create_session(session_info)
     except Exception:
         return redirect_error()
