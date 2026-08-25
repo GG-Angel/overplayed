@@ -1,3 +1,4 @@
+from services.spotify.service import SpotifyService
 from services.spotify.utils import build_session_info
 import asyncio
 from urllib.parse import urlsplit, urlunsplit
@@ -10,7 +11,7 @@ from spotipy import Spotify, SpotifyOAuth
 
 from core.limiter import limiter
 from services.spotify.cache import SpotifyCache
-from services.spotify.dependencies import get_spotify_cache
+from services.spotify.dependencies import get_spotify_cache, get_spotify_service
 from services.spotify.models import CurrentUser, TokenInfo
 from settings import Settings
 from state import get_oauth, get_settings
@@ -81,11 +82,13 @@ async def handle_logout(
     request: Request,
     session_id: str = Cookie(),
     cache: SpotifyCache = Depends(get_spotify_cache),
+    service: SpotifyService = Depends(get_spotify_service),
     settings: Settings = Depends(get_settings),
 ) -> JSONResponse:
     """Revoke the session token and delete the cookie on the client."""
     try:
-        await cache.end_session(session_id)
+        user = await service.get_current_user()
+        await cache.end_session(session_id, user.email)
     except RedisError:
         raise HTTPException(detail="Failed to log out.", status_code=500)
 
