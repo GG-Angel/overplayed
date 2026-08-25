@@ -1,3 +1,4 @@
+from services.spotify.utils import build_session_info
 import asyncio
 from time import time
 
@@ -37,28 +38,22 @@ async def get_spotify_service(
     cache: SpotifyCache = Depends(get_spotify_cache),
     settings: Settings = Depends(get_settings),
 ) -> SpotifyService:
-    if not session_id or not (session := await cache.get_session(session_id)):
+    if not session_id or not (session_info := await cache.get_session(session_id)):
         raise UnauthorizedException()
 
-    spotify = None
-    if _is_token_expired(session.expires_at):
-        new_token = await _refresh_token(oauth, session)
-        spotify = Spotify(auth=new_token.access_token)
+    if _is_token_expired(session_info.expires_at):
+        new_token_info = await _refresh_token(oauth, session_info)
+        spotify = Spotify(auth=new_token_info.access_token)
         user = CurrentUser(**await asyncio.to_thread(spotify.current_user))
-        session = SessionInfo(
-            user_id=session.user_id,
-            email=user.email,
-            **new_token.model_dump(),
-        )
-        await cache.set_session(session_id, session)
-
-    if spotify is None:
-        spotify = Spotify(auth=session.access_token)
+        session_info = build_session_info(user, new_token_info)
+        await cache.set_session(session_id, session_info)
+    else:
+        spotify = Spotify(auth=session_info.access_token)
 
     return SpotifyService(
         spotify=SpotifyClient(
             spotify=spotify,
-            user_id=session.user_id,
+            user_id=session_info.user_id,
             playlist_limit=settings.playlist_limit,
             playlist_tracks_limit=settings.playlist_tracks_limit,
             get_saved_tracks_limit=settings.get_saved_tracks_limit,
@@ -66,7 +61,7 @@ async def get_spotify_service(
             max_pagination_offset=settings.max_pagination_offset,
         ),
         cache=cache,
-        user_id=session.user_id,
+        user_id=session_info.user_id,
         background_tasks=state.background_tasks,
         track_streams=state.track_streams,
     )

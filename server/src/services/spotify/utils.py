@@ -9,6 +9,8 @@ from services.spotify.models import (
     ExternalUrls,
     Playlist,
     User,
+    SessionInfo,
+    TokenInfo,
 )
 
 
@@ -52,6 +54,19 @@ def build_liked_songs_playlist(user: CurrentUser, total: int) -> Playlist:
         external_urls=ExternalUrls(
             spotify="https://open.spotify.com/collection/tracks"
         ),
+    )
+
+
+def build_session_info(user: CurrentUser, token_info: TokenInfo) -> SessionInfo:
+    return SessionInfo(
+        user_id=user.id,
+        email=user.email,
+        access_token=token_info.access_token,
+        refresh_token=token_info.refresh_token,
+        token_type=token_info.token_type,
+        expires_in=token_info.expires_in,
+        expires_at=token_info.expires_at,
+        scope=token_info.scope,
     )
 
 

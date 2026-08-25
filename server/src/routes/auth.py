@@ -1,3 +1,4 @@
+from services.spotify.utils import build_session_info
 import asyncio
 from urllib.parse import urlsplit, urlunsplit
 
@@ -10,7 +11,7 @@ from spotipy import Spotify, SpotifyOAuth
 from core.limiter import limiter
 from services.spotify.cache import SpotifyCache
 from services.spotify.dependencies import get_spotify_cache
-from services.spotify.models import CurrentUser, SessionInfo, TokenInfo
+from services.spotify.models import CurrentUser, TokenInfo
 from settings import Settings
 from state import get_oauth, get_settings
 
@@ -54,10 +55,7 @@ async def handle_callback(
         token_info = TokenInfo(**oauth.get_access_token(code, check_cache=False))
         spotify = Spotify(auth=token_info.access_token)
         user = CurrentUser(**await asyncio.to_thread(spotify.current_user))
-
-        session_info = SessionInfo(
-            user_id=user.id, email=user.email, **token_info.model_dump()
-        )
+        session_info = build_session_info(user, token_info)
         session_id = await cache.create_session(session_info)
     except Exception:
         return redirect_error()
