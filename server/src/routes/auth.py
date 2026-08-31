@@ -1,5 +1,3 @@
-from services.spotify.service import SpotifyService
-from services.spotify.utils import build_session_info
 import asyncio
 from urllib.parse import urlsplit, urlunsplit
 
@@ -12,6 +10,8 @@ from core.limiter import limiter
 from services.spotify.cache import SpotifyCache
 from services.spotify.dependencies import get_spotify_cache, get_spotify_service
 from services.spotify.models import CurrentUser, TokenInfo
+from services.spotify.service import SpotifyService
+from services.spotify.utils import build_session_info
 from settings import Settings
 from state import get_oauth, get_settings
 

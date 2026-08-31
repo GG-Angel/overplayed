@@ -1,4 +1,3 @@
-from services.spotify.utils import build_session_info
 import asyncio
 from time import time
 
@@ -11,6 +10,7 @@ from services.spotify.cache import SpotifyCache
 from services.spotify.client import SpotifyClient
 from services.spotify.models import CurrentUser, SessionInfo, TokenInfo
 from services.spotify.service import SpotifyService
+from services.spotify.utils import build_session_info
 from settings import Settings
 from state import State, get_oauth, get_settings, get_state
 

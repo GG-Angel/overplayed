@@ -8,9 +8,9 @@ from services.spotify.models import (
     CurrentUser,
     ExternalUrls,
     Playlist,
-    User,
     SessionInfo,
     TokenInfo,
+    User,
 )
 
 
