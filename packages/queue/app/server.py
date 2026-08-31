@@ -74,7 +74,7 @@ def build_app() -> FastAPI:
 
     # rate limiting
     app.state.limiter = limiter
-    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # ty:ignore[invalid-argument-type]
+    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # pyright: ignore[reportArgumentType] # ty:ignore[invalid-argument-type]
 
     # cors
     app.add_middleware(

@@ -47,4 +47,4 @@ class Settings(BaseSettings):
         return f"redis://{self.redis_user}:{self.redis_password}@{self.redis_host}:{self.redis_port}"
 
 
-settings = Settings()
+settings = Settings()  # pyright: ignore[reportCallIssue]
