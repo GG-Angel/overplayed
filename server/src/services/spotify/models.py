@@ -18,6 +18,7 @@ class TokenInfo(BaseModel):
 
 class SessionInfo(TokenInfo):
     user_id: str
+    email: str
 
 
 class ExternalUrls(BaseModel):

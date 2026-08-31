@@ -8,7 +8,8 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 RUN uv sync --locked --no-cache --no-dev
 
-COPY . .
+COPY src ./src
+COPY alembic ./alembic
 
 RUN useradd --system --no-create-home appuser && chown -R appuser /app
 USER appuser

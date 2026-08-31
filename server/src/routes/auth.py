@@ -4,13 +4,14 @@ from urllib.parse import urlsplit, urlunsplit
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse, RedirectResponse
 from loguru import logger
-from redis.asyncio import RedisError
 from spotipy import Spotify, SpotifyOAuth
 
 from core.limiter import limiter
 from services.spotify.cache import SpotifyCache
-from services.spotify.dependencies import get_spotify_cache
-from services.spotify.models import CurrentUser, SessionInfo, TokenInfo
+from services.spotify.dependencies import get_spotify_cache, get_spotify_service
+from services.spotify.models import CurrentUser, TokenInfo
+from services.spotify.service import SpotifyService
+from services.spotify.utils import build_session_info
 from settings import Settings
 from state import get_oauth, get_settings
 
@@ -54,8 +55,7 @@ async def handle_callback(
         token_info = TokenInfo(**oauth.get_access_token(code, check_cache=False))
         spotify = Spotify(auth=token_info.access_token)
         user = CurrentUser(**await asyncio.to_thread(spotify.current_user))
-
-        session_info = SessionInfo(user_id=user.id, **token_info.model_dump())
+        session_info = build_session_info(user, token_info)
         session_id = await cache.create_session(session_info)
     except Exception:
         return redirect_error()
@@ -81,12 +81,17 @@ async def handle_logout(
     request: Request,
     session_id: str = Cookie(),
     cache: SpotifyCache = Depends(get_spotify_cache),
+    service: SpotifyService = Depends(get_spotify_service),
     settings: Settings = Depends(get_settings),
 ) -> JSONResponse:
     """Revoke the session token and delete the cookie on the client."""
     try:
-        await cache.end_session(session_id)
-    except RedisError:
+        user = await service.get_current_user()
+        await cache.end_session(
+            session_id=session_id, user_id=user.id, email=user.email
+        )
+    except Exception as e:
+        logger.error(f"Failed to log out user: {e}")
         raise HTTPException(detail="Failed to log out.", status_code=500)
 
     response = JSONResponse({"detail": "Logged out successfully."}, status_code=200)
