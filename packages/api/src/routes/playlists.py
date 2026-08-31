@@ -75,4 +75,6 @@ async def handle_swipes(
     swipe: SwipeService = Depends(get_swipe_service),
 ) -> SwipesResponse:
     backup = await swipe.apply_swipes(playlist_id, form, background_tasks)
-    return SwipesResponse(backup_playlist=backup)
+    return SwipesResponse(
+        backup_playlist=PlaylistResponse.model_validate(backup) if backup else None
+    )

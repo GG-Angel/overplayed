@@ -1,3 +1,4 @@
+from typing import cast, Any
 import asyncio
 from time import time
 
@@ -44,7 +45,8 @@ async def get_spotify_service(
     if _is_token_expired(session_info.expires_at):
         new_token_info = await _refresh_token(oauth, session_info)
         spotify = Spotify(auth=new_token_info.access_token)
-        user = CurrentUser(**await asyncio.to_thread(spotify.current_user))
+        user_data = cast(dict[str, Any], await asyncio.to_thread(spotify.current_user))
+        user = CurrentUser(**user_data)
         session_info = build_session_info(user, new_token_info)
         await cache.set_session(session_id, session_info)
     else:

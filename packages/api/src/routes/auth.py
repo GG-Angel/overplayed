@@ -1,4 +1,5 @@
 import asyncio
+from typing import Any, cast
 from urllib.parse import urlsplit, urlunsplit
 
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Request
@@ -54,7 +55,8 @@ async def handle_callback(
     try:
         token_info = TokenInfo(**oauth.get_access_token(code, check_cache=False))
         spotify = Spotify(auth=token_info.access_token)
-        user = CurrentUser(**await asyncio.to_thread(spotify.current_user))
+        user_data = cast(dict[str, Any], await asyncio.to_thread(spotify.current_user))
+        user = CurrentUser(**user_data)
         session_info = build_session_info(user, token_info)
         session_id = await cache.create_session(session_info)
     except Exception:
