@@ -53,13 +53,10 @@ class SpotifyCache:
         return self._codec.model(SessionInfo).decrypt(session) if session else None
 
     async def end_session(self, session_id: str, user_id: str, email: str) -> None:
-        keys_to_delete = [
+        await self._client.delete(
             self._build_session_key_from_id(session_id),
-            self._build_user_key(user_id),
-            self._build_playlists_key(user_id),
-            self._build_playlist_tracks_key(user_id),
-        ]
-        await self._client.delete(*keys_to_delete)
+            *self._build_user_keys(user_id),
+        )
         await self._client.srem(self._build_session_key_from_email(email), session_id)
         logger.info(f"Ended session for email: {email}")
 
@@ -71,8 +68,15 @@ class SpotifyCache:
             return
 
         session_keys = [self._build_session_key_from_id(session_id) for session_id in session_ids]  # fmt: skip
-        await self._client.delete(*session_keys)
-        await self._client.delete(email_to_sessions_key)
+        user_keys = []
+
+        for session_id in session_ids:
+            session = await self.get_session(session_id)
+            if not session:
+                continue
+            user_keys.extend(self._build_user_keys(session.user_id))
+
+        await self._client.delete(*session_keys, *user_keys, email_to_sessions_key)
         logger.info(f"Ended all sessions for email: {email}")
 
     async def get_user(self, user_id: str) -> CurrentUser | None:
@@ -159,3 +163,11 @@ class SpotifyCache:
     def _build_playlist_snapshot_key(playlist_id: str, snapshot_id: str) -> str:
         """playlistId:snapshotId"""
         return RedisClient.key(playlist_id, snapshot_id)
+
+    @staticmethod
+    def _build_user_keys(user_id: str) -> list[str]:
+        return [
+            SpotifyCache._build_user_key(user_id),
+            SpotifyCache._build_playlists_key(user_id),
+            SpotifyCache._build_playlist_tracks_key(user_id),
+        ]
