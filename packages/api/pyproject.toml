@@ -1,5 +1,5 @@
 [project]
-name = "server"
+name = "api"
 version = "1.0.0"
 description = "Overplayed API"
 readme = "README.md"
@@ -16,11 +16,15 @@ dependencies = [
     "pydantic>=2.13.3",
     "pydantic-settings>=2.14.2",
     "redis[hiredis]>=8.1.0",
+    "shared",
     "slowapi>=0.1.9",
     "spotipy>=2.26.0",
     "sqlalchemy[asyncio]>=2.0.50",
     "uvicorn>=0.46.0",
 ]
+
+[tool.uv.sources]
+shared = { workspace = true }
 
 [dependency-groups]
 dev = [
@@ -30,11 +34,8 @@ dev = [
     "ty>=0.0.65",
 ]
 
-[tool.ruff.lint]
-ignore = ["BLE001"] # catch on exception
-
-[tool.ruff.lint.flake8-bugbear]
-extend-immutable-calls = ["fastapi.Depends"]
+[tool.ruff]
+extend = "../../pyproject.toml"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

@@ -173,7 +173,7 @@
                       "spec": {
                         "editorMode": "builder",
                         "exemplar": false,
-                        "expr": "up{job=\"overplayed-server\"}",
+                        "expr": "up{job=\"overplayed-api\"}",
                         "instant": true,
                         "legendFormat": "__auto",
                         "range": false
@@ -191,7 +191,7 @@
           "description": "",
           "id": 2,
           "links": [],
-          "title": "Server Status",
+          "title": "API Status",
           "vizConfig": {
             "group": "stat",
             "kind": "VizConfig",

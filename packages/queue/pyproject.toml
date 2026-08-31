@@ -13,8 +13,12 @@ dependencies = [
     "pydantic-settings>=2.14.2",
     "redis[hiredis]>=8.0.1",
     "resend>=2.36.0",
+    "shared",
     "slowapi>=0.1.9",
 ]
+
+[tool.uv.sources]
+shared = { workspace = true }
 
 [dependency-groups]
 dev = [
@@ -26,15 +30,8 @@ dev = [
     "ruff>=0.16.0",
 ]
 
-[tool.ruff.lint]
-# BLE001: broad `except Exception` is deliberate here — it keeps the worker loop
-# alive and isolates per-user failures so one bad user cannot abort a batch.
-ignore = ["BLE001"]
-
-[tool.ruff.lint.flake8-bugbear]
-# FastAPI's DI marker is resolved per-request by the framework, not evaluated
-# once at import time, so it is not a real mutable-default hazard.
-extend-immutable-calls = ["fastapi.Depends"]
+[tool.ruff]
+extend = "../../pyproject.toml"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

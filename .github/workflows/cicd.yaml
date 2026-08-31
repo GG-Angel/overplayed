@@ -23,7 +23,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - context: server
+          - context: api
           - context: queue
     steps:
       - name: Checkout code
@@ -49,7 +49,8 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
-          context: ./${{ matrix.context }}
+          context: .
+          file: packages/${{ matrix.context }}/Dockerfile
           tags: ${{ env.REGISTRY }}/${{ steps.lc.outputs.repo }}-${{ matrix.context }}:latest
           push: true
           cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ steps.lc.outputs.repo }}-${{ matrix.context }}:buildcache
@@ -85,5 +86,5 @@ jobs:
             cd ~/${{ github.event.repository.name }}
             git pull
             docker compose -f compose.yaml pull
-            docker compose -f compose.yaml run --rm server .venv/bin/alembic upgrade head
+            docker compose -f compose.yaml run --rm api .venv/bin/alembic upgrade head
             docker compose -f compose.yaml up -d --remove-orphans

@@ -18,15 +18,13 @@ updates:
 
   - package-ecosystem: "docker"
     directories:
-      - "/queue"
-      - "/server"
+      - "/packages/queue"
+      - "/packages/api"
     schedule:
       interval: "weekly"
 
   - package-ecosystem: "uv"
-    directories:
-      - "/queue"
-      - "/server"
+    directory: "/"
     schedule:
       interval: "weekly"
     groups:
