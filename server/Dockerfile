@@ -10,6 +10,7 @@ RUN uv sync --locked --no-cache --no-dev
 
 COPY src ./src
 COPY alembic ./alembic
+COPY alembic.ini ./alembic.ini
 
 RUN useradd --system --no-create-home appuser && chown -R appuser /app
 USER appuser
