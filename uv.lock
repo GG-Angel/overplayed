@@ -1818,7 +1818,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "pydantic", extras = ["email"], specifier = ">=2.12.4" },
+    { name = "pydantic", extras = ["email"], specifier = ">=2.13.5" },
     { name = "redis", specifier = ">=8.0.1" },
 ]
 
