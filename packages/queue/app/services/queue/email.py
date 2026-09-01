@@ -5,7 +5,8 @@ from typing import Any, Protocol
 import resend
 from loguru import logger
 from redis.asyncio import Redis
-from settings import settings
+
+from app.settings import settings
 
 
 class EmailSender(Protocol):

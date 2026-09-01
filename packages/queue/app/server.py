@@ -1,27 +1,28 @@
 from contextlib import asynccontextmanager
 
 from aiohttp import ClientSession
-from core.limiter import limiter
 from fastapi import APIRouter, FastAPI, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from redis.asyncio import ConnectionPool, Redis
-from routes import queue
-from services.queue import (
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+
+from app.core.limiter import limiter
+from app.routes import queue
+from app.services.queue import (
     build_email_service,
     build_queue_repository,
     build_queue_service,
     build_queue_worker,
 )
-from services.spotify import (
+from app.services.spotify import (
     build_spotify_token_provider,
     build_spotify_user_manager,
     build_spotify_user_validator,
 )
-from services.turnstile import TurnstileVerifier
-from settings import APP_STATE_KEY, settings
-from slowapi import _rate_limit_exceeded_handler
-from slowapi.errors import RateLimitExceeded
-from state import State
+from app.services.turnstile import TurnstileVerifier
+from app.settings import APP_STATE_KEY, settings
+from app.state import State
 
 
 @asynccontextmanager

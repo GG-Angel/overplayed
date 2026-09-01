@@ -1,12 +1,13 @@
 from typing import Protocol
 
-from core.errors import SpotifyTokenError
 from cryptography.fernet import Fernet
 from loguru import logger
-from models.spotify import SpotifyTokenResponse
 from redis.asyncio import Redis
-from services.spotify.http import SpotifyHttpClient
-from settings import settings
+
+from app.core.errors import SpotifyTokenError
+from app.models.spotify import SpotifyTokenResponse
+from app.services.spotify.http import SpotifyHttpClient
+from app.settings import settings
 
 
 class TokenCipher(Protocol):

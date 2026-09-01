@@ -1,22 +1,23 @@
 from urllib.parse import urlencode
 
-from core.errors import InvalidTokenError, UnknownUserError
-from core.limiter import limiter
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from loguru import logger
-from models.requests import AccessRequest
-from models.responses import (
+
+from app.core.errors import InvalidTokenError, UnknownUserError
+from app.core.limiter import limiter
+from app.models.requests import AccessRequest
+from app.models.responses import (
     AccessStatusResponse,
     ActiveUserStatusResponse,
     ConfirmationPendingResponse,
     QueuedUserStatusResponse,
     QueueOverviewResponse,
 )
-from services.queue import QueueService
-from services.turnstile import TurnstileVerifier
-from settings import settings
-from state import get_queue_service, get_turnstile_verifier
+from app.services.queue import QueueService
+from app.services.turnstile import TurnstileVerifier
+from app.settings import settings
+from app.state import get_queue_service, get_turnstile_verifier
 
 router = APIRouter()
 
