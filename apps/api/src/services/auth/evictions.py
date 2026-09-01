@@ -111,9 +111,11 @@ class EvictionConsumer:
         logger.info(f"Started eviction consumer: {self._consumer}")
 
         backlog_id = "0"
+        logger.info("Processing backlog of eviction events.")
         while backlog_id is not None:
             backlog_id = await self._consume(backlog_id)
 
+        logger.info("Finished processing backlog, switching to live consumption.")
         while True:
             await self._consume(">")
 
