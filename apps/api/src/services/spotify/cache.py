@@ -7,6 +7,7 @@ from pydantic import TypeAdapter
 from src.cache.client import RedisClient
 from src.cache.codec import Codec
 from src.services.spotify.models import CurrentUser, Playlist, SessionInfo, Track
+from src.settings import Settings
 
 _SESSION_ID_LEN = 32
 _TRACKS = TypeAdapter(list[Track])
@@ -171,3 +172,15 @@ class SpotifyCache:
             SpotifyCache._build_playlists_key(user_id),
             SpotifyCache._build_playlist_tracks_key(user_id),
         ]
+
+
+def build_spotify_cache(redis: RedisClient, settings: Settings) -> SpotifyCache:
+    """Build a SpotifyCache wired to Redis and the app settings."""
+    return SpotifyCache(
+        redis=redis,
+        redis_key=settings.redis_key,
+        ttl_sessions=settings.ttl_sessions,
+        ttl_users=settings.ttl_users,
+        ttl_playlists=settings.ttl_playlists,
+        ttl_playlist_tracks=settings.ttl_playlist_tracks,
+    )

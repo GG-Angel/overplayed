@@ -19,4 +19,4 @@ RUN useradd --system --no-create-home appuser && chown -R appuser /app
 USER appuser
 
 EXPOSE 8080
-CMD ["uv", "run", "--no-sync", "--no-cache", "python", "-m", "src.main"]
+CMD [".venv/bin/python", "-m", "src.main"]

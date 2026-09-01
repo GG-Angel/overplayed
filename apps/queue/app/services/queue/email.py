@@ -5,6 +5,8 @@ from typing import Any, Protocol
 import resend
 from loguru import logger
 from redis.asyncio import Redis
+from shared.constants import RedisKeys
+from shared.models.requests import EvictionRequest
 
 from app.settings import settings
 
@@ -123,6 +125,10 @@ class EmailService:
         except Exception as e:
             logger.error(f"Failed to send onboarded email to {email}: {e}")
             return False
+
+    async def publish_eviction(self, request: EvictionRequest) -> None:
+        """Publish an eviction request to the Redis stream for processing by the API service."""
+        await self._redis.xadd(RedisKeys.EVICTIONS, request.to_fields())
 
     @staticmethod
     def _build_token_key(token: str) -> str:

@@ -6,6 +6,7 @@ from typing import NamedTuple
 
 from loguru import logger
 from redis.asyncio import Redis
+from shared.models.requests import EvictionRequest
 
 from app.core.errors import InvalidTokenError, UnknownUserError
 from app.core.lock import DistributedLock
@@ -54,7 +55,7 @@ class QueueService:
         self._user_validator = user_validator
         self._emailer = emailer
         self._queue = queue
-        self._notification_tasks: set[asyncio.Task[bool]] = set()
+        self._tasks: set[asyncio.Task] = set()
         self._lock = lock
         self._user_limit = user_limit
         self._retry_limit = retry_limit
@@ -138,6 +139,7 @@ class QueueService:
         retried = await self._retry_rejected(rejected)
 
         self._notify_activations(activated)
+        self._publish_evictions(evicted)
 
         logger.success(
             f"Processed queue: evicted {len(evicted)}, "
@@ -220,8 +222,16 @@ class QueueService:
         """Fires activation emails in the background."""
         for user in activated:
             task = asyncio.create_task(self._emailer.send_onboarded_email(user.email))
-            self._notification_tasks.add(task)
-            task.add_done_callback(self._notification_tasks.discard)
+            self._tasks.add(task)
+            task.add_done_callback(self._tasks.discard)
+
+    def _publish_evictions(self, evicted: list[SpotifyUser]) -> None:
+        """Publish eviction requests to the Redis stream for processing by the API service."""
+        for user in evicted:
+            request = EvictionRequest(email=user.email)
+            task = asyncio.create_task(self._emailer.publish_eviction(request))
+            self._tasks.add(task)
+            task.add_done_callback(self._tasks.discard)
 
 
 def build_queue_service(

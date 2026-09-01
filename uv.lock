@@ -1809,8 +1809,18 @@ wheels = [
 
 [[package]]
 name = "shared"
-version = "0.1.0"
+version = "1.0.0"
 source = { editable = "libs/shared" }
+dependencies = [
+    { name = "pydantic", extra = ["email"] },
+    { name = "redis" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "pydantic", extras = ["email"], specifier = ">=2.12.4" },
+    { name = "redis", specifier = ">=8.0.1" },
+]
 
 [[package]]
 name = "shellingham"

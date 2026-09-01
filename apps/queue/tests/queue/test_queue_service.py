@@ -4,6 +4,7 @@ from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock
 
 import pytest
+from shared.models.requests import EvictionRequest
 
 from app.core.errors import UnknownUserError
 from app.core.lock import DistributedLock
@@ -229,6 +230,9 @@ async def test_process_queue_prunes_expired_user_and_fills_open_slot() -> None:
     harness.queue.pop.assert_awaited_once_with(count=1)
     harness.user_manager.add_user.assert_awaited_once()
     harness.emailer.send_onboarded_email.assert_awaited_once_with(queued.email)
+    harness.emailer.publish_eviction.assert_awaited_once_with(
+        EvictionRequest(email=expired.email)
+    )
 
 
 async def test_process_queue_retries_failed_activation_within_limit() -> None:

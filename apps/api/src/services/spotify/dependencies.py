@@ -7,7 +7,7 @@ from spotipy import Spotify, SpotifyOAuth
 
 from src.cache.client import RedisClient, get_redis_client
 from src.core.exceptions import UnauthorizedException
-from src.services.spotify.cache import SpotifyCache
+from src.services.spotify.cache import SpotifyCache, build_spotify_cache
 from src.services.spotify.client import SpotifyClient
 from src.services.spotify.models import CurrentUser, SessionInfo, TokenInfo
 from src.services.spotify.service import SpotifyService
@@ -22,14 +22,7 @@ def get_spotify_cache(
     redis: RedisClient = Depends(get_redis_client),
     settings: Settings = Depends(get_settings),
 ) -> SpotifyCache:
-    return SpotifyCache(
-        redis=redis,
-        redis_key=settings.redis_key,
-        ttl_sessions=settings.ttl_sessions,
-        ttl_users=settings.ttl_users,
-        ttl_playlists=settings.ttl_playlists,
-        ttl_playlist_tracks=settings.ttl_playlist_tracks,
-    )
+    return build_spotify_cache(redis, settings)
 
 
 async def get_spotify_service(
