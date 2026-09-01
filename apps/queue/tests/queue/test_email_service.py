@@ -5,6 +5,8 @@ from typing import Any
 
 import pytest
 from fakeredis.aioredis import FakeRedis
+from shared.constants import RedisKeys
+from shared.models.requests import EvictionRequest
 
 from app.services.queue.email import EmailService
 
@@ -194,3 +196,16 @@ async def test_send_onboarded_email_returns_false_on_delivery_failure(
     )
 
     assert await email_service.send_onboarded_email("user@example.com") is False
+
+
+async def test_publish_eviction_adds_request_to_eviction_stream(
+    email_service: EmailService,
+    redis_client: FakeRedis,
+) -> None:
+    await email_service.publish_eviction(EvictionRequest(email="user@example.com"))
+
+    entries = await redis_client.xrange(RedisKeys.EVICTIONS)
+
+    assert entries is not None
+    assert len(entries) == 1
+    assert entries[0][1] == {"email": "user@example.com"}
