@@ -4,17 +4,18 @@ from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock
 
 import pytest
-from core.errors import UnknownUserError
-from core.lock import DistributedLock
-from models.queue import (
+
+from app.core.errors import UnknownUserError
+from app.core.lock import DistributedLock
+from app.models.queue import (
     ActiveUserStatus,
     QueuedUser,
     QueuedUserPosition,
     QueuedUserStatus,
 )
-from models.spotify import SpotifyUser, SpotifyUserCreationRequest
-from services.queue import EmailService, QueueRepository, QueueService
-from services.spotify import SpotifyUserManager, SpotifyUserValidator
+from app.models.spotify import SpotifyUser, SpotifyUserCreationRequest
+from app.services.queue import EmailService, QueueRepository, QueueService
+from app.services.spotify import SpotifyUserManager, SpotifyUserValidator
 
 NOW = datetime(2026, 1, 2, 12, tzinfo=UTC)
 USER_TTL = 3600

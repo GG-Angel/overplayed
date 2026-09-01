@@ -1,6 +1,7 @@
 import pytest
-from core.errors import SpotifyValidationError
-from services.spotify.validator import (
+
+from app.core.errors import SpotifyValidationError
+from app.services.spotify.validator import (
     SpotifyUserValidator,
     build_spotify_user_validator,
 )

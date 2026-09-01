@@ -5,7 +5,8 @@ from typing import Any
 
 import pytest
 from fakeredis.aioredis import FakeRedis
-from services.queue.email import EmailService
+
+from app.services.queue.email import EmailService
 
 TOKEN = "fixed-token"
 TOKEN_TTL_SECONDS = 300

@@ -2,14 +2,15 @@ import asyncio
 from datetime import UTC, datetime
 
 import pytest
-from core.errors import SpotifyUserManagementError
 from fakeredis.aioredis import FakeRedis
-from models.spotify import (
+
+from app.core.errors import SpotifyUserManagementError
+from app.models.spotify import (
     SpotifyUser,
     SpotifyUserCreationRequest,
     SpotifyUsersResponse,
 )
-from services.spotify.manager import SpotifyUserManager
+from app.services.spotify.manager import SpotifyUserManager
 
 from .common import FakeResponse, RecordingHttpClient, RequestCall
 
