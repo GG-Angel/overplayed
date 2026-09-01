@@ -171,7 +171,7 @@ wheels = [
 [[package]]
 name = "api"
 version = "1.0.0"
-source = { virtual = "packages/api" }
+source = { editable = "packages/api" }
 dependencies = [
     { name = "aiohttp" },
     { name = "alembic" },
@@ -1564,7 +1564,7 @@ wheels = [
 [[package]]
 name = "queue"
 version = "1.0.0"
-source = { virtual = "packages/queue" }
+source = { editable = "packages/queue" }
 dependencies = [
     { name = "aiohttp" },
     { name = "cryptography" },

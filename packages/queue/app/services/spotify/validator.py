@@ -1,5 +1,5 @@
-from core.errors import SpotifyValidationError
-from services.spotify.http import SpotifyHttpClient
+from app.core.errors import SpotifyValidationError
+from app.services.spotify.http import SpotifyHttpClient
 
 
 class SpotifyUserValidator:

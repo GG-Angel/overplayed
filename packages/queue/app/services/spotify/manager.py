@@ -1,15 +1,16 @@
 from typing import Protocol
 
-from core.errors import SpotifyUserManagementError
 from loguru import logger
-from models.spotify import (
+from redis.asyncio import Redis
+
+from app.core.errors import SpotifyUserManagementError
+from app.models.spotify import (
     SpotifyUser,
     SpotifyUserCreationRequest,
     SpotifyUsersResponse,
 )
-from redis.asyncio import Redis
-from services.spotify.http import SpotifyHttpClient
-from settings import settings
+from app.services.spotify.http import SpotifyHttpClient
+from app.settings import settings
 
 
 class SpotifyAccessTokenProvider(Protocol):

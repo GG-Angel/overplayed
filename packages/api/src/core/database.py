@@ -9,8 +9,8 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.orm import declarative_base
 
-from settings import Settings
-from state import State, get_state
+from src.settings import Settings
+from src.state import State, get_state
 
 Base = declarative_base()
 

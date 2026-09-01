@@ -6,8 +6,8 @@ from redis.asyncio import ConnectionPool
 from spotipy import SpotifyOAuth
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
-from services.spotify.stream import TrackStream, TrackStreamKey
-from settings import APP_STATE_KEY, Settings
+from src.services.spotify.stream import TrackStream, TrackStreamKey
+from src.settings import APP_STATE_KEY, Settings
 
 
 class State:

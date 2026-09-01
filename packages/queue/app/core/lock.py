@@ -1,10 +1,11 @@
 from types import TracebackType
 from typing import Self
 
-from core.errors import QueueLockError
 from loguru import logger
 from redis.asyncio import Redis
 from redis.exceptions import LockError
+
+from app.core.errors import QueueLockError
 
 
 class DistributedLock:

@@ -1,7 +1,8 @@
 import pytest
-from core.errors import SpotifyTokenError
 from fakeredis.aioredis import FakeRedis
-from services.spotify.tokens import SpotifyTokenProvider
+
+from app.core.errors import SpotifyTokenError
+from app.services.spotify.tokens import SpotifyTokenProvider
 
 from .common import FakeResponse, RecordingHttpClient, RequestCall
 

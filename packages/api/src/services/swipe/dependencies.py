@@ -1,9 +1,9 @@
 from fastapi import Depends
 
-from database.service import DatabaseService, get_database_service
-from services.spotify.dependencies import get_spotify_service
-from services.spotify.service import SpotifyService
-from services.swipe.service import SwipeService
+from src.database.service import DatabaseService, get_database_service
+from src.services.spotify.dependencies import get_spotify_service
+from src.services.spotify.service import SpotifyService
+from src.services.swipe.service import SwipeService
 
 
 def get_swipe_service(

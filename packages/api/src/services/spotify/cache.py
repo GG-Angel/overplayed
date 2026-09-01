@@ -4,9 +4,9 @@ from cryptography.fernet import Fernet
 from loguru import logger
 from pydantic import TypeAdapter
 
-from cache.client import RedisClient
-from cache.codec import Codec
-from services.spotify.models import CurrentUser, Playlist, SessionInfo, Track
+from src.cache.client import RedisClient
+from src.cache.codec import Codec
+from src.services.spotify.models import CurrentUser, Playlist, SessionInfo, Track
 
 _SESSION_ID_LEN = 32
 _TRACKS = TypeAdapter(list[Track])

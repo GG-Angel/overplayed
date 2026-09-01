@@ -3,8 +3,8 @@ from collections.abc import AsyncGenerator
 from fastapi import Depends
 from redis.asyncio import ConnectionPool, Redis
 
-from settings import Settings
-from state import State, get_state
+from src.settings import Settings
+from src.state import State, get_state
 
 
 def build_redis_pool(settings: Settings) -> ConnectionPool:

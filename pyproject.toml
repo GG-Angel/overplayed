@@ -1,8 +1,2 @@
 [tool.uv.workspace]
 members = ["packages/*"]
-
-[tool.ruff.lint]
-ignore = ["BLE001"]
-
-[tool.ruff.lint.flake8-bugbear]
-extend-immutable-calls = ["fastapi.Depends"]

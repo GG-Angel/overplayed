@@ -4,8 +4,8 @@ from collections.abc import AsyncGenerator, AsyncIterator, Callable
 from loguru import logger
 from spotipy import Spotify
 
-from services.spotify.models import CurrentUser, Playlist, Track
-from services.spotify.utils import spotify_fields
+from src.services.spotify.models import CurrentUser, Playlist, Track
+from src.services.spotify.utils import spotify_fields
 
 
 class SpotifyClient:

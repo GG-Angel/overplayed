@@ -4,10 +4,12 @@ from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
 from typing import NamedTuple
 
-from core.errors import InvalidTokenError, UnknownUserError
-from core.lock import DistributedLock
 from loguru import logger
-from models.queue import (
+from redis.asyncio import Redis
+
+from app.core.errors import InvalidTokenError, UnknownUserError
+from app.core.lock import DistributedLock
+from app.models.queue import (
     ActiveUserStatus,
     PendingUserStatus,
     QueuedUser,
@@ -15,11 +17,10 @@ from models.queue import (
     QueueOverview,
     QueueUserStatus,
 )
-from models.spotify import SpotifyUser, SpotifyUserCreationRequest
-from redis.asyncio import Redis
-from services.queue import EmailService, QueueRepository
-from services.spotify import SpotifyUserManager, SpotifyUserValidator
-from settings import settings
+from app.models.spotify import SpotifyUser, SpotifyUserCreationRequest
+from app.services.queue import EmailService, QueueRepository
+from app.services.spotify import SpotifyUserManager, SpotifyUserValidator
+from app.settings import settings
 
 
 def utc_now() -> datetime:

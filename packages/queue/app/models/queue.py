@@ -3,7 +3,7 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-from models.spotify import SpotifyUser
+from app.models.spotify import SpotifyUser
 
 
 class QueuedUser(BaseModel):

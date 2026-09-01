@@ -1,7 +1,7 @@
 import asyncio
 
-from services.queue import QueueWorker, build_queue_worker
-from settings import settings
+from app.services.queue import QueueWorker, build_queue_worker
+from app.settings import settings
 
 
 class RecordingQueueProcessor:

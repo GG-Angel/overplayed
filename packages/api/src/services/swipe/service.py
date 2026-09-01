@@ -1,12 +1,12 @@
 from fastapi import BackgroundTasks
 
-from core.exceptions import BadRequestException
-from database.schemas import SwipeSession, User
-from database.service import DatabaseService
-from services.spotify.models import LIKED_SONGS_ID, Playlist
-from services.spotify.service import SpotifyService
-from services.spotify.utils import get_formatted_date
-from services.swipe.models import SwipesForm
+from src.core.exceptions import BadRequestException
+from src.database.schemas import SwipeSession, User
+from src.database.service import DatabaseService
+from src.services.spotify.models import LIKED_SONGS_ID, Playlist
+from src.services.spotify.service import SpotifyService
+from src.services.spotify.utils import get_formatted_date
+from src.services.swipe.models import SwipesForm
 
 
 class SwipeService:

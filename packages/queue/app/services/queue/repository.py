@@ -2,8 +2,9 @@ from collections.abc import Callable
 from datetime import UTC, datetime
 
 from loguru import logger
-from models.queue import QueuedUser, QueuedUserPosition
 from redis.asyncio import Redis
+
+from app.models.queue import QueuedUser, QueuedUserPosition
 
 
 def utc_now() -> datetime:

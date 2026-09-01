@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from redis.asyncio import Redis
 from redis.typing import EncodableT, FieldT
 
-from core.redis import get_redis
+from src.core.redis import get_redis
 
 M = TypeVar("M", bound=BaseModel)
 

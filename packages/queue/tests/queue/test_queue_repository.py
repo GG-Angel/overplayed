@@ -2,8 +2,9 @@ from datetime import UTC, datetime
 
 import pytest
 from fakeredis.aioredis import FakeRedis
-from models.queue import QueuedUser, QueuedUserPosition
-from services.queue import QueueRepository, build_queue_repository
+
+from app.models.queue import QueuedUser, QueuedUserPosition
+from app.services.queue import QueueRepository, build_queue_repository
 
 NOW = datetime(2026, 1, 2, 12, tzinfo=UTC)
 

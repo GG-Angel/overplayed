@@ -1,7 +1,8 @@
 from aiohttp import ClientSession
 from fastapi import HTTPException, Request
 from loguru import logger
-from models.requests import AccessRequest
+
+from app.models.requests import AccessRequest
 
 SITEVERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
 

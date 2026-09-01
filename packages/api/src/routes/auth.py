@@ -7,14 +7,14 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from loguru import logger
 from spotipy import Spotify, SpotifyOAuth
 
-from core.limiter import limiter
-from services.spotify.cache import SpotifyCache
-from services.spotify.dependencies import get_spotify_cache, get_spotify_service
-from services.spotify.models import CurrentUser, TokenInfo
-from services.spotify.service import SpotifyService
-from services.spotify.utils import build_session_info
-from settings import Settings
-from state import get_oauth, get_settings
+from src.core.limiter import limiter
+from src.services.spotify.cache import SpotifyCache
+from src.services.spotify.dependencies import get_spotify_cache, get_spotify_service
+from src.services.spotify.models import CurrentUser, TokenInfo
+from src.services.spotify.service import SpotifyService
+from src.services.spotify.utils import build_session_info
+from src.settings import Settings
+from src.state import get_oauth, get_settings
 
 router = APIRouter()
 

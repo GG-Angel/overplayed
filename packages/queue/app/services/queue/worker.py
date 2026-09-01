@@ -3,7 +3,8 @@ from collections.abc import Awaitable, Callable
 from typing import Protocol
 
 from loguru import logger
-from settings import settings
+
+from app.settings import settings
 
 
 class QueueProcessor(Protocol):
