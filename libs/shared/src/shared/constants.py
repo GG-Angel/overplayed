@@ -1,2 +1,2 @@
-class Keys:
+class RedisKeys:
     EVICTIONS = "auth:eviction:stream"

@@ -6,7 +6,7 @@ from loguru import logger
 from pydantic import ValidationError
 from redis.asyncio import Redis
 from redis.exceptions import ResponseError, TimeoutError
-from shared.constants import Keys
+from shared.constants import RedisKeys
 from shared.models.requests import EvictionRequest
 
 from src.settings import Settings
@@ -45,7 +45,7 @@ class EvictionConsumer:
         """Create the consumer group, starting from the oldest entry in the stream."""
         try:
             await self._redis.xgroup_create(
-                Keys.EVICTIONS, self._group, id="0", mkstream=True
+                RedisKeys.EVICTIONS, self._group, id="0", mkstream=True
             )
             logger.info(f"Created consumer group {self._group}.")
         except ResponseError as e:
@@ -59,7 +59,7 @@ class EvictionConsumer:
             response = await self._redis.xreadgroup(
                 groupname=self._group,
                 consumername=self._consumer,
-                streams={Keys.EVICTIONS: start_id},
+                streams={RedisKeys.EVICTIONS: start_id},
                 count=self._batch_size,
                 block=self._block_ms,
             )
@@ -101,7 +101,7 @@ class EvictionConsumer:
     async def _ack(self, event_id: str) -> None:
         """Acknowledge the processed eviction event in the Redis stream."""
         try:
-            await self._redis.xack(Keys.EVICTIONS, self._group, event_id)
+            await self._redis.xack(RedisKeys.EVICTIONS, self._group, event_id)
         except Exception as e:
             logger.warning(f"Failed to acknowledge eviction event {event_id}: {e}")
 
