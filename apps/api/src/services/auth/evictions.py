@@ -5,7 +5,7 @@ from typing import Protocol, cast
 from loguru import logger
 from pydantic import ValidationError
 from redis.asyncio import Redis
-from redis.exceptions import ResponseError
+from redis.exceptions import ResponseError, TimeoutError
 from shared.constants import Keys
 from shared.models.requests import EvictionRequest
 
@@ -63,6 +63,8 @@ class EvictionConsumer:
                 count=self._batch_size,
                 block=self._block_ms,
             )
+        except TimeoutError:
+            return None
         except Exception as e:
             logger.exception(f"Failed to read eviction events: {e}")
             await self._sleep(self._retry_interval)
