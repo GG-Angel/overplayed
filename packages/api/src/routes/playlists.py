@@ -4,14 +4,14 @@ from typing import Annotated
 from fastapi import APIRouter, BackgroundTasks, Depends, Path, Request
 from fastapi.responses import StreamingResponse
 
-from core.limiter import limiter
-from routes.schemas import PlaylistResponse, SwipesResponse, TrackResponse
-from services.spotify.dependencies import get_spotify_service
-from services.spotify.models import Playlist, PlaylistIdRegex
-from services.spotify.service import SpotifyService
-from services.swipe.dependencies import get_swipe_service
-from services.swipe.models import SwipesForm
-from services.swipe.service import SwipeService
+from src.core.limiter import limiter
+from src.routes.schemas import PlaylistResponse, SwipesResponse, TrackResponse
+from src.services.spotify.dependencies import get_spotify_service
+from src.services.spotify.models import Playlist, PlaylistIdRegex
+from src.services.spotify.service import SpotifyService
+from src.services.swipe.dependencies import get_swipe_service
+from src.services.swipe.models import SwipesForm
+from src.services.swipe.service import SwipeService
 
 router = APIRouter()
 

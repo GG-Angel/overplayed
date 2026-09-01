@@ -7,8 +7,8 @@ from sqlalchemy import distinct, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.database import get_db
-from database.schemas import SwipeSession, User
+from src.core.database import get_db
+from src.database.schemas import SwipeSession, User
 
 
 @dataclass

@@ -4,17 +4,17 @@ from collections.abc import AsyncGenerator
 
 from loguru import logger
 
-from core.exceptions import NotFoundException
-from services.spotify.cache import SpotifyCache
-from services.spotify.client import SpotifyClient
-from services.spotify.models import (
+from src.core.exceptions import NotFoundException
+from src.services.spotify.cache import SpotifyCache
+from src.services.spotify.client import SpotifyClient
+from src.services.spotify.models import (
     LIKED_SONGS_ID,
     CurrentUser,
     Playlist,
     Track,
 )
-from services.spotify.stream import TrackStream, TrackStreamKey
-from services.spotify.utils import build_liked_songs_playlist
+from src.services.spotify.stream import TrackStream, TrackStreamKey
+from src.services.spotify.utils import build_liked_songs_playlist
 
 TRACK_PUBLISH_BATCH = 100
 

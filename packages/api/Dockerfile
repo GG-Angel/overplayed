@@ -18,4 +18,4 @@ RUN useradd --system --no-create-home appuser && chown -R appuser /app
 USER appuser
 
 EXPOSE 8080
-CMD ["uv", "run", "--no-sync", "--no-cache", "python", "src/main.py"]
+CMD ["uv", "run", "--no-sync", "--no-cache", "python", "-m", "src.main"]

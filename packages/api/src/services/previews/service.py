@@ -1,7 +1,7 @@
-from services.previews.cache import NO_PREVIEW, DeezerCache
-from services.previews.client import DeezerClient
-from services.previews.models import TrackPreview
-from services.previews.utils import parse_expiration_timestamp, parse_expires_in
+from src.services.previews.cache import NO_PREVIEW, DeezerCache
+from src.services.previews.client import DeezerClient
+from src.services.previews.models import TrackPreview
+from src.services.previews.utils import parse_expiration_timestamp, parse_expires_in
 
 
 class DeezerService:

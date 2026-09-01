@@ -1,7 +1,7 @@
 from spotipy import SpotifyOAuth
 from spotipy.cache_handler import CacheHandler
 
-from settings import settings
+from src.settings import settings
 
 
 class NoOpCacheHandler(CacheHandler):

@@ -1,4 +1,4 @@
-from cache.client import RedisClient
+from src.cache.client import RedisClient
 
 NO_PREVIEW = "__NO_PREVIEW__"
 

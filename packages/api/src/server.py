@@ -6,13 +6,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
-from core.database import build_engine, build_sessionmaker
-from core.limiter import limiter
-from core.oauth import build_spotify_oauth
-from core.redis import build_redis_pool
-from routes import auth, playlists, previews, stats, users
-from settings import APP_STATE_KEY, settings
-from state import State
+from src.core.database import build_engine, build_sessionmaker
+from src.core.limiter import limiter
+from src.core.oauth import build_spotify_oauth
+from src.core.redis import build_redis_pool
+from src.routes import auth, playlists, previews, stats, users
+from src.settings import APP_STATE_KEY, settings
+from src.state import State
 
 
 @asynccontextmanager

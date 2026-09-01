@@ -1,7 +1,7 @@
 import asyncio
 from collections.abc import AsyncGenerator
 
-from services.spotify.models import Track
+from src.services.spotify.models import Track
 
 # (user_id, playlist_id, snapshot_id)
 TrackStreamKey = tuple[str, str, str]

@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, Request
 
-from core.limiter import limiter
-from database.service import DatabaseService, get_database_service
-from routes.schemas import GlobalSwipeMetricsResponse, UserSwipeMetricsResponse
-from services.spotify.dependencies import get_spotify_service
-from services.spotify.service import SpotifyService
+from src.core.limiter import limiter
+from src.database.service import DatabaseService, get_database_service
+from src.routes.schemas import GlobalSwipeMetricsResponse, UserSwipeMetricsResponse
+from src.services.spotify.dependencies import get_spotify_service
+from src.services.spotify.service import SpotifyService
 
 router = APIRouter()
 

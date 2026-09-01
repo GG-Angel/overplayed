@@ -1,6 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 
-from database.service import (
+from src.database.service import (
     GlobalSwipeAggregates,
     LeaderboardEntry,
     UserSwipeAggregates,

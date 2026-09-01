@@ -2,7 +2,7 @@ from typing import Annotated
 
 from pydantic import BaseModel, Field, PositiveInt
 
-from services.spotify.models import TrackUriRegex
+from src.services.spotify.models import TrackUriRegex
 
 
 class SwipesFormOptions(BaseModel):

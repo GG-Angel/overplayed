@@ -3,7 +3,7 @@ from typing import get_args, get_origin
 
 from pydantic import BaseModel
 
-from services.spotify.models import (
+from src.services.spotify.models import (
     LIKED_SONGS_ID,
     CurrentUser,
     ExternalUrls,
