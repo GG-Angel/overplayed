@@ -37,6 +37,13 @@ class Settings(BaseSettings):
     ttl_previews_hit: int = 60 * 10  # 10 minutes
     ttl_previews_miss: int = 60 * 60 * 2  # 2 hours
 
+    # Eviction stream consumer
+    evictions_group: str = "api:evictions_consumer_group"
+    evictions_consumer: str = "api:evictions_consumer"
+    evictions_batch_size: int = 10
+    evictions_block_ms: int = 30_000  # 30 seconds
+    evictions_retry_interval: float = 5  # 5 seconds
+
     # Spotify API limits
     playlist_limit: int = 50
     playlist_tracks_limit: int = 100

@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+from typing import Literal
 
 from aiohttp import ClientSession
 from fastapi import APIRouter, FastAPI, Response, status
@@ -91,11 +92,11 @@ def build_app() -> FastAPI:
     root.include_router(queue.router, tags=["queue"])
 
     @root.get("/health")
-    def handle_healthcheck():
+    def handle_healthcheck() -> Literal["ok!"]:
         return "ok!"
 
     @root.get("/favicon.ico")
-    def handle_favicon():
+    def handle_favicon() -> Response:
         return Response(status_code=status.HTTP_204_NO_CONTENT)
 
     app.include_router(root)
