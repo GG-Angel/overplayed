@@ -8,6 +8,7 @@ WORKDIR /app
 RUN --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=apps,target=apps \
+    --mount=type=bind,source=libs,target=libs \
     uv sync --locked --no-cache --no-dev --no-editable --package api
 
 COPY apps/api/src ./src

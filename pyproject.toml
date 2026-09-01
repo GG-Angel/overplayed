@@ -1,2 +1,2 @@
 [tool.uv.workspace]
-members = ["apps/*"]
+members = ["apps/*", "libs/*"]
