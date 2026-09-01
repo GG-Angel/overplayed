@@ -21,7 +21,7 @@ jobs:
         project: [api, queue]
     defaults:
       run:
-        working-directory: packages/${{ matrix.project }}
+        working-directory: apps/${{ matrix.project }}
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -38,14 +38,14 @@ jobs:
       - name: Ruff lint
         uses: astral-sh/ruff-action@278981a28ce3188b1e39527901f38254bf3aac89 # v4.1.0
         with:
-          src: packages/${{ matrix.project }}
+          src: apps/${{ matrix.project }}
           version-file: uv.lock
           args: check
 
       - name: Ruff format
         uses: astral-sh/ruff-action@278981a28ce3188b1e39527901f38254bf3aac89 # v4.1.0
         with:
-          src: packages/${{ matrix.project }}
+          src: apps/${{ matrix.project }}
           version-file: uv.lock
           args: format --check
 
@@ -100,7 +100,7 @@ jobs:
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: .
-          file: packages/${{ matrix.context }}/Dockerfile
+          file: apps/${{ matrix.context }}/Dockerfile
           push: false
           cache-from: type=gha,scope=${{ matrix.context }}
           cache-to: type=gha,mode=max,scope=${{ matrix.context }}

@@ -6,10 +6,10 @@ WORKDIR /app
 
 RUN --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
     --mount=type=bind,source=uv.lock,target=uv.lock \
-    --mount=type=bind,source=packages,target=packages \
+    --mount=type=bind,source=apps,target=apps \
     uv sync --locked --no-cache --no-dev --no-editable --package queue
 
-COPY packages/queue/app ./app
+COPY apps/queue/app ./app
 
 RUN useradd --system --no-create-home appuser && chown -R appuser /app
 USER appuser

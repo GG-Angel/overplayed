@@ -18,8 +18,8 @@ updates:
 
   - package-ecosystem: "docker"
     directories:
-      - "/packages/queue"
-      - "/packages/api"
+      - "/apps/queue"
+      - "/apps/api"
     schedule:
       interval: "weekly"
 

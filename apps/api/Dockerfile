@@ -7,12 +7,12 @@ WORKDIR /app
 
 RUN --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
     --mount=type=bind,source=uv.lock,target=uv.lock \
-    --mount=type=bind,source=packages,target=packages \
+    --mount=type=bind,source=apps,target=apps \
     uv sync --locked --no-cache --no-dev --no-editable --package api
 
-COPY packages/api/src ./src
-COPY packages/api/alembic ./alembic
-COPY packages/api/alembic.ini ./alembic.ini
+COPY apps/api/src ./src
+COPY apps/api/alembic ./alembic
+COPY apps/api/alembic.ini ./alembic.ini
 
 RUN useradd --system --no-create-home appuser && chown -R appuser /app
 USER appuser

@@ -10,24 +10,24 @@
     },
     {
       "name": "queue",
-      "path": "packages/queue"
+      "path": "apps/queue"
     },
     {
       "name": "api",
-      "path": "packages/api"
+      "path": "apps/api"
     },
     {
       "name": "shared",
-      "path": "packages/shared"
+      "path": "apps/shared"
     }
   ],
   "settings": {
     "typescript.tsdk": "web/node_modules/typescript/lib",
     "files.exclude": {
       "web": true,
-      "packages/api": true,
-      "packages/queue": true,
-      "packages/shared": true
+      "apps/api": true,
+      "apps/queue": true,
+      "apps/shared": true
     }
   }
 }

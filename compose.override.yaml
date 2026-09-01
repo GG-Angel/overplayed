@@ -2,7 +2,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: packages/api/Dockerfile
+      dockerfile: apps/api/Dockerfile
     environment:
       - APP_DEBUG=true
       - APP_FRONTEND_URL=http://127.0.0.1:5173
@@ -11,7 +11,7 @@ services:
   queue:
     build:
       context: .
-      dockerfile: packages/queue/Dockerfile
+      dockerfile: apps/queue/Dockerfile
     environment:
       - APP_DEBUG=true
       - APP_FRONTEND_URL=http://127.0.0.1:5173

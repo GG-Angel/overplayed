@@ -171,7 +171,7 @@ wheels = [
 [[package]]
 name = "api"
 version = "1.0.0"
-source = { editable = "packages/api" }
+source = { editable = "apps/api" }
 dependencies = [
     { name = "aiohttp" },
     { name = "alembic" },
@@ -212,7 +212,7 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2.13.3" },
     { name = "pydantic-settings", specifier = ">=2.14.2" },
     { name = "redis", extras = ["hiredis"], specifier = ">=8.1.0" },
-    { name = "shared", editable = "packages/shared" },
+    { name = "shared", editable = "apps/shared" },
     { name = "slowapi", specifier = ">=0.1.9" },
     { name = "spotipy", specifier = ">=2.26.0" },
     { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.50" },
@@ -1564,7 +1564,7 @@ wheels = [
 [[package]]
 name = "queue"
 version = "1.0.0"
-source = { editable = "packages/queue" }
+source = { editable = "apps/queue" }
 dependencies = [
     { name = "aiohttp" },
     { name = "cryptography" },
@@ -1598,7 +1598,7 @@ requires-dist = [
     { name = "pydantic-settings", specifier = ">=2.14.2" },
     { name = "redis", extras = ["hiredis"], specifier = ">=8.0.1" },
     { name = "resend", specifier = ">=2.36.0" },
-    { name = "shared", editable = "packages/shared" },
+    { name = "shared", editable = "apps/shared" },
     { name = "slowapi", specifier = ">=0.1.9" },
 ]
 
@@ -1810,7 +1810,7 @@ wheels = [
 [[package]]
 name = "shared"
 version = "0.1.0"
-source = { editable = "packages/shared" }
+source = { editable = "apps/shared" }
 
 [[package]]
 name = "shellingham"
