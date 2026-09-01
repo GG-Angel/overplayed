@@ -215,7 +215,7 @@ requires-dist = [
     { name = "shared", editable = "libs/shared" },
     { name = "slowapi", specifier = ">=0.1.9" },
     { name = "spotipy", specifier = ">=2.26.0" },
-    { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.50" },
+    { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.52" },
     { name = "uvicorn", specifier = ">=0.46.0" },
 ]
 
