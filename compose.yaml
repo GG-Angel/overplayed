@@ -10,16 +10,16 @@ services:
       - caddy-data:/data
       - caddy-config:/config
     depends_on:
-      - server
+      - api
       - queue
     networks:
       - external
       - internal
 
-  server:
-    image: ghcr.io/gg-angel/overplayed-server:latest
+  api:
+    image: ghcr.io/gg-angel/overplayed-api:latest
     platform: linux/amd64
-    container_name: overplayed-server
+    container_name: overplayed-api
     env_file: .env
     restart: unless-stopped
     depends_on:

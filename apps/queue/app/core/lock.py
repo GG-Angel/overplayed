@@ -1,0 +1,45 @@
+from types import TracebackType
+from typing import Self
+
+from loguru import logger
+from redis.asyncio import Redis
+from redis.exceptions import LockError
+
+from app.core.errors import QueueLockError
+
+
+class DistributedLock:
+    """A Redis-backed distributed lock guarding a named critical section."""
+
+    def __init__(
+        self,
+        redis: Redis,
+        *,
+        timeout: float = 45,
+        blocking_timeout: float = 10,
+    ):
+        self._key = "queue:lock"
+        self._lock = redis.lock(
+            self._key,
+            timeout=timeout,
+            blocking_timeout=blocking_timeout,
+        )
+
+    async def __aenter__(self) -> Self:
+        acquired = await self._lock.acquire()
+        if not acquired:
+            raise QueueLockError(
+                f"Could not acquire lock '{self._key}' in time; try again."
+            )
+        return self
+
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc: BaseException | None,
+        tb: TracebackType | None,
+    ) -> None:
+        try:
+            await self._lock.release()
+        except LockError:
+            logger.warning(f"Lock '{self._key}' was already released or expired.")

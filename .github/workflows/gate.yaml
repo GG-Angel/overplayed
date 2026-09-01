@@ -18,10 +18,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        project: [server, queue]
+        project: [api, queue]
     defaults:
       run:
-        working-directory: ${{ matrix.project }}
+        working-directory: apps/${{ matrix.project }}
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -30,7 +30,7 @@ jobs:
         uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
           enable-cache: true
-          cache-dependency-glob: ${{ matrix.project }}/uv.lock
+          cache-dependency-glob: uv.lock
 
       - name: Install dependencies
         run: uv sync --locked
@@ -38,15 +38,15 @@ jobs:
       - name: Ruff lint
         uses: astral-sh/ruff-action@278981a28ce3188b1e39527901f38254bf3aac89 # v4.1.0
         with:
-          src: ${{ matrix.project }}
-          version-file: ${{ matrix.project }}/uv.lock
+          src: apps/${{ matrix.project }}
+          version-file: uv.lock
           args: check
 
       - name: Ruff format
         uses: astral-sh/ruff-action@278981a28ce3188b1e39527901f38254bf3aac89 # v4.1.0
         with:
-          src: ${{ matrix.project }}
-          version-file: ${{ matrix.project }}/uv.lock
+          src: apps/${{ matrix.project }}
+          version-file: uv.lock
           args: format --check
 
       - name: Type check
@@ -88,7 +88,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        context: [server, queue]
+        context: [api, queue]
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -99,7 +99,8 @@ jobs:
       - name: Build image
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
-          context: ./${{ matrix.context }}
+          context: .
+          file: apps/${{ matrix.context }}/Dockerfile
           push: false
           cache-from: type=gha,scope=${{ matrix.context }}
           cache-to: type=gha,mode=max,scope=${{ matrix.context }}

@@ -8,9 +8,9 @@ scrape_configs:
     static_configs:
       - targets: ["prometheus:9090"]
 
-  - job_name: "overplayed-server"
+  - job_name: "overplayed-api"
     static_configs:
-      - targets: ["server:9090"]
+      - targets: ["api:9090"]
 
   - job_name: "overplayed-queue"
     static_configs:

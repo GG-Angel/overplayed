@@ -1,0 +1,13 @@
+[project]
+name = "shared"
+version = "1.0.0"
+description = "Shared code for Overplayed services"
+requires-python = ">=3.13"
+dependencies = [
+    "pydantic[email]>=2.12.4",
+    "redis>=8.0.1",
+]
+
+[build-system]
+requires = ["uv_build>=0.9.5,<0.10.0"]
+build-backend = "uv_build"

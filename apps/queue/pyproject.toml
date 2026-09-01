@@ -1,0 +1,50 @@
+[project]
+name = "queue"
+version = "1.0.0"
+description = "Queue service for Overplayed"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "aiohttp>=3.14.3",
+    "cryptography>=49.0.0",
+    "fastapi[standard]>=0.141.1",
+    "loguru>=0.7.3",
+    "prometheus-fastapi-instrumentator>=8.1.0",
+    "pydantic-settings>=2.14.2",
+    "redis[hiredis]>=8.0.1",
+    "resend>=2.36.0",
+    "shared",
+    "slowapi>=0.1.9",
+]
+
+[dependency-groups]
+dev = [
+    "pytest-asyncio>=1.4.0",
+    "fakeredis>=2.36.2",
+    "pytest>=9.1.1",
+    "pytest-mock>=3.15.1",
+    "ty>=0.0.65",
+    "ruff>=0.16.0",
+]
+
+[tool.uv.sources]
+shared = { workspace = true }
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+
+[tool.pyright]
+venvPath = "../../"
+venv = ".venv"
+strict = ["**/*.py"]
+pythonVersion = "3.13"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[tool.ruff.lint]
+ignore = ["B008", "BLE001"]
