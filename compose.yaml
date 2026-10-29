@@ -1,6 +1,6 @@
 services:
   caddy:
-    image: caddy:2.11.6-alpine
+    image: caddy:2.11.7-alpine
     restart: unless-stopped
     container_name: overplayed-caddy
     ports:
@@ -59,7 +59,7 @@ services:
       - internal
 
   prometheus:
-    image: prom/prometheus:v3.15.0
+    image: prom/prometheus:v3.15.1
     container_name: overplayed-prometheus
     restart: unless-stopped
     volumes:
@@ -71,7 +71,7 @@ services:
       - internal
 
   redis:
-    image: redis:8.10.1-alpine
+    image: redis:8.10.2-alpine
     container_name: overplayed-redis
     command: redis-server --requirepass ${REDIS_PASSWORD}
     restart: unless-stopped
@@ -82,7 +82,7 @@ services:
       - internal
 
   postgres:
-    image: postgres:18.4-alpine3.24
+    image: postgres:18.6-alpine3.24
     container_name: overplayed-postgres
     restart: unless-stopped
     env_file: .env
