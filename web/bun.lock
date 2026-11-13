@@ -20,7 +20,7 @@
         "react-router-dom": "^7.18.5",
         "tailwind-merge": "^3.7.0",
         "tailwindcss": "^4.3.5",
-        "wavesurfer.js": "^7.12.11",
+        "wavesurfer.js": "^8.0.5",
         "zod": "^4.6.7",
       },
       "devDependencies": {
@@ -718,7 +718,7 @@
 
     "vite-plugin-svgr": ["vite-plugin-svgr@5.2.0", "", { "dependencies": { "@rollup/pluginutils": "^5.3.0", "@svgr/core": "^8.1.0", "@svgr/plugin-jsx": "^8.1.0" }, "peerDependencies": { "vite": ">=3.0.0" } }, "sha512-qj2eAKF8C6PZWemVTvQA0xgQIcP1hHU6Buh7fl6BhvayWwnuxE+z417miKxeDvRWbDrupQ1oK99hfxElopJ3sQ=="],
 
-    "wavesurfer.js": ["wavesurfer.js@7.12.11", "", {}, "sha512-Sx0yZIz7jRJ9J9p7UL+pl9y0UQBB6UN/XNo+R7Gy4tCR5xZI9jMyA0dnt1R8TMVSQ4LZ10SeB2HJYQ+dV2dPSA=="],
+    "wavesurfer.js": ["wavesurfer.js@8.0.5", "", {}, "sha512-VRYjNG8vKhpMN9hKGgo6VzqQdnZ+AsDg4yIQppmntUagB+/vKbvirWZYSM+PYT03Z7Ry10f5Uqxadbutx47l/g=="],
 
     "which": ["which@2.0.2", "", { "dependencies": { "isexe": "^2.0.0" }, "bin": { "node-which": "./bin/node-which" } }, "sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA=="],
 
