@@ -10,7 +10,7 @@ Do not open a public issue or pull request for a security vulnerability.
 
 A useful report includes:
 
-- The affected component (`web`, `server`, or `queue`) and, if possible, the relevant file or endpoint
+- The affected component (`web`, `api`, or `queue`) and, if possible, the relevant file or endpoint
 - Steps to reproduce, or a proof of concept
 - What an attacker could accomplish with it
 

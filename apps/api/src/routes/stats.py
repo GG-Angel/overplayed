@@ -1,0 +1,30 @@
+from fastapi import APIRouter, Depends, Request
+
+from src.core.limiter import limiter
+from src.database.service import DatabaseService, get_database_service
+from src.routes.schemas import GlobalSwipeMetricsResponse, UserSwipeMetricsResponse
+from src.services.spotify.dependencies import get_spotify_service
+from src.services.spotify.service import SpotifyService
+
+router = APIRouter()
+
+
+@router.get("")
+@limiter.limit("120/minute")
+async def get_global_swipe_stats(
+    request: Request,
+    db: DatabaseService = Depends(get_database_service),
+) -> GlobalSwipeMetricsResponse:
+    return GlobalSwipeMetricsResponse.from_aggregates(await db.get_global_swipe_stats())
+
+
+@router.get("/me")
+@limiter.limit("120/minute")
+async def get_user_swipe_stats(
+    request: Request,
+    db: DatabaseService = Depends(get_database_service),
+    spotify: SpotifyService = Depends(get_spotify_service),
+) -> UserSwipeMetricsResponse:
+    return UserSwipeMetricsResponse.from_aggregates(
+        await db.get_user_swipe_stats(user_id=spotify.user_id)
+    )
