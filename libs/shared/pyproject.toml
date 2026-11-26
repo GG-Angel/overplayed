@@ -5,7 +5,7 @@ description = "Shared code for Overplayed services"
 requires-python = ">=3.13"
 dependencies = [
     "pydantic[email]>=2.14.3",
-    "redis>=8.0.1",
+    "redis>=8.2.0",
 ]
 
 [build-system]
